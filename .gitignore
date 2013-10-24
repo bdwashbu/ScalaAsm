@@ -1,0 +1,11 @@
+target/
+.*.marks
+.classpath
+.project
+.settings
+.history
+tags
+client-libraries
+.cache
+.tag
+/personal

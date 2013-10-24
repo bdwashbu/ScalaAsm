@@ -1,7 +1,8 @@
 ScalaAsm
 ========
+#### x86 Assembler written in Scala
 
-Have you ever wondered how executable files work, or if a high-level language like Scala is suitable for low-level x86 machine code generation?
+Have you ever wondered how executable files work, or if a high-level language like Scala is suitable for x86 machine code generation?
 
 Rest assured, Scala is great for this task and ScalaAsm is the answer for you!
 

@@ -1,12 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-  <classpathentry kind="src" path="src\main\scala" output="target\scala-2.10\classes"/>
-  <classpathentry kind="src" path="src\main\java" output="target\scala-2.10\classes"/>
-  <classpathentry kind="src" path="src\test\scala" output="target\scala-2.10\test-classes"/>
-  <classpathentry kind="src" path="src\test\java" output="target\scala-2.10\test-classes"/>
-  <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-  <classpathentry kind="lib" path="C:\Users\Antares\.ivy2\cache\commons-lang\commons-lang\jars\commons-lang-2.6.jar"/>
-  <classpathentry kind="src" path="/asm" exported="true" combineaccessrules="false"/>
-  <classpathentry kind="src" path="/x86" exported="true" combineaccessrules="false"/>
-  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-  <classpathentry kind="output" path="bin"/>
+	<classpathentry kind="src" output="target/scala-2.10/classes" path="src/main/scala"/>
+	<classpathentry kind="src" output="target/scala-2.10/test-classes" path="src/test/scala"/>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Antares/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/asm"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/x86"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

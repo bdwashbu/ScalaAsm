@@ -3,7 +3,6 @@ package com.scalaAsm.asm
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86.Instructions
 import com.scalaAsm.x86.Operands
-import com.scalaAsm.x86.Registers
 import com.scalaAsm.asm.Tokens._
 
 trait AsmCode extends Registers with Instructions with Operands {

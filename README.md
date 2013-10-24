@@ -5,7 +5,7 @@ Have you ever wondered how executable files work, or if a high-level language li
 
 Rest assured, Scala is great for this task and ScalaAsm is the answer for you!
 
-ScalaAsm is designed to assemble an executable from scratch, using nothing more than a built-in DSL (Domain specific language)
+ScalaAsm is designed to assemble an executable from scratch, using nothing more than a built-in DSL (Domain specific language).  The goal is to eventually use ScalaAsm to implement a programming language!
 
 Heres an example assembly program:
 

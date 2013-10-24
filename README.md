@@ -190,8 +190,9 @@ How to run:
 2. type 'project example'
 3. type 'run'
 4. Observe 'test.exe' get generated
-5. Double-click 'test.exe'
+5. Execute 'test.exe'
 
+Output:
 ```
 Hello World!
 Press any key to continue ...

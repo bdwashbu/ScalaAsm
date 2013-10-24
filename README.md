@@ -7,7 +7,7 @@ Rest assured, Scala is great for this task and ScalaAsm is the answer for you!
 
 ScalaAsm is designed to assemble an executable from scratch, using nothing more than a built-in DSL (Domain specific language)
 
-Heres an example:
+Heres an example assembly program:
 
 ```scala
 object HelloWorld extends AsmProgram {
@@ -159,6 +159,16 @@ object HelloWorld extends AsmProgram {
 }
 ```
 
+Heres code to output the executable:
+
+```scala
+val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
+val assembled = HelloWorld.assemble
+val exe = ExeGenerator.compile(assembled)
+outputStream.write(exe.get)
+outputStream.close
+```
+
 ScalaAsm currently supports many useful Assembly features such as procedures, labels, and variables.
 
 Additionally, many errors can be caught at compile time:
@@ -172,3 +182,17 @@ lea(rcx, *(rdi - imm32(0x1010101))) // compile-time error (64-bit is not yet sup
 Typeclasses are used to implement the many forms of instructions, with no runtime overhead.
 
 x86 reference can be found here: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
+
+How to run:
+========
+
+1. Launch sbt
+2. type 'project example'
+3. type 'run'
+4. Observe 'test.exe' get generated
+5. Double-click 'test.exe'
+
+```
+Hello World!
+Press any key to continue ...
+```

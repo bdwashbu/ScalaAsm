@@ -6,7 +6,10 @@ Have you ever wondered how executable files work, or if a high-level language li
 
 Rest assured, Scala is great for this task and ScalaAsm is the answer for you!
 
-ScalaAsm is designed to assemble an executable from scratch, using nothing more than a built-in DSL (Domain specific language).  The goal is to eventually use ScalaAsm to implement a programming language!
+ScalaAsm is an academic exercise that explores whether things like typeclasses, extractors, and pattern matching are beneficial to machine code generation.  The resounding answer so far is 'Most definately!'.
+
+Currently, the library is designed to assemble an executable from the ground up, using a built-in DSL (Domain Specific Language).
+The ultimate goal is to use ScalaAsm to implement a BASIC programming language!
 
 Heres an example assembly program:
 
@@ -180,7 +183,7 @@ If an instruction is not supported or not yet implemented it will throw an error
 lea(rcx, *(rdi - imm32(0x1010101))) // compile-time error (64-bit is not yet supported)
 ```
 
-Typeclasses are used to implement the many forms of instructions, with no runtime overhead.
+Typeclasses are used to implement the many forms of x86 instructions.  A primary goal was to have the code resemble the intel x86 reference manual.
 
 x86 reference can be found here: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
 

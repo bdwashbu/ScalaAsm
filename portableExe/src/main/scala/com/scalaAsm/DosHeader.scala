@@ -5,6 +5,9 @@ import java.io.ByteArrayOutputStream
 import com.scalaAsm.asm.AsmProgram
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import com.scalaAsm.x86.imm8
+import com.scalaAsm.x86.imm16
+import com.scalaAsm.x86.imm32
 
 class DosHeader {
     val e_magic = "MZ"  // Magic number
@@ -53,6 +56,7 @@ class DosHeader {
       bbuf.putInt(e_lfanew)
       
       val dosStub = new AsmProgram {
+
 
 		  val data = new Data {
 		  }

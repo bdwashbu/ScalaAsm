@@ -2,25 +2,17 @@ package com.scalaAsm.asm
 
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86.Instructions
+import com.scalaAsm.x86.Operands
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.x86.Addressing
 
-trait AsmCode extends Registers with Instructions with Addressing {
+trait AsmCode extends Registers with Instructions with Operands {
   self: AsmProgram =>
 
   val code: Code
   
-  def proc(name: String)(x: () => Unit)(implicit code: CodeBuilder): Proc = {
-    
-      val result = Proc(name, x)
-      code.codeTokens += result
-      result
-    }
-  
-  case class Proc(name: String, x: () => Unit) {
+  case class Proc(name: String)(implicit code: CodeBuilder) {
       implicit val builder = new CodeBuilder{}
-      
-      x()
+      code.codeTokens += this
   }
 
   case class Code  {
@@ -31,8 +23,6 @@ trait AsmCode extends Registers with Instructions with Addressing {
       bytes.toArray
     }
 
-    
-    
     var parserPos: Int = 0
 
     implicit def toByte(x: Int) = x.toByte

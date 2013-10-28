@@ -2,7 +2,7 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.utils.Endian
 
-trait Instructions extends x86Registers with Addressing {
+trait Instructions extends x86Registers with Operands {
 
   trait ADD
   trait ADD_2[-O1, -O2] extends ADD {

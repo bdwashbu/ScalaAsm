@@ -1,6 +1,6 @@
 package com.scalaAsm.x86
 
-trait x86Registers
+trait x86Registers extends Operands
 {
 	abstract class Register[T](val ID: Byte)
     case class RegisterOffset[+T <: Register[_], S <: Immediate[_,_]](val offset: S, val x: T)

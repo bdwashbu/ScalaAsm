@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: example
+Bundle-SymbolicName: example
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: example.jar,
+ Antares/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar
+Export-Package: com.scalaAsm

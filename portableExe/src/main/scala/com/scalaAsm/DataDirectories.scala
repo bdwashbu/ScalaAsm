@@ -13,8 +13,6 @@ case class Directory(val virtualAddress: Int, val size: Int) extends ExeWriter {
 
 case class DataDirectories(val imports: Directory, val importAddressTable: Directory) extends Function0[Array[Byte]]{
   
-    //val None = Directory(0, 0)
-
     object DirectoryTypes extends Enumeration {
       type characteristic = Value
       val Export, Import, Resource, Exception, Security, BaseReloc, Debug, Copyright,
@@ -22,6 +20,7 @@ case class DataDirectories(val imports: Directory, val importAddressTable: Direc
     }
 
     import DirectoryTypes._
+    
     // Virtual Address and Size
     val directories = TreeMap(
       Export -> None,
@@ -44,7 +43,11 @@ case class DataDirectories(val imports: Directory, val importAddressTable: Direc
     def apply(): Array[Byte] = {
       val directoryOutput = new ByteArrayOutputStream()
       val stream = new DataOutputStream(directoryOutput)
-      for ((name, dict) <- directories) { (dict getOrElse Directory(0, 0)).write(stream) }
+      
+      for ((name, dict) <- directories) {
+        (dict getOrElse Directory(0, 0)).write(stream)
+      }
+      
       directoryOutput.toByteArray
     }
   }

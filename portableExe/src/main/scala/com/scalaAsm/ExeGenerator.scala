@@ -17,7 +17,21 @@ import com.scalaAsm.utils.Endian
                             val boundImportSize: Int,
                             val nameTableSize: Int,
                             val imports: Map[String, Int],
-                            val externs: Map[String, Int])
+                            val externs: Map[String, Int]) {
+  
+  def getImportsDirectory(optionalHeader: OptionalHeader, dataSize: Int) = {
+    
+    val importsLocation = optionalHeader.addressOfData + dataSize
+    Directory(importsLocation, boundImportSize)
+  }
+  
+  def getIATDirectory(optionalHeader: OptionalHeader, dataSize: Int) = {
+    
+    val endOfData = optionalHeader.addressOfData + dataSize
+    val IATlocation = endOfData + boundImportSize + nameTableSize
+    Directory(IATlocation, nameTableSize)
+  }  
+}
 
  case class CompiledData(val rawData: Array[Byte],
                          val variables: Map[String, Int])
@@ -71,8 +85,9 @@ object ExeGenerator extends Sections {
   
   def compileImports(addressOfData: Int, dataSize: Int): CompiledImports = { 
     
-    val test = Imports(Seq(Extern("kernel32.dll", List("ExitProcess", "GetStdHandle", "WriteFile", "FlushConsoleInputBuffer", "Sleep"))),
-                       Seq(Extern("msvcrt.dll", List("printf", "_kbhit", "_getch"))), addressOfData + dataSize)
+    val test = Imports(externs = Seq(Extern("kernel32.dll", List("ExitProcess", "GetStdHandle", "WriteFile", "FlushConsoleInputBuffer", "Sleep"))),
+                       nonExterns = Seq(Extern("msvcrt.dll", List("printf", "_kbhit", "_getch"))),
+                       offset = addressOfData + dataSize)
     
     test.link
   }
@@ -151,19 +166,17 @@ object ExeGenerator extends Sections {
   def compile(asm: Assembled): PortableExecutable = {
 
     val optionalHeader = new OptionalHeader
-    val ExeParts(code, compiledData, compiledImports) = buildExe(optionalHeader, asm)
+    val ExeParts(code, data, imports) = buildExe(optionalHeader, asm)
     
-    val dataSize = compiledData.rawData.size
-    val endOfData = optionalHeader.addressOfData + dataSize
-
-    val IATlocation = endOfData + compiledImports.boundImportSize + compiledImports.nameTableSize
+    val directories = DataDirectories(imports = imports.getImportsDirectory(optionalHeader, data.rawData.size),
+                                      importAddressTable = imports.getIATDirectory(optionalHeader, data.rawData.size))
     
-    val directories = DataDirectories(imports = Directory(endOfData, compiledImports.boundImportSize),
-                                      importAddressTable = Directory(IATlocation, compiledImports.nameTableSize))
+    val sections = compileSections(code.size, data.rawData.size + imports.rawData.size)
     
-    val sections = compileSections(code.size, dataSize + compiledImports.rawData.size)
+    val dosHeader = new DosHeader
+    val peHeader = new PeHeader(optionalHeader, directories)
     
-    new PortableExecutable(new DosHeader, new PeHeader(optionalHeader, directories), optionalHeader, directories, sections, code, compiledData, compiledImports)
+    new PortableExecutable(dosHeader, peHeader, optionalHeader, directories, sections, code, data, imports)
   }
   
   

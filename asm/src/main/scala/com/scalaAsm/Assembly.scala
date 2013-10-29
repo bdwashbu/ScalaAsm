@@ -32,7 +32,7 @@ abstract class AsmProgram extends AsmData with AsmCode {
     for (token <- code.builder.codeTokens) {
       if (token.isInstanceOf[Proc]) {
         val proc = token.asInstanceOf[Proc]
-        tokens ++= (BeginProc(proc.name) +: proc.builder.codeTokens :+ EndProc(proc.name))
+        tokens += BeginProc(proc.name)
       }
       else
       {

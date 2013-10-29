@@ -1,23 +1,29 @@
 package com.scalaAsm.asm
 
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.x86.Instructions
-import com.scalaAsm.x86.Operands
+import com.scalaAsm.x86._
 import com.scalaAsm.asm.Tokens._
 
-trait AsmCode extends Registers with Instructions with Operands {
+trait AsmCode extends Registers with Instructions {
   self: AsmProgram =>
 
   val code: Code
   
-  case class Proc(name: String)(implicit code: CodeBuilder) {
-      implicit val builder = new CodeBuilder{}
-      code.codeTokens += this
+  def proc(name: String)(x: => Unit)(implicit code: CodeBuilder) = {
+    val result = Proc(name)
+    code.codeTokens += result
+    x
   }
+  
+  case class Proc(name: String)
 
   case class Code  {
     
     implicit val builder = new CodeBuilder{}
+    
+    def imm8(x: Byte) = Immediate8(x)
+    def imm16(x: Short) = Immediate16(x)
+    def imm32(x: Int) = Immediate32(x)
 
     def b(bytes: Byte*): Array[Byte] = {
       bytes.toArray

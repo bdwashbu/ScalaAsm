@@ -2,7 +2,6 @@ package com.scalaAsm.asm
 
 object Tokens {
 	sealed trait Token
-	case class EndProc(val name: String) extends Token
 	case class Reference(val name: String) extends Token
 	case class JmpRef(val name: String) extends Token
 	

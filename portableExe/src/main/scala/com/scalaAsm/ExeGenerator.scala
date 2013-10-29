@@ -56,11 +56,7 @@ object ExeGenerator extends Sections {
         case _ => None
       }})
       
-    val bytes = ListBuffer[Byte]()
-    
-    dataBytes.foreach(x => bytes ++= x)
-    
-    val data = Array.fill[Byte](8)(0x00) ++ bytes
+    val data = Array.fill[Byte](8)(0x00) ++ dataBytes.reduce(_++_)
 
     // a map of variable to its RVA
     def createDefMap: Map[String, Int] = {

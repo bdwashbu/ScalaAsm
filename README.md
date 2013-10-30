@@ -17,16 +17,14 @@ Heres an example assembly program:
 object HelloWorld extends AsmProgram {
 
   val data = new Data {
-    "pressAnyKey" db "Press any key to continue ..." + 0x00.toChar
-    "newline" db hex2Bytes("0D 0A 00").map(_.toChar).mkString
-    align(0x4, 0x00)
-    "helloWorld" db "Hello World!\n" + 0x00.toChar
-    align(0x4, 0x00)
+    val pressAnyKey = "Press any key to continue ..." + 0x00.toChar
+    val newline = hex2Bytes("0D 0A 00").map(_.toChar).mkString
+    val helloWorld = "Hello World!\n" + 0x00.toChar
   }
   
   val code = new Code {
 
-    new Proc("start") {
+    proc("start") {
       call("sub_401025")
       push("pressAnyKey")
       call("sub_401034")
@@ -37,14 +35,14 @@ object HelloWorld extends AsmProgram {
       call("ExitProcess")
     }
 
-    new Proc("sub_401025") {
+    proc("sub_401025") {
       push("helloWorld")
       call("printf")
       add(esp, imm8(4))
       retn
     }
      
-    new Proc("sub_401034") {
+    proc("sub_401034") {
       
       val numberOfBytesToWrite = imm8(-12)
       val numberOfBytesWritten = imm8(-8)
@@ -74,7 +72,7 @@ object HelloWorld extends AsmProgram {
 
     align(0x10)
 
-    new Proc("sub_401070") {
+    proc("sub_401070") {
       push(imm8(-10)) //nStdHandle
       call("GetStdHandle")
       push(eax)
@@ -90,7 +88,7 @@ object HelloWorld extends AsmProgram {
 
     align(0x10)
 
-    new Proc("sub_4010A0") {
+    proc("sub_4010A0") {
       mov(eax, *(esp + imm8(4)))
       lea(edx, *(eax + imm8(3)))
       push(ebp)
@@ -140,23 +138,23 @@ object HelloWorld extends AsmProgram {
 
     align(2)
 
-    new Proc("ExitProcess") {
+    proc("ExitProcess") {
       jmp("ExitProcess")
     }
 
-    new Proc("GetStdHandle") {
+    proc("GetStdHandle") {
       jmp("GetStdHandle")
     }
 
-    new Proc("WriteFile") {
+    proc("WriteFile") {
       jmp("WriteFile")
     }
 
-    new Proc("FlushConsoleInputBuffer") {
+    proc("FlushConsoleInputBuffer") {
       jmp("FlushConsoleInputBuffer")
     }
 
-    new Proc("Sleep") {
+    proc("Sleep") {
       jmp("Sleep")
     }
   }

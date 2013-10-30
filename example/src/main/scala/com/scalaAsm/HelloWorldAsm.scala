@@ -5,11 +5,9 @@ import com.scalaAsm.asm.AsmProgram
 object HelloWorld extends AsmProgram {
 
   val data = new Data {
-    "pressAnyKey" db "Press any key to continue ..." + 0x00.toChar
-    "newline" db hex2Bytes("0D 0A 00").map(_.toChar).mkString
-    align(0x4, 0x00)
-    "helloWorld" db "Hello World!\n" + 0x00.toChar
-    align(0x4, 0x00)
+    val pressAnyKey = "Press any key to continue ..." + 0x00.toChar
+    val newline = hex2Bytes("0D 0A 00").map(_.toChar).mkString
+    val helloWorld = "Hello World!\n" + 0x00.toChar
   }
   
   val code = new Code {

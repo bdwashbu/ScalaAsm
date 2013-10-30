@@ -28,6 +28,9 @@ abstract class AsmProgram extends AsmData with AsmCode {
   }
 
   def assemble = {
+
+    data.compile
+
     val tokens = ListBuffer[Any]()
     for (token <- code.builder.codeTokens) {
       if (token.isInstanceOf[Proc]) {

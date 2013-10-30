@@ -12,14 +12,16 @@ trait AsmData {
     
   case class Data {
 	
-    protected implicit class ImplicitVariable(val name: String) {
-      def db(value: String) = {
-        dataTokens += Variable(name, value, value.length)
+    def compile = {
+      var isFirst = true
+      data.getClass().getDeclaredFields().foreach { field =>
+        field.setAccessible(true)
+    	dataTokens += Variable(field.getName(), field.get(data).asInstanceOf[String], field.get(data).asInstanceOf[String].length)
+    	if (!isFirst)
+    	  align(0x4, 0x00)
+    	else
+    	  isFirst = false
       }
-    }
-
-    def apply(contents: => Unit) {
-      contents
     }
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = {

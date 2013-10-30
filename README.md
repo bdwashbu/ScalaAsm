@@ -6,7 +6,7 @@ Have you ever wondered how executable files work, or if a high-level language li
 
 Rest assured, Scala is great for this task and ScalaAsm is the answer for you!
 
-ScalaAsm is an academic exercise that explores whether things like typeclasses, extractors, and pattern matching are beneficial to machine code generation.  The resounding answer so far is 'Most definately!'.
+ScalaAsm is an academic exercise that explores whether things like typeclasses, extractors, and pattern matching are beneficial to machine code generation.  The answer so far is 'Most definitely!'.
 
 Currently, the library is designed to assemble an executable from the ground up, using a built-in DSL (Domain Specific Language).
 The ultimate goal is to use ScalaAsm to implement a BASIC programming language!

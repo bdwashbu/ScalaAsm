@@ -25,24 +25,24 @@ object HelloWorld extends AsmProgram {
   val code = new Code {
 
     proc("start") {
-      call("sub_401025")
+      call("printHelloWorld")
       push("pressAnyKey")
-      call("sub_401034")
-      call("sub_401070")
+      call("flushBuffer")
+      call("waitForKeypress")
       push("newline")
-      call("sub_401034")
+      call("flushBuffer")
       push(imm8(0))
       call("ExitProcess")
     }
 
-    proc("sub_401025") {
+    proc("printHelloWorld") {
       push("helloWorld")
       call("printf")
       add(esp, imm8(4))
       retn
     }
      
-    proc("sub_401034") {
+    proc("flushBuffer") {
       
       val numberOfBytesToWrite = imm8(-12)
       val numberOfBytesWritten = imm8(-8)
@@ -72,7 +72,7 @@ object HelloWorld extends AsmProgram {
 
     align(0x10)
 
-    proc("sub_401070") {
+    proc("waitForKeypress") {
       push(imm8(-10)) //nStdHandle
       call("GetStdHandle")
       push(eax)

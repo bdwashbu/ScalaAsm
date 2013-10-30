@@ -10,3 +10,6 @@ client-libraries
 .tag
 /personal
 test.exe
+.idea/
+*.class
+*.iml

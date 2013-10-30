@@ -17,9 +17,9 @@ Heres an example assembly program:
 object HelloWorld extends AsmProgram {
 
   val data = new Data {
-    val pressAnyKey = "Press any key to continue ..." + 0x00.toChar
-    val newline = hex2Bytes("0D 0A 00").map(_.toChar).mkString
-    val helloWorld = "Hello World!\n" + 0x00.toChar
+    val pressAnyKey = "Press any key to continue ...\0"
+    val newline = "\r\n\0"
+    val helloWorld = "Hello World!\n\0"
   }
   
   val code = new Code {

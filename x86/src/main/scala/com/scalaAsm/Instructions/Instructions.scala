@@ -224,6 +224,6 @@ trait Instructions extends x86Registers with Addressing {
     implicit object mov7 extends MOV_R[r16, imm16] { def get(x: r16, y: imm16) = Array[Byte]((0xB8 + x.ID).toByte, (y.value & 0x00FF).toByte, ((y.value & 0xFF00) >> 8).toByte) }
     implicit object mov8 extends MOV_R[r8, imm8] { def get(x: r8, y: imm8) = Array[Byte]((0xB0 + x.ID).toByte, y.value) }
 
-    implicit object mov6 extends MOV_R2[imm32] { def get(x: imm32) = 0xBD.toByte +: Endian.swap(x.value) }
+    implicit object mov6 extends MOV_R[r32, imm32] { def get(x: r32, y: imm32) = (0xB8 + x.ID).toByte +: Endian.swap(y.value) }
   }
 }

@@ -63,12 +63,11 @@ object ExeGenerator extends Sections {
       }      
     }
     
-    val dataBytes = (dataSection.flatMap { token =>
-      token match {
+    val dataBytes = (dataSection.flatMap {
         case ByteOutputPost(padding) => Some(padding)
         case PostVar(_,value,_) => Some(value.toCharArray().map(_.toByte))
         case _ => None
-      }})
+    })
       
     val data = Array.fill[Byte](8)(0x00) ++ dataBytes.reduce(_++_)
 
@@ -104,8 +103,7 @@ object ExeGenerator extends Sections {
     lazy val varNames = compiledData.variables.keys.toList
     lazy val procNames = asm.code.collect{ case BeginProc(name) => name }
     
-    def onePass: Seq[Token] = (asm.code.flatMap { (token) =>
-      token match {
+    def onePass: Seq[Token] = asm.code.flatMap {
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case JmpRef(name) if externNames.contains(name) => Some(JmpRefResolved(name))
@@ -116,8 +114,7 @@ object ExeGenerator extends Sections {
         case Label(name) => Some(Label(name))
         case LabelRef(name,opcode) => Some(LabelRef(name,opcode))
         case _ => None
-      }
-    })
+    }
 
     def twoPass: Seq[PostToken] = {
       var parserPosition = 0
@@ -148,8 +145,7 @@ object ExeGenerator extends Sections {
     val procs = twoPass.collect{case Proc(offset, name) => (name, offset)}.toMap
     val labels = twoPass.collect{case LabelResolved(offset, name) => (name, offset)}.toMap
 
-    val code: Array[Byte] = twoPass.map { token =>
-      token match {
+    val code: Array[Byte] = twoPass.map {
         case ByteOutputPost(code) => code
         case ProcState(offset, name) => 0xE8.toByte +: Endian.swap(procs(name) - offset - 5)
         case VarState(_, name) => 0x68.toByte +: Endian.swap(compiledData.variables(name) + optionalHeader.imageBase)
@@ -157,7 +153,6 @@ object ExeGenerator extends Sections {
         case JmpState(_, name) => Array[Byte](0xFF.toByte, 0x25) ++ Endian.swap(compiledImports.externs(name) + optionalHeader.imageBase)
         case LabelRefResolved(offset, name, opCode) => Array(opCode, (labels(name) - offset - 2).toByte)
         case _ => Array[Byte]()
-      }
     }.reduce(_ ++ _)
     
     ExeParts(code, compiledData, compiledImports) 

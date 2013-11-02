@@ -1,6 +1,7 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.utils.Endian
+import scala.annotation.implicitNotFound
 
 trait Instructions extends x86Registers with Addressing {
   
@@ -20,13 +21,9 @@ trait Instructions extends x86Registers with Addressing {
 
   trait PUSH
 
+  @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
   trait PUSH_M[-O1] extends PUSH {
     def get(op1: O1): Array[Byte]
-  }
-
-  trait PUSH_I[O1] extends PUSH {
-    var x: O1 = _
-    def get: Array[Byte]
   }
 
   trait AND

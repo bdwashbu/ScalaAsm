@@ -3,23 +3,28 @@ package com.scalaAsm.portableExe
 import java.io.DataOutputStream
 import java.io.ByteArrayOutputStream
 import scala.collection.mutable.ListBuffer
+import scala.collection.immutable.TreeMap
 
 case class Extern(dllName: String, functionNames: Seq[String])
 
+case class ImageThunkDataRVA(offset: Int) extends AnyVal
+  
 case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val offset: Int) extends ExeWriter {
 
-  type Address = Int
+  def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0"  else name
   
-  case class ImageThunkDataRVA(offset: Int)
-  case class ImportByNameRVA(offset: Int)
+  case class ImageImportByNameRVA(offset: Int, dllName: String = "")
+  
+  case class ImageThunkData(imagePointer: ImageImportByNameRVA) extends ExeWriter {
+    def write(stream: DataOutputStream) {
+      write(stream, imagePointer.offset)
+    }
+  }
   
   case class ImageImportByName(hint: Short = 0, name: String) extends ExeWriter {
     def write(stream: DataOutputStream) {
-     def padString(name: String) = if (name.size % 2 != 0) Array[Byte](0x00) else Array[Byte]()
-    	  
        write(stream, 0.toShort)
-       stream.write(name.toCharArray().map(_.toByte))
-       stream.write(padString(name))
+       stream.write(alignTo16(name).toCharArray().map(_.toByte))
     }
   }
   
@@ -27,16 +32,15 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     var originalFirstThunk: ImageThunkDataRVA,
     val timeStamp: Int,
     val forwarderChain: Int, // -1 if no forwarders
-    var importedDLLname: Int,
-    var firstThunk: ImageThunkDataRVA,
-    val dllName: String)
+    var importedDLLname: ImageImportByNameRVA,
+    var firstThunk: ImageThunkDataRVA)
       extends ExeWriter {
 
     def write(stream: DataOutputStream) {
       write(stream, originalFirstThunk.offset)
       write(stream, timeStamp)
       write(stream, forwarderChain)
-      write(stream, importedDLLname)
+      write(stream, importedDLLname.offset)
       write(stream, firstThunk.offset)
     }
   }
@@ -51,32 +55,36 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     val imports = externs ++ nonExterns
     val numImportsPlusNull = imports.size + 1
 
-    def padString(name: String) = if (name.size % 2 != 0) Array[Byte](0x00) else Array[Byte]()
+
 
     def getDllNames(x: Seq[Extern]): List[String] = x.flatMap(x => List(x.dllName)).toList
     def getFunctionNames(x: Seq[Extern]): List[String] = x.flatMap(_.functionNames).toList
 
-    case class BoundImport(val boundImportDescriptors: Seq[ImageImportDescriptor], val importAddressList: Seq[Int])
+    case class BoundImport(val boundImportDescriptors: Seq[ImageImportDescriptor], val importAddressList: Seq[ImageThunkData])
 
     def getBoundImports(): BoundImport = {
 
-      val initalLookupTableRVA: Map[String, Int] = Map.empty
+      val initalLookupTableRVA: TreeMap[String, Int] = TreeMap.empty
 
       type ImageImportAddress = Int
       
-      val nameRVAs: Map[String, ImageImportAddress] = {
+      val imageMap: Map[String, ImageImportAddress] = {
         var position = 0
-        val flattenedFcns: Seq[String] = imports.flatMap(x => x.functionNames.map(_ + "\0") ++ Seq(x.dllName + "\0"))
-        
-        flattenedFcns.foldLeft(initalLookupTableRVA)((prev, name) => {
-          
-          val noNull = name.reverse.tail.reverse
-          val skipHint = if (getDllNames(imports).contains(noNull)) 0 else 2
-          
-          val result = prev ++ Map(noNull -> (position + skipHint))
-          position += name.length + padString(name).length + skipHint
-          result
-        })
+
+        imports.flatMap { descriptor =>
+          descriptor.functionNames.map(_ + "\0").map { name =>
+            val noNull = name.reverse.tail.reverse
+            val result = (noNull, position + 2)
+	        position += alignTo16(name).length + 2
+	        result
+          } :+ {
+            val name = descriptor.dllName + "\0"
+            val noNull = name.reverse.tail.reverse
+            val result = (noNull, position)
+	        position += alignTo16(name).length
+	        result
+          }
+        }.toMap
       }
 
       val lookupTableRVAs: Map[String, Int] = {
@@ -89,34 +97,35 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
         })
       }
 
-      val importFunctionNames = getFunctionNames(imports)
-      val sizeOfAddrTable = importFunctionNames.size * 4 + getDllNames(imports).size * 4
+      val sizeOfAddrTable = getFunctionNames(imports).size * 4 + getDllNames(imports).size * 4
+      
+      val nullImportDescriptor = ImageImportDescriptor(ImageThunkDataRVA(0), 0, 0, ImageImportByNameRVA(0,""), ImageThunkDataRVA(0))
 
       val importDescriptors = getDllNames(imports).map { dllName =>
 
         ImageImportDescriptor(
-          originalFirstThunk = null,
+          originalFirstThunk = ImageThunkDataRVA(0),
           timeStamp       = 0x00000000,
           forwarderChain  = 0x00000000,
-          importedDLLname = 0,
-          firstThunk = null,
-          dllName = dllName)
+          importedDLLname = ImageImportByNameRVA(0, dllName),
+          firstThunk = ImageThunkDataRVA(0))
         
-      } :+ ImageImportDescriptor(ImageThunkDataRVA(0), 0, 0, 0, ImageThunkDataRVA(0), "") // terminating descriptor
+      } :+ nullImportDescriptor
       
       val descriptorSize = importDescriptors.size * ImageImportDescriptor.size
+
+      def getImageRVA(name: String) = ImageImportByNameRVA(offset + descriptorSize + sizeOfAddrTable * 2 + imageMap(name) - 2, name)
+      
+      def toAddressTable(extern: Extern): Seq[ImageThunkData] = extern.functionNames.map(x => ImageThunkData(getImageRVA(x))) :+ ImageThunkData(ImageImportByNameRVA(0))
+      val importAddressTable = imports.flatMap(toAddressTable)
       
       for (descriptor <- importDescriptors.take(importDescriptors.size-1)) {
-        val lookupAddr = offset + lookupTableRVAs(descriptor.dllName) + descriptorSize // assumes imports.size is the number of tables
+        val lookupAddr = offset + descriptorSize + lookupTableRVAs(descriptor.importedDLLname.dllName)
         
-        descriptor.importedDLLname = offset + nameRVAs(descriptor.dllName) + sizeOfAddrTable * 2 + descriptorSize
-        descriptor.firstThunk = ImageThunkDataRVA(lookupAddr + sizeOfAddrTable)
-        descriptor.originalFirstThunk = ImageThunkDataRVA(lookupAddr)
+        descriptor.importedDLLname = ImageImportByNameRVA(getImageRVA(descriptor.importedDLLname.dllName).offset + 2, descriptor.importedDLLname.dllName)
+        descriptor.firstThunk = ImageThunkDataRVA(lookupAddr + sizeOfAddrTable) //point to Import Address Table (IAT)
+        descriptor.originalFirstThunk = ImageThunkDataRVA(lookupAddr) //point to Import Name Table (INT)
       }
-
-      def getRVAAddress(name: String): Address = offset + nameRVAs(name) + sizeOfAddrTable * 2 + descriptorSize - 2
-      def toAddressTable(extern: Extern) = extern.functionNames.map(getRVAAddress) :+ 0
-      val importAddressTable = imports.flatMap(toAddressTable)
 
       return BoundImport(importDescriptors, importAddressTable)
     }
@@ -128,17 +137,15 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     val stream = new DataOutputStream(byteOutput)
 
     boundImportDescriptors.foreach(_.write(stream))
-    importNameTable.foreach(x => write(stream, x)) // (INT)
-    importAddressTable.foreach(x => write(stream, x)) // (IAT)
+    importNameTable.foreach(thunkData => thunkData.write(stream)) // (INT)
+    importAddressTable.foreach(thunkData => thunkData.write(stream)) // (IAT)
 
     for (importEntry <- imports) {
       
       val importsByName = importEntry.functionNames.map(name => ImageImportByName(0, name + "\0"))
-      
       importsByName.foreach(importName => importName.write(stream))
-      val dllName = importEntry.dllName + "\0"
-      stream.write(dllName.toCharArray().map(_.toByte))
-      stream.write(padString(dllName))
+      
+      stream.write(alignTo16(importEntry.dllName + "\0").toCharArray().map(_.toByte))
     }
 
     val getCompleteFunctionMap = {

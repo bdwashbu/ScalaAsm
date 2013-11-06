@@ -44,28 +44,29 @@ object HelloWorld extends AsmProgram {
      
     proc("flushBuffer") {
       
-      val numberOfBytesToWrite = imm8(-12)
-      val numberOfBytesWritten = imm8(-8)
-      val hFile = imm8(-4)
-      val lpBuffer = imm8(8)
+      val numberOfBytesToWrite = *(ebp + imm8(-12))
+      val numberOfBytesWritten = *(ebp + imm8(-8))
+      val hFile = *(ebp + imm8(-4))
+      val lpBuffer = *(ebp + imm8(8))
+      val STD_OUTPUT_HANDLE = imm8(-11)
       
       push(ebp)
       mov(ebp, esp)
       add(esp, imm8(-12))
-      push(imm8(0xF5))
+      push(STD_OUTPUT_HANDLE)
       call("GetStdHandle")
-      mov(*(ebp + hFile), eax)
-      push(*(ebp + lpBuffer))
-      call("sub_4010A0")
-      mov(*(ebp + numberOfBytesToWrite), eax)
+      mov(hFile, eax)
+      push(lpBuffer)
+      call("strlen")
+      mov(numberOfBytesToWrite, eax)
       push(imm8(0))
-      lea(eax, *(ebp + numberOfBytesWritten))
+      lea(eax, numberOfBytesWritten)
       push(eax)
-      push(*(ebp + numberOfBytesToWrite))
-      push(*(ebp + lpBuffer))
-      push(*(ebp + hFile))
+      push(numberOfBytesToWrite)
+      push(lpBuffer)
+      push(hFile)
       call("WriteFile")
-      mov(eax, *(ebp + numberOfBytesWritten))
+      mov(eax, numberOfBytesWritten)
       leave
       retn(imm16(4))
     }
@@ -73,7 +74,10 @@ object HelloWorld extends AsmProgram {
     align(0x10)
 
     proc("waitForKeypress") {
-      push(imm8(-10)) //nStdHandle
+      
+      val STD_INPUT_HANDLE = imm8(-10)
+      
+      push(STD_INPUT_HANDLE)
       call("GetStdHandle")
       push(eax)
       call("FlushConsoleInputBuffer")
@@ -88,34 +92,26 @@ object HelloWorld extends AsmProgram {
 
     align(0x10)
 
-    proc("sub_4010A0") {
-      mov(eax, *(esp + imm8(4)))
+    proc("strlen") {
+      
+      mov(eax, *(esp + imm8(4))) // pointer to string
       lea(edx, *(eax + imm8(3)))
       push(ebp)
       push(edi)
-      mov(imm32(0x80808080))
+      mov(ebp, imm32(0x80808080))
+      
       label("start")
-      mov(edi, *(eax))
-      add(eax, imm8(4))
-      lea(ecx, *(edi - imm32(0x1010101)))
-      not(edi)
-      and(ecx, edi)
-      and(ecx, ebp)
-      jnz("test")
-      mov(edi, *(eax))
-      add(eax, imm8(4))
-      lea(ecx, *(edi - imm32(0x1010101)))
-      not(edi)
-      and(ecx, edi)
-      and(ecx, ebp)
-      jnz("test")
-      mov(edi, *(eax))
-      add(eax, imm8(4))
-      lea(ecx, *(edi - imm32(0x1010101)))
-      not(edi)
-      and(ecx, edi)
-      and(ecx, ebp)
-      jnz("test")
+      
+      for (i <- 0 until 3) {
+	      mov(edi, *(eax)) // read first 4 bytes
+	      add(eax, imm8(4)) // increment pointer
+	      lea(ecx, *(edi - imm32(0x1010101))) // subtract 1 from each byte
+	      not(edi) // invert all bytes
+	      and(ecx, edi)
+	      and(ecx, ebp)
+	      jnz("test")
+      }
+
       mov(edi, *(eax))
       add(eax, imm8(4))
       lea(ecx, *(edi - imm32(0x1010101)))
@@ -123,14 +119,15 @@ object HelloWorld extends AsmProgram {
       and(ecx, edi)
       and(ecx, ebp)
       jz("start")
+      
       label("test")
-      test(ecx, imm32(0x8080))
+      test(ecx, imm32(0x8080)) // test first 2 bytes
       jnz("end")
       shr(ecx, imm8(0x10))
       add(eax, imm8(2))
       label("end")
       shl(cl)
-      sbb(eax, edx)
+      sbb(eax, edx) // compute length
       pop(edi)
       pop(ebp)
       retn(imm16(4))

@@ -30,6 +30,11 @@ trait Instructions extends x86Registers with Addressing {
   trait AND_RM[-O1, -O2] extends AND {
     def get(p1: O1, p2: O2): Array[Byte]
   }
+  
+  trait DEC
+  trait DEC_O[-O1] extends DEC {
+    def get(p1: O1): Array[Byte]
+  }
 
   trait NOT
   trait NOT_M[-O1] extends NOT {
@@ -88,6 +93,11 @@ trait Instructions extends x86Registers with Addressing {
     def get(x: O1, y: O2): Array[Byte]
   }
 
+  trait RDRAND
+  trait RDRAND_M[-O1] extends RDRAND {
+    def get(p1: O1): Array[Byte]
+  }
+  
   trait RETN
   trait RETN_1[O1] extends RETN {
     def get(p1: O1): Array[Byte]
@@ -116,6 +126,7 @@ trait Instructions extends x86Registers with Addressing {
   object MODRM
   {
 	  implicit object mod1 extends MODRM[r32, r32] { def get(x: r32, y: r32) = { Array((0xC0 + 8 * x.ID + y.ID).toByte) } }
+	  implicit object mod11 extends MODRM[r16, r16] { def get(x: r16, y: r16) = { Array((0xC0 + 8 * x.ID + y.ID).toByte) } }
 	  implicit object mod2 extends MODRM[r32, *[r32]] { def get(x: r32, y: *[r32]) = { Array((8 * x.ID + y.x.ID).toByte) } }
 	  implicit object mod3 extends MODRM[*[r32 + imm8], r32] { def get(x: *[r32 + imm8], y: r32) = mov4.get(y, x) }
 	  implicit object mod6 extends MODRM_1[*[r32 + imm8]] { def get(x: *[r32 + imm8]) = Array((0x40 + reg * 8 + x.x.x.ID).toByte, x.x.offset.value) }
@@ -152,6 +163,11 @@ trait Instructions extends x86Registers with Addressing {
     implicit object retn1 extends RETN_1[imm16] { def get(x: imm16) = Array(0xC2.toByte) ++ Endian.swap(x.value) }
   }
 
+  object DEC {
+    implicit object dec1 extends DEC_O[r32] { def get(x: r32) = Array((0x48 + x.ID).toByte) }
+    implicit object dec2 extends DEC_O[r16] { def get(x: r16) = Array((0x48 + x.ID).toByte) }
+  }
+  
   object SBB {
     implicit object sbb1 extends SBB_2[r32, r32] { def get(x: r32, y: r32) = 0x1B.toByte +: modRM(x, y) }
   }
@@ -184,6 +200,7 @@ trait Instructions extends x86Registers with Addressing {
   object PUSH {
     import MODRM._
     implicit object push1 extends PUSH_M[r32] { def get(x: r32) = Array((0x50 + x.ID).toByte) }
+    implicit object push8 extends PUSH_M[r16] { def get(x: r16) = Array((0x50 + x.ID).toByte) }
     implicit object push4 extends PUSH_M[imm8] { def get(x: imm8) = Array(0x6A.toByte, x.value) }
     implicit object push5 extends PUSH_M[imm16] { def get(x: imm16) = Array(0x68.toByte) ++ Endian.swap(x.value) }
     implicit object push6 extends PUSH_M[*[r32 + imm8]] { def get(x: *[r32 + imm8]) = 0xFF.toByte +: modRM(x, reg = 6.toByte) }
@@ -209,12 +226,21 @@ trait Instructions extends x86Registers with Addressing {
     implicit object lea3 extends LEA_2[r32, *[r32 + imm32]] { def get(x: r32, y: *[r32 + imm32]) = Array(0x8D.toByte, 0x8F.toByte) ++ Endian.swap(y.x.offset.value) }
   }
 
+  object RDRAND {
+    import MODRM._
+    implicit object rdrand1 extends RDRAND_M[r32] { def get(x: r32) = Array[Byte](0x0F.toByte, 0xC7.toByte) ++ modRM(x, reg = 6.toByte) }
+    implicit object rdrand2 extends RDRAND_M[r16] { def get(x: r16) = Array[Byte](0x0F.toByte, 0xC7.toByte) ++ modRM(x, reg = 6.toByte) }
+    //implicit object rdrand3 extends RDRAND_M[r64] { def get(x: r32) = Array[Byte](0x0F.toByte, 0xC7.toByte) ++ modRM(x, reg = 6.toByte) }
+  }
+  
   object MOV {
     implicit object mov1 extends MOV_R[*[r32 + imm8], r32] { def get(x: *[r32 + imm8], y: r32) = 0x89.toByte +: modRM(x, y) }
 
     implicit object mov3 extends MOV_R[r32, *[r32 + imm8]] { def get(x: r32, y: *[r32 + imm8]) = 0x8B.toByte +: modRM(x, y) }
 
     implicit object mov4 extends MOV_R[r32, r32] { def get(x: r32, y: r32) = 0x8B.toByte +: modRM(x, y) }
+    
+    implicit object mov9 extends MOV_R[r16, r16] { def get(x: r16, y: r16) = 0x8B.toByte +: modRM(x, y) }
 
     implicit object mov5 extends MOV_R[r32, *[r32]] { def get(x: r32, y: *[r32]) = 0x8B.toByte +: modRM(x, y) }
     

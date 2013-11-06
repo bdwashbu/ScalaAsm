@@ -53,14 +53,13 @@ trait AsmCode extends Registers with Instructions {
     def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1, p2))
 
-//    def push[O1 <: Register[_]](p1: O1)(implicit ev: PUSH_O[O1]) = toCode {
-//      ev.get(p1)
-//    }
-
     def push[O1](p1: O1)(implicit ev: PUSH_M[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))
 
     def pop[O1](p1: O1)(implicit ev: POP_O[O1], code: CodeBuilder) =
+      code.codeTokens += CodeToken(ev.get(p1))
+      
+    def dec[O1](p1: O1)(implicit ev: DEC_O[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))
 
     def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_RM[O1, O2], code: CodeBuilder) =
@@ -126,6 +125,9 @@ trait AsmCode extends Registers with Instructions {
 
     def jmp(ref: String)(implicit code: CodeBuilder) =
       code.codeTokens += JmpRef(ref)
+      
+    def rdrand[O1](p1: O1)(implicit ev: RDRAND_M[O1], code: CodeBuilder) =
+      code.codeTokens += CodeToken(ev.get(p1))
   }
 
 }

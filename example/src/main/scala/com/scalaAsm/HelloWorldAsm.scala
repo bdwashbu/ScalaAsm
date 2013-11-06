@@ -7,7 +7,7 @@ object HelloWorld extends AsmProgram {
   val data = new Data {
     val pressAnyKey = "Press any key to continue ...\0"
     val newline = "\r\n\0"
-    val helloWorld = "Hello World!\n\0"
+    val helloWorld = "Hello World!, %d\n\0"
   }
   
   val code = new Code {
@@ -24,9 +24,28 @@ object HelloWorld extends AsmProgram {
     }
 
     proc("printHelloWorld") {
+      
+      mov (ecx,imm32(3))
+      mov (edx,imm32(0))
+      
+      label("whoa")
+      //rdrand(ax)
+      //mov (ax,cx)
+      //push(ax)
+      //rdrand(cx)
+      push(ecx)
+
       push("helloWorld")
       call("printf")
       add(esp, imm8(4))
+      pop(ecx)
+      dec(ecx)
+      
+     
+      //dec(ecx)
+      //and(ecx,edx)
+      //test(ecx, imm32(0x0))
+      jnz("whoa")
       retn
     }
      

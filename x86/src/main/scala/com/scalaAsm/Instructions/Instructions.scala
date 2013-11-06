@@ -2,12 +2,14 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.utils.Endian
 import scala.annotation.implicitNotFound
+import MODRM._
+import x86Registers._
+import Addressing._
+import MODRM._
 
-trait Instructions extends x86Registers with Addressing {
+//trait Instructions extends Operands {
   
-  type imm8 = Immediate8
-  type imm16 = Immediate16
-  type imm32 = Immediate32
+
 
   trait ADD
   trait ADD_2[-O1, -O2] extends ADD {
@@ -50,18 +52,6 @@ trait Instructions extends x86Registers with Addressing {
     def get(p1: O1, p2: O2): Array[Byte]
   }
 
-  trait MOV
-  trait MOV_RM[O1, O2, O3] extends MOV {
-    def get(x: O3): Array[Byte]
-  }
-
-  trait MOV_R[-O1, -O2] extends MOV {
-    def get(op1: O1, op2: O2): Array[Byte]
-  }
-
-  trait MOV_R2[O1] extends MOV {
-    def get(x: O1): Array[Byte]
-  }
 
   trait SHR
   trait SHR_2[-O1, -O2] extends SHR {
@@ -103,61 +93,13 @@ trait Instructions extends x86Registers with Addressing {
     def get(p1: O1): Array[Byte]
   }
 
-  trait TEST
-  trait TEST_1[O1] extends TEST {
-    def get(p1: O1): Array[Byte]
-  }
-  trait TEST_2[-O1, -O2] extends TEST {
-    def get(p1: O1, p2: O2): Array[Byte]
-  }
 
-  type +[A <: Register[_], B <: Immediate[_, _]] = RegisterOffset[A, B]
 
-  trait MODRM[-O1, -O2] {
-    var reg: Byte = 0
-    def get(p1: O1, p2: O2): Array[Byte]
-  }
-
-  trait MODRM_1[-O1] {
-    var reg: Byte = 0
-    def get(p1: O1): Array[Byte]
-  }
-
-  object MODRM
-  {
-	  implicit object mod1 extends MODRM[r32, r32] { def get(x: r32, y: r32) = { Array((0xC0 + 8 * x.ID + y.ID).toByte) } }
-	  implicit object mod11 extends MODRM[r16, r16] { def get(x: r16, y: r16) = { Array((0xC0 + 8 * x.ID + y.ID).toByte) } }
-	  implicit object mod2 extends MODRM[r32, *[r32]] { def get(x: r32, y: *[r32]) = { Array((8 * x.ID + y.x.ID).toByte) } }
-	  implicit object mod3 extends MODRM[*[r32 + imm8], r32] { def get(x: *[r32 + imm8], y: r32) = mov4.get(y, x) }
-	  implicit object mod6 extends MODRM_1[*[r32 + imm8]] { def get(x: *[r32 + imm8]) = Array((0x40 + reg * 8 + x.x.x.ID).toByte, x.x.offset.value) }
-	  implicit object mod8 extends MODRM_1[Register[_]] { def get(x: Register[_]) = Array((0xC0 + reg * 8 + x.ID).toByte) }
-	  implicit object mod7 extends MODRM[r32, imm8] { def get(x: r32, y: imm8) = Array((0xC0 + reg * 8 + x.ID).toByte, y.value) }
-	  implicit object mod10 extends MODRM[r32, imm32] { def get(x: r32, y: imm32) = Array((0xC0 + reg * 8 + x.ID).toByte) ++ Endian.swap(y.value) }
-	  implicit object mov4 extends MODRM[r32, *[r32 + imm8]] {
-	    def get(x: r32, y: *[r32 + imm8]) = {
-	      if (y.x.x.ID == 4) // [--][--] SIB
-	        Array((0x40 + 8 * x.ID + y.x.x.ID).toByte, 0x24.toByte, y.x.offset.value)
-	      else
-	        Array((0x40 + 8 * x.ID + y.x.x.ID).toByte, y.x.offset.value)
-	    }
-	  }
-	  implicit object mov5 extends MODRM[r32, *[r32 + imm32]] { def get(x: r32, y: *[r32 + imm32]) = { Array(0x8D.toByte, 0x8F.toByte) ++ Endian.swap(y.x.offset.value) } }
-  }
   
-  def modRM[O1, O2](p1: O1, p2: O2, reg: Byte = 0)(implicit ev: MODRM[O1, O2]) = {
-    ev.reg = reg
-    ev.get(p1, p2)
-  }
 
-  def modRM[O1](p1: O1, reg: Byte = 0)(implicit ev: MODRM_1[O1]) = {
-    ev.reg = reg
-    ev.get(p1)
-  }
 
-  object TEST {
-    implicit object test1 extends TEST_2[r32, r32] { def get(x: r32, y: r32) = 0x85.toByte +: modRM(x, y) }
-    implicit object test2 extends TEST_2[r32, imm32] { def get(x: r32, y: imm32) = 0xF7.toByte +: modRM(x, y) } //Array(0xF7.toByte, 0xC1.toByte) ++ Endian.swap(y) }
-  }
+
+ 
 
   object RETN {
     implicit object retn1 extends RETN_1[imm16] { def get(x: imm16) = Array(0xC2.toByte) ++ Endian.swap(x.value) }
@@ -173,7 +115,6 @@ trait Instructions extends x86Registers with Addressing {
   }
 
   object SHL {
-    import MODRM._
     implicit object shl1 extends SHL_1[r8] { def get(x: r8) = 0xD0.toByte +: modRM(x, reg = 4.toByte) }
   }
 
@@ -198,7 +139,6 @@ trait Instructions extends x86Registers with Addressing {
   }
 
   object PUSH {
-    import MODRM._
     implicit object push1 extends PUSH_M[r32] { def get(x: r32) = Array((0x50 + x.ID).toByte) }
     implicit object push8 extends PUSH_M[r16] { def get(x: r16) = Array((0x50 + x.ID).toByte) }
     implicit object push4 extends PUSH_M[imm8] { def get(x: imm8) = Array(0x6A.toByte, x.value) }
@@ -217,7 +157,6 @@ trait Instructions extends x86Registers with Addressing {
   }
 
   object NOT {
-    import MODRM._
     implicit object not1 extends NOT_M[r32] { def get(x: r32) = 0xF7.toByte +: modRM(x, reg = 2) }
   }
 
@@ -227,26 +166,10 @@ trait Instructions extends x86Registers with Addressing {
   }
 
   object RDRAND {
-    import MODRM._
     implicit object rdrand1 extends RDRAND_M[r32] { def get(x: r32) = Array[Byte](0x0F.toByte, 0xC7.toByte) ++ modRM(x, reg = 6.toByte) }
     implicit object rdrand2 extends RDRAND_M[r16] { def get(x: r16) = Array[Byte](0x0F.toByte, 0xC7.toByte) ++ modRM(x, reg = 6.toByte) }
     //implicit object rdrand3 extends RDRAND_M[r64] { def get(x: r32) = Array[Byte](0x0F.toByte, 0xC7.toByte) ++ modRM(x, reg = 6.toByte) }
   }
   
-  object MOV {
-    implicit object mov1 extends MOV_R[*[r32 + imm8], r32] { def get(x: *[r32 + imm8], y: r32) = 0x89.toByte +: modRM(x, y) }
-
-    implicit object mov3 extends MOV_R[r32, *[r32 + imm8]] { def get(x: r32, y: *[r32 + imm8]) = 0x8B.toByte +: modRM(x, y) }
-
-    implicit object mov4 extends MOV_R[r32, r32] { def get(x: r32, y: r32) = 0x8B.toByte +: modRM(x, y) }
-    
-    implicit object mov9 extends MOV_R[r16, r16] { def get(x: r16, y: r16) = 0x8B.toByte +: modRM(x, y) }
-
-    implicit object mov5 extends MOV_R[r32, *[r32]] { def get(x: r32, y: *[r32]) = 0x8B.toByte +: modRM(x, y) }
-    
-    implicit object mov7 extends MOV_R[r16, imm16] { def get(x: r16, y: imm16) = Array[Byte]((0xB8 + x.ID).toByte, (y.value & 0x00FF).toByte, ((y.value & 0xFF00) >> 8).toByte) }
-    implicit object mov8 extends MOV_R[r8, imm8] { def get(x: r8, y: imm8) = Array[Byte]((0xB0 + x.ID).toByte, y.value) }
-
-    implicit object mov6 extends MOV_R[r32, imm32] { def get(x: r32, y: imm32) = (0xB8 + x.ID).toByte +: Endian.swap(y.value) }
-  }
-}
+ 
+//}

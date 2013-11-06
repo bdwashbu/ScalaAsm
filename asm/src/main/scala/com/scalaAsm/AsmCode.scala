@@ -2,9 +2,10 @@ package com.scalaAsm.asm
 
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86._
+import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.asm.Tokens._
 
-trait AsmCode extends Registers with Instructions {
+trait AsmCode extends Registers {
   self: AsmProgram =>
 
   val code: Code

@@ -1,6 +1,7 @@
 package com.scalaAsm
 
 import com.scalaAsm.asm.AsmProgram
+import com.scalaAsm.x86.Addressing._
 
 object HelloWorld extends AsmProgram {
 

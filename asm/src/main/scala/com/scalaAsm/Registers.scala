@@ -1,8 +1,8 @@
 package com.scalaAsm.asm
 
-import com.scalaAsm.x86.x86Registers
+import com.scalaAsm.x86.x86Registers._
 
-trait Registers extends x86Registers {
+trait Registers {
     val edi = EDI()
     val eax = EAX()
     val ecx = ECX()

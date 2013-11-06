@@ -5,6 +5,7 @@ import java.nio.ByteOrder
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.asm.Tokens._
+import com.scalaAsm.x86.Addressing
 
 case class Assembled(val code: Seq[Token], val data: Seq[Token]) {
   def rawCode: Array[Byte] = code.collect{ case CodeToken(x) => x}.reduce(_++_)
@@ -15,7 +16,7 @@ trait CodeBuilder {
 }
 
 abstract class AsmProgram extends AsmData with AsmCode {
-
+  
   def hex2Bytes(hex: String) = {
     def stripChars(s: String, ch: String) = s filterNot (ch contains _)
     stripChars(hex, " -").grouped(2).map(Integer.parseInt(_, 16).toByte).toArray

@@ -84,8 +84,8 @@ object HelloWorld extends AsmProgram {
       push(imm8(1))
       call("Sleep")
       call("_kbhit")
-      test(eax, eax)
-      jz(imm8(-17))
+      test(eax, eax) // eax is 0 if a key has not been pressed
+      jz(imm8(-17)) // if a key has not been pressed, loop around again
       call("_getch")
       retn
     }
@@ -168,7 +168,7 @@ outputStream.write(exe.get)
 outputStream.close
 ```
 
-ScalaAsm currently supports many useful Assembly features such as procedures, labels, and variables.
+ScalaAsm currently supports many useful Assembly features such as procedures, loops, labels, and variables.  Some of these, like variables and loops, are implemented using first-class scala constructs.
 
 Additionally, many errors can be caught at compile time:
 

@@ -1,0 +1,17 @@
+package com.scalaAsm.x86.Instructions
+
+import com.scalaAsm.x86._
+import x86Registers._
+import Addressing._
+import MODRM._
+import scala.annotation.implicitNotFound
+import com.scalaAsm.utils.Endian
+
+trait SBB
+trait SBB_2[-O1, -O2] extends SBB {
+  def get(x: O1, y: O2): Array[Byte]
+}
+
+object SBB {
+  implicit object sbb1 extends SBB_2[r32, r32] { def get(x: r32, y: r32) = 0x1B.toByte +: modRM(x, y) }
+}

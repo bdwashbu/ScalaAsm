@@ -2,14 +2,18 @@ ScalaAsm
 ========
 #### x86 Assembler written in Scala
 
-Have you ever wondered how executable files work, or if a high-level language like Scala is suitable for x86 machine code generation?
+* Have you ever wondered how executable files work?
 
-ScalaAsm is an API that exists somewhere inbetween a full assembly language and machine code.  It can be used to implement an assembly language or a higher level programming language.
+* Have you ever wanted to learn x86/assembly?
+
+* Have you ever wanted to control each and every byte that gets placed into an executable?
+
+ScalaAsm is an API that exists somewhere inbetween a full assembly language and machine code.  It uses existing Scala features to appear to be like assembly while actually being closer to machine code.
 
 Currently, the library is designed to assemble an executable from the ground up, using a built-in DSL (Domain Specific Language).
 The ultimate goal is to use ScalaAsm to implement a BASIC programming language!
 
-Heres an example assembly program:
+Heres an example ScalaAsm program:
 
 ```scala
 object HelloWorld extends AsmProgram {

@@ -4,9 +4,7 @@ ScalaAsm
 
 Have you ever wondered how executable files work, or if a high-level language like Scala is suitable for x86 machine code generation?
 
-Rest assured, Scala is great for this task and ScalaAsm is the answer for you!
-
-ScalaAsm is an academic exercise that explores whether things like typeclasses, extractors, and pattern matching are beneficial to machine code generation.  The answer so far is 'Most definitely!'.
+ScalaAsm is an API that exists somewhere inbetween a full assembly language and machine code.  It can be used to implement an assembly language or a higher level programming language.
 
 Currently, the library is designed to assemble an executable from the ground up, using a built-in DSL (Domain Specific Language).
 The ultimate goal is to use ScalaAsm to implement a BASIC programming language!

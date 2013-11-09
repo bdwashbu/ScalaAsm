@@ -21,6 +21,15 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
   
+  case class ThunkArray(thunks: Seq[ImageThunkData]) extends ExeWriter {
+    def write(stream: DataOutputStream) {
+      for (thunk <- thunks) {
+        thunk.write(stream)
+      } 
+      stream.write(Array[Byte](0,0,0,0))
+    }
+  }
+  
   case class ImageImportByName(hint: Short = 0, name: String) extends ExeWriter {
     def write(stream: DataOutputStream) {
        write(stream, hint)
@@ -70,7 +79,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     def getDllNames(x: Seq[Extern]): List[String] = x.flatMap(x => List(x.dllName)).toList
     def getFunctionNames(x: Seq[Extern]): List[String] = x.flatMap(_.functionNames).toList
 
-    case class BoundImport(val boundImportDescriptors: Seq[ImageImportDescriptor], val importAddressList: Seq[Seq[ImageThunkData]], val importNameList: Seq[Seq[ImageThunkData]])
+    case class BoundImport(val boundImportDescriptors: Seq[ImageImportDescriptor], val importAddressList: Seq[ThunkArray], val importNameList: Seq[ThunkArray])
 
     def getBoundImports(): BoundImport = {
 
@@ -126,8 +135,8 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
 
       def getImageRVA(name: String) = ImageImportByNameRVA(offset + descriptorSize + sizeOfAddrTable * 2 + imageMap(name) - 2, name)
       
-      def toAddressTable(extern: Extern): Seq[ImageThunkData] = {
-        extern.functionNames.map(x => ImageThunkData(getImageRVA(x)))
+      def toAddressTable(extern: Extern): ThunkArray = {
+        ThunkArray(extern.functionNames.map(x => ImageThunkData(getImageRVA(x))))
       }
       
       val importAddressTable = imports.map(toAddressTable)
@@ -154,8 +163,8 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
 
     boundImportDescriptors.foreach(_.write(stream))
-    importNameTable.foreach{x => x.foreach(_.write(stream)); stream.write(Array[Byte](0,0,0,0))} // (INT)
-    importAddressTable.foreach{x => x.foreach(_.write(stream)); stream.write(Array[Byte](0,0,0,0))} // (IAT)
+    importNameTable.foreach{x => x.write(stream)} // (INT)
+    importAddressTable.foreach{x => x.write(stream)} // (IAT)
     importByNames.foreach(_.write(stream)) // Function names follow by dll name
 
     val getCompleteFunctionMap = {
@@ -182,7 +191,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
 
     CompiledImports(byteOutput.toByteArray(),
                     boundImportDescriptors.size * 20,
-                    importAddressTable.map(x => (x.size + 1) * 4).reduce(_+_),
+                    importAddressTable.map(x => (x.thunks.size + 1) * 4).reduce(_+_),
                     getFunctionMap(nonExterns),
                     getFunctionMap(externs))
   }

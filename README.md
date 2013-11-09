@@ -2,16 +2,18 @@ ScalaAsm
 ========
 #### x86 Assembler written in Scala
 
-Have you ever wondered how executable files work, or if a high-level language like Scala is suitable for x86 machine code generation?
+* Have you ever wondered how executable files work?
 
-Rest assured, Scala is great for this task and ScalaAsm is the answer for you!
+* Have you ever wanted to learn x86/assembly?
 
-ScalaAsm is an academic exercise that explores whether things like typeclasses, extractors, and pattern matching are beneficial to machine code generation.  The answer so far is 'Most definitely!'.
+* Have you ever wanted to control each and every byte that gets placed into an executable?
+
+ScalaAsm is an API that exists somewhere inbetween a full assembly language and machine code.  It uses existing Scala features to appear to be like assembly while actually being closer to machine code.
 
 Currently, the library is designed to assemble an executable from the ground up, using a built-in DSL (Domain Specific Language).
 The ultimate goal is to use ScalaAsm to implement a BASIC programming language!
 
-Heres an example assembly program:
+Heres an example ScalaAsm program:
 
 ```scala
 object HelloWorld extends AsmProgram {
@@ -84,8 +86,8 @@ object HelloWorld extends AsmProgram {
       push(imm8(1))
       call("Sleep")
       call("_kbhit")
-      test(eax, eax)
-      jz(imm8(-17))
+      test(eax, eax) // eax is 0 if a key has not been pressed
+      jz(imm8(-17)) // if a key has not been pressed, loop around again
       call("_getch")
       retn
     }
@@ -168,7 +170,7 @@ outputStream.write(exe.get)
 outputStream.close
 ```
 
-ScalaAsm currently supports many useful Assembly features such as procedures, labels, and variables.
+ScalaAsm currently supports many useful Assembly features such as procedures, loops, labels, and variables.  Some of these, like variables and loops, are implemented using first-class scala constructs.
 
 Additionally, many errors can be caught at compile time:
 

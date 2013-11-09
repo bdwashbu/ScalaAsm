@@ -10,7 +10,7 @@ trait AsmData {
   val data: Data
   protected val dataTokens = new ListBuffer[Token]()
     
-  case class Data {
+  case class Data() {
 	
     def compile = {
       var isFirst = true

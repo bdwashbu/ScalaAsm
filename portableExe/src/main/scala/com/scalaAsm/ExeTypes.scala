@@ -10,6 +10,8 @@ import java.io.ByteArrayOutputStream
 
 trait ExeWriter {
 
+    def write(stream: DataOutputStream)
+  
     def writePadding(stream: DataOutputStream, numBytes: Int) = {
       stream.write(Array.fill[Byte](numBytes)(0))
     }

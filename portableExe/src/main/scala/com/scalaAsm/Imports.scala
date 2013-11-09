@@ -9,7 +9,7 @@ case class Extern(dllName: String, functionNames: Seq[String])
 
 case class ImageThunkDataRVA(offset: Int) extends AnyVal
   
-case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val offset: Int) extends ExeWriter {
+case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val offset: Int) {
 
   def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0"  else name
   
@@ -23,8 +23,18 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
   
   case class ImageImportByName(hint: Short = 0, name: String) extends ExeWriter {
     def write(stream: DataOutputStream) {
-       write(stream, 0.toShort)
+       write(stream, hint)
        stream.write(alignTo16(name).toCharArray().map(_.toByte))
+    }
+  }
+  
+  case class DLLName(val name: String) extends ExeWriter {
+    
+    var position: Int = 0
+    
+    def write(stream: DataOutputStream) {
+      position = stream.size
+      stream.write(name.toCharArray().map(_.toByte))
     }
   }
   
@@ -135,18 +145,15 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
 
     val byteOutput = new ByteArrayOutputStream()
     val stream = new DataOutputStream(byteOutput)
+    
+    val importByNames: Seq[ExeWriter] = imports.flatMap { importEntry =>
+      importEntry.functionNames.map(name => ImageImportByName(0, name + "\0")) :+ DLLName(alignTo16(importEntry.dllName + "\0"))
+    }
 
     boundImportDescriptors.foreach(_.write(stream))
-    importNameTable.foreach(thunkData => thunkData.write(stream)) // (INT)
-    importAddressTable.foreach(thunkData => thunkData.write(stream)) // (IAT)
-
-    for (importEntry <- imports) {
-      
-      val importsByName = importEntry.functionNames.map(name => ImageImportByName(0, name + "\0"))
-      importsByName.foreach(importName => importName.write(stream))
-      
-      stream.write(alignTo16(importEntry.dllName + "\0").toCharArray().map(_.toByte))
-    }
+    importNameTable.foreach(_.write(stream)) // (INT)
+    importAddressTable.foreach(_.write(stream)) // (IAT)
+    importByNames.foreach(_.write(stream)) // Function names follow by dll name
 
     val getCompleteFunctionMap = {
       val flattenedFcns = imports.flatMap(imp => imp.functionNames ++ List(imp.dllName))

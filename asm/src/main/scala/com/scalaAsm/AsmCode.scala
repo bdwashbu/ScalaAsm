@@ -18,7 +18,7 @@ trait AsmCode extends Registers {
   
   case class Proc(name: String)
 
-  case class Code  {
+  case class Code() {
     
     implicit val builder = new CodeBuilder{}
     

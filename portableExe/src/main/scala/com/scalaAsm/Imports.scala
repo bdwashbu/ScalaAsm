@@ -21,8 +21,12 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
   
-  case class ThunkArray(thunks: Seq[ImageThunkData]) extends ExeWriter {
+  case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String) extends ExeWriter {
+    
+    var position: Int = 0
+    
     def write(stream: DataOutputStream) {
+      position = stream.size
       for (thunk <- thunks) {
         thunk.write(stream)
       } 
@@ -140,7 +144,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
       
       
       def toAddressTable(extern: Extern): ThunkArray = {
-        ThunkArray(extern.functionNames.map(x => ImageThunkData(getImageRVA(x))))
+        ThunkArray(extern.functionNames.map(x => ImageThunkData(getImageRVA(x))), extern.dllName)
       }
       
       val importAddressTable = imports.map(toAddressTable)
@@ -164,7 +168,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     importByNames.foreach(_.write(firstStream)) // Function names follow by dll name
       
       for (descriptor <- boundImportDescriptors.take(boundImportDescriptors.size-1)) {
-        val lookupAddr = offset + descriptorSize + lookupTableRVAs(descriptor.importedDLLname.dllName)
+        val lookupAddr = offset + importNameTable.find(x => x.dllName contains descriptor.importedDLLname.dllName).get.position  //lookupTableRVAs(descriptor.importedDLLname.dllName)
         
         descriptor.importedDLLname = ImageImportByNameRVA(getImageRVA(descriptor.importedDLLname.dllName).offset + 2, descriptor.importedDLLname.dllName)
         descriptor.firstThunk = ImageThunkDataRVA(lookupAddr + sizeOfAddrTable) //point to Import Address Table (IAT)

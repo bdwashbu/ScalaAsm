@@ -13,6 +13,10 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
 
   def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0"  else name
   
+  trait Positionable extends ExeWriter {
+    var position: Int = 0
+  }
+  
   case class ImageImportByNameRVA(offset: Int, dllName: String = "")
   
   case class ImageThunkData(imagePointer: ImageImportByNameRVA) extends ExeWriter {
@@ -21,10 +25,8 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
   
-  case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String) extends ExeWriter {
-    
-    var position: Int = 0
-    
+  case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String) extends Positionable {
+
     def write(stream: DataOutputStream) {
       position = stream.size
       for (thunk <- thunks) {
@@ -34,17 +36,21 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
   
-  case class ImageImportByName(hint: Short = 0, name: String) extends ExeWriter {
+  trait ImportSymbol extends Positionable {
+    val name: String
+  }
+  
+  case class ImageImportByName(hint: Short = 0, name: String) extends ImportSymbol {
+
     def write(stream: DataOutputStream) {
+       position = stream.size
        write(stream, hint)
        stream.write(alignTo16(name).toCharArray().map(_.toByte))
     }
   }
   
-  case class DLLName(val name: String) extends ExeWriter {
-    
-    var position: Int = 0
-    
+  case class DLLName(val name: String) extends ImportSymbol {
+
     def write(stream: DataOutputStream) {
       position = stream.size
       stream.write(name.toCharArray().map(_.toByte))
@@ -158,7 +164,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     val firstByteOutput = new ByteArrayOutputStream()
     val firstStream = new DataOutputStream(firstByteOutput)
     
-    val importByNames: Seq[ExeWriter] = imports.flatMap { importEntry =>
+    val importByNames: Seq[ImportSymbol] = imports.flatMap { importEntry =>
       importEntry.functionNames.map(name => ImageImportByName(0, name + "\0")) :+ DLLName(alignTo16(importEntry.dllName + "\0"))
     }
 
@@ -170,7 +176,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
       for (descriptor <- boundImportDescriptors.take(boundImportDescriptors.size-1)) {
         val lookupAddr = offset + importNameTable.find(x => x.dllName contains descriptor.importedDLLname.dllName).get.position  //lookupTableRVAs(descriptor.importedDLLname.dllName)
         
-        descriptor.importedDLLname = ImageImportByNameRVA(getImageRVA(descriptor.importedDLLname.dllName).offset + 2, descriptor.importedDLLname.dllName)
+        descriptor.importedDLLname = ImageImportByNameRVA(offset + importByNames.find(x => x.name contains descriptor.importedDLLname.dllName).get.position)
         descriptor.firstThunk = ImageThunkDataRVA(lookupAddr + sizeOfAddrTable) //point to Import Address Table (IAT)
         descriptor.originalFirstThunk = ImageThunkDataRVA(lookupAddr) //point to Import Name Table (INT)
       }

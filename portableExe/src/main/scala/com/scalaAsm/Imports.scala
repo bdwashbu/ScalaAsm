@@ -30,9 +30,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
 
     def write(stream: DataOutputStream) {
       position = stream.size
-      for (thunk <- thunks) {
-        thunk.write(stream)
-      }
+      thunks.foreach(_.write(stream))
       stream.write(Array[Byte](0, 0, 0, 0))
     }
   }
@@ -50,7 +48,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
 
-  case class DLLName(val name: String) extends ImportSymbol {
+  case class DLLName(name: String) extends ImportSymbol {
 
     def write(stream: DataOutputStream) {
       position = stream.size
@@ -150,7 +148,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
 
     val getCompleteFunctionMap = {
       (for (table <- importAddressTable;
-                        thunk <- table.thunks)
+            thunk <- table.thunks)
        yield ((thunk.name.trim(), offset + thunk.position))).toMap
     }
     
@@ -169,7 +167,8 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
       getCompleteFunctionMap.filter(x => functionNames.contains(x._1))
     }
 
-    CompiledImports(byteOutput.toByteArray(),
+    CompiledImports(
+      byteOutput.toByteArray(),
       importDescriptors.size * ImageImportDescriptor.size,
       importAddressTable.map(x => (x.thunks.size + 1) * 4).reduce(_ + _),
       getFunctionMap(nonExterns),

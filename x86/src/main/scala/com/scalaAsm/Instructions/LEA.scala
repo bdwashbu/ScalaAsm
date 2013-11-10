@@ -2,12 +2,11 @@ package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86._
 import x86Registers._
-import Addressing._
 import MODRM._
-import scala.annotation.implicitNotFound
+import Addressing._
 import com.scalaAsm.utils.Endian
 
-trait LEA
+trait LEA extends Instruction
 trait LEA_3[O1, O2, O3] extends LEA {
   def get: Array[Byte]
 }

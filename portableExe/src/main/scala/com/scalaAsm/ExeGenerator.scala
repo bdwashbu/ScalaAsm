@@ -13,11 +13,11 @@ import com.scalaAsm.asm.Assembled
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
   
- case class CompiledImports(val rawData: Array[Byte],
-                            val boundImportSize: Int,
-                            val nameTableSize: Int,
-                            val imports: Map[String, Int],
-                            val externs: Map[String, Int]) {
+ case class CompiledImports(rawData: Array[Byte],
+                            boundImportSize: Int,
+                            nameTableSize: Int,
+                            imports: Map[String, Int],
+                            externs: Map[String, Int]) {
   
   def getImportsDirectory(optionalHeader: OptionalHeader, dataSize: Int) = {
     
@@ -33,8 +33,8 @@ import com.scalaAsm.utils.Endian
   }  
 }
 
- case class CompiledData(val rawData: Array[Byte],
-                         val variables: Map[String, Int])
+ case class CompiledData(rawData: Array[Byte],
+                         variables: Map[String, Int])
 
 
 object ExeGenerator extends Sections {
@@ -91,7 +91,7 @@ object ExeGenerator extends Sections {
     test.link
   }
     
-  case class ExeParts(val code: Array[Byte], val compiledData: CompiledData, val compiledImports: CompiledImports)
+  case class ExeParts(code: Array[Byte], compiledData: CompiledData, compiledImports: CompiledImports)
   
   private def buildExe(optionalHeader: OptionalHeader, asm: Assembled): ExeParts = {
 

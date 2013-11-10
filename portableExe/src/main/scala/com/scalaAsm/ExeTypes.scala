@@ -49,16 +49,16 @@ trait ExeWriter {
     }
   }
 
-	case class SectionHeader(val name: String,
-      val virtualSize: Int,
-      val virtualAddress: Int,
-      val sizeOfRawData: Int,
-      val pointerOrRawData: Int,
-      val relocPtr: Int,
-      val linenumPtr: Int,
-      val relocations: Short,
-      val lineNumbers: Short,
-      val characteristics: Int) {
+	case class SectionHeader(name: String,
+      virtualSize: Int,
+      virtualAddress: Int,
+      sizeOfRawData: Int,
+      pointerOrRawData: Int,
+      relocPtr: Int,
+      linenumPtr: Int,
+      relocations: Short,
+      lineNumbers: Short,
+      characteristics: Int) {
 
       def write: Array[Byte] = {
         val bbuf = ByteBuffer.allocate(256);

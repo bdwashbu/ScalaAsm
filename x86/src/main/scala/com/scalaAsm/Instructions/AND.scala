@@ -2,10 +2,7 @@ package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86._
 import x86Registers._
-import Addressing._
 import MODRM._
-import scala.annotation.implicitNotFound
-import com.scalaAsm.utils.Endian
 
 trait AND
 trait AND_RM[-O1, -O2] extends AND {

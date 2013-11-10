@@ -1,5 +1,5 @@
 package com.scalaAsm.x86
 
-trait Instruction {
+private[x86] trait Instruction extends Operands {
 
 }

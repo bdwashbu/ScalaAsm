@@ -3,11 +3,10 @@ package com.scalaAsm.x86.Instructions
 import com.scalaAsm.x86._
 import x86Registers._
 import Addressing._
-import MODRM._
 import scala.annotation.implicitNotFound
 import com.scalaAsm.utils.Endian
 
-trait SBB
+trait SBB extends ModRM with Operands
 trait SBB_2[-O1, -O2] extends SBB {
   def get(x: O1, y: O2): Array[Byte]
 }

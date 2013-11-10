@@ -17,12 +17,10 @@ object Addressing {
   type +[A <: Register[_], B <: Immediate[_, _]] = RegisterOffset[A, B]
 }
 
-trait Operands {
+private[x86] trait Operands extends ModRM {
   type imm8 = Immediate8
   type imm16 = Immediate16
   type imm32 = Immediate32
-
-  import MODRM._
 
   def modRM[O1, O2](p1: O1, p2: O2, reg: Byte = 0)(implicit ev: MODRM[O1, O2]) = {
     ev.reg = reg

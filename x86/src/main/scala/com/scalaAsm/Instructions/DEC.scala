@@ -2,9 +2,8 @@ package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86._
 import x86Registers._
-import MODRM._
 
-trait DEC
+trait DEC extends ModRM with Operands
 trait DEC_O[-O1] extends DEC {
   def get(p1: O1): Array[Byte]
 }

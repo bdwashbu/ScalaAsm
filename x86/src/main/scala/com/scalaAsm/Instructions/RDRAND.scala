@@ -3,11 +3,10 @@ package com.scalaAsm.x86.Instructions
 import com.scalaAsm.x86._
 import x86Registers._
 import Addressing._
-import MODRM._
 import scala.annotation.implicitNotFound
 import com.scalaAsm.utils.Endian
 
-trait RDRAND
+trait RDRAND extends ModRM with Operands
 trait RDRAND_M[-O1] extends RDRAND {
   def get(p1: O1): Array[Byte]
 }

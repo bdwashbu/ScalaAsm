@@ -2,9 +2,8 @@ package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86._
 import x86Registers._
-import MODRM._
 
-trait AND
+trait AND extends ModRM with Operands
 trait AND_RM[-O1, -O2] extends AND {
   def get(p1: O1, p2: O2): Array[Byte]
 }

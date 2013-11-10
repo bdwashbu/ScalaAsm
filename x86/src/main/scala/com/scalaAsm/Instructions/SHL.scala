@@ -3,11 +3,10 @@ package com.scalaAsm.x86.Instructions
 import com.scalaAsm.x86._
 import x86Registers._
 import Addressing._
-import MODRM._
 import scala.annotation.implicitNotFound
 import com.scalaAsm.utils.Endian
 
-trait SHL
+trait SHL extends ModRM with Operands
 trait SHL_1[-O1] extends SHL {
   def get(p: O1): Array[Byte]
 }

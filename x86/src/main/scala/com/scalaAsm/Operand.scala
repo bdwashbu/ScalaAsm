@@ -23,7 +23,7 @@ private[x86] trait Operands {
   type imm32 = Immediate32
 }
 
-trait Immediate[T, X <: Immediate[_, _]] extends Any {
+trait Immediate[T, X <: Immediate[T, X]] extends Any {
   def value: T
   def negate: X
 }
@@ -37,6 +37,6 @@ case class Immediate16(value: Short) extends AnyVal with Immediate[Short, Immedi
 }
 
 case class Immediate32(val value: Int) extends AnyVal with Immediate[Int, Immediate32] {
-  def negate: Immediate32 = Immediate32((-value).toInt)
+  def negate: Immediate32 = Immediate32(-value)
 }
 

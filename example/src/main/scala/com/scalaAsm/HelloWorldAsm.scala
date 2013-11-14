@@ -10,7 +10,7 @@ object HelloWorld extends AsmProgram {
     val newline = "\r\n\0"
     val helloWorld = "Hello World!\n\0"
   }
-  
+
   val code = new Code {
 
     proc("start") {
@@ -30,15 +30,15 @@ object HelloWorld extends AsmProgram {
       add(esp, imm8(4))
       retn
     }
-     
+
     proc("flushBuffer") {
-      
+
       val numberOfBytesToWrite = *(ebp + imm8(-12))
       val numberOfBytesWritten = *(ebp + imm8(-8))
       val hFile = *(ebp + imm8(-4))
       val lpBuffer = *(ebp + imm8(8))
       val STD_OUTPUT_HANDLE = imm8(-11)
-      
+
       push(ebp)
       mov(ebp, esp)
       add(esp, imm8(-12))
@@ -63,9 +63,9 @@ object HelloWorld extends AsmProgram {
     align(0x10)
 
     proc("waitForKeypress") {
-      
+
       val STD_INPUT_HANDLE = imm8(-10)
-      
+
       push(STD_INPUT_HANDLE)
       call("GetStdHandle")
       push(eax)
@@ -82,23 +82,23 @@ object HelloWorld extends AsmProgram {
     align(0x10)
 
     proc("strlen") {
-      
+
       mov(eax, *(esp + imm8(4))) // pointer to string
       lea(edx, *(eax + imm8(3)))
       push(ebp)
       push(edi)
       mov(ebp, imm32(0x80808080))
-      
+
       label("start")
-      
+
       for (i <- 0 until 3) {
-	      mov(edi, *(eax)) // read first 4 bytes
-	      add(eax, imm8(4)) // increment pointer
-	      lea(ecx, *(edi - imm32(0x1010101))) // subtract 1 from each byte
-	      not(edi) // invert all bytes
-	      and(ecx, edi)
-	      and(ecx, ebp)
-	      jnz("test")
+        mov(edi, *(eax)) // read first 4 bytes
+        add(eax, imm8(4)) // increment pointer
+        lea(ecx, *(edi - imm32(0x1010101))) // subtract 1 from each byte
+        not(edi) // invert all bytes
+        and(ecx, edi)
+        and(ecx, ebp)
+        jnz("test")
       }
 
       mov(edi, *(eax))
@@ -108,7 +108,7 @@ object HelloWorld extends AsmProgram {
       and(ecx, edi)
       and(ecx, ebp)
       jz("start")
-      
+
       label("test")
       test(ecx, imm32(0x8080)) // test first 2 bytes
       jnz("end")

@@ -3,7 +3,7 @@ package com.scalaAsm.x86.Instructions
 import com.scalaAsm.x86._
 import x86Registers._
 
-trait JNZ extends ModRM with Operands
+trait JNZ extends ModRMFormat with Operands
 trait JNZ_1[O1] extends JNZ {
   def get(p1: O1): Array[Byte]
 }

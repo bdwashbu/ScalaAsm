@@ -5,7 +5,7 @@ import x86Registers._
 import Addressing._
 import com.scalaAsm.utils.Endian
 
-trait MOV extends ModRM with Operands
+trait MOV extends ModRMFormat with Operands
 trait MOV_RM[O1, O2, O3] extends MOV {
   def get(x: O3): Array[Byte]
 }

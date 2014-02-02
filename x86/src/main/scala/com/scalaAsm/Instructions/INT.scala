@@ -3,7 +3,7 @@ package com.scalaAsm.x86.Instructions
 import com.scalaAsm.x86._
 import x86Registers._
 
-trait INT extends ModRM with Operands
+trait INT extends ModRMFormat with Operands
 trait INT_1[O1] extends INT {
   def get(p1: O1): Array[Byte]
 }

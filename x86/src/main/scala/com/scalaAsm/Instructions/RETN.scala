@@ -6,7 +6,7 @@ import Addressing._
 import scala.annotation.implicitNotFound
 import com.scalaAsm.utils.Endian
 
-trait RETN extends ModRM with Operands
+trait RETN extends ModRMFormat with Operands
 trait RETN_1[O1] extends RETN {
   def get(p1: O1): Array[Byte]
 }

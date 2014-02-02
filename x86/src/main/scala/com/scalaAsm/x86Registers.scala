@@ -3,12 +3,12 @@ package com.scalaAsm.x86
 object x86Registers {
   import Addressing._
 
-  abstract class Register[T](val ID: Byte)
+  abstract class Register(val ID: Byte)
 
-  abstract class r8(ID: Byte) extends Register[Byte](ID)
-  abstract class r16(ID: Byte) extends Register[Short](ID)
-  abstract class r32(ID: Byte) extends Register[Int](ID)
-  abstract class r64(ID: Byte) extends Register[Long](ID)
+  abstract class r8(ID: Byte) extends Register(ID)
+  abstract class r16(ID: Byte) extends Register(ID)
+  abstract class r32(ID: Byte) extends Register(ID)
+  abstract class r64(ID: Byte) extends Register(ID)
 
   class AL extends r8(0) with Addressable[AL]
   class CL extends r8(1) with Addressable[CL]

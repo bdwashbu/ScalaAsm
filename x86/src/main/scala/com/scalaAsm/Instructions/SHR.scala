@@ -12,5 +12,5 @@ trait SHR_2[-O1, -O2] extends SHR {
 }
 
 object SHR extends Instruction {
-  implicit object shr1 extends SHR_2[r32, imm8] { def get(x: r32, y: imm8) = 0xC1.toByte +: modRM(x, y, reg = 5.toByte) }
+  implicit object shr1 extends SHR_2[r32, imm8] { def get(x: r32, y: imm8) = 0xC1.toByte +: modRM2(x, y, reg = 5.toByte) }
 }

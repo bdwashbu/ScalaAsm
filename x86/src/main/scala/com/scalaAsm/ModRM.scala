@@ -7,7 +7,7 @@ import Addressing._
 private[x86] trait ModRM {
   self: Operands =>
 
-  def modRM[O1, O2](p1: O1, p2: O2, reg: Byte = 0)(implicit ev: MODRM_2[O1, O2]) = {
+  def modRM2[O1, O2](p1: O1, p2: O2, reg: Byte = 0)(implicit ev: MODRM_2[O1, O2]) = {
     ev.reg = reg
     ev.get(p1, p2)
   }

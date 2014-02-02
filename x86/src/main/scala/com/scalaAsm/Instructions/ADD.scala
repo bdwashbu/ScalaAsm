@@ -9,5 +9,5 @@ trait ADD_2[-O1, -O2] extends ADD {
 }
 
 object ADD extends Instruction {
-  implicit object add1 extends ADD_2[r32, imm8] { def get(x: r32, y: imm8) = 0x83.toByte +: modRM(x, y, reg = 0.toByte) }
+  implicit object add1 extends ADD_2[r32, imm8] { def get(x: r32, y: imm8) = 0x83.toByte +: modRM2(x, y, reg = 0.toByte) }
 }

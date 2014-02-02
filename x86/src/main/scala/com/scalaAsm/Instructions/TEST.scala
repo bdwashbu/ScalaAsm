@@ -13,6 +13,6 @@ trait TEST_2[-O1, -O2] extends TEST {
 }
 
 object TEST extends Instruction {
-  implicit object test1 extends TEST_2[r32, r32] { def get(x: r32, y: r32) = 0x85.toByte +: modRM(x, y) }
-  implicit object test2 extends TEST_2[r32, imm32] { def get(x: r32, y: imm32) = 0xF7.toByte +: modRM(x, y) } //Array(0xF7.toByte, 0xC1.toByte) ++ Endian.swap(y) }
+  implicit object test1 extends TEST_2[r32, r32] { def get(x: r32, y: r32) = 0x85.toByte +: modRM2(x, y) }
+  implicit object test2 extends TEST_2[r32, imm32] { def get(x: r32, y: imm32) = 0xF7.toByte +: modRM2(x, y) } //Array(0xF7.toByte, 0xC1.toByte) ++ Endian.swap(y) }
 }

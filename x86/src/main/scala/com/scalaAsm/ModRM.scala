@@ -11,23 +11,28 @@ private[x86] trait ModRMFormat {
 
   sealed class RegisterMode(val value: Byte)
   case object NoDisplacment extends RegisterMode(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacemen
-  case object Displacment8 extends RegisterMode(1) // Eight-bit displacement, sign-extended to 16 bits
-  case object Displacment16 extends RegisterMode(2) // 16-bit displacement (example: MOV [BX + SI]+ displacement,al)
-  case object SecondReg extends RegisterMode(3) // r/m is treated as a second "reg" field
+  case object Displacment8 extends RegisterMode(1)  // Eight-bit displacement, sign-extended to 16 bits
+  case object Displacment32 extends RegisterMode(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
+  case object SecondReg extends RegisterMode(3)     // r/m is treated as a second "reg" field
 
   trait ModRMByte {
     def get: Byte
   }
   
-  case class ModRM(mod: RegisterMode, reg: Register, rm: Byte) extends ModRMByte {
-    def get: Byte = ((mod.value << 6) + (reg.ID << 3) + rm).toByte
+  case class ModRM(mod: RegisterMode, reg: Register, rm: Register) extends ModRMByte {
+    def get: Byte = ((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte
   }
   
-  case class ModRMExtended(mod: RegisterMode, opEx: Byte, rm: Byte) extends ModRMByte {
-    def get: Byte = ((mod.value << 6) + (opEx << 3) + rm).toByte
+  case class ModRMExtended(mod: RegisterMode, opEx: Byte, rm: Register) extends ModRMByte {
+    def get: Byte = ((mod.value << 6) + (opEx << 3) + rm.ID).toByte
   }
 
-  protected[this] trait AddressingFormSpecifier
+  protected[this] trait AddressingFormSpecifier {
+//    val modRM: ModRMByte
+//    val scaleIndexBase: Unit
+//    val displacment: Unit
+//    val immediate: Unit
+  }
 
   protected[this] trait MODRM_2[-O1, -O2] extends AddressingFormSpecifier {
     def get(p1: O1, p2: O2): Array[Byte]
@@ -61,16 +66,12 @@ private[x86] trait ModRMFormat {
     ev.get(p1, extensionCode)
   }
 
-  implicit object mod1 extends MODRM_2[r32, r32] {
-    def get(x: r32, y: r32) = Array(ModRM(mod = SecondReg, reg = x, rm = y.ID).get)
-  }
-
-  implicit object mod11 extends MODRM_2[r16, r16] {
-    def get(x: r16, y: r16) = Array(ModRM(mod = SecondReg, reg = x, rm = y.ID).get)
+  implicit object mod1 extends MODRM_2[Register, Register] {
+    def get(x: Register, y: Register) = Array(ModRM(SecondReg, x, y).get)
   }
 
   implicit object mod2 extends MODRM_2[r32, *[r32]] {
-    def get(x: r32, y: *[r32]) = Array(ModRM(mod = NoDisplacment, reg = x, rm = y.x.ID).get)
+    def get(x: r32, y: *[r32]) = Array(ModRM(NoDisplacment, x, y.x).get)
   }
 
   implicit object mod3 extends MODRM_2[*[r32 + imm8], r32] {
@@ -79,28 +80,28 @@ private[x86] trait ModRMFormat {
 
   implicit object mod6 extends MODRM_1Extended[*[r32 + imm8]] {
     def get(x: *[r32 + imm8], opcodeExtension: Byte) = {
-      Array(ModRMExtended(mod = Displacment8, opEx = opcodeExtension, rm = x.x.x.ID).get, x.x.offset.value)
+      Array(ModRMExtended(Displacment8, opcodeExtension, x.x.x).get, x.x.offset.value)
     }
   }
 
   implicit object mod8 extends MODRM_1Extended[Register] {
-    def get(x: Register, opcodeExtension: Byte) = Array(ModRMExtended(mod = SecondReg, opEx = opcodeExtension, rm = x.ID).get)
+    def get(x: Register, opcodeExtension: Byte) = Array(ModRMExtended(SecondReg, opcodeExtension, x).get)
   }
 
   implicit object mod7 extends MODRM_2Extended[r32, imm8] {
-    def get(x: r32, y: imm8, opcodeExtension: Byte) = Array(ModRMExtended(mod = SecondReg, opEx = opcodeExtension, rm = x.ID).get, y.value)
+    def get(x: r32, y: imm8, opcodeExtension: Byte) = Array(ModRMExtended(SecondReg, opcodeExtension, x).get, y.value)
   }
 
   implicit object mod10 extends MODRM_2Extended[r32, imm32] {
-    def get(x: r32, y: imm32, opcodeExtension: Byte) = Array(ModRMExtended(mod = SecondReg, opEx = opcodeExtension, rm = x.ID).get) ++ Endian.swap(y.value)
+    def get(x: r32, y: imm32, opcodeExtension: Byte) = Array(ModRMExtended(SecondReg, opcodeExtension, x).get) ++ Endian.swap(y.value)
   }
 
   implicit object mod4 extends MODRM_2[r32, *[r32 + imm8]] {
     def get(x: r32, y: *[r32 + imm8]) = {
       if (y.x.x.ID == 4) // [--][--] SIB  
-        Array(ModRM(mod = Displacment8, reg = x, rm = y.x.x.ID).get, 0x24.toByte, y.x.offset.value) //Array((0x40 + 8 * x.ID + y.x.x.ID).toByte, 0x24.toByte, y.x.offset.value)
+        Array(ModRM(Displacment8, x, y.x.x).get, 0x24.toByte, y.x.offset.value)
       else
-        Array(ModRM(mod = Displacment8, reg = x, rm = y.x.x.ID).get, y.x.offset.value)
+        Array(ModRM(Displacment8, x, y.x.x).get, y.x.offset.value)
     }
   }
 }

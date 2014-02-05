@@ -4,7 +4,7 @@ import com.scalaAsm.utils.Endian
 import x86Registers._
 import Addressing._
 
-private[x86] trait ModRMFormat {
+trait ModRMFormat {
   self: Operands =>
 
   import x86Registers._
@@ -27,26 +27,21 @@ private[x86] trait ModRMFormat {
     def get: Byte = ((mod.value << 6) + (opEx << 3) + rm.ID).toByte
   }
 
-  protected[this] trait AddressingFormSpecifier {
-//    val modRM: ModRMByte
-//    val scaleIndexBase: Unit
-//    val displacment: Unit
-//    val immediate: Unit
-  }
+ 
 
-  protected[this] trait MODRM_2[-O1, -O2] extends AddressingFormSpecifier {
+  protected[this] trait MODRM_2[-O1, -O2] {
     def get(p1: O1, p2: O2): Array[Byte]
   }
 
-  protected[this] trait MODRM_1[-O1] extends AddressingFormSpecifier {
+  protected[this] trait MODRM_1[-O1] {
     def get(p1: O1): Array[Byte]
   }
 
-  protected[this] trait MODRM_2Extended[-O1, -O2] extends AddressingFormSpecifier {
+  protected[this] trait MODRM_2Extended[-O1, -O2] {
     def get(p1: O1, p2: O2, opcodeExtension: Byte): Array[Byte]
   }
 
-  protected[this] trait MODRM_1Extended[-O1] extends AddressingFormSpecifier {
+  protected[this] trait MODRM_1Extended[-O1]  {
     def get(p1: O1, opcodeExtension: Byte): Array[Byte]
   }
 

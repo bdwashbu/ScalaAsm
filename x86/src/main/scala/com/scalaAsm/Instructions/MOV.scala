@@ -19,9 +19,9 @@ trait MOV_R2[O1] extends MOV {
 }
 
 object MOV extends Instruction {
-  implicit object mov1 extends MOV_R[*[r32 + imm8], r32] { def get(x: *[r32 + imm8], y: r32) = 0x89.toByte +: modRM2(x, y) }
+  implicit object mov1 extends MOV_R[rm32, r32] { def get(x: rm32, y: r32) = 0x89.toByte +: modRM2(x, y) }
 
-  implicit object mov3 extends MOV_R[r32, *[r32 + imm8]] { def get(x: r32, y: *[r32 + imm8]) = 0x8B.toByte +: modRM2(x, y) }
+  implicit object mov3 extends MOV_R[r32, rm32] { def get(x: r32, y: rm32) = 0x8B.toByte +: modRM2(x, y) }
 
   implicit object mov4 extends MOV_R[r32, r32] { def get(x: r32, y: r32) = 0x8B.toByte +: modRM2(x, y) }
 

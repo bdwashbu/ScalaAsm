@@ -2,6 +2,7 @@ package com.scalaAsm
 
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.x86.Addressing._
+import com.scalaAsm.x86.rm32
 
 object HelloWorld extends AsmProgram {
 
@@ -33,10 +34,10 @@ object HelloWorld extends AsmProgram {
 
     proc("flushBuffer") {
 
-      val numberOfBytesToWrite = *(ebp + imm8(-12))
-      val numberOfBytesWritten = *(ebp + imm8(-8))
-      val hFile = *(ebp + imm8(-4))
-      val lpBuffer = *(ebp + imm8(8))
+      val numberOfBytesToWrite = new rm32{ val reg = ebp; val offset8 = -12.toByte; val isMemory = true}
+      val numberOfBytesWritten = new rm32{ val reg = ebp; val offset8 = -8.toByte; val isMemory = true}
+      val hFile = new rm32{ val reg = ebp; val offset8 = -4.toByte; val isMemory = true}
+      val lpBuffer = new rm32{ val reg = ebp; val offset8 = 8.toByte; val isMemory = true}
       val STD_OUTPUT_HANDLE = imm8(-11)
 
       push(ebp)
@@ -83,8 +84,8 @@ object HelloWorld extends AsmProgram {
 
     proc("strlen") {
 
-      mov(eax, *(esp + imm8(4))) // pointer to string
-      lea(edx, *(eax + imm8(3)))
+      mov(eax, new rm32{ val reg = esp; val offset8 = 4.toByte; val isMemory = true}) //*(esp + imm8(4))) // pointer to string
+      lea(edx, new rm32{ val reg = eax; val offset8 = 3.toByte; val isMemory = true}) //*(eax + imm8(3)))
       push(ebp)
       push(edi)
       mov(ebp, imm32(0x80808080))

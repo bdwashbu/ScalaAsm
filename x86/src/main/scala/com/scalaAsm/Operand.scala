@@ -1,9 +1,9 @@
 package com.scalaAsm.x86
 
-import com.scalaAsm.x86._
+import x86Registers._
 
 object Addressing {
-  import x86Registers._
+  
 
   case class RegisterOffset[+T <: Register, S <: Immediate[_, _]](offset: S, x: T)
 
@@ -15,6 +15,12 @@ object Addressing {
 
   case class *[+A](x: A)
   type +[A <: Register, B <: Immediate[_, _]] = RegisterOffset[A, B]
+}
+
+trait rm32 {
+  val reg: Register
+  val isMemory: Boolean
+  val offset8: Byte
 }
 
 private[x86] trait Operands {

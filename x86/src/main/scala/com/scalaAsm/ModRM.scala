@@ -69,13 +69,11 @@ trait ModRMFormat {
     def get(x: r32, y: *[r32]) = Array(ModRM(NoDisplacment, x, y.x).get)
   }
 
-  implicit object mod3 extends MODRM_2[*[r32 + imm8], r32] {
-    def get(x: *[r32 + imm8], y: r32) = mod4.get(y, x)
-  }
+  
 
-  implicit object mod6 extends MODRM_1Extended[*[r32 + imm8]] {
-    def get(x: *[r32 + imm8], opcodeExtension: Byte) = {
-      Array(ModRMExtended(Displacment8, opcodeExtension, x.x.x).get, x.x.offset.value)
+  implicit object mod6 extends MODRM_1Extended[rm32] {
+    def get(x: rm32, opcodeExtension: Byte) = {
+      Array(ModRMExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
     }
   }
 
@@ -91,12 +89,16 @@ trait ModRMFormat {
     def get(x: r32, y: imm32, opcodeExtension: Byte) = Array(ModRMExtended(SecondReg, opcodeExtension, x).get) ++ Endian.swap(y.value)
   }
 
-  implicit object mod4 extends MODRM_2[r32, *[r32 + imm8]] {
-    def get(x: r32, y: *[r32 + imm8]) = {
-      if (y.x.x.ID == 4) // [--][--] SIB  
-        Array(ModRM(Displacment8, x, y.x.x).get, 0x24.toByte, y.x.offset.value)
+  implicit object mod3 extends MODRM_2[rm32, r32] {
+    def get(x: rm32, y: r32) = mod4.get(y, x)
+  }
+  
+  implicit object mod4 extends MODRM_2[r32, rm32] {
+    def get(x: r32, y: rm32) = {
+      if (y.reg.ID == 4) // [--][--] SIB  
+        Array(ModRM(Displacment8, x, y.reg).get, 0x24.toByte, y.offset8)
       else
-        Array(ModRM(Displacment8, x, y.x.x).get, y.x.offset.value)
+        Array(ModRM(Displacment8, x, y.reg).get, y.offset8)
     }
   }
 }

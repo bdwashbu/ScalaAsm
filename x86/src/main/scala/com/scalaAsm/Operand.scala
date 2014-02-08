@@ -17,22 +17,26 @@ object Addressing {
   type +[A <: Register, B <: Immediate[_, _]] = RegisterOffset[A, B]
 }
 
-trait rm32 {
+trait RegisterOrMemory {
   val reg: Register
   val isMemory: Boolean
   val offset8: Byte
 }
 
-trait rm16 {
-  val reg: Register
-  val isMemory: Boolean
-  val offset8: Byte
-}
+
 
 private[x86] trait Operands {
   type imm8 = Immediate8
   type imm16 = Immediate16
   type imm32 = Immediate32
+  
+  type rm8 = RegisterOrMemory
+  type rm16 = RegisterOrMemory
+  type rm32 = RegisterOrMemory
+  
+  type r8 = Register8
+  type r16 = Register16
+  type r32 = Register32
 }
 
 trait Immediate[T, X <: Immediate[T, X]] extends Any {

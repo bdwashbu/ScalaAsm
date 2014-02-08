@@ -2,7 +2,6 @@ package com.scalaAsm
 
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.x86.Addressing._
-import com.scalaAsm.x86.rm32
 import com.scalaAsm.x86.Instructions.PUSH._
 import com.scalaAsm.x86.Instructions.MOV._
 

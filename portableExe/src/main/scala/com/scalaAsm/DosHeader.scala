@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream
 import com.scalaAsm.asm.AsmProgram
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import com.scalaAsm.x86.Instructions.PUSH._
 
 class DosHeader {
     val e_magic = "MZ"  // Magic number

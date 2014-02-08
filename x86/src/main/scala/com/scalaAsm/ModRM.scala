@@ -61,19 +61,18 @@ trait ModRMFormat {
     ev.get(p1, extensionCode)
   }
 
-  implicit object mod1 extends MODRM_2[Register, Register] {
-    def get(x: Register, y: Register) = Array(ModRM(SecondReg, x, y).get)
-  }
-
-  implicit object mod2 extends MODRM_2[r32, *[r32]] {
-    def get(x: r32, y: *[r32]) = Array(ModRM(NoDisplacment, x, y.x).get)
-  }
-
-  
+//  implicit object mod1 extends MODRM_2[Register, Register] {
+//    def get(x: Register, y: Register) = Array(ModRM(SecondReg, x, y).get)
+//  }
 
   implicit object mod6 extends MODRM_1Extended[rm32] {
     def get(x: rm32, opcodeExtension: Byte) = {
-      Array(ModRMExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
+      if (x.offset8 != 0 && x.isMemory)
+    	  Array(ModRMExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
+      else if (x.offset8 == 0 && x.isMemory)
+          Array(ModRMExtended(NoDisplacment, opcodeExtension, x.reg).get)
+      else
+          Array(ModRMExtended(SecondReg, opcodeExtension, x.reg).get)
     }
   }
 
@@ -95,10 +94,27 @@ trait ModRMFormat {
   
   implicit object mod4 extends MODRM_2[r32, rm32] {
     def get(x: r32, y: rm32) = {
-      if (y.reg.ID == 4) // [--][--] SIB  
+      if (y.reg.ID == 4 && y.offset8 != 0 && y.isMemory) // [--][--] SIB  
         Array(ModRM(Displacment8, x, y.reg).get, 0x24.toByte, y.offset8)
-      else
+      else if (y.offset8 != 0 && y.isMemory)
         Array(ModRM(Displacment8, x, y.reg).get, y.offset8)
+      else if (y.isMemory && y.offset8 == 0)
+        Array(ModRM(NoDisplacment, x, y.reg).get)
+      else
+        Array(ModRM(SecondReg, x, y.reg).get)
+    }
+  }
+  
+  implicit object mod20 extends MODRM_2[r16, rm16] {
+    def get(x: r16, y: rm16) = {
+      if (y.reg.ID == 4 && y.offset8 != 0 && y.isMemory) // [--][--] SIB  
+        Array(ModRM(Displacment8, x, y.reg).get, 0x24.toByte, y.offset8)
+      else if (y.offset8 != 0 && y.isMemory)
+        Array(ModRM(Displacment8, x, y.reg).get, y.offset8)
+      else if (y.isMemory && y.offset8 == 0)
+        Array(ModRM(NoDisplacment, x, y.reg).get)
+      else
+        Array(ModRM(SecondReg, x, y.reg).get)
     }
   }
 }

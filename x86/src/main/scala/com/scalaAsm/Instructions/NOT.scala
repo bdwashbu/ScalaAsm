@@ -12,5 +12,5 @@ trait NOT_M[-O1] extends NOT {
 }
 
 object NOT {
-  implicit object not1 extends NOT_M[r32] { def get(x: r32) = 0xF7.toByte +: modRMExtended(x, extensionCode = 2) }
+  implicit object not1 extends NOT_M[rm32] { def get(x: rm32) = 0xF7.toByte +: modRMExtended(x, extensionCode = 2) }
 }

@@ -23,6 +23,12 @@ trait rm32 {
   val offset8: Byte
 }
 
+trait rm16 {
+  val reg: Register
+  val isMemory: Boolean
+  val offset8: Byte
+}
+
 private[x86] trait Operands {
   type imm8 = Immediate8
   type imm16 = Immediate16

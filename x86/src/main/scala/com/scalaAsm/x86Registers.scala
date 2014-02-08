@@ -6,8 +6,16 @@ object x86Registers {
   abstract class Register(val ID: Byte)
 
   abstract class r8(ID: Byte) extends Register(ID)
-  abstract class r16(ID: Byte) extends Register(ID)
-  abstract class r32(ID: Byte) extends Register(ID)
+  abstract class r16(ID: Byte) extends Register(ID) with rm16 {
+    val reg: Register = this
+    val isMemory: Boolean = false
+    val offset8: Byte = 0
+  }
+  abstract class r32(ID: Byte) extends Register(ID) with rm32 {
+    val reg: Register = this
+    val isMemory: Boolean = false
+    val offset8: Byte = 0
+  }
   abstract class r64(ID: Byte) extends Register(ID)
 
   class AL extends r8(0) with Addressable[AL]

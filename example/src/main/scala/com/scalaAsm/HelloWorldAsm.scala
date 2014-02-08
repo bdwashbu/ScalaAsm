@@ -3,6 +3,8 @@ package com.scalaAsm
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.x86.Addressing._
 import com.scalaAsm.x86.rm32
+import com.scalaAsm.x86.Instructions.PUSH._
+import com.scalaAsm.x86.Instructions.MOV._
 
 object HelloWorld extends AsmProgram {
 
@@ -93,7 +95,7 @@ object HelloWorld extends AsmProgram {
       label("start")
 
       for (i <- 0 until 3) {
-        mov(edi, *(eax)) // read first 4 bytes
+        mov(edi, new rm32{ val reg = eax; val offset8 = 0.toByte; val isMemory = true}) // read first 4 bytes
         add(eax, imm8(4)) // increment pointer
         lea(ecx, *(edi - imm32(0x1010101))) // subtract 1 from each byte
         not(edi) // invert all bytes
@@ -102,7 +104,7 @@ object HelloWorld extends AsmProgram {
         jnz("test")
       }
 
-      mov(edi, *(eax))
+      mov(edi, new rm32{ val reg = eax; val offset8 = 0.toByte; val isMemory = true})
       add(eax, imm8(4))
       lea(ecx, *(edi - imm32(0x1010101)))
       not(edi)

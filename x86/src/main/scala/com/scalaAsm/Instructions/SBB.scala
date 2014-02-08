@@ -12,5 +12,5 @@ trait SBB_2[-O1, -O2] extends SBB {
 }
 
 object SBB {
-  implicit object sbb1 extends SBB_2[r32, r32] { def get(x: r32, y: r32) = 0x1B.toByte +: modRM2(x, y) }
+  implicit object sbb1 extends SBB_2[r32, rm32] { def get(x: r32, y: rm32) = 0x1B.toByte +: modRM2(x, y) }
 }

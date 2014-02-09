@@ -22,7 +22,7 @@ private[x86] trait Instruction extends Operands {
 //  }
 }
 
-private[x86] case class Instruction1(opcode: Byte, addressingFormSpecifier: AddressingFormSpecifier, opcodeExtension: Byte = -1) extends ModRMFormat with Operands
+private[x86] case class Instruction1(opcode: Byte, addressingFormSpecifier: AddressingFormSpecifier = null, opcodeExtension: Byte = -1) extends ModRMFormat with Operands
 
 //private[x86] trait Instruction2 extends ModRMFormat with Operands {
 //	val opcode: (Byte, Byte)

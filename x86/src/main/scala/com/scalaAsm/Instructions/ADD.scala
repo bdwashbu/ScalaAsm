@@ -10,8 +10,11 @@ trait ADD_2[-O1, -O2] extends ADD {
   def get(op1: O1, op2: O2): Instruction1
 }
 
+trait MI[X <: OperandSize] extends ADD_2[ModeRMFormat.reg[X], imm8]
+trait MR[X <: OperandSize] extends ADD_2[ModeRMFormat.rm[X], ModeRMFormat.reg[X]]
+
 object ADD extends Instruction {
-  implicit object add1 extends ADD_2[r32, imm8] { def get(x: r32, y: imm8) = {
+  implicit object add1 extends MI[DwordOperand] { def get(x: r32, y: imm8) = {
     new Instruction1(
       opcode = 0x83.toByte,
 	  addressingFormSpecifier = new AddressingFormSpecifier {

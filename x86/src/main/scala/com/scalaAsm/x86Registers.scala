@@ -3,27 +3,22 @@ package com.scalaAsm.x86
 object x86Registers extends Operands {
   import Addressing._
 
-  abstract class Register(val ID: Byte)
+  abstract class Register(val ID: Byte) extends RegisterOrMemory {
+    val reg: Register = this
+    val isMemory: Boolean = false
+    val offset8: Byte = 0
+  }
 
-  abstract class Register8(ID: Byte) extends Register(ID) with RegisterOrMemory {
+  abstract class Register8(ID: Byte) extends Register(ID) {
     type Size = ByteOperand
-    val reg: Register = this
-    val isMemory: Boolean = false
-    val offset8: Byte = 0
   }
   
-  abstract class Register16(ID: Byte) extends Register(ID) with RegisterOrMemory {
+  abstract class Register16(ID: Byte) extends Register(ID) {
     type Size = WordOperand
-    val reg: Register = this
-    val isMemory: Boolean = false
-    val offset8: Byte = 0
   }
   
-  abstract class Register32(ID: Byte) extends Register(ID) with RegisterOrMemory {
+  abstract class Register32(ID: Byte) extends Register(ID) {
     type Size = DwordOperand
-    val reg: Register = this
-    val isMemory: Boolean = false
-    val offset8: Byte = 0
   }
   
   abstract class r64(ID: Byte) extends Register(ID)

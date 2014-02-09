@@ -40,9 +40,9 @@ trait Operands {
   type rm16 = RegisterOrMemory{ type Size = WordOperand }
   type rm32 = RegisterOrMemory{ type Size = DwordOperand }
   
-  type r8 = Register8
-  type r16 = Register16
-  type r32 = Register32
+  type r8 = Register { type Size = ByteOperand }
+  type r16 = Register { type Size = WordOperand }
+  type r32 = Register { type Size = DwordOperand }
   
  
 }

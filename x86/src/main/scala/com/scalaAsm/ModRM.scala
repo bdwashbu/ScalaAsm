@@ -4,6 +4,11 @@ import com.scalaAsm.utils.Endian
 import x86Registers._
 import Addressing._
 
+object ModeRMFormat {
+  type rm[Z] = RegisterOrMemory {type Size = Z}
+  type reg[Z] = Register {type Size = Z}
+}
+
 trait ModRMFormat {
   self: Operands =>
 

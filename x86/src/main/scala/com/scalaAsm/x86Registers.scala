@@ -5,19 +5,22 @@ object x86Registers extends Operands {
 
   abstract class Register(val ID: Byte)
 
-  abstract class Register8(ID: Byte) extends Register(ID) with rm8 {
+  abstract class Register8(ID: Byte) extends Register(ID) with RegisterOrMemory {
+    type Size = ByteOperand
     val reg: Register = this
     val isMemory: Boolean = false
     val offset8: Byte = 0
   }
   
-  abstract class Register16(ID: Byte) extends Register(ID) with rm16 {
+  abstract class Register16(ID: Byte) extends Register(ID) with RegisterOrMemory {
+    type Size = WordOperand
     val reg: Register = this
     val isMemory: Boolean = false
     val offset8: Byte = 0
   }
   
-  abstract class Register32(ID: Byte) extends Register(ID) with rm32 {
+  abstract class Register32(ID: Byte) extends Register(ID) with RegisterOrMemory {
+    type Size = DwordOperand
     val reg: Register = this
     val isMemory: Boolean = false
     val offset8: Byte = 0

@@ -75,6 +75,28 @@ trait ModRMFormat {
           Array(ModRMExtended(SecondReg, opcodeExtension, x.reg).get)
     }
   }
+  
+  implicit object mod16 extends MODRM_1Extended[rm16] {
+    def get(x: rm16, opcodeExtension: Byte) = {
+      if (x.offset8 != 0 && x.isMemory)
+    	  Array(ModRMExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
+      else if (x.offset8 == 0 && x.isMemory)
+          Array(ModRMExtended(NoDisplacment, opcodeExtension, x.reg).get)
+      else
+          Array(ModRMExtended(SecondReg, opcodeExtension, x.reg).get)
+    }
+  }
+  
+  implicit object mod26 extends MODRM_1Extended[rm8] {
+    def get(x: rm8, opcodeExtension: Byte) = {
+      if (x.offset8 != 0 && x.isMemory)
+    	  Array(ModRMExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
+      else if (x.offset8 == 0 && x.isMemory)
+          Array(ModRMExtended(NoDisplacment, opcodeExtension, x.reg).get)
+      else
+          Array(ModRMExtended(SecondReg, opcodeExtension, x.reg).get)
+    }
+  }
 
   implicit object mod8 extends MODRM_1Extended[Register] {
     def get(x: Register, opcodeExtension: Byte) = Array(ModRMExtended(SecondReg, opcodeExtension, x).get)

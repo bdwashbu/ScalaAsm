@@ -4,8 +4,10 @@ import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86._
 import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.asm.Tokens._
+import com.scalaAsm.x86.x86Registers._
+import com.scalaAsm.x86.Operands
 
-trait AsmCode extends Registers {
+trait AsmCode extends Registers with Operands {
   self: AsmProgram =>
 
   val code: Code
@@ -25,6 +27,13 @@ trait AsmCode extends Registers {
     def imm8(x: Byte) = Immediate8(x)
     def imm16(x: Short) = Immediate16(x)
     def imm32(x: Int) = Immediate32(x)
+    
+    def modRM(reg2: Register, offset82: Byte, isMemory2: Boolean): rm32 = new RegisterOrMemory {
+      type Size = DwordOperand
+      val reg: Register = reg2
+      val isMemory: Boolean = isMemory2
+      val offset8: Byte = offset82
+    }
 
     def b(bytes: Byte*): Array[Byte] = {
       bytes.toArray

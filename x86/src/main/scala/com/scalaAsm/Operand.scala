@@ -5,16 +5,16 @@ import x86Registers._
 object Addressing {
   
 
-  case class RegisterOffset[+T <: Register, S <: Immediate[_, _]](offset: S, x: T)
+  case class RegisterOffset[+T <: Register, S <: Immediate](offset: S, x: T)
 
   trait Addressable[X <: Register] {
     self: X =>
-    def -[T <: Immediate[_, T]](offset: T) = RegisterOffset[X, T](offset.negate, this)
-    def +[T <: Immediate[_, T]](offset: T) = RegisterOffset[X, T](offset, this)
+    def -[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset.negate, this)
+    def +[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset, this)
   }
 
   case class *[+A](x: A)
-  type +[A <: Register, B <: Immediate[_, _]] = RegisterOffset[A, B]
+  type +[A <: Register, B <: Immediate] = RegisterOffset[A, B]
 }
 
 sealed class OperandSize
@@ -32,6 +32,7 @@ trait RegisterOrMemory {
 
 
 trait Operands {
+  type imm = Immediate
   type imm8 = Immediate8
   type imm16 = Immediate16
   type imm32 = Immediate32
@@ -47,20 +48,30 @@ trait Operands {
  
 }
 
-trait Immediate[T, X <: Immediate[T, X]] extends Any {
+trait blah
+
+trait Immediate extends Any {
+  type T
+  type X <: Immediate
   def value: T
   def negate: X
 }
 
-case class Immediate8(value: Byte) extends AnyVal with Immediate[Byte, Immediate8] {
+case class Immediate8(value: Byte) extends AnyVal with Immediate {
+  type T = Byte
+  type X = Immediate8
   def negate: Immediate8 = Immediate8((-value).toByte)
 }
 
-case class Immediate16(value: Short) extends AnyVal with Immediate[Short, Immediate16] {
+case class Immediate16(value: Short) extends AnyVal with Immediate {
+  type T = Short
+  type X = Immediate16
   def negate: Immediate16 = Immediate16((-value).toShort)
 }
 
-case class Immediate32(val value: Int) extends AnyVal with Immediate[Int, Immediate32] {
+case class Immediate32(val value: Int) extends AnyVal with Immediate {
+  type T = Int
+  type X = Immediate32
   def negate: Immediate32 = Immediate32(-value)
 }
 

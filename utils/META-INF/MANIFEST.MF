@@ -3,6 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: utils
 Bundle-SymbolicName: utils
 Bundle-Version: 1.0.0.qualifier
-Bundle-ClassPath: utils.jar,
- Antares/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar
+Bundle-ClassPath: utils.jar
 Export-Package: com.scalaAsm
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

@@ -5,4 +5,4 @@ Bundle-SymbolicName: portableExe
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: portableExe.jar,
  Antares/.ivy2/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar
-Export-Package: com.scalaAsm
+Export-Package: com.scalaAsm.portableExe

@@ -11,7 +11,7 @@ trait PUSH_M[-O1]{
   def get(op1: O1): Array[Byte]
 }
 
-trait POWLow extends ModRMFormat with Operands {
+trait POWLow extends ModRM with Operands {
   implicit object push6 extends PUSH_M[rm32] { def get(x: rm32) = 0xFF.toByte +: modRMExtended(x, extensionCode = 6.toByte) }  
 }
 

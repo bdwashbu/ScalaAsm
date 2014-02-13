@@ -5,7 +5,7 @@ import x86Registers._
 import Addressing._
 import com.scalaAsm.utils.Endian
 
-trait LEA extends ModRMFormat with Operands
+trait LEA extends ModRM with Operands
 trait LEA_3[O1, O2, O3] extends LEA {
   def get: Array[Byte]
 }

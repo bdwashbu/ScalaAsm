@@ -4,12 +4,12 @@ import com.scalaAsm.utils.Endian
 import x86Registers._
 import Addressing._
 
-object ModeRMFormat {
+object ModRM {
   type rm[Z] = RegisterOrMemory {type Size = Z}
   type reg[Z] = Register {type Size = Z}
 }
 
-trait ModRMFormat {
+trait ModRM {
   self: Operands =>
 
   import x86Registers._
@@ -20,15 +20,15 @@ trait ModRMFormat {
   case object Displacment32 extends RegisterMode(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
   case object Register extends RegisterMode(3)     // r/m is treated as a second "reg" field
 
-  trait ModRMByte {
+  trait ModRMFormat {
     def get: Byte
   }
   
-  case class ModRM(mod: RegisterMode, reg: Register, rm: Register) extends ModRMByte {
+  case class ModRMByte(mod: RegisterMode, reg: Register, rm: Register) extends ModRMFormat {
     def get: Byte = ((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte
   }
   
-  case class ModRMExtended(mod: RegisterMode, opEx: Byte, rm: Register) extends ModRMByte {
+  case class ModRMByteExtended(mod: RegisterMode, opEx: Byte, rm: Register) extends ModRMFormat {
     def get: Byte = ((mod.value << 6) + (opEx << 3) + rm.ID).toByte
   }
 
@@ -73,46 +73,46 @@ trait ModRMFormat {
   implicit object mod6 extends MODRM_1Extended[rm32] {
     def get(x: rm32, opcodeExtension: Byte) = {
       if (x.offset8 != 0 && x.isMemory)
-    	  Array(ModRMExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
+    	  Array(ModRMByteExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
       else if (x.offset8 == 0 && x.isMemory)
-          Array(ModRMExtended(NoDisplacment, opcodeExtension, x.reg).get)
+          Array(ModRMByteExtended(NoDisplacment, opcodeExtension, x.reg).get)
       else
-          Array(ModRMExtended(Register, opcodeExtension, x.reg).get)
+          Array(ModRMByteExtended(Register, opcodeExtension, x.reg).get)
     }
   }
   
   implicit object mod16 extends MODRM_1Extended[rm16] {
     def get(x: rm16, opcodeExtension: Byte) = {
       if (x.offset8 != 0 && x.isMemory)
-    	  Array(ModRMExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
+    	  Array(ModRMByteExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
       else if (x.offset8 == 0 && x.isMemory)
-          Array(ModRMExtended(NoDisplacment, opcodeExtension, x.reg).get)
+          Array(ModRMByteExtended(NoDisplacment, opcodeExtension, x.reg).get)
       else
-          Array(ModRMExtended(Register, opcodeExtension, x.reg).get)
+          Array(ModRMByteExtended(Register, opcodeExtension, x.reg).get)
     }
   }
   
   implicit object mod26 extends MODRM_1Extended[rm8] {
     def get(x: rm8, opcodeExtension: Byte) = {
       if (x.offset8 != 0 && x.isMemory)
-    	  Array(ModRMExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
+    	  Array(ModRMByteExtended(Displacment8, opcodeExtension, x.reg).get, x.offset8)
       else if (x.offset8 == 0 && x.isMemory)
-          Array(ModRMExtended(NoDisplacment, opcodeExtension, x.reg).get)
+          Array(ModRMByteExtended(NoDisplacment, opcodeExtension, x.reg).get)
       else
-          Array(ModRMExtended(Register, opcodeExtension, x.reg).get)
+          Array(ModRMByteExtended(Register, opcodeExtension, x.reg).get)
     }
   }
 
   implicit object mod8 extends MODRM_1Extended[Register] {
-    def get(x: Register, opcodeExtension: Byte) = Array(ModRMExtended(Register, opcodeExtension, x).get)
+    def get(x: Register, opcodeExtension: Byte) = Array(ModRMByteExtended(Register, opcodeExtension, x).get)
   }
 
   implicit object mod7 extends MODRM_2Extended[r32, imm8] {
-    def get(x: r32, y: imm8, opcodeExtension: Byte) = Array(ModRMExtended(Register, opcodeExtension, x).get, y.value)
+    def get(x: r32, y: imm8, opcodeExtension: Byte) = Array(ModRMByteExtended(Register, opcodeExtension, x).get, y.value)
   }
 
   implicit object mod10 extends MODRM_2Extended[r32, imm32] {
-    def get(x: r32, y: imm32, opcodeExtension: Byte) = Array(ModRMExtended(Register, opcodeExtension, x).get) ++ Endian.swap(y.value)
+    def get(x: r32, y: imm32, opcodeExtension: Byte) = Array(ModRMByteExtended(Register, opcodeExtension, x).get) ++ Endian.swap(y.value)
   }
 
   implicit object mod3 extends MODRM_2[rm32, r32] {
@@ -122,26 +122,26 @@ trait ModRMFormat {
   implicit object mod4 extends MODRM_2[r32, rm32] {
     def get(x: r32, y: rm32) = {
       if (y.reg.ID == 4 && y.offset8 != 0 && y.isMemory) // [--][--] SIB  
-        Array(ModRM(Displacment8, x, y.reg).get, 0x24.toByte, y.offset8)
+        Array(ModRMByte(Displacment8, x, y.reg).get, 0x24.toByte, y.offset8)
       else if (y.offset8 != 0 && y.isMemory)
-        Array(ModRM(Displacment8, x, y.reg).get, y.offset8)
+        Array(ModRMByte(Displacment8, x, y.reg).get, y.offset8)
       else if (y.isMemory && y.offset8 == 0)
-        Array(ModRM(NoDisplacment, x, y.reg).get)
+        Array(ModRMByte(NoDisplacment, x, y.reg).get)
       else
-        Array(ModRM(Register, x, y.reg).get)
+        Array(ModRMByte(Register, x, y.reg).get)
     }
   }
   
   implicit object mod20 extends MODRM_2[r16, rm16] {
     def get(x: r16, y: rm16) = {
       if (y.reg.ID == 4 && y.offset8 != 0 && y.isMemory) // [--][--] SIB  
-        Array(ModRM(Displacment8, x, y.reg).get, 0x24.toByte, y.offset8)
+        Array(ModRMByte(Displacment8, x, y.reg).get, 0x24.toByte, y.offset8)
       else if (y.offset8 != 0 && y.isMemory)
-        Array(ModRM(Displacment8, x, y.reg).get, y.offset8)
+        Array(ModRMByte(Displacment8, x, y.reg).get, y.offset8)
       else if (y.isMemory && y.offset8 == 0)
-        Array(ModRM(NoDisplacment, x, y.reg).get)
+        Array(ModRMByte(NoDisplacment, x, y.reg).get)
       else
-        Array(ModRM(Register, x, y.reg).get)
+        Array(ModRMByte(Register, x, y.reg).get)
     }
   }
 }

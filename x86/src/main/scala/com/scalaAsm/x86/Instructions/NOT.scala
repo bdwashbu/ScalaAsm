@@ -6,7 +6,7 @@ import Addressing._
 import scala.annotation.implicitNotFound
 import com.scalaAsm.utils.Endian
 
-trait NOT extends ModRMFormat with Operands
+trait NOT extends ModRM with Operands
 trait NOT_M[-O1] extends NOT {
   def get(p: O1): Array[Byte]
 }

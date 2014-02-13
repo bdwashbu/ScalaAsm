@@ -18,7 +18,7 @@ trait MOV_R2[O1] extends MOV {
   def get(x: O1): Array[Byte]
 }
 
-trait MOVLow extends ModRMFormat with Operands {
+trait MOVLow extends ModRM with Operands {
    implicit object mov1 extends MOV_R[rm32, r32] { def get(x: rm32, y: r32) = 0x89.toByte +: modRM2(x, y) }
    
 }

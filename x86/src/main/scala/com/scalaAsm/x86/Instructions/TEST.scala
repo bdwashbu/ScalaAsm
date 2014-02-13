@@ -4,7 +4,7 @@ import com.scalaAsm.x86._
 import x86Registers._
 import Addressing._
 
-trait TEST extends ModRMFormat with Operands
+trait TEST extends ModRM with Operands
 trait TEST_1[O1] extends TEST {
   def get(p1: O1): Array[Byte]
 }

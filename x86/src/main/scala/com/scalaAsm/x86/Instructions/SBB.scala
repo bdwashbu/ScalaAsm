@@ -6,7 +6,7 @@ import Addressing._
 import scala.annotation.implicitNotFound
 import com.scalaAsm.utils.Endian
 
-trait SBB extends ModRMFormat with Operands
+trait SBB extends ModRM with Operands
 trait SBB_2[-O1, -O2] extends SBB {
   def get(x: O1, y: O2): Array[Byte]
 }

@@ -6,7 +6,7 @@ import Addressing._
 import scala.annotation.implicitNotFound
 import com.scalaAsm.utils.Endian
 
-trait SHL extends ModRMFormat with Operands
+trait SHL extends ModRM with Operands
 trait SHL_1[-O1] extends SHL {
   def get(p: O1): Array[Byte]
 }

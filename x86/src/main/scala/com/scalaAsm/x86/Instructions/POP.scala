@@ -6,7 +6,7 @@ import Addressing._
 import scala.annotation.implicitNotFound
 import com.scalaAsm.utils.Endian
 
-trait POP extends ModRMFormat with Operands
+trait POP extends ModRM with Operands
 trait POP_O[-O1] extends POP {
   def get(p1: O1): Array[Byte]
 }

@@ -9,14 +9,14 @@ trait DEC_1[-O1] extends DEC {
   def getBytes(op1: O1): Array[Byte]
 }
 
-trait O[X <: OperandSize] extends DEC_1[ModeRMFormat.reg[X]] {
-  def getBytes(op1: ModeRMFormat.reg[X]): Array[Byte] = {
+trait O[X <: OperandSize] extends DEC_1[ModRM.reg[X]] {
+  def getBytes(op1: ModRM.reg[X]): Array[Byte] = {
     val blah = get(op1)
     Array((blah.opcode + op1.reg.ID).toByte)
   }
 }
 
-object DEC extends ModRMFormat with Operands {
+object DEC extends ModRM with Operands {
   //implicit object dec1 extends DEC_O[r32] { def get(x: r32) = Array((0x48 + x.ID).toByte) }
  // implicit object dec2 extends DEC_O[r16] { def get(x: r16) = Array((0x48 + x.ID).toByte) }
   

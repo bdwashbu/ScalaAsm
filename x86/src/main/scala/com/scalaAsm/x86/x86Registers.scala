@@ -6,7 +6,7 @@ object x86Registers extends Operands {
   abstract class Register(val ID: Byte) extends RegisterOrMemory {
     val reg: Register = this
     val isMemory: Boolean = false
-    val offset8: Byte = 0
+    val offset8: Immediate8 = Immediate8(0)
   }
 
   abstract class Register8(ID: Byte) extends Register(ID) {

@@ -30,9 +30,9 @@ trait AsmCode extends Registers with Operands {
     
     def modRM(reg2: Register, offset82: Byte, isMemory2: Boolean): rm32 = new RegisterOrMemory {
       type Size = DwordOperand
-      val reg: Register = reg2
-      val isMemory: Boolean = isMemory2
-      val offset8: Byte = offset82
+      val reg = reg2
+      val isMemory = isMemory2
+      val offset8 = imm8(offset82)
     }
 
     def b(bytes: Byte*): Array[Byte] = {

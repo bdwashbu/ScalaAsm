@@ -19,14 +19,14 @@ trait MOV_R2[O1] extends MOV {
 }
 
 trait MOVLow extends ModRM with Operands {
-   implicit object mov1 extends MOV_R[rm32, r32] { def get(x: rm32, y: r32) = 0x89.toByte +: modRM2(x, y) }
+   implicit object mov1 extends MOV_R[rm32, r32] { def get(x: rm32, y: r32) = 0x89.toByte +: modRM2(x, y).getBytes }
    
 }
 
 object MOV extends MOVLow {
  
-implicit object mov3 extends MOV_R[r32, rm32] { def get(x: r32, y: rm32) = 0x8B.toByte +: modRM2(x, y) }  
-  implicit object mov9 extends MOV_R[r16, rm16] { def get(x: r16, y: rm16) = 0x8B.toByte +: modRM2(x, y) }
+implicit object mov3 extends MOV_R[r32, rm32] { def get(x: r32, y: rm32) = 0x8B.toByte +: modRM2(x, y).getBytes }  
+  implicit object mov9 extends MOV_R[r16, rm16] { def get(x: r16, y: rm16) = 0x8B.toByte +: modRM2(x, y).getBytes }
 
   implicit object mov7 extends MOV_R[r16, imm16] { def get(x: r16, y: imm16) = Array[Byte]((0xB8 + x.ID).toByte, (y.value & 0x00FF).toByte, ((y.value & 0xFF00) >> 8).toByte) }
   implicit object mov8 extends MOV_R[r8, imm8] { def get(x: r8, y: imm8) = Array[Byte]((0xB0 + x.ID).toByte, y.value) }

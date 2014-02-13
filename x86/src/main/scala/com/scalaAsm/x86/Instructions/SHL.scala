@@ -12,5 +12,5 @@ trait SHL_1[-O1] extends SHL {
 }
 
 object SHL {
-  implicit object shl1 extends SHL_1[rm8] { def get(x: rm8) = 0xD0.toByte +: modRMExtended(x, extensionCode = 4.toByte) }
+  implicit object shl1 extends SHL_1[rm8] { def get(x: rm8) = 0xD0.toByte +: modRMExtended(x, extensionCode = 4.toByte).getBytes }
 }

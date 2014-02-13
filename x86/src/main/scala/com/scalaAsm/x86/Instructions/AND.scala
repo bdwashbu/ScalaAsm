@@ -9,5 +9,5 @@ trait AND_RM[-O1, -O2] extends AND {
 }
 
 object AND {
-  implicit object and1 extends AND_RM[r32, rm32] { def get(x: r32, y: rm32) = 0x23.toByte +: modRM2(x, y) }
+  implicit object and1 extends AND_RM[r32, rm32] { def get(x: r32, y: rm32) = 0x23.toByte +: modRM2(x, y).getBytes }
 }

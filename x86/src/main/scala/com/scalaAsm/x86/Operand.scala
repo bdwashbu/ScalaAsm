@@ -3,7 +3,6 @@ package com.scalaAsm.x86
 import x86Registers._
 
 object Addressing {
-  
 
   case class RegisterOffset[+T <: Register, S <: Immediate](offset: S, x: T)
 
@@ -28,7 +27,7 @@ trait RegisterOrMemory {
   type Size <: OperandSize
   val reg: Register
   val isMemory: Boolean
-  val offset8: Byte
+  val offset8: Immediate
 }
 
 trait Operands {

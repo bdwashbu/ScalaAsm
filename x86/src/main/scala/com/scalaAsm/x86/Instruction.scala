@@ -1,17 +1,5 @@
 package com.scalaAsm.x86
 
-//import com.scalaAsm.x86.ModRMFormat._
-
- protected[x86] trait AddressingFormSpecifier extends ModRM with Operands {
-    val modRM: ModRMFormat
-    val scaleIndexBase: Option[Byte]
-    val displacment: Option[Byte]
-    val immediate: Option[Immediate]
-    
-    def getBytes: Array[Byte] = {
-      Array(modRM.get) ++ immediate.get.getBytes
-    }
-  }
 
 private[x86] trait Instruction extends Operands {
   

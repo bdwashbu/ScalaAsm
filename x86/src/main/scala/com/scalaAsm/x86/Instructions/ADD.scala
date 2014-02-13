@@ -15,9 +15,9 @@ trait ADD_2[-O1, -O2] extends ADD {
 trait MI[X <: OperandSize] extends ADD_2[ModRM.reg[X], imm8] {
   def getAddressForm(op1: ModRM.reg[X], op2: imm8): AddressingFormSpecifier = new AddressingFormSpecifier {
         val modRM: ModRMFormat = ModRMByteExtended(Register, 0.toByte, op1)
-	    val scaleIndexBase: Option[Byte] = None
-	    val displacment: Option[Byte] = None
-	    val immediate: Option[Immediate] = Some(op2)
+	    val scaleIndexBase = None
+	    val displacment = None
+	    val immediate = Some(op2)
   }
   
   def getBytes(op1: ModRM.reg[X], op2: imm8): Array[Byte] = {

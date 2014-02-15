@@ -61,7 +61,7 @@ trait AsmCode extends Registers with Operands {
       code.codeTokens += Reference(param)
 
     def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.getBytes(p1,p2))
+      code.codeTokens += CodeToken(ev.get(p1,p2).getBytes)
 
     def push[O1](p1: O1)(implicit ev: PUSH_M[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))

@@ -22,13 +22,13 @@ object DEC extends ModRM with Operands {
   
   implicit object dec1 extends O[DwordOperand] {
     def get(x: r32) = {
-	    new Instruction1(opcode = 0x48.toByte)
+	    Instruction.newInst1(operand1 = x, opcode = 0x48.toByte)
      }
   }
   
   implicit object dec2 extends O[WordOperand] {
     def get(x: r16) = {
-	    new Instruction1(opcode = 0x48.toByte)
+	    Instruction.newInst1(operand1 = x, opcode = 0x48.toByte)
      }
   }
 }

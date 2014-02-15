@@ -21,18 +21,13 @@ object ModRM {
   type reg[Z] = Register {type Size = Z}
 }
 
-trait ModRM {
-  self: Operands =>
-
-  sealed class RegisterMode(val value: Byte)
+ sealed class RegisterMode(val value: Byte)
   case object NoDisplacment extends RegisterMode(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacemen
   case object Displacment8 extends RegisterMode(1)  // Eight-bit displacement, sign-extended to 16 bits
   case object Displacment32 extends RegisterMode(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
   case object Register extends RegisterMode(3)     // r/m is treated as a second "reg" field
 
-   
-  
-  trait ModRMFormat {
+trait ModRMFormat {
     def get: Byte
   }
   
@@ -44,7 +39,8 @@ trait ModRM {
     def get: Byte = ((mod.value << 6) + (opEx << 3) + rm.ID).toByte
   }
 
- 
+trait ModRM {
+  self: Operands =>
 
   protected[this] trait MODRM_2[-O1, -O2] {
     def get(p1: O1, p2: O2): AddressingFormSpecifier
@@ -77,10 +73,6 @@ trait ModRM {
   def modRMExtended[O1](p1: O1, extensionCode: Byte)(implicit ev: MODRM_1Extended[O1]) = {
     ev.get(p1, extensionCode)
   }
-
-//  implicit object mod1 extends MODRM_2[Register, Register] {
-//    def get(x: Register, y: Register) = Array(ModRM(SecondReg, x, y).get)
-//  }
 
   implicit object mod6 extends MODRM_1Extended[rm32] {
     def get(x: rm32, opcodeExtension: Byte) = {
@@ -158,16 +150,6 @@ trait ModRM {
 		    val immediate = if (x.offset8.value == 0) None else Some(x.offset8)
 	    }
     }
-  }
-
-  implicit object mod8 extends MODRM_1Extended[Register] {
-    def get(x: Register, opcodeExtension: Byte) = 
-      new AddressingFormSpecifier {
-	     val modRM = ModRMByteExtended(Register, opcodeExtension, x)
-		 val scaleIndexBase = None
-		 val displacment = None
-		 val immediate = None
-	  }
   }
 
   implicit object mod7 extends MODRM_2Extended[r32, imm8] {

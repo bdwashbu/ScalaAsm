@@ -27,7 +27,7 @@ trait RegisterOrMemory {
   type Size <: OperandSize
   val reg: Register
   val isMemory: Boolean
-  val offset8: Immediate
+  val offset: Option[Immediate]
 }
 
 trait Operands {

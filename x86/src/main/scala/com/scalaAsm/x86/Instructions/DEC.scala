@@ -19,14 +19,14 @@ object DEC {
   implicit object dec1 extends DEC_1[r32] {
     def get(x: r32) = new O[DwordOperand](x) {
       val opcode = (0x48 + x.ID).toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
     }
   }
   
   implicit object dec2 extends DEC_1[r16] {
     def get(x: r16) = new O[WordOperand](x) {
 	    val opcode = (0x48 + x.ID).toByte
-	    val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(this))
+	    val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
      }
   }
 }

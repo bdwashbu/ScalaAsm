@@ -22,14 +22,14 @@ object ADD {
   implicit object add1 extends ADD_2[r32, imm8] {
     def get(x: r32, y: imm8) = new MI[DwordOperand](x,y) {
       val opcode = 0x83.toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
      }
   }
   
   implicit object add2 extends ADD_2[r16, imm8] {
     def get(x: r16, y: imm8) = new MI[WordOperand](x,y) {
       val opcode = 0x83.toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
      }
   }
 }

@@ -78,11 +78,8 @@ trait AsmCode extends Registers with Operands {
     def not[O1](p1: O1)(implicit ev: NOT_M[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))
 
-    def lea[O1, O2, O3](p1: O1, p2: O2, p3: O3)(implicit ev: LEA_3[O1, O2, O3], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get)
-
     def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: CodeBuilder) = 
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
 
     def mov[O1, O2, O3](p1: O1, p2: O2, p3: O3)(implicit ev: MOV_RM[O1, O2, O3], code: CodeBuilder) = 
       code.codeTokens += CodeToken(ev.get(p3))

@@ -200,12 +200,19 @@ trait ModRM {
     def get(x: r32, y: rm32) = {
       
       (y.reg.ID, y.offset, y.isMemory) match {
-        case (4, Some(offset), true) =>
+        case (4, Some(Immediate8(offset)), true) =>
           new AddressingFormSpecifier {
 	       val modRM = ModRMByte(Displacment8, x.reg, y.reg)
 		   val scaleIndexBase = Some(Immediate8(0x24.toByte))
 		   val displacment = None
-		   val immediate = Some(offset)
+		   val immediate = Some(Immediate8(offset))
+	      }
+        case (_, Some(Immediate32(offset)), true) =>
+          new AddressingFormSpecifier {
+	       val modRM = ModRMByte(Displacment32, x.reg, y.reg)
+		   val scaleIndexBase = None
+		   val displacment = None
+		   val immediate = Some(Immediate32(offset))
 	      }
         case (_, Some(offset), true) =>
           new AddressingFormSpecifier {
@@ -235,12 +242,19 @@ trait ModRM {
   implicit object mod20 extends MODRM_2[r16, rm16] {
     def get(x: r16, y: rm16) = {
       (y.reg.ID, y.offset, y.isMemory) match {
-        case (4, Some(offset), true) =>
+        case (4, Some(Immediate8(offset)), true) =>
           new AddressingFormSpecifier {
 	       val modRM = ModRMByte(Displacment8, x.reg, y.reg)
 		   val scaleIndexBase = Some(Immediate8(0x24.toByte))
 		   val displacment = None
-		   val immediate = Some(offset)
+		   val immediate = Some(Immediate8(offset))
+	      }
+        case (_, Some(Immediate32(offset)), true) =>
+          new AddressingFormSpecifier {
+	       val modRM = ModRMByte(Displacment32, x.reg, y.reg)
+		   val scaleIndexBase = None
+		   val displacment = None
+		   val immediate = Some(Immediate32(offset))
 	      }
         case (_, Some(offset), true) =>
           new AddressingFormSpecifier {

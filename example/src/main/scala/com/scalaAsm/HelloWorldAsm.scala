@@ -96,7 +96,7 @@ object HelloWorld extends AsmProgram {
       for (i <- 0 until 3) {
         mov(edi, modRM(eax, None, true)) //new rm32{ val reg = eax; val offset8 = 0.toByte; val isMemory = true}) // read first 4 bytes
         add(eax, imm8(4)) // increment pointer
-        lea(ecx, *(edi - imm32(0x1010101))) // subtract 1 from each byte
+        lea(ecx, modRM(edi, Some(imm32(-0x1010101)), true)) //*(edi - imm32(0x1010101))) // subtract 1 from each byte
         not(edi) // invert all bytes
         and(ecx, edi)
         and(ecx, ebp)
@@ -105,7 +105,7 @@ object HelloWorld extends AsmProgram {
 
       mov(edi, modRM(eax, None, true)) //new rm32{ val reg = eax; val offset8 = 0.toByte; val isMemory = true})
       add(eax, imm8(4))
-      lea(ecx, *(edi - imm32(0x1010101)))
+      lea(ecx, modRM(edi, Some(imm32(-0x1010101)), true))
       not(edi)
       and(ecx, edi)
       and(ecx, ebp)

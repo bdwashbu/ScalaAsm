@@ -11,6 +11,6 @@ trait RETN_1[O1] extends RETN {
   def get(p1: O1): Array[Byte]
 }
 
-object RETN extends Instruction {
+object RETN {
   implicit object retn1 extends RETN_1[imm16] { def get(x: imm16) = Array(0xC2.toByte) ++ Endian.swap(x.value) }
 }

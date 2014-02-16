@@ -8,6 +8,6 @@ trait INT_1[O1] extends INT {
   def get(p1: O1): Array[Byte]
 }
 
-object INT extends Instruction {
+object INT {
   implicit object int1 extends INT_1[imm8] { def get(x: imm8) = Array(0xCD.toByte, x.value) }
 }

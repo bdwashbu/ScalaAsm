@@ -19,6 +19,22 @@ protected[x86] trait AddressingFormSpecifier extends ModRM with Operands {
 object ModRM {
   type rm[Z] = RegisterOrMemory {type Size = Z}
   type reg[Z] = Register {type Size = Z}
+  
+  trait MODRM_2[-O1, -O2] {
+    def get(p1: O1, p2: O2): AddressingFormSpecifier
+  }
+
+  trait MODRM_1[-O1] {
+    def get(p1: O1): AddressingFormSpecifier
+  }
+
+  trait MODRM_2Extended[-O1, -O2] {
+    def get(p1: O1, p2: O2, opcodeExtension: Byte): AddressingFormSpecifier
+  }
+
+  trait MODRM_1Extended[-O1]  {
+    def get(p1: O1, opcodeExtension: Byte): AddressingFormSpecifier
+  }
 }
 
  sealed class RegisterMode(val value: Byte)
@@ -42,21 +58,8 @@ trait ModRMFormat {
 trait ModRM {
   self: Operands =>
 
-  protected[this] trait MODRM_2[-O1, -O2] {
-    def get(p1: O1, p2: O2): AddressingFormSpecifier
-  }
-
-  protected[this] trait MODRM_1[-O1] {
-    def get(p1: O1): AddressingFormSpecifier
-  }
-
-  protected[this] trait MODRM_2Extended[-O1, -O2] {
-    def get(p1: O1, p2: O2, opcodeExtension: Byte): AddressingFormSpecifier
-  }
-
-  protected[this] trait MODRM_1Extended[-O1]  {
-    def get(p1: O1, opcodeExtension: Byte): AddressingFormSpecifier
-  }
+   import ModRM._
+  
 
   def modRM2[O1, O2](p1: O1, p2: O2)(implicit ev: MODRM_2[O1, O2]) = {
     ev.get(p1, p2)

@@ -1,23 +1,38 @@
 package com.scalaAsm.x86
 
+import com.scalaAsm.x86.ModRM._
+
 object Instruction extends ModRM with Operands {
-  def newInst2[X, Y](opcode: Byte, operand1: X, operand2: Y, opcodeExtension: Byte = -1)(implicit ev: MODRM_2Extended[X, Y]): Instruction1 = {
-    new Instruction1(
-      opcode = 0x83.toByte,
-      modRM2Extended(operand1, operand2, opcodeExtension))
+  def newInst2[X, Y](inst: Instruction2[X,Y])(implicit ev: MODRM_2Extended[X, Y]): AddressingFormSpecifier = {
+      modRM2Extended(inst.operand1.get, inst.operand2.get, inst.opcodeExtension)
   }
 
-  def newInst1[X](opcode: Byte, operand1: X, opcodeExtension: Byte = -1)(implicit ev: MODRM_1Extended[X]): Instruction1 = {
-    new Instruction1(
-      opcode = 0x83.toByte,
-      modRMExtended(operand1, opcodeExtension))
+def newInst1[X](inst: Instruction1[X])(implicit ev: MODRM_1Extended[X]): AddressingFormSpecifier = {
+      modRMExtended(inst.operand1.get, inst.opcodeExtension)
   }
 }
 
-private[x86] trait Instruction extends Operands
-
-private[x86] case class Instruction1(opcode: Byte, modRM: AddressingFormSpecifier) extends Instruction {
+private[x86] trait Instruction extends ModRM with Operands {
+  var opcode: Byte = 0.toByte
+  var modRM: Option[AddressingFormSpecifier] = None
   def getBytes: Array[Byte] = {
-    Array(opcode) ++ modRM.getBytes
+    Array(opcode) ++ modRM.get.getBytes
+  }
+}
+
+private[x86] trait Instruction1[X] extends Instruction {
+  var operand1: Option[X] = None
+  var opcodeExtension: Byte = 0.toByte
+  def getBytes[P](implicit ev: MODRM_1Extended[P]): Array[Byte] = {
+    Array(opcode) ++ modRM.get.getBytes
+  }
+}
+
+private[x86] trait Instruction2[X,Y] extends Instruction {
+  var operand1: Option[X] = None
+  var operand2: Option[Y] = None
+  var opcodeExtension: Byte = 0.toByte
+  def getBytes[P,Q](implicit ev: MODRM_2Extended[P, Q]): Array[Byte] = {
+    Array(opcode) ++ modRM.get.getBytes
   }
 }

@@ -155,6 +155,16 @@ trait ModRM {
     }
   }
 
+  implicit object mod14 extends MODRM_2Extended[r16, imm8] {
+    def get(x: r16, y: imm8, opcodeExtension: Byte) = 
+      new AddressingFormSpecifier {
+	     val modRM = ModRMByteExtended(Register, opcodeExtension, x)
+		 val scaleIndexBase = None
+		 val displacment = None
+		 val immediate = if (y.value == 0) None else Some(y)
+	  }
+  }
+  
   implicit object mod7 extends MODRM_2Extended[r32, imm8] {
     def get(x: r32, y: imm8, opcodeExtension: Byte) = 
       new AddressingFormSpecifier {

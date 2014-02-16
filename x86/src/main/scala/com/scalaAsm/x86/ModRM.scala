@@ -94,7 +94,7 @@ trait ModRM {
 		    val displacment = None
 		    val immediate = None
 	    }
-       case (offset,z) =>
+       case (offset, false) =>
          new AddressingFormSpecifier {
 	        val modRM = ModRMByteExtended(Register, opcodeExtension, x.reg)
 		    val scaleIndexBase = None
@@ -123,7 +123,7 @@ trait ModRM {
 		    val displacment = None
 		    val immediate = None
 	    }
-       case (offset, z) =>
+       case (offset, false) =>
          new AddressingFormSpecifier {
 	        val modRM = ModRMByteExtended(Register, opcodeExtension, x.reg)
 		    val scaleIndexBase = None
@@ -151,7 +151,7 @@ trait ModRM {
 		    val displacment = None
 		    val immediate = None
 	    }
-       case (offset, z) =>
+       case (offset, false) =>
          new AddressingFormSpecifier {
 	        val modRM = ModRMByteExtended(Register, opcodeExtension, x.reg)
 		    val scaleIndexBase = None

@@ -72,8 +72,8 @@ trait AsmCode extends Registers with Operands {
     def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1).getBytes)
 
-    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_RM[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: CodeBuilder) =
+      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
 
     def not[O1](p1: O1)(implicit ev: NOT_M[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))
@@ -97,7 +97,7 @@ trait AsmCode extends Registers with Operands {
       code.codeTokens += LabelRef(labelRef, 0x75.toByte)
     
     def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+      code.codeTokens += CodeToken(ev.get(p1).getBytes)
 
     def jz(labelRef: String)(implicit code: CodeBuilder) =
       code.codeTokens += LabelRef(labelRef, 0x74.toByte)
@@ -106,7 +106,7 @@ trait AsmCode extends Registers with Operands {
       code.codeTokens += CodeToken(ev.get(p1))
     
     def int[O1](p1: O1)(implicit ev: INT_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+      code.codeTokens += CodeToken(ev.get(p1).getBytes)
 
     def shl[O1](p1: O1)(implicit ev: SHL_1[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))

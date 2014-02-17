@@ -18,9 +18,7 @@ abstract class RM[X <: OperandSize](op1: ModRM.reg[X], op2: ModRM.rm[X]) extends
 }
 
 object LEA {
-  //implicit object lea1 extends LEA_2[r32, rm32] { def get(x: r32, y: rm32) = 0x8D.toByte +: modRM2(x, y).getBytes }
-  //implicit object lea3 extends LEA_2[r32, *[r32 + imm32]] { def get(x: r32, y: *[r32 + imm32]) = Array(0x8D.toByte, 0x8F.toByte) ++ Endian.swap(y.x.offset.value) }
-  
+
   implicit object lea1 extends LEA_2[r32, rm32] {
     def get(x: r32, y: rm32) = new RM[DwordOperand](x,y) {
       val opcode = 0x8D.toByte

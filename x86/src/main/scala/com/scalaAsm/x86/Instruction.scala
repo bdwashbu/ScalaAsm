@@ -28,7 +28,10 @@ private[x86] trait Instruction extends ModRM with Operands {
   }
 
   def getBytes: Array[Byte] = {
-    Array(opcode) ++ modRM.get.getBytes
+    Array(opcode) ++ (modRM match {
+      case Some(modRM) => modRM.getBytes
+      case _ => Array.emptyByteArray
+    })
   }
 }
 

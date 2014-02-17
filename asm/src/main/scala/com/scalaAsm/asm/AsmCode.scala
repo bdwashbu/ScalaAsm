@@ -66,8 +66,8 @@ trait AsmCode extends Registers with Operands {
     def push[O1](p1: O1)(implicit ev: PUSH_M[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))
 
-    def pop[O1](p1: O1)(implicit ev: POP_O[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: CodeBuilder) =
+      code.codeTokens += CodeToken(ev.get(p1).getBytes)
       
     def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1).getBytes)

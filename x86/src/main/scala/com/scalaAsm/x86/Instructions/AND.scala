@@ -16,6 +16,7 @@ object AND {
 	  val opcodeExtension = None
 	  val operand1 = op1
 	  val operand2 = op2
+	  val opcode2 = None
 	}
   
   implicit object and1 extends AND_2[r32, rm32] {

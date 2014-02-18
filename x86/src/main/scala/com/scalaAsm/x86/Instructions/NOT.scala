@@ -15,6 +15,7 @@ object NOT {
   abstract class M[X <: OperandSize](op1: ModRM.rm[X]) extends Instruction1[ModRM.rm[X]] {
      val opcodeExtension = Some(2.toByte)
      val operand1 = op1
+     val opcode2 = None
   }
   
   implicit object not1 extends NOT_1[rm32] {

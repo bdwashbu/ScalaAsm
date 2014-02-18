@@ -9,6 +9,7 @@ object Instruction extends ModRM {
 
 private[x86] trait Instruction extends ModRM {
   def opcode: Byte
+  def opcode2: Option[Byte]
   def opcodeExtension: Option[Byte]
   def modRM: Option[AddressingFormSpecifier]
 
@@ -29,7 +30,8 @@ private[x86] trait Instruction extends ModRM {
   }
 
   def getBytes: Array[Byte] = {
-    Array(opcode) ++ (modRM match {
+    val opCodes = List(Some(opcode), opcode2)
+    opCodes.flatten.toArray ++ (modRM match {
       case Some(modRM) => modRM.getBytes
       case _ => Array.emptyByteArray
     })

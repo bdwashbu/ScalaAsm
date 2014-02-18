@@ -19,6 +19,7 @@ object POP {
 	  val opcodeExtension = None
 	  val operand1 = op1
 	  val opcode = (0x58 + op1.ID).toByte
+	  val opcode2 = None
 	  val modRM: Option[AddressingFormSpecifier] = None
 	}
 
@@ -31,6 +32,7 @@ object POP {
       val opcodeExtension = None
       val operand1 = x
       val opcode = 0x1F.toByte
+      val opcode2 = None
       val modRM: Option[AddressingFormSpecifier] = None
      }
   }

@@ -16,6 +16,7 @@ object INT {
    val opcodeExtension = None
    val operand1 = op1
    val opcode = 0xCD.toByte
+   val opcode2 = None
   }
   
   implicit object int1 extends INT_1[imm8] {

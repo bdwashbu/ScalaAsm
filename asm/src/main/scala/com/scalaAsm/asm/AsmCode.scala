@@ -131,8 +131,8 @@ trait AsmCode extends Registers {
     def jmp(ref: String)(implicit code: CodeBuilder) =
       code.codeTokens += JmpRef(ref)
       
-    def rdrand[O1](p1: O1)(implicit ev: RDRAND_M[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: CodeBuilder) =
+      code.codeTokens += CodeToken(ev.get(p1).getBytes)
   }
 
 }

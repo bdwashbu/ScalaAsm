@@ -17,6 +17,7 @@ object SBB {
     val operand1 = op1
     val operand2 = op2
     val opcodeExtension = None
+    val opcode2 = None
   }
   
   implicit object sbb1 extends SBB_2[r32, rm32] {

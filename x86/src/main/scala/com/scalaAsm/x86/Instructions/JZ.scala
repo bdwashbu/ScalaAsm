@@ -17,6 +17,7 @@ object JZ {
       val opcode = 0x74.toByte
       val opcodeExtension = None
       val operand1 = x
+      val opcode2 = None
       val modRM = 
         Some(new AddressingFormSpecifier {
 	        val modRM = None

@@ -15,6 +15,7 @@ object DEC {
   protected[this] abstract class O[X <: OperandSize](op1: ModRM.reg[X]) extends Instruction1[ModRM.reg[X]] {
    val opcodeExtension = None
    val operand1 = op1
+   val opcode2 = None
   }
   
   implicit object dec1 extends DEC_1[r32] {

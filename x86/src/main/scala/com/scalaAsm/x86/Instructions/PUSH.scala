@@ -18,6 +18,7 @@ trait POWLow extends ModRM {
   abstract class O[X <: OperandSize](op1: ModRM.reg[X]) extends Instruction1[ModRM.reg[X]] {
     val opcodeExtension = None
     val opcode = (0x50 + op1.ID).toByte
+    val opcode2 = None
     val operand1 = op1
     val modRM: Option[AddressingFormSpecifier] = None
   }
@@ -25,13 +26,14 @@ trait POWLow extends ModRM {
   abstract class I[X <: Immediate](op1: X) extends Instruction1[X] {
     val opcodeExtension = None
     val operand1 = op1
-    
+    val opcode2 = None
   }
   
   abstract class M[X <: OperandSize](op1: ModRM.rm[X]) extends Instruction1[ModRM.rm[X]] {
     val opcodeExtension = Some(6.toByte)
     val opcode = 0xFF.toByte
     val operand1 = op1
+    val opcode2 = None
   }
   
   implicit object push6 extends PUSH_1[rm32] {
@@ -71,6 +73,7 @@ object PUSH extends POWLow {
     def get(x: CS) = new Instruction1[CS] {
       val opcodeExtension = None
       val opcode = 0x0E.toByte
+      val opcode2 = None
       val operand1 = x
       val modRM: Option[AddressingFormSpecifier] = None
     }

@@ -17,12 +17,14 @@ object TEST {
     val operand1 = op1
     val operand2 = op2
     val opcodeExtension = None
+    val opcode2 = None
   }
   
   abstract class MI[X <: OperandSize](op1: ModRM.reg[X], op2: imm32) extends Instruction2[ModRM.reg[X], imm32] {
      val opcodeExtension = Some(0.toByte)
      val operand1 = op1
      val operand2 = op2
+     val opcode2 = None
   }
   
   implicit object test1 extends TEST_2[r32, rm32] {

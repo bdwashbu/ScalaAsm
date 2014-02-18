@@ -20,6 +20,7 @@ object SHL extends ModRM {
   abstract class M1[X <: OperandSize](op1: ModRM.rm[X]) extends Instruction1[ModRM.rm[X]] {
      val operand1 = op1
      val operand2 = null
+     val opcode2 = None
   }
   
   implicit object shl1 extends SHL_2[rm8, One] {

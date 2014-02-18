@@ -14,6 +14,7 @@ abstract class RM[X <: OperandSize](op1: ModRM.reg[X], op2: ModRM.rm[X]) extends
   val opcodeExtension = Some(0.toByte)
   val operand1 = op1
   val operand2 = op2
+  val opcode2 = None
 }
 
 object LEA {

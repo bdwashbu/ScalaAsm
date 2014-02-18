@@ -20,6 +20,7 @@ object ADD {
      val opcodeExtension = Some(0.toByte)
      val operand1 = op1
      val operand2 = op2
+     val opcode2 = None
   }
   
   implicit object add1 extends ADD_2[r32, imm8] {

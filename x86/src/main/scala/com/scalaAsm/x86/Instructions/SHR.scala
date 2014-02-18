@@ -16,6 +16,7 @@ object SHR {
   abstract class MI[X <: OperandSize](op1: ModRM.reg[X], op2: imm8) extends Instruction2[ModRM.reg[X], imm8] {
      val operand1 = op1
      val operand2 = op2
+     val opcode2 = None
   }
   
   implicit object shr1 extends SHR_2[r32, imm8] {

@@ -76,8 +76,8 @@ trait AsmCode extends Registers {
     def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
 
-    def not[O1](p1: O1)(implicit ev: NOT_M[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: CodeBuilder) =
+      code.codeTokens += CodeToken(ev.get(p1).getBytes)
 
     def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: CodeBuilder) = 
       code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
@@ -104,7 +104,7 @@ trait AsmCode extends Registers {
       code.codeTokens += LabelRef(labelRef, 0x74.toByte)
     
     def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+      code.codeTokens += CodeToken(ev.get(p1).getBytes)
     
     def int[O1](p1: O1)(implicit ev: INT_1[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1).getBytes)

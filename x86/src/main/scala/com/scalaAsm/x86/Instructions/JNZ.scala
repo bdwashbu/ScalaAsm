@@ -20,6 +20,4 @@ object JNZ {
       val modRM: Option[AddressingFormSpecifier] = None
      }
   }
-  
-  //implicit object jnz1 extends JNZ_1[imm8] { def get(x: imm8) = Array(0x75.toByte, x.value) }
 }

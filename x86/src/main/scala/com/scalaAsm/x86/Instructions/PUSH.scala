@@ -13,8 +13,6 @@ trait PUSH_1[-O1] extends PUSH {
   def get(op1: O1): Instruction
 }
 
-
-
 trait POWLow extends ModRM {
   
   abstract class O[X <: OperandSize](op1: ModRM.reg[X]) extends Instruction1[ModRM.reg[X]] {
@@ -77,11 +75,4 @@ object PUSH extends POWLow {
       val modRM: Option[AddressingFormSpecifier] = None
     }
   }
-  
-  //implicit object push1 extends PUSH_M[r32] { def get(x: r32) = Array((0x50 + x.ID).toByte) }
-  //implicit object push8 extends PUSH_M[r16] { def get(x: r16) = Array((0x50 + x.ID).toByte) }
-  //implicit object push4 extends PUSH_M[imm8] { def get(x: imm8) = Array(0x6A.toByte, x.value) }
-  //implicit object push5 extends PUSH_M[imm16] { def get(x: imm16) = Array(0x68.toByte) ++ Endian.swap(x.value) }
-
-  //implicit object push7 extends PUSH_M[CS] { def get(x: CS) = Array(0x0E.toByte) }
 }

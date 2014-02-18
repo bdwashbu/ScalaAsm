@@ -25,6 +25,4 @@ object SBB {
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(this))
      }
   }
-  
-  //implicit object sbb1 extends SBB_2[r32, rm32] { def get(x: r32, y: rm32) = 0x1B.toByte +: modRM2(x, y).getBytes }
 }

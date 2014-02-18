@@ -25,6 +25,4 @@ object SHR {
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
      }
   }
-  
-  //implicit object shr1 extends SHR_2[r32, imm8] { def get(x: r32, y: imm8) = 0xC1.toByte +: modRM2Extended(x, y, extensionCode = 5.toByte).getBytes }
 }

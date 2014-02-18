@@ -113,7 +113,7 @@ trait AsmCode extends Registers {
       code.codeTokens += CodeToken(ev.get(p1,p2).getBytes)
 
     def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
 
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))

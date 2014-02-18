@@ -1,12 +1,13 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.ModRM._
+import com.scalaAsm.x86.Operands._
 
-object Instruction extends ModRM with Operands {
+object Instruction extends ModRM {
 
 }
 
-private[x86] trait Instruction extends ModRM with Operands {
+private[x86] trait Instruction extends ModRM {
   def opcode: Byte
   def opcodeExtension: Option[Byte]
   def modRM: Option[AddressingFormSpecifier]

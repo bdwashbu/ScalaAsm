@@ -1,9 +1,10 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait JNZ extends ModRM with Operands
+trait JNZ extends ModRM
 
 trait JNZ_1[-O1] extends JNZ {
   def get(p1: O1): Instruction

@@ -1,9 +1,10 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait INT extends ModRM with Operands
+trait INT extends ModRM
 
 trait INT_1[-O1] extends INT {
   def get(p1: O1): Instruction
@@ -15,16 +16,11 @@ object INT {
    val opcodeExtension = None
    val operand1 = op1
    val opcode = 0xCD.toByte
-   val modRM = 
-      Some(new AddressingFormSpecifier {
-	     val modRM = None
-		 val scaleIndexBase = None
-		 val displacment = None
-		 val immediate = Some(op1)
-	  })
   }
   
   implicit object int1 extends INT_1[imm8] {
-    def get(x: imm8) = new I[imm8](x) {}
+    def get(x: imm8) = new I[imm8](x) {
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(this))
+    }
   }
 }

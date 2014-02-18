@@ -1,7 +1,8 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, DwordOperand, WordOperand}
+import com.scalaAsm.x86.AddressingFormSpecifier
 
 trait DEC
 

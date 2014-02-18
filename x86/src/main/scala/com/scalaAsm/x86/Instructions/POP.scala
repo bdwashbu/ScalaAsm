@@ -1,12 +1,11 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
-import Addressing._
-import scala.annotation.implicitNotFound
-import com.scalaAsm.utils.Endian
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.x86Registers._
+import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait POP extends ModRM with Operands
+trait POP extends ModRM
 
 trait POP_1[-O1] extends POP {
   def get(p1: O1): Instruction

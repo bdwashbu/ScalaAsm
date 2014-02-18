@@ -3,8 +3,9 @@ package com.scalaAsm.x86
 import com.scalaAsm.utils.Endian
 import x86Registers._
 import Addressing._
+import com.scalaAsm.x86.Operands._
 
-protected[x86] trait AddressingFormSpecifier extends ModRM with Operands {
+protected[x86] trait AddressingFormSpecifier extends ModRM {
     val modRM: Option[ModRMFormat]
     val scaleIndexBase: Option[Immediate]
     val displacment: Option[Immediate]
@@ -61,9 +62,8 @@ trait ModRMFormat {
   }
 
 trait ModRM {
-  self: Operands =>
 
-   import ModRM._
+  import ModRM._
   
 
   def modRM2[O1, O2](p1: O1, p2: O2)(implicit ev: MODRM_2[O1, O2]) = {
@@ -200,7 +200,7 @@ trait ModRM {
   implicit object modI8 extends MODRM_1[Immediate] {
     def get(x: Immediate) = 
       new AddressingFormSpecifier {
-	     val modRM = null
+	     val modRM = None
 		 val scaleIndexBase = None
 		 val displacment = None
 		 val immediate = Some(x)

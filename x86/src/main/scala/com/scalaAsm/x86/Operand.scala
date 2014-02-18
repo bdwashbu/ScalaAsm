@@ -30,7 +30,7 @@ trait RegisterOrMemory {
   val offset: Option[Immediate]
 }
 
-trait Operands {
+object Operands {
   type imm = Immediate
   type imm8 = Immediate8
   type imm16 = Immediate16
@@ -44,7 +44,7 @@ trait Operands {
   type r16 = Register { type Size = WordOperand }
   type r32 = Register { type Size = DwordOperand }
   
- 
+  trait One
 }
 
 trait Immediate extends Any {

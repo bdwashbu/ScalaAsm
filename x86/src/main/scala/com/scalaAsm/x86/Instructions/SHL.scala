@@ -1,16 +1,34 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
-import Addressing._
-import scala.annotation.implicitNotFound
-import com.scalaAsm.utils.Endian
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand, ByteOperand}
+import com.scalaAsm.x86.AddressingFormSpecifier
+import com.scalaAsm.x86.x86Registers._
 
-trait SHL extends ModRM with Operands
+trait SHL
+
 trait SHL_1[-O1] extends SHL {
-  def get(p: O1): Array[Byte]
+  def get(x: O1): Instruction
 }
 
-object SHL {
-  implicit object shl1 extends SHL_1[rm8] { def get(x: rm8) = 0xD0.toByte +: modRMExtended(x, extensionCode = 4.toByte).getBytes }
+trait SHL_2[-O1, -O2] extends SHL {
+  def get(x: O1, y: O2): Instruction
+}
+
+object SHL extends ModRM {
+  
+  abstract class M1[X <: OperandSize](op1: ModRM.rm[X]) extends Instruction1[ModRM.rm[X]] {
+     val operand1 = op1
+     val operand2 = null
+  }
+  
+  implicit object shl1 extends SHL_2[rm8, One] {
+    def get(x: rm8, y: One) = new M1[ByteOperand](x) {
+      val opcode = 0xD0.toByte
+      val opcodeExtension = Some(4.toByte)
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
+     }
+  }
+  
+  //implicit object shl1 extends SHL_2[rm8, One] { def get(x: rm8) = 0xD0.toByte +: modRMExtended(x, extensionCode = 4.toByte).getBytes }
 }

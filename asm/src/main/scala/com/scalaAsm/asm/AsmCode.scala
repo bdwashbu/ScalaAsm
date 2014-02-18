@@ -5,9 +5,9 @@ import com.scalaAsm.x86._
 import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.x86Registers._
-import com.scalaAsm.x86.Operands
+import com.scalaAsm.x86.Operands._
 
-trait AsmCode extends Registers with Operands {
+trait AsmCode extends Registers {
   self: AsmProgram =>
 
   val code: Code
@@ -42,6 +42,7 @@ trait AsmCode extends Registers with Operands {
     var parserPos: Int = 0
 
     implicit def toByte(x: Int) = x.toByte
+    val One = new One{}
 
 //    private def toCode(machineCode: Array[Byte]) = Code {
 //      codeTokens :+ CodeToken(machineCode, machineCode.size)
@@ -91,7 +92,7 @@ trait AsmCode extends Registers with Operands {
       code.codeTokens += CodeToken(ev.get(p1))
 
     def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
 
     def jnz(labelRef: String)(implicit code: CodeBuilder) =
       code.codeTokens += LabelRef(labelRef, 0x75.toByte)
@@ -108,8 +109,8 @@ trait AsmCode extends Registers with Operands {
     def int[O1](p1: O1)(implicit ev: INT_1[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1).getBytes)
 
-    def shl[O1](p1: O1)(implicit ev: SHL_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: CodeBuilder) =
+      code.codeTokens += CodeToken(ev.get(p1,p2).getBytes)
 
     def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1, p2))

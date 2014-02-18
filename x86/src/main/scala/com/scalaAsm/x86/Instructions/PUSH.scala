@@ -1,12 +1,12 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
-import Addressing._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.AddressingFormSpecifier
+import com.scalaAsm.x86.x86Registers._
 import scala.annotation.implicitNotFound
-import com.scalaAsm.utils.Endian
 
-trait PUSH extends ModRM with Operands
+trait PUSH extends ModRM
 
 @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
 trait PUSH_1[-O1] extends PUSH {
@@ -15,7 +15,7 @@ trait PUSH_1[-O1] extends PUSH {
 
 
 
-trait POWLow extends ModRM with Operands {
+trait POWLow extends ModRM {
   
   abstract class O[X <: OperandSize](op1: ModRM.reg[X]) extends Instruction1[ModRM.reg[X]] {
     val opcodeExtension = None

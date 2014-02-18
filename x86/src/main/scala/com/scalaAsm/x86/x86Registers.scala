@@ -1,6 +1,6 @@
 package com.scalaAsm.x86
 
-object x86Registers extends Operands {
+object x86Registers {
   import Addressing._
 
   abstract class Register(val ID: Byte) extends RegisterOrMemory {

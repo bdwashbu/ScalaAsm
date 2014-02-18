@@ -117,7 +117,7 @@ object HelloWorld extends AsmProgram {
       shr(ecx, imm8(0x10))
       add(eax, imm8(2))
       label("end")
-      shl(cl)
+      shl(cl, One)
       sbb(eax, edx) // compute length
       pop(edi)
       pop(ebp)

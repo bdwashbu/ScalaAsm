@@ -1,9 +1,10 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction2, DwordOperand, WordOperand}
+import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait AND extends ModRM with Operands
+trait AND extends ModRM
 
 trait AND_2[-O1, -O2] extends AND {
   def get(p1: O1, p2: O2): Instruction

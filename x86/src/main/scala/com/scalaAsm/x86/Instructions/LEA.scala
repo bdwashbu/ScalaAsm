@@ -1,11 +1,10 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
-import Addressing._
-import com.scalaAsm.utils.Endian
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait LEA extends ModRM with Operands
+trait LEA extends ModRM
 
 trait LEA_2[-O1, -O2] extends LEA {
   def get(p1: O1, p2: O2): Instruction

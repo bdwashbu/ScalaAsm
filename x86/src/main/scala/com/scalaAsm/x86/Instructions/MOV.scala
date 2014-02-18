@@ -1,8 +1,8 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86._
-import x86Registers._
-import Addressing._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.utils.Endian
 
 trait MOV
@@ -18,7 +18,7 @@ trait MOV_R2[O1] extends MOV {
   def get(x: O1): Array[Byte]
 }
 
-trait MOVLow extends ModRM with Operands {
+trait MOVLow extends ModRM {
    implicit object mov1 extends MOV_R[rm32, r32] { def get(x: rm32, y: r32) = 0x89.toByte +: modRM2(x, y).getBytes }
    
 }

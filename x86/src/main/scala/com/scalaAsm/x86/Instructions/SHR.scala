@@ -13,14 +13,14 @@ trait SHR_2[-O1, -O2] extends SHR {
 
 object SHR {
   
-  abstract class MI[X <: OperandSize](op1: ModRM.reg[X], op2: imm8) extends Instruction2[ModRM.reg[X], imm8] {
+  abstract class MI[M <: ModRM.rm, I <: Immediate](op1: M, op2: I) extends Instruction2[M,I] {
      val operand1 = op1
      val operand2 = op2
      val opcode2 = None
   }
   
   implicit object shr1 extends SHR_2[r32, imm8] {
-    def get(x: r32, y: imm8) = new MI[DwordOperand](x,y) {
+    def get(x: r32, y: imm8) = new MI(x,y) {
       val opcode = 0xC1.toByte
       val opcodeExtension = Some(5.toByte)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))

@@ -15,7 +15,7 @@ trait POP_1[-O1] extends POP {
 
 object POP {
   
-  abstract class O[X <: OperandSize](op1: ModRM.reg[X]) extends Instruction1[ModRM.reg[X]] {
+  abstract class O[R <: ModRM.reg](op1: R) extends Instruction1[R] {
 	  val opcodeExtension = None
 	  val operand1 = op1
 	  val opcode = (0x58 + op1.ID).toByte
@@ -24,7 +24,7 @@ object POP {
 	}
 
   implicit object pop1 extends POP_1[r32] {
-    def get(x: r32) = new O[DwordOperand](x) {}
+    def get(x: r32) = new O(x) {}
   }
   
   implicit object pop2 extends POP_1[DS] {

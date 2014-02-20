@@ -14,7 +14,7 @@ trait RDRAND_1[-O1] extends RDRAND {
 
 object RDRAND extends ModRM {
   
-  abstract class M[X <: OperandSize](op1: ModRM.rm[X]) extends Instruction1[ModRM.rm[X]] {
+  abstract class M[X <: ModRM.rm](op1: X) extends Instruction1[X] {
      val opcodeExtension = Some(6.toByte)
      val operand1 = op1
      val opcode = 0x0F.toByte
@@ -23,13 +23,13 @@ object RDRAND extends ModRM {
   }
   
   implicit object rdrand1 extends RDRAND_1[rm32] {
-    def get(x: rm32) = new M[DwordOperand](x) {
+    def get(x: rm32) = new M(x) {
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
     }
   }
   
   implicit object rdrand2 extends RDRAND_1[rm16] {
-    def get(x: rm16) = new M[WordOperand](x) {
+    def get(x: rm16) = new M(x) {
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
      }
   }

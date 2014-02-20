@@ -12,14 +12,14 @@ trait NOT_1[-O1] extends NOT {
 
 object NOT {
   
-  abstract class M[X <: OperandSize](op1: ModRM.rm[X]) extends Instruction1[ModRM.rm[X]] {
+  abstract class M[X <: ModRM.rm](op1: X) extends Instruction1[X] {
      val opcodeExtension = Some(2.toByte)
      val operand1 = op1
      val opcode2 = None
   }
   
   implicit object not1 extends NOT_1[rm32] {
-    def get(x: rm32) = new M[DwordOperand](x) {
+    def get(x: rm32) = new M(x) {
       val opcode = 0xF7.toByte
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
      }

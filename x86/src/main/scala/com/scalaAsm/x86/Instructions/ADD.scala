@@ -12,11 +12,11 @@ trait ADD_2[-O1, -O2] extends ADD {
 
 
 
-trait MR[X <: OperandSize] extends ADD_2[ModRM.rm[X], ModRM.reg[X]]
+trait MR extends ADD_2[ModRM.rm, ModRM.reg]
 
 object ADD {
   
-  abstract class MI[X <: OperandSize](op1: ModRM.reg[X], op2: imm8) extends Instruction2[ModRM.reg[X], imm8] {
+  abstract class MI[M <: ModRM.reg, I <: imm8](op1: M, op2: I) extends Instruction2[M, I] {
      val opcodeExtension = Some(0.toByte)
      val operand1 = op1
      val operand2 = op2
@@ -24,14 +24,14 @@ object ADD {
   }
   
   implicit object add1 extends ADD_2[r32, imm8] {
-    def get(x: r32, y: imm8) = new MI[DwordOperand](x,y) {
+    def get(x: r32, y: imm8) = new MI(x,y) {
       val opcode = 0x83.toByte
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
      }
   }
   
   implicit object add2 extends ADD_2[r16, imm8] {
-    def get(x: r16, y: imm8) = new MI[WordOperand](x,y) {
+    def get(x: r16, y: imm8) = new MI(x,y) {
       val opcode = 0x83.toByte
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
      }

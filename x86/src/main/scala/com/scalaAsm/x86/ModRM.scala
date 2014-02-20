@@ -21,8 +21,8 @@ protected[x86] trait AddressingFormSpecifier extends ModRM {
   }
 
 object ModRM {
-  type rm[Z] = RegisterOrMemory {type Size = Z}
-  type reg[Z] = Register {type Size = Z}
+  type rm = RegisterOrMemory
+  type reg = Register
   
   trait MODRM_2[-O1, -O2] {
     def get(p1: O1, p2: O2): AddressingFormSpecifier

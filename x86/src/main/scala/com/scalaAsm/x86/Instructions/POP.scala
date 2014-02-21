@@ -1,6 +1,7 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.OperandEncoding._
 import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.x86Registers._
 import com.scalaAsm.x86.AddressingFormSpecifier
@@ -15,16 +16,13 @@ trait POP_1[-O1] extends POP {
 
 object POP {
   
-  abstract class O[R <: ModRM.reg](op1: R) extends Instruction1[R] {
-	  val opcodeExtension = None
-	  val operand1 = op1
-	  val opcode = (0x58 + op1.ID).toByte
-	  val opcode2 = None
-	  val modRM: Option[AddressingFormSpecifier] = None
-	}
-
   implicit object pop1 extends POP_1[r32] {
-    def get(x: r32) = new O(x) {}
+    def get(x: r32) = new O(x) {
+      val opcode = (0x58 + x.ID).toByte
+	  val opcode2 = None
+	  val opcodeExtension = None
+	  val modRM: Option[AddressingFormSpecifier] = None
+    }
   }
   
   implicit object pop2 extends POP_1[DS] {

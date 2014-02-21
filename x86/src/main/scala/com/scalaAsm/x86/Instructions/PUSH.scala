@@ -1,6 +1,7 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.OperandEncoding._
 import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.x86.x86Registers._
@@ -14,50 +15,41 @@ trait PUSH_1[-O1] extends PUSH {
 }
 
 trait POWLow extends ModRM {
-  
-  abstract class O[R <: ModRM.reg](op1: R) extends Instruction1[R] {
-    val opcodeExtension = None
-    val opcode = (0x50 + op1.ID).toByte
-    val opcode2 = None
-    val operand1 = op1
-    val modRM: Option[AddressingFormSpecifier] = None
-  }
-  
-  abstract class I[X <: Immediate](op1: X) extends Instruction1[X] {
-    val opcodeExtension = None
-    val operand1 = op1
-    val opcode2 = None
-  }
-  
-  abstract class M[X <: ModRM.rm](op1: X) extends Instruction1[X] {
-    val opcodeExtension = Some(6.toByte)
-    val opcode = 0xFF.toByte
-    val operand1 = op1
-    val opcode2 = None
-  }
-  
+    
   implicit object push6 extends PUSH_1[rm32] {
     def get(x: rm32) = new M(x) {
+      val opcodeExtension = Some(6.toByte)
+      val opcode = 0xFF.toByte
+      val opcode2 = None
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
     }
   }
-  
-  //implicit object push6 extends PUSH_M[rm32] { def get(x: rm32) = 0xFF.toByte +: modRMExtended(x, extensionCode = 6.toByte).getBytes }  
 }
 
 object PUSH extends POWLow {
   
   implicit object push1 extends PUSH_1[r32] {
-    def get(x: r32) = new O(x) {}
+    def get(x: r32) = new O(x) {
+      val opcode = (0x50 + x.ID).toByte
+      val opcodeExtension = None
+      val opcode2 = None
+      val modRM: Option[AddressingFormSpecifier] = None
+    }
   }
   
   implicit object push8 extends PUSH_1[r16] {
-    def get(x: r16) = new O(x) {}
+    def get(x: r16) = new O(x) {
+      val opcodeExtension = None
+      val opcode = (0x50 + x.ID).toByte
+      val opcode2 = None
+      val modRM: Option[AddressingFormSpecifier] = None
+    }
   }
   
   implicit object push4 extends PUSH_1[imm8] {
     def get(x: imm8) = new I[imm8](x) {
       val opcode = 0x6A.toByte
+      val opcodeExtension = None
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(this))
     }
   }
@@ -65,6 +57,7 @@ object PUSH extends POWLow {
   implicit object push5 extends PUSH_1[imm16] {
     def get(x: imm16) = new I[imm16](x) {
       val opcode = 0x68.toByte
+      val opcodeExtension = None
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(this))
     }
   }

@@ -1,6 +1,7 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.OperandEncoding._
 import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.x86.x86Registers._
@@ -13,17 +14,12 @@ trait SBB_2[-O1, -O2] extends SBB {
 
 object SBB {
   
-  abstract class RM[R <: ModRM.reg, M <: ModRM.rm](op1: R, op2: M) extends Instruction2[R,M] {
-    val operand1 = op1
-    val operand2 = op2
-    val opcodeExtension = None
-    val opcode2 = None
-  }
-  
   implicit object sbb1 extends SBB_2[r32, rm32] {
     def get(x: r32, y: rm32) = new RM(x,y) {
       val opcode = 0x1B.toByte
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(this))
+    val opcodeExtension = None
+    val opcode2 = None
      }
   }
 }

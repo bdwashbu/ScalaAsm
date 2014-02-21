@@ -16,8 +16,8 @@ object ADD {
   implicit object add1 extends ADD_2[r32, imm8] {
     def get(x: r32, y: imm8) = new Instruction {
       val operands = MI(x,y)
-      val opcodeExtension = Some(0.toByte)
-      val opcode = OneOpcode(0x83.toByte)
+      val opcodeExtension: Option[Byte] = Some(0)
+      val opcode = OneOpcode(0x83)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcodeExtension.get))
      }
   }
@@ -25,8 +25,8 @@ object ADD {
   implicit object add2 extends ADD_2[r16, imm8] {
     def get(x: r16, y: imm8) = new Instruction {
       val operands = MI(x,y)
-      val opcodeExtension = Some(0.toByte)
-      val opcode = OneOpcode(0x83.toByte)
+      val opcodeExtension: Option[Byte] = Some(0)
+      val opcode = OneOpcode(0x83)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcodeExtension.get))
      }
   }

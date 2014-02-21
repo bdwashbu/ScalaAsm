@@ -16,9 +16,9 @@ object LEA {
   implicit object lea1 extends LEA_2[r32, rm32] {
     def get(x: r32, y: rm32) = new Instruction {
       val operands = RM(x,y)
-      val opcode = OneOpcode(0x8D.toByte)
+      val opcode = OneOpcode(0x8D)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(operands))
-      val opcodeExtension = Some(0.toByte)
+      val opcodeExtension: Option[Byte] = Some(0)
      }
   }
 }

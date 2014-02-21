@@ -16,7 +16,7 @@ object DEC {
   implicit object dec1 extends DEC_1[r32] {
     def get(x: r32) = new Instruction {
       val operands = O(x)
-      val opcode = OneOpcode((0x48 + x.ID).toByte)
+      val opcode = OneOpcode(0x48 + x.ID)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, 0))
       val opcodeExtension = None
     }
@@ -25,7 +25,7 @@ object DEC {
   implicit object dec2 extends DEC_1[r16] {
     def get(x: r16) = new Instruction {
         val operands = O(x)
-	    val opcode = OneOpcode((0x48 + x.ID).toByte)
+	    val opcode = OneOpcode(0x48 + x.ID)
 	    val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, 0))
 	    val opcodeExtension = None
      }

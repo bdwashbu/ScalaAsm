@@ -16,8 +16,8 @@ object NOT {
   implicit object not1 extends NOT_1[rm32] {
     def get(x: rm32) = new Instruction {
       val operands = M(x)
-      val opcode = OneOpcode(0xF7.toByte)
-      val opcodeExtension = Some(2.toByte)
+      val opcode = OneOpcode(0xF7)
+      val opcodeExtension: Option[Byte] = Some(2)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcodeExtension.get))
      }
   }

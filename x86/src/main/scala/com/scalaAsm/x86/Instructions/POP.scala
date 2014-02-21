@@ -19,7 +19,7 @@ object POP {
   implicit object pop1 extends POP_1[r32] {
     def get(x: r32) = new Instruction {
       val operands = O(x)
-      val opcode = OneOpcode((0x58 + x.ID).toByte)
+      val opcode = OneOpcode(0x58 + x.ID)
 	  val opcodeExtension = None
 	  val modRM: Option[AddressingFormSpecifier] = None
     }
@@ -29,7 +29,7 @@ object POP {
     def get(x: DS) = new Instruction {
       val operands = new OneOperand[DS](x) {}
       val opcodeExtension = None
-      val opcode = OneOpcode(0x1F.toByte)
+      val opcode = OneOpcode(0x1F)
       val modRM: Option[AddressingFormSpecifier] = None
      }
   }

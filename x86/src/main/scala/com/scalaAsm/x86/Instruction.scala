@@ -7,8 +7,10 @@ import com.scalaAsm.x86.OperandEncoding._
 private[x86] trait Instruction extends ModRM {
   def opcode: Opcodes
   val operands: OperandFormat
-  def opcodeExtension: Option[Byte]
+  val opcodeExtension: Option[Byte]
   def modRM: Option[AddressingFormSpecifier]
+  
+  implicit def toByte(x:Int) = x.toByte
 
   def getAddressingFormExtended2[X, Y](ops: TwoOperands[X, Y], opcodeExtension: Byte)(implicit ev: MODRM_2Extended[X, Y]): AddressingFormSpecifier = {
     modRM2Extended(ops.operand1, ops.operand2, opcodeExtension)

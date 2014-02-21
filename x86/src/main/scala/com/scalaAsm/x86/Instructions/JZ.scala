@@ -16,7 +16,7 @@ object JZ {
   implicit object jz1 extends JZ_1[imm8] {
     def get(x: imm8) = new Instruction {
       val operands = new OneOperand[imm8](x) {}
-      val opcode = OneOpcode(0x74.toByte)
+      val opcode = OneOpcode(0x74)
       val opcodeExtension = None
       val modRM = 
         Some(new AddressingFormSpecifier {

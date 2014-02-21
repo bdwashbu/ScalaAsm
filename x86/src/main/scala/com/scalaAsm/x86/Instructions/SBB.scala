@@ -17,7 +17,7 @@ object SBB {
   implicit object sbb1 extends SBB_2[r32, rm32] {
     def get(x: r32, y: rm32) = new Instruction {
       val operands = RM(x,y)
-      val opcode = OneOpcode(0x1B.toByte)
+      val opcode = OneOpcode(0x1B)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(operands))
       val opcodeExtension = None
      }

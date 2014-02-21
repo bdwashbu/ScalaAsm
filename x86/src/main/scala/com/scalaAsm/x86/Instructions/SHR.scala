@@ -17,8 +17,8 @@ object SHR {
   implicit object shr1 extends SHR_2[r32, imm8] {
     def get(x: r32, y: imm8) = new Instruction {
       val operands = MI(x,y)
-      val opcode = OneOpcode(0xC1.toByte)
-      val opcodeExtension = Some(5.toByte)
+      val opcode = OneOpcode(0xC1)
+      val opcodeExtension: Option[Byte] = Some(5)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcodeExtension.get))
      }
   }

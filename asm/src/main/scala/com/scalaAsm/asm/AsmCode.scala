@@ -82,14 +82,8 @@ trait AsmCode extends Registers {
     def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: CodeBuilder) = 
       code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
 
-    def mov[O1, O2, O3](p1: O1, p2: O2, p3: O3)(implicit ev: MOV_RM[O1, O2, O3], code: CodeBuilder) = 
-      code.codeTokens += CodeToken(ev.get(p3))
-
-    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_R[O1, O2], code: CodeBuilder) = 
+    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: CodeBuilder) = 
       code.codeTokens += CodeToken(ev.get(p1, p2))
-
-    def mov[O1, O2](p1: O1)(implicit ev: MOV_R2[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
 
     def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)

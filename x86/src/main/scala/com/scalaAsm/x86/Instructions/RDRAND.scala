@@ -2,7 +2,7 @@ package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.OperandEncoding._
-import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, TwoOpcodes, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.x86.x86Registers._
 import scala.annotation.implicitNotFound
@@ -19,8 +19,7 @@ object RDRAND extends ModRM {
     def get(x: rm32) = new Instruction {
       val operands = M(x)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcodeExtension.get))
-       val opcode = 0x0F.toByte
-     val opcode2 = Some(0xC7.toByte)
+       val opcode = TwoOpcodes(0x0F.toByte, 0xC7.toByte)
      val opcodeExtension = Some(6.toByte)
     }
   }
@@ -29,8 +28,7 @@ object RDRAND extends ModRM {
     def get(x: rm16) = new Instruction {
       val operands = M(x)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcodeExtension.get))
-       val opcode = 0x0F.toByte
-     val opcode2 = Some(0xC7.toByte)
+       val opcode = TwoOpcodes(0x0F.toByte, 0xC7.toByte)
      val opcodeExtension = Some(6.toByte)
      }
   }

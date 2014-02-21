@@ -4,13 +4,8 @@ import com.scalaAsm.x86.ModRM._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.OperandEncoding._
 
-object Instruction extends ModRM {
-
-}
-
 private[x86] trait Instruction extends ModRM {
-  def opcode: Byte
-  def opcode2: Option[Byte]
+  def opcode: Opcodes
   val operands: OperandFormat
   def opcodeExtension: Option[Byte]
   def modRM: Option[AddressingFormSpecifier]
@@ -32,19 +27,21 @@ private[x86] trait Instruction extends ModRM {
   }
 
   def getBytes: Array[Byte] = {
-    val opCodes = List(Some(opcode), opcode2)
-    opCodes.flatten.toArray ++ (modRM match {
+    opcode.get ++ (modRM match {
       case Some(modRM) => modRM.getBytes
       case _ => Array.emptyByteArray
     })
   }
 }
 
-private[x86] trait Instruction1[X] extends Instruction {
-  def operand1: X
+trait Opcodes {
+  def get: Array[Byte]
 }
 
-private[x86] trait Instruction2[X, Y] extends Instruction {
-  def operand1: X
-  def operand2: Y
+case class OneOpcode(operand1:Byte) extends Opcodes {
+  def get = Array(operand1)
+}
+
+case class TwoOpcodes(operand1:Byte, operand2:Byte) extends Opcodes {
+  def get = Array(operand1, operand2)
 }

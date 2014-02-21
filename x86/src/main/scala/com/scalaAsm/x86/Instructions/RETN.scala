@@ -1,7 +1,7 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.x86.x86Registers._
 import scala.annotation.implicitNotFound

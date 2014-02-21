@@ -15,20 +15,22 @@ trait TEST_2[-O1, -O2] extends TEST {
 object TEST {
   
   implicit object test1 extends TEST_2[r32, rm32] {
-    def get(x: r32, y: rm32) = new RM(x,y) {
+    def get(x: r32, y: rm32) = new Instruction {
+      val operands = RM(x,y)
       val opcode = 0x85.toByte
       val opcode2 = None
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(operands))
       val opcodeExtension = None
      }
   }
   
   implicit object test2 extends TEST_2[r32, imm32] {
-    def get(x: r32, y: imm32) = new MI(x,y) {
+    def get(x: r32, y: imm32) = new Instruction {
+      val operands = MI(x,y)
       val opcodeExtension = Some(0.toByte)
       val opcode = 0xF7.toByte
       val opcode2 = None
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcodeExtension.get))
      }
   }
 }

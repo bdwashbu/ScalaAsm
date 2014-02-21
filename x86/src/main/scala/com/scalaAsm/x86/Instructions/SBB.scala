@@ -15,9 +15,10 @@ trait SBB_2[-O1, -O2] extends SBB {
 object SBB {
   
   implicit object sbb1 extends SBB_2[r32, rm32] {
-    def get(x: r32, y: rm32) = new RM(x,y) {
+    def get(x: r32, y: rm32) = new Instruction {
+      val operands = RM(x,y)
       val opcode = 0x1B.toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(operands))
     val opcodeExtension = None
     val opcode2 = None
      }

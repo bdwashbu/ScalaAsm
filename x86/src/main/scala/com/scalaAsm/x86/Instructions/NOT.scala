@@ -1,6 +1,7 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.OperandEncoding._
 import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Instruction1, Instruction2, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 
@@ -12,18 +13,13 @@ trait NOT_1[-O1] extends NOT {
 
 object NOT {
   
-  abstract class M[X <: ModRM.rm](op1: X) extends Instruction1[X] {
-     val opcodeExtension = Some(2.toByte)
-     val operand1 = op1
-     val opcode2 = None
-  }
-  
   implicit object not1 extends NOT_1[rm32] {
-    def get(x: rm32) = new M(x) {
+    def get(x: rm32) = new Instruction {
+      val operands = M(x)
       val opcode = 0xF7.toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
+      val opcodeExtension = Some(2.toByte)
+      val opcode2 = None
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcodeExtension.get))
      }
   }
-  
-  //implicit object not1 extends NOT_M[rm32] { def get(x: rm32) = 0xF7.toByte +: modRMExtended(x, extensionCode = 2).getBytes }
 }

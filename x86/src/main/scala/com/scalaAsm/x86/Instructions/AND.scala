@@ -14,9 +14,10 @@ trait AND_2[-O1, -O2] extends AND {
 object AND {
   
   implicit object and1 extends AND_2[r32, rm32] {
-    def get(x: r32, y: rm32) = new RM(x,y) {
+    def get(x: r32, y: rm32) = new Instruction {
+      val operands = RM(x,y)
       val opcode = 0x23.toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(operands))
       val opcode2 = None
       val opcodeExtension = None
      }

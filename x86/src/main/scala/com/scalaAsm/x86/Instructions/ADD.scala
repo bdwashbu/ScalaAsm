@@ -14,19 +14,21 @@ trait ADD_2[-O1, -O2] extends ADD {
 object ADD {
   
   implicit object add1 extends ADD_2[r32, imm8] {
-    def get(x: r32, y: imm8) = new MI(x,y) {
+    def get(x: r32, y: imm8) = new Instruction {
+      val operands = MI(x,y)
       val opcodeExtension = Some(0.toByte)
       val opcode = 0x83.toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcodeExtension.get))
       val opcode2 = None
      }
   }
   
   implicit object add2 extends ADD_2[r16, imm8] {
-    def get(x: r16, y: imm8) = new MI(x,y) {
+    def get(x: r16, y: imm8) = new Instruction {
+      val operands = MI(x,y)
       val opcodeExtension = Some(0.toByte)
       val opcode = 0x83.toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcodeExtension.get))
       val opcode2 = None
      }
   }

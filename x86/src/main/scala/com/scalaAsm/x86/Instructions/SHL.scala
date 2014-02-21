@@ -16,11 +16,12 @@ trait SHL_2[-O1, -O2] extends SHL {
 object SHL extends ModRM {
   
   implicit object shl1 extends SHL_2[rm8, One] {
-    def get(x: rm8, y: One) = new M1(x) {
+    def get(x: rm8, y: One) = new Instruction {
+      val operands = M1(x)
       val opcode = 0xD0.toByte
       val opcode2 = None
       val opcodeExtension = Some(4.toByte)
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcodeExtension.get))
      }
   }
 }

@@ -17,7 +17,8 @@ trait POP_1[-O1] extends POP {
 object POP {
   
   implicit object pop1 extends POP_1[r32] {
-    def get(x: r32) = new O(x) {
+    def get(x: r32) = new Instruction {
+      val operands = O(x)
       val opcode = (0x58 + x.ID).toByte
 	  val opcode2 = None
 	  val opcodeExtension = None
@@ -26,7 +27,8 @@ object POP {
   }
   
   implicit object pop2 extends POP_1[DS] {
-    def get(x: DS) = new Instruction1[DS] {
+    def get(x: DS) = new Instruction {
+      val operands = new OneOperand[DS](x) {}
       val opcodeExtension = None
       val operand1 = x
       val opcode = 0x1F.toByte

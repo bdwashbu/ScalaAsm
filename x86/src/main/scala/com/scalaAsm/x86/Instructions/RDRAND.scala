@@ -16,8 +16,9 @@ trait RDRAND_1[-O1] extends RDRAND {
 object RDRAND extends ModRM {
   
   implicit object rdrand1 extends RDRAND_1[rm32] {
-    def get(x: rm32) = new M(x) {
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
+    def get(x: rm32) = new Instruction {
+      val operands = M(x)
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcodeExtension.get))
        val opcode = 0x0F.toByte
      val opcode2 = Some(0xC7.toByte)
      val opcodeExtension = Some(6.toByte)
@@ -25,8 +26,9 @@ object RDRAND extends ModRM {
   }
   
   implicit object rdrand2 extends RDRAND_1[rm16] {
-    def get(x: rm16) = new M(x) {
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(this))
+    def get(x: rm16) = new Instruction {
+      val operands = M(x)
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcodeExtension.get))
        val opcode = 0x0F.toByte
      val opcode2 = Some(0xC7.toByte)
      val opcodeExtension = Some(6.toByte)

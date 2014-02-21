@@ -2,36 +2,29 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
 
-object OperandEncoding {
+trait OperandFormat
 
-  abstract class MI[M <: ModRM.reg, I <: imm](op1: M, op2: I) extends Instruction2[M, I] { 
-     val operand1 = op1
-     val operand2 = op2
+object OperandEncoding {
+  
+  class OneOperand[X](x:X) extends OperandFormat {
+     val operand1 = x
   }
   
-  abstract class RM[R <: ModRM.reg, M <: ModRM.rm](op1: R, op2: M) extends Instruction2[R,M] {
-	  val operand1 = op1
-	  val operand2 = op2 
+  class TwoOperands[X,Y](x:X, y:Y) extends OperandFormat {
+     val operand1 = x
+     val operand2 = y
   }
+
+  case class MI[M <: ModRM.reg, I <: imm](op1: M, op2: I) extends TwoOperands[M, I](op1, op2)
   
-  abstract class O[R <: ModRM.reg](op1: R) extends Instruction1[R] {
-   val operand1 = op1
-   val operand2 = None
-  }
+  case class RM[R <: ModRM.reg, M <: ModRM.rm](op1: R, op2: M) extends TwoOperands[R,M](op1, op2)
   
-  abstract class I[I <: Immediate](op1: I) extends Instruction1[I] {
-   val operand1 = op1
-   val opcode2 = None
-  }
+  case class O[R <: ModRM.reg](op1: R) extends OneOperand[R](op1)
   
-  abstract class M[M <: ModRM.rm](op1: M) extends Instruction1[M] {
-       val operand1 = op1
-       val operand2 = None
-  }
+  case class I[I <: Immediate](op1: I) extends OneOperand[I](op1)
   
-  abstract class M1[M <: ModRM.rm](op1: M) extends Instruction1[M] {
-     val operand1 = op1 
-     val operand2 = None
-  }
+  case class M[M <: ModRM.rm](op1: M) extends OneOperand[M](op1)
+  
+  case class M1[M <: ModRM.rm](op1: M) extends OneOperand[M](op1)
   
 }

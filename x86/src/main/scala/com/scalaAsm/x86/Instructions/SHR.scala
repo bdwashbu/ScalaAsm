@@ -15,10 +15,11 @@ trait SHR_2[-O1, -O2] extends SHR {
 object SHR {
   
   implicit object shr1 extends SHR_2[r32, imm8] {
-    def get(x: r32, y: imm8) = new MI(x,y) {
+    def get(x: r32, y: imm8) = new Instruction {
+      val operands = MI(x,y)
       val opcode = 0xC1.toByte
       val opcodeExtension = Some(5.toByte)
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(this))
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcodeExtension.get))
       val opcode2 = None
      }
   }

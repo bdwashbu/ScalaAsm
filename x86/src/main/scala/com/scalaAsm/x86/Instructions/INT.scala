@@ -16,9 +16,11 @@ object INT {
 
   
   implicit object int1 extends INT_1[imm8] {
-    def get(x: imm8) = new I[imm8](x) {
+    def get(x: imm8) = new Instruction {
+      val operands = I[imm8](x)
       val opcode = 0xCD.toByte
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(this))
+      val opcode2 = None
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(operands))
       val opcodeExtension = None
     }
   }

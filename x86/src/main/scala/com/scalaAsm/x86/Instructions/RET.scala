@@ -1,13 +1,17 @@
 package com.scalaAsm.x86.Instructions
 
-import com.scalaAsm.x86.{Instruction, OneOpcode}
+import com.scalaAsm.x86.{x86Instruction, Opcodes, OneOpcode}
 
-trait RET
+abstract class RET extends x86Instruction("RET") {
+  def get: Instruction
+}
 
 object RET {
-  
-  object NearReturn extends Instruction {
+
+  implicit object NearReturn extends RET {
+    def get = new Instruction {
       val operands = NA
-      val opcode = OneOpcode(0xC3)
+      val opcode: Opcodes = 0xC3
+     }
   }
 }

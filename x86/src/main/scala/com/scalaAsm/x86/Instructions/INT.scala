@@ -1,11 +1,10 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.OperandEncoding._
-import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.{ModRM, x86Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait INT
+class INT extends x86Instruction("DEC")
 
 trait INT_1[-O1] extends INT {
   def get(p1: O1): Instruction

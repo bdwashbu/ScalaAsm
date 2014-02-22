@@ -1,11 +1,10 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.OperandEncoding._
-import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, Immediate, OneOpcode, DwordOperand, WordOperand}
+import com.scalaAsm.x86.{ModRM, x86Instruction, OperandSize, Immediate, OneOpcode, DwordOperand, WordOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait JZ
+class JZ extends x86Instruction("JZ")
 
 trait JZ_1[-O1] extends JZ {
   def get(p1: O1): Instruction

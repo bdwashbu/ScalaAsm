@@ -1,12 +1,11 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.OperandEncoding._
-import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.{ModRM, x86Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.x86Registers._
 import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait POP
+class POP extends x86Instruction("POP ")
 
 trait POP_1[-O1] extends POP {
   def get(p1: O1): Instruction

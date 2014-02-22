@@ -112,12 +112,12 @@ trait AsmCode extends Registers {
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1))
 
-    def retn(implicit code: CodeBuilder) = code.codeTokens += CodeToken(RET.NearReturn)
+    def retn(implicit ev: RET, code: CodeBuilder) = code.codeTokens += CodeToken(ev.get)
 
     def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: CodeBuilder) =
       code.codeTokens += CodeToken(ev.get(p1, p2))
 
-    def leave(implicit code: CodeBuilder) = code.codeTokens += CodeToken(LEAVE)
+    def leave(implicit ev: LEAVE, code: CodeBuilder) = code.codeTokens += CodeToken(ev.get)
 
     def call(refName: String)(implicit code: CodeBuilder) =
       code.codeTokens += Reference(refName)

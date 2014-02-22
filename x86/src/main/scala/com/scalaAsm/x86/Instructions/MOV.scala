@@ -1,11 +1,11 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
+import com.scalaAsm.x86.{ModRM, x86Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.utils.Endian
 
-trait MOV
+class MOV extends x86Instruction("MOV")
 
 trait MOV_2[-O1, -O2] extends MOV {
   def get(op1: O1, op2: O2): Instruction

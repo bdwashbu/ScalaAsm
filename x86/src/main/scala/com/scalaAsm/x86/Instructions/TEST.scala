@@ -19,16 +19,14 @@ object TEST {
       val operands = RM(x,y)
       val opcode = OneOpcode(0x85)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(operands))
-      val opcodeExtension = None
      }
   }
   
   implicit object test2 extends TEST_2[r32, imm32] {
     def get(x: r32, y: imm32) = new Instruction {
       val operands = MI(x,y)
-      val opcodeExtension: Option[Byte] = Some(0)
-      val opcode = OneOpcode(0xF7)
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcodeExtension.get))
+      val opcode = OneOpcode(0xF7) / 0
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcode.opcodeExtension))
      }
   }
 }

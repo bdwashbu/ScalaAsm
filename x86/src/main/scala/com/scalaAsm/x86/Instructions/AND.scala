@@ -18,7 +18,6 @@ object AND {
       val operands = RM(x,y)
       val opcode = OneOpcode(0x23)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(operands))
-      val opcodeExtension = None
      }
   }
 }

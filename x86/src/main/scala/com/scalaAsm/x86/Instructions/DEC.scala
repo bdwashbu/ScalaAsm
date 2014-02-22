@@ -18,7 +18,6 @@ object DEC {
       val operands = O(x)
       val opcode = OneOpcode(0x48 + x.ID)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, 0))
-      val opcodeExtension = None
     }
   }
   
@@ -27,7 +26,6 @@ object DEC {
         val operands = O(x)
 	    val opcode = OneOpcode(0x48 + x.ID)
 	    val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, 0))
-	    val opcodeExtension = None
      }
   }
 }

@@ -17,7 +17,6 @@ object JNZ {
     def get(x: imm8) = new Instruction {
       val operands = new OneOperand[imm8](x) {}
       val opcode = OneOpcode(0x75)
-      val opcodeExtension = None
       val operand1 = x
       val modRM: Option[AddressingFormSpecifier] = None
      }

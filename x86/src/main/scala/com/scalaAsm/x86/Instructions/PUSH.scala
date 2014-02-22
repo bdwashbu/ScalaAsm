@@ -19,9 +19,8 @@ trait POWLow extends ModRM {
   implicit object push6 extends PUSH_1[rm32] {
     def get(x: rm32) = new Instruction {
       val operands = M(x)
-      val opcodeExtension = Some(6.toByte)
-      val opcode = OneOpcode(0xFF.toByte)
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcodeExtension.get))
+      val opcode = OneOpcode(0xFF.toByte) / 6
+      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcode.opcodeExtension))
     }
   }
 }
@@ -32,7 +31,6 @@ object PUSH extends POWLow {
     def get(x: r32) = new Instruction {
       val operands = O(x)
       val opcode = OneOpcode(0x50 + x.ID)
-      val opcodeExtension = None
       val modRM: Option[AddressingFormSpecifier] = None
     }
   }
@@ -40,7 +38,6 @@ object PUSH extends POWLow {
   implicit object push8 extends PUSH_1[r16] {
     def get(x: r16) = new Instruction {
       val operands = O(x)
-      val opcodeExtension = None
       val opcode = OneOpcode(0x50 + x.ID)
       val modRM: Option[AddressingFormSpecifier] = None
     }
@@ -50,7 +47,6 @@ object PUSH extends POWLow {
     def get(x: imm8) = new Instruction {
       val operands = I[imm8](x)
       val opcode = OneOpcode(0x6A)
-      val opcodeExtension = None
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(operands))
     }
   }
@@ -59,7 +55,6 @@ object PUSH extends POWLow {
     def get(x: imm16) = new Instruction {
       val operands = I[imm16](x)
       val opcode = OneOpcode(0x68)
-      val opcodeExtension = None
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(operands))
     }
   }
@@ -67,7 +62,6 @@ object PUSH extends POWLow {
   implicit object push7 extends PUSH_1[CS] {
     def get(x: CS) = new Instruction {
       val operands = new OneOperand[CS](x) {}
-      val opcodeExtension = None
       val opcode = OneOpcode(0x0E)
       val modRM: Option[AddressingFormSpecifier] = None
     }

@@ -20,7 +20,6 @@ object INT {
       val operands = I[imm8](x)
       val opcode = OneOpcode(0xCD)
       val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(operands))
-      val opcodeExtension = None
     }
   }
 }

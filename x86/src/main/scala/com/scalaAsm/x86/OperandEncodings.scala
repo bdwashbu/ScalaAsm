@@ -1,7 +1,6 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.x86Instruction
 
 trait OperandFormat {
   def getAddressingForm: Option[AddressingFormSpecifier]
@@ -24,8 +23,6 @@ trait OperandEncoding {
   }
   
   object NA extends NoOperand  
-  
-
   
   case class MI[M <: ModRM.reg, I <: Immediate](op1: M, op2: I) extends TwoOperands[M, I](op1, op2) {
     

@@ -2,11 +2,9 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.ModRM._
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.OperandEncoding
 
 abstract class x86Instruction(val mnemonic: String) {
   implicit def toByte(x:Int) = x.toByte
-  
   implicit def toOneOpcode(x:Int): OneOpcode = OneOpcode(x.toByte)
   implicit def toTwoOpcodes(x:(Int,Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
   

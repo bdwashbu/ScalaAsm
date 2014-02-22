@@ -4,11 +4,13 @@ import com.scalaAsm.x86.ModRM._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.OperandEncoding._
 
-private[x86] trait Instruction {
+trait Instruction {
   def opcode: Opcodes
   val operands: OperandFormat
   
   implicit def toByte(x:Int) = x.toByte
+  
+  object NA extends NoOperand
   
   case class MI[M <: ModRM.reg, I <: Immediate](op1: M, op2: I) extends TwoOperands[M, I](op1, op2) {
     

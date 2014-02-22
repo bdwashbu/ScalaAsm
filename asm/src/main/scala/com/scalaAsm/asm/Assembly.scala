@@ -8,7 +8,7 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Addressing
 
 case class Assembled(val code: Seq[Token], val data: Seq[Token]) {
-  def rawCode: Array[Byte] = code.collect{ case CodeToken(x) => x}.reduce(_++_)
+  def rawCode: Array[Byte] = code.collect{ case CodeToken(x) => x.getBytes}.reduce(_++_)
 }
 
 trait CodeBuilder {

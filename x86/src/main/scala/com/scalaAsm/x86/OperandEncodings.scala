@@ -8,6 +8,10 @@ trait OperandFormat {
 
 object OperandEncoding {
   
+  class NoOperand extends OperandFormat {
+    def getAddressingForm = None
+  }
+  
   abstract class OneOperand[X](x:X) extends OperandFormat {
      val operand1 = x
   }

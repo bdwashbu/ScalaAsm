@@ -62,62 +62,62 @@ trait AsmCode extends Registers {
       code.codeTokens += Reference(param)
 
     def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1,p2).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1,p2))
 
     def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
 
     def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
       
     def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
 
     def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1, p2))
 
     def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
 
     def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: CodeBuilder) = 
-      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1, p2))
 
     def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: CodeBuilder) = 
-      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1, p2))
 
     def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1, p2))
 
     def jnz(labelRef: String)(implicit code: CodeBuilder) =
       code.codeTokens += LabelRef(labelRef, 0x75.toByte)
     
     def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
 
     def jz(labelRef: String)(implicit code: CodeBuilder) =
       code.codeTokens += LabelRef(labelRef, 0x74.toByte)
     
     def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
     
     def int[O1](p1: O1)(implicit ev: INT_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
 
     def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1,p2).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1,p2))
 
     def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1, p2))
 
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
 
-    def retn(implicit code: CodeBuilder) = code.codeTokens += CodeToken(Array(0xC3))
+    def retn(implicit code: CodeBuilder) = code.codeTokens += CodeToken(RET.NearReturn)
 
     def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1, p2))
 
-    def leave(implicit code: CodeBuilder) = code.codeTokens += CodeToken(Array(0xC9))
+    def leave(implicit code: CodeBuilder) = code.codeTokens += CodeToken(LEAVE)
 
     def call(refName: String)(implicit code: CodeBuilder) =
       code.codeTokens += Reference(refName)
@@ -126,7 +126,7 @@ trait AsmCode extends Registers {
       code.codeTokens += JmpRef(ref)
       
     def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1).getBytes)
+      code.codeTokens += CodeToken(ev.get(p1))
   }
 
 }

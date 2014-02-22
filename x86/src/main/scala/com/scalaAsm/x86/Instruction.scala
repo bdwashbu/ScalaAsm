@@ -11,17 +11,166 @@ private[x86] trait Instruction extends ModRM {
   
   implicit def toByte(x:Int) = x.toByte
   
-  case class MI[M <: ModRM.reg, I <: imm](op1: M, op2: I) extends TwoOperands[M, I](op1, op2)
+  case class MI[M <: ModRM.reg, I <: Immediate](op1: M, op2: I) extends TwoOperands[M, I](op1, op2) {
+    
+    def getAddressingForm: AddressingFormSpecifier = {
+        
+      new AddressingFormSpecifier {
+	     val modRM = Some(ModRMByte(Register, opEx = Some(opcode.opcodeExtension.get), rm = op1))
+		 val scaleIndexBase = None
+		 val displacment = None
+		 val immediate = if (op2.value == 0) None else Some(op2)
+	  }
+    }
+  }
   
-  case class RM[R <: ModRM.reg, M <: ModRM.rm](op1: R, op2: M) extends TwoOperands[R,M](op1, op2)
+  case class RM[R <: ModRM.reg, M <: ModRM.rm](op1: R, op2: M) extends TwoOperands[R,M](op1, op2) {
+    
+     def getAddressingForm: AddressingFormSpecifier = {
+      
+      (op2.reg.ID, op2.offset, op2.isMemory) match {
+        case (4, Some(Immediate8(offset)), true) =>
+          new AddressingFormSpecifier {
+	       val modRM = Some(ModRMByte(Displacment8, reg = Some(op1.reg), rm = op2.reg))
+		   val scaleIndexBase = Some(Immediate8(0x24.toByte))
+		   val displacment = None
+		   val immediate = Some(Immediate8(offset))
+	      }
+        case (_, Some(Immediate32(offset)), true) =>
+          new AddressingFormSpecifier {
+	       val modRM = Some(ModRMByte(Displacment32, reg = Some(op1.reg), rm = op2.reg))
+		   val scaleIndexBase = None
+		   val displacment = None
+		   val immediate = Some(Immediate32(offset))
+	      }
+        case (_, Some(offset), true) =>
+          new AddressingFormSpecifier {
+	       val modRM = Some(ModRMByte(Displacment8, reg = Some(op1), rm = op2.reg))
+		   val scaleIndexBase = None
+		   val displacment = None
+		   val immediate = Some(offset)
+	      } 
+        case (_, None, true) =>
+          new AddressingFormSpecifier {
+	       val modRM = Some(ModRMByte(NoDisplacment, reg = Some(op1), rm = op2.reg))
+		   val scaleIndexBase = None
+		   val displacment = None
+		   val immediate = None
+	      }
+        case _ =>
+          new AddressingFormSpecifier {
+	       val modRM = Some(ModRMByte(Register, reg = Some(op1), rm = op2.reg))
+		   val scaleIndexBase = None
+		   val displacment = None
+		   val immediate: Option[Immediate] = op1.offset
+	     }
+      }
+    }
+    
+  }
   
-  case class O[R <: ModRM.reg](op1: R) extends OneOperand[R](op1)
+  case class O[R <: ModRM.reg](op1: R) extends OneOperand[R](op1) {
+    
+    def getAddressingForm: AddressingFormSpecifier = {
+      
+       (op1.offset, op1.isMemory) match {
+       case (Some(offset), true) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(Displacment8, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = Some(offset)
+	     }
+       case (None, true) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(NoDisplacment, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = None
+	    }
+       case (offset, false) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(Register, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = offset
+	    }
+     }
+    }
+    
+  }
   
-  case class I[I <: Immediate](op1: I) extends OneOperand[I](op1)
+  case class I[I <: Immediate](op1: I) extends OneOperand[I](op1) {
+    
+     def getAddressingForm: AddressingFormSpecifier = {
+      new AddressingFormSpecifier {
+	     val modRM = None
+		 val scaleIndexBase = None
+		 val displacment = None
+		 val immediate = Some(op1)
+	  }
+     }
+    
+  }
   
-  case class M[M <: ModRM.rm](op1: M) extends OneOperand[M](op1)
+  case class M[M <: ModRM.rm](op1: M) extends OneOperand[M](op1) {
+    
+    def getAddressingForm: AddressingFormSpecifier = {
+      
+       (op1.offset, op1.isMemory) match {
+       case (Some(offset), true) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(Displacment8, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = Some(offset)
+	     }
+       case (None, true) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(NoDisplacment, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = None
+	    }
+       case (offset, false) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(Register, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = offset
+	    }
+     }
+    }
+  }
   
-  case class M1[M <: ModRM.rm](op1: M) extends OneOperand[M](op1)
+  case class M1[M <: ModRM.rm](op1: M) extends OneOperand[M](op1) {
+    def getAddressingForm: AddressingFormSpecifier = {
+      
+       (op1.offset, op1.isMemory) match {
+       case (Some(offset), true) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(Displacment8, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = Some(offset)
+	     }
+       case (None, true) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(NoDisplacment, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = None
+	    }
+       case (offset, false) =>
+         new AddressingFormSpecifier {
+	        val modRM = Some(ModRMByte(Register, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
+		    val scaleIndexBase = None
+		    val displacment = None
+		    val immediate = offset
+	    }
+     }
+    }
+  }
 
   def getAddressingFormExtended2[X, Y](ops: TwoOperands[X, Y], opcodeExtension: Byte)(implicit ev: MODRM_2Extended[X, Y]): AddressingFormSpecifier = {
     modRM2Extended(ops.operand1, ops.operand2, opcodeExtension)
@@ -47,24 +196,19 @@ private[x86] trait Instruction extends ModRM {
   }
 }
 
-trait OpcodeExtension {
-  val opcodeExtension: Byte
-}
-
 trait Opcodes {
   def get: Array[Byte]
+  val opcodeExtension: Option[Byte]
 }
 
 case class OneOpcode(operand1:Byte) extends Opcodes {
   def get = Array(operand1)
-  def / (x: Byte) = new OneOpcodeWithExtension(operand1, x)
+  val opcodeExtension: Option[Byte] = None
+  def / (x: Byte) = new OneOpcode(operand1) { override val opcodeExtension = Some(x) }
 }
-
-class OneOpcodeWithExtension(operand1:Byte, val opcodeExtension: Byte) extends OneOpcode(operand1) with OpcodeExtension
 
 case class TwoOpcodes(operand1:Byte, operand2:Byte) extends Opcodes {
   def get = Array(operand1, operand2)
-  def / (x: Byte) = new TwoOpcodesWithExtension(operand1, operand2, x)
+  val opcodeExtension: Option[Byte] = None
+  def / (x: Byte) = new TwoOpcodes(operand1, operand2) { override val opcodeExtension = Some(x) }
 }
-
-class TwoOpcodesWithExtension(operand1:Byte, operand2:Byte, val opcodeExtension: Byte) extends TwoOpcodes(operand1, operand2) with OpcodeExtension

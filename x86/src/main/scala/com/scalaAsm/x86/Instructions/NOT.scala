@@ -17,7 +17,7 @@ object NOT {
     def get(x: rm32) = new Instruction {
       val operands = M(x)
       val opcode = OneOpcode(0xF7) / 2
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcode.opcodeExtension))
+      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
      }
   }
 }

@@ -15,7 +15,7 @@ object JNZ {
   
   implicit object jnz1 extends JNZ_1[imm8] {
     def get(x: imm8) = new Instruction {
-      val operands = new OneOperand[imm8](x) {}
+      val operands = new OneOperand[imm8](x) {def getAddressingForm = null}
       val opcode = OneOpcode(0x75)
       val operand1 = x
       val modRM: Option[AddressingFormSpecifier] = None

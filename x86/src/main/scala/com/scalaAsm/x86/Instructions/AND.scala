@@ -17,7 +17,7 @@ object AND {
     def get(x: r32, y: rm32) = new Instruction {
       val operands = RM(x,y)
       val opcode = OneOpcode(0x23)
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm2(operands))
+      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
      }
   }
 }

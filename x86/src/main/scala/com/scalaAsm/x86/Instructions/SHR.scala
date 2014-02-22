@@ -18,7 +18,7 @@ object SHR {
     def get(x: r32, y: imm8) = new Instruction {
       val operands = MI(x,y)
       val opcode = OneOpcode(0xC1) / 5
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended2(operands, opcode.opcodeExtension))
+      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
      }
   }
 }

@@ -2,19 +2,18 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
 
-trait OperandFormat
+trait OperandFormat {
+  def getAddressingForm: AddressingFormSpecifier
+}
 
 object OperandEncoding {
   
-  class OneOperand[X](x:X) extends OperandFormat {
+  abstract class OneOperand[X](x:X) extends OperandFormat {
      val operand1 = x
   }
   
-  class TwoOperands[X,Y](x:X, y:Y) extends OperandFormat {
+  abstract class TwoOperands[X,Y](x:X, y:Y) extends OperandFormat {
      val operand1 = x
      val operand2 = y
   }
-
- 
-  
 }

@@ -19,7 +19,7 @@ object SHL extends ModRM {
     def get(x: rm8, y: One) = new Instruction {
       val operands = M1(x)
       val opcode = OneOpcode(0xD0) / 4
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingFormExtended1(operands, opcode.opcodeExtension))
+      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
      }
   }
 }

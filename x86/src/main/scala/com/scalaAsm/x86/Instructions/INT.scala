@@ -19,7 +19,7 @@ object INT {
     def get(x: imm8) = new Instruction {
       val operands = I[imm8](x)
       val opcode = OneOpcode(0xCD)
-      val modRM: Option[AddressingFormSpecifier] = Some(getAddressingForm1(operands))
+      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
     }
   }
 }

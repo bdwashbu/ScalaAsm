@@ -6,13 +6,11 @@ import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, OneOpcode, Immediate, 
 import com.scalaAsm.x86.x86Registers._
 import com.scalaAsm.x86.AddressingFormSpecifier
 
-trait POP extends ModRM
+trait POP
 
 trait POP_1[-O1] extends POP {
   def get(p1: O1): Instruction
 }
-
-
 
 object POP {
   
@@ -20,7 +18,6 @@ object POP {
     def get(x: r32) = new Instruction {
       val operands = O(x)
       val opcode = OneOpcode(0x58 + x.ID)
-	  val modRM: Option[AddressingFormSpecifier] = None
     }
   }
   
@@ -28,7 +25,6 @@ object POP {
     def get(x: DS) = new Instruction {
       val operands = new OneOperand[DS](x) {def getAddressingForm = null}
       val opcode = OneOpcode(0x1F)
-      val modRM: Option[AddressingFormSpecifier] = None
      }
   }
 }

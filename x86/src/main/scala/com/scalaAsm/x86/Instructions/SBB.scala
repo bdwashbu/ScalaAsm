@@ -6,7 +6,7 @@ import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, OneOpcode, Immediate, 
 import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.x86.x86Registers._
 
-trait SBB extends ModRM
+trait SBB
 
 trait SBB_2[-O1, -O2] extends SBB {
   def get(x: O1, y: O2): Instruction
@@ -18,7 +18,6 @@ object SBB {
     def get(x: r32, y: rm32) = new Instruction {
       val operands = RM(x,y)
       val opcode = OneOpcode(0x1B)
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
      }
   }
 }

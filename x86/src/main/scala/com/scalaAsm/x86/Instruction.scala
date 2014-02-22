@@ -7,28 +7,27 @@ import com.scalaAsm.x86.OperandEncoding._
 private[x86] trait Instruction extends ModRM {
   def opcode: Opcodes
   val operands: OperandFormat
-  def modRM: Option[AddressingFormSpecifier]
   
   implicit def toByte(x:Int) = x.toByte
   
   case class MI[M <: ModRM.reg, I <: Immediate](op1: M, op2: I) extends TwoOperands[M, I](op1, op2) {
     
-    def getAddressingForm: AddressingFormSpecifier = {
+    def getAddressingForm: Option[AddressingFormSpecifier] = {
         
-      new AddressingFormSpecifier {
+      Some(new AddressingFormSpecifier {
 	     val modRM = Some(ModRMByte(Register, opEx = Some(opcode.opcodeExtension.get), rm = op1))
 		 val scaleIndexBase = None
 		 val displacment = None
 		 val immediate = if (op2.value == 0) None else Some(op2)
-	  }
+	  })
     }
   }
   
   case class RM[R <: ModRM.reg, M <: ModRM.rm](op1: R, op2: M) extends TwoOperands[R,M](op1, op2) {
     
-     def getAddressingForm: AddressingFormSpecifier = {
+     def getAddressingForm: Option[AddressingFormSpecifier] = {
       
-      (op2.reg.ID, op2.offset, op2.isMemory) match {
+      Some((op2.reg.ID, op2.offset, op2.isMemory) match {
         case (4, Some(Immediate8(offset)), true) =>
           new AddressingFormSpecifier {
 	       val modRM = Some(ModRMByte(Displacment8, reg = Some(op1.reg), rm = op2.reg))
@@ -64,16 +63,17 @@ private[x86] trait Instruction extends ModRM {
 		   val displacment = None
 		   val immediate: Option[Immediate] = op1.offset
 	     }
-      }
+      })
     }
     
   }
   
   case class O[R <: ModRM.reg](op1: R) extends OneOperand[R](op1) {
     
-    def getAddressingForm: AddressingFormSpecifier = {
+    def getAddressingForm: Option[AddressingFormSpecifier] = {
       
-       (op1.offset, op1.isMemory) match {
+       if (!opcode.opcodeExtension.isDefined) None else
+       Some((op1.offset, op1.isMemory) match {
        case (Some(offset), true) =>
          new AddressingFormSpecifier {
 	        val modRM = Some(ModRMByte(Displacment8, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
@@ -95,29 +95,29 @@ private[x86] trait Instruction extends ModRM {
 		    val displacment = None
 		    val immediate = offset
 	    }
-     }
+     })
     }
     
   }
   
   case class I[I <: Immediate](op1: I) extends OneOperand[I](op1) {
     
-     def getAddressingForm: AddressingFormSpecifier = {
-      new AddressingFormSpecifier {
+     def getAddressingForm: Option[AddressingFormSpecifier] = {
+      Some(new AddressingFormSpecifier {
 	     val modRM = None
 		 val scaleIndexBase = None
 		 val displacment = None
 		 val immediate = Some(op1)
-	  }
+	  })
      }
     
   }
   
   case class M[M <: ModRM.rm](op1: M) extends OneOperand[M](op1) {
     
-    def getAddressingForm: AddressingFormSpecifier = {
+    def getAddressingForm: Option[AddressingFormSpecifier] = {
       
-       (op1.offset, op1.isMemory) match {
+       Some((op1.offset, op1.isMemory) match {
        case (Some(offset), true) =>
          new AddressingFormSpecifier {
 	        val modRM = Some(ModRMByte(Displacment8, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
@@ -139,14 +139,14 @@ private[x86] trait Instruction extends ModRM {
 		    val displacment = None
 		    val immediate = offset
 	    }
-     }
+     })
     }
   }
   
   case class M1[M <: ModRM.rm](op1: M) extends OneOperand[M](op1) {
-    def getAddressingForm: AddressingFormSpecifier = {
+    def getAddressingForm: Option[AddressingFormSpecifier] = {
       
-       (op1.offset, op1.isMemory) match {
+       Some((op1.offset, op1.isMemory) match {
        case (Some(offset), true) =>
          new AddressingFormSpecifier {
 	        val modRM = Some(ModRMByte(Displacment8, opEx = Some(opcode.opcodeExtension.get), rm = op1.reg))
@@ -168,7 +168,7 @@ private[x86] trait Instruction extends ModRM {
 		    val displacment = None
 		    val immediate = offset
 	    }
-     }
+     })
     }
   }
 
@@ -189,7 +189,7 @@ private[x86] trait Instruction extends ModRM {
   }
 
   def getBytes: Array[Byte] = {
-    opcode.get ++ (modRM match {
+    opcode.get ++ (operands.getAddressingForm match {
       case Some(modRM) => modRM.getBytes
       case _ => Array.emptyByteArray
     })

@@ -18,7 +18,6 @@ object TEST {
     def get(x: r32, y: rm32) = new Instruction {
       val operands = RM(x,y)
       val opcode = OneOpcode(0x85)
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
      }
   }
   
@@ -26,7 +25,6 @@ object TEST {
     def get(x: r32, y: imm32) = new Instruction {
       val operands = MI(x,y)
       val opcode = OneOpcode(0xF7) / 0
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
      }
   }
 }

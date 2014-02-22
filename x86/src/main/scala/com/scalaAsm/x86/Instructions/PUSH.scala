@@ -7,20 +7,19 @@ import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.x86.x86Registers._
 import scala.annotation.implicitNotFound
 
-trait PUSH extends ModRM
+trait PUSH
 
 @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
 trait PUSH_1[-O1] extends PUSH {
   def get(op1: O1): Instruction
 }
 
-trait POWLow extends ModRM {
+trait POWLow {
     
   implicit object push6 extends PUSH_1[rm32] {
     def get(x: rm32) = new Instruction {
       val operands = M(x)
-      val opcode = OneOpcode(0xFF.toByte) / 6
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
+      val opcode = OneOpcode(0xFF) / 6
     }
   }
 }
@@ -31,7 +30,6 @@ object PUSH extends POWLow {
     def get(x: r32) = new Instruction {
       val operands = O(x)
       val opcode = OneOpcode(0x50 + x.ID)
-      val modRM: Option[AddressingFormSpecifier] = None
     }
   }
   
@@ -39,7 +37,6 @@ object PUSH extends POWLow {
     def get(x: r16) = new Instruction {
       val operands = O(x)
       val opcode = OneOpcode(0x50 + x.ID)
-      val modRM: Option[AddressingFormSpecifier] = None
     }
   }
   
@@ -47,7 +44,6 @@ object PUSH extends POWLow {
     def get(x: imm8) = new Instruction {
       val operands = I[imm8](x)
       val opcode = OneOpcode(0x6A)
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
     }
   }
   
@@ -55,7 +51,6 @@ object PUSH extends POWLow {
     def get(x: imm16) = new Instruction {
       val operands = I[imm16](x)
       val opcode = OneOpcode(0x68)
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
     }
   }
   
@@ -63,7 +58,6 @@ object PUSH extends POWLow {
     def get(x: CS) = new Instruction {
       val operands = new OneOperand[CS](x) {def getAddressingForm = null}
       val opcode = OneOpcode(0x0E)
-      val modRM: Option[AddressingFormSpecifier] = None
     }
   }
 }

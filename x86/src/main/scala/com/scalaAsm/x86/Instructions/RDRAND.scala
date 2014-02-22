@@ -13,21 +13,19 @@ trait RDRAND_1[-O1] extends RDRAND {
   def get(p1: O1): Instruction
 }
 
-object RDRAND extends ModRM {
+object RDRAND {
   
   implicit object rdrand1 extends RDRAND_1[rm32] {
     def get(x: rm32) = new Instruction {
       val operands = M(x)
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
-       val opcode = TwoOpcodes(0x0F.toByte, 0xC7.toByte) / 6
+       val opcode = TwoOpcodes(0x0F, 0xC7) / 6
     }
   }
   
   implicit object rdrand2 extends RDRAND_1[rm16] {
     def get(x: rm16) = new Instruction {
       val operands = M(x)
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
-       val opcode = TwoOpcodes(0x0F.toByte, 0xC7.toByte) / 6
+       val opcode = TwoOpcodes(0x0F, 0xC7) / 6
      }
   }
 }

@@ -17,7 +17,6 @@ object DEC {
     def get(x: r32) = new Instruction {
       val operands = O(x)
       val opcode = OneOpcode(0x48 + x.ID)
-      val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
     }
   }
   
@@ -25,7 +24,6 @@ object DEC {
     def get(x: r16) = new Instruction {
         val operands = O(x)
 	    val opcode = OneOpcode(0x48 + x.ID)
-	    val modRM: Option[AddressingFormSpecifier] = Some(operands.getAddressingForm)
      }
   }
 }

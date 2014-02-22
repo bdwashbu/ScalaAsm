@@ -12,6 +12,7 @@ abstract class x86Instruction(val mnemonic: String) {
 	  val opcode: Opcodes
 	  val operands: OperandFormat
 	
+	  def getMnemonic = mnemonic
 	  def getBytes: Array[Byte] = {
 	    opcode.get ++ (operands.getAddressingForm match {
 	      case Some(modRM) => modRM.getBytes

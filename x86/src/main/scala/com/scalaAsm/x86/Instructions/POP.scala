@@ -5,7 +5,7 @@ import com.scalaAsm.x86.{ModRM, x86Instruction, OperandSize, OneOpcode, Immediat
 import com.scalaAsm.x86.x86Registers._
 import com.scalaAsm.x86.AddressingFormSpecifier
 
-class POP extends x86Instruction("POP ")
+class POP extends x86Instruction("POP")
 
 trait POP_1[-O1] extends POP {
   def get(p1: O1): Instruction

@@ -11,7 +11,7 @@ trait MOV_2[-O1, -O2] extends MOV {
   def get(op1: O1, op2: O2): Instruction
 }
 
-trait MOVLow extends ModRM {
+trait MOVLow {
   
  implicit object mov1 extends MOV_2[rm32, r32] {
     def get(x: rm32, y: r32) = new Instruction {

@@ -6,7 +6,7 @@ import com.scalaAsm.x86.{ModRM, Instruction, OperandSize, OneOpcode, Immediate, 
 import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.x86.x86Registers._
 
-trait TEST extends ModRM
+trait TEST
 
 trait TEST_2[-O1, -O2] extends TEST {
   def get(p1: O1, p2: O2): Instruction

@@ -2,7 +2,6 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.utils.Endian
 import x86Registers._
-import Addressing._
 import com.scalaAsm.x86.Operands._
 
 protected[x86] trait AddressingFormSpecifier {

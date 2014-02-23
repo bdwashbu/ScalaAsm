@@ -2,23 +2,12 @@ package com.scalaAsm.x86
 
 import x86Registers._
 
-object Addressing {
 
-  case class RegisterOffset[+T <: Register, S <: Immediate](offset: S, x: T)
-
-  trait Addressable[X <: Register] {
-    self: X =>
-    def -[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset.negate, this)
-    def +[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset, this)
-  }
-
-  case class *[+A](x: A)
-  type +[A <: Register, B <: Immediate] = RegisterOffset[A, B]
-}
 
 sealed class OperandSize {
   type OpType
 }
+
 class ByteOperand extends OperandSize { type OpType = Byte }
 class WordOperand extends OperandSize { type OpType = Short }
 class DwordOperand extends OperandSize { type OpType = Int }
@@ -28,6 +17,24 @@ trait RegisterOrMemory {
   val reg: Register
   val isMemory: Boolean
   val offset: Option[Immediate]
+  
+  override def toString = {
+    var result: String = ""
+    if (isMemory) {
+      result = "[" + reg.toString
+      if (offset.isDefined) {
+          if (!offset.get.isNegative)
+        	  result += " + " + offset.get.toString
+          else
+        	  result += " - " + offset.get.negate.toString
+      }
+      result += "]"
+    } else {
+      reg.toString
+    }
+    
+    result
+  }
 }
 
 object Operands {

@@ -1,9 +1,7 @@
 package com.scalaAsm
 
 import com.scalaAsm.asm.AsmProgram
-import com.scalaAsm.x86.Addressing._
-import com.scalaAsm.x86.Instructions.PUSH._
-import com.scalaAsm.x86.Instructions.MOV._
+import com.scalaAsm.asm.Addressing._
 
 object HelloWorld extends AsmProgram {
 
@@ -35,10 +33,10 @@ object HelloWorld extends AsmProgram {
 
     proc("flushBuffer") {
 
-      val numberOfBytesToWrite = modRM(ebp, Some(imm8(-12.toByte)), true)
-      val numberOfBytesWritten = modRM(ebp, Some(imm8(-8.toByte)), true)
-      val hFile = modRM(ebp, Some(imm8(-4.toByte)), true) 
-      val lpBuffer = modRM(ebp, Some(imm8(8.toByte)), true)
+      val numberOfBytesToWrite = *(ebp - imm8(12))
+      val numberOfBytesWritten = *(ebp + imm8(-8))
+      val hFile = *(ebp + imm8(-4))
+      val lpBuffer = *(ebp + imm8(8))
       val STD_OUTPUT_HANDLE = imm8(-11)
 
       push(ebp)
@@ -85,8 +83,8 @@ object HelloWorld extends AsmProgram {
 
     proc("strlen") {
 
-      mov(eax, modRM(esp, Some(imm8(4.toByte)), true)) // new rm32{ val reg = esp; val offset8 = 4.toByte; val isMemory = true}) //*(esp + imm8(4))) // pointer to string
-      lea(edx, modRM(eax, Some(imm8(3.toByte)), true)) //new rm32{ val reg = eax; val offset8 = 3.toByte; val isMemory = true}) //*(eax + imm8(3)))
+      mov(eax, *(esp + imm8(4))) // pointer to string
+      lea(edx, *(eax + imm8(3)))
       push(ebp)
       push(edi)
       mov(ebp, imm32(0x80808080))
@@ -94,18 +92,18 @@ object HelloWorld extends AsmProgram {
       label("start")
 
       for (i <- 0 until 3) {
-        mov(edi, modRM(eax, None, true)) //new rm32{ val reg = eax; val offset8 = 0.toByte; val isMemory = true}) // read first 4 bytes
+        mov(edi, *(eax)) // read first 4 bytes
         add(eax, imm8(4)) // increment pointer
-        lea(ecx, modRM(edi, Some(imm32(-0x1010101)), true)) //*(edi - imm32(0x1010101))) // subtract 1 from each byte
+        lea(ecx, *(edi - imm32(0x1010101))) // subtract 1 from each byte
         not(edi) // invert all bytes
         and(ecx, edi)
         and(ecx, ebp)
         jnz("test")
       }
 
-      mov(edi, modRM(eax, None, true)) //new rm32{ val reg = eax; val offset8 = 0.toByte; val isMemory = true})
+      mov(edi, *(eax))
       add(eax, imm8(4))
-      lea(ecx, modRM(edi, Some(imm32(-0x1010101)), true))
+      lea(ecx, *(edi - imm32(0x1010101)))
       not(edi)
       and(ecx, edi)
       and(ecx, ebp)

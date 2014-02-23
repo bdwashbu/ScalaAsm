@@ -5,7 +5,6 @@ import java.nio.ByteOrder
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.x86.Addressing
 
 case class Assembled(val code: Seq[Token], val data: Seq[Token]) {
   def rawCode: Array[Byte] = code.collect{ case CodeToken(x) => x.getBytes}.reduce(_++_)

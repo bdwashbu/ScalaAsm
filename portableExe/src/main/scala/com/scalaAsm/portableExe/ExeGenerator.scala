@@ -120,7 +120,7 @@ object ExeGenerator extends Sections {
       var parserPosition = 0
       for (token <- onePass) yield {
         val result = token match {
-	        case CodeToken(code) => ByteOutputPost(code.getBytes)
+	        case CodeToken(code) => println(code); ByteOutputPost(code.getBytes)
 	        case Align(to, filler, _) => ByteOutputPost(Array.fill((to - (parserPosition % to)) % to)(filler))
 	        case Padding(to, _) => ByteOutputPost(Array.fill(to)(0xCC.toByte))
 	        case BeginProc(name) => Proc(parserPosition, name)

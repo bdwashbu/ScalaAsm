@@ -15,11 +15,13 @@ trait OperandEncoding {
   
   abstract class OneOperand[X](x:X) extends OperandFormat {
      val operand1 = x
+     override def toString = x.toString
   }
   
   abstract class TwoOperands[X,Y](x:X, y:Y) extends OperandFormat {
      val operand1 = x
      val operand2 = y
+     override def toString = x.toString + ", " + y.toString
   }
   
   object NA extends NoOperand  

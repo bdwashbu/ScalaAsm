@@ -33,6 +33,24 @@ trait AsmCode extends Registers {
       val reg = reg2
       val isMemory = isMemory2
       val offset = offset82
+      
+      override def toString = {
+        var result: String = ""
+        if (isMemory) {
+          result = "[" + reg.toString
+          if (offset.isDefined) {
+              if (!offset.get.isNegative)
+            	  result += " + " + offset.get.toString
+              else
+            	  result += " - " + offset.get.negate.toString
+          }
+          result += "]"
+        } else {
+          reg.toString
+        }
+        
+        result
+      }
     }
 
     def b(bytes: Byte*): Array[Byte] = {

@@ -2,7 +2,7 @@ package com.scalaAsm.portableExe
 
 import java.io.DataOutputStream
 import java.io.ByteArrayOutputStream
-import com.scalaAsm.asm.AsmProgram
+import com.scalaAsm.asm.AsmCodeSimple
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import com.scalaAsm.x86.Instructions.PUSH._
@@ -53,25 +53,17 @@ class DosHeader {
       e_res2.foreach(field =>  bbuf.putShort(field))
       bbuf.putInt(e_lfanew)
       
-      val dosStub = new AsmProgram {
-
-		  val data = new Data {
-		  }
-		  
-		  val code = new Code {
-		    push(cs)
-		    pop(ds)
-		    mov(dx, imm16(0xE.toByte))
-		    mov(ah, imm8(0x9))
-		    int(imm8(0x21))
-		    mov(ax, imm16(0x4C01))
-		    int(imm8(0x21))
-		  }
-		  
+      val dosStub = new AsmCodeSimple {
+	     push(cs)
+	     pop(ds)
+	     mov(dx, imm16(0xE.toByte))
+	     mov(ah, imm8(0x9))
+	     int(imm8(0x21))
+	     mov(ax, imm16(0x4C01))
+	     int(imm8(0x21))
 	  }
-      val assembled = dosStub.assemble
-      val code = assembled.rawCode      
-      bbuf.put(code)
+        
+      bbuf.put(dosStub.getRawBytes)
       bbuf.put(dosWarning.toCharArray().map(_.toByte))
       bbuf.array().take(bbuf.position())
     }

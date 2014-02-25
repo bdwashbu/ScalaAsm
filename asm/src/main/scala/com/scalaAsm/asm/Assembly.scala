@@ -5,13 +5,18 @@ import java.nio.ByteOrder
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.asm.Tokens._
+import com.scalaAsm.x86.x86Instruction
 
 case class Assembled(val code: Seq[Token], val data: Seq[Token]) {
   def rawCode: Array[Byte] = code.collect{ case CodeToken(x) => x.getBytes}.reduce(_++_)
 }
 
 trait CodeBuilder {
-  val codeTokens = ListBuffer[Any]()
+  val codeTokens = ListBuffer[Token]()
+}
+
+trait SimpleCodeBuilder {
+  val codeTokens = ListBuffer[x86Instruction#Instruction]()
 }
 
 abstract class AsmProgram extends AsmData with AsmCode {
@@ -27,23 +32,16 @@ abstract class AsmProgram extends AsmData with AsmCode {
     stream ++ poo
   }
 
-  def assemble = {
+  def assemble: Assembled = {
 
     data.compile
 
-    val tokens = ListBuffer[Any]()
-    for (token <- code.builder.codeTokens) {
-      if (token.isInstanceOf[Proc]) {
-        val proc = token.asInstanceOf[Proc]
-        tokens += BeginProc(proc.name)
-      }
-      else
-      {
-        tokens += token.asInstanceOf[Token]
-      }
+    val tokens = code.builder.codeTokens map {
+        case Procedure(name) => BeginProc(name)
+        case token => token
     }
 
-    Assembled(tokens.asInstanceOf[ListBuffer[Token]].toSeq, dataTokens)
+    Assembled(tokens, dataTokens)
   }
 
 //  def getAssembledPermutations: Iterator[Assembled] = {

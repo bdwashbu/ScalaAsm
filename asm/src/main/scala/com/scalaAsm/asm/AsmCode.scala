@@ -7,18 +7,87 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.x86Registers._
 import com.scalaAsm.x86.Operands._
 
+trait AsmCodeSimple extends Registers {
+    
+    implicit val builder = new SimpleCodeBuilder{}
+    
+    def imm8(x: Byte) = Immediate8(x)
+    def imm16(x: Short) = Immediate16(x)
+    def imm32(x: Int) = Immediate32(x)
+    
+    def getRawBytes: Array[Byte] = {
+      builder.codeTokens.flatMap(x => x.getBytes).toArray
+    }
+
+    implicit def toByte(x: Int) = x.toByte
+    val One = new One{}
+    
+    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1,p2)
+
+    def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+
+    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+      
+    def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+
+    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1, p2)
+
+    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+
+    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: SimpleCodeBuilder) = 
+      code.codeTokens += ev.get(p1, p2)
+
+    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: SimpleCodeBuilder) = 
+      code.codeTokens += ev.get(p1, p2)
+
+    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1, p2)
+    
+    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+    
+    def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+    
+    def int[O1](p1: O1)(implicit ev: INT_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+
+    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1,p2)
+
+    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1, p2)
+
+    def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+
+    def retn(implicit ev: RET, code: SimpleCodeBuilder) = code.codeTokens += ev.get
+
+    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1, p2)
+
+    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = code.codeTokens += ev.get
+
+    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: SimpleCodeBuilder) =
+      code.codeTokens += ev.get(p1)
+}
+
 trait AsmCode extends Registers {
   self: AsmProgram =>
 
   val code: Code
   
   def proc(name: String)(x: => Unit)(implicit code: CodeBuilder) = {
-    val result = Proc(name)
+    val result = Procedure(name)
     code.codeTokens += result
     x
   }
-  
-  case class Proc(name: String)
 
   case class Code() {
     
@@ -46,9 +115,6 @@ trait AsmCode extends Registers {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
 
-//    private def toCode(machineCode: Array[Byte]) = Code {
-//      codeTokens :+ CodeToken(machineCode, machineCode.size)
-//    }
 
     private def procRef(procName: String)(implicit code: CodeBuilder) =
       code.codeTokens += ProcRef(procName)

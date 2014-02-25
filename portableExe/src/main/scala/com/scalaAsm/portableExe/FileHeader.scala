@@ -13,7 +13,7 @@ class FileHeader(optionalHeader: OptionalHeader, directories: DataDirectories) {
     var characteristics: Short = 271
 
     def apply() = {
-      val bbuf = ByteBuffer.allocate(256);
+      val bbuf = ByteBuffer.allocate(20);
       bbuf.order(ByteOrder.LITTLE_ENDIAN)
       bbuf.putShort(machine)
       bbuf.putShort(numberOfSections)

@@ -10,12 +10,20 @@ protected[x86] trait AddressingFormSpecifier {
     val displacment: Option[Immediate]
     val immediate: Option[Immediate]
     
-    def getBytes: Array[Byte] = {
+    lazy val getBytes: Array[Byte] = {
       val components = List(scaleIndexBase, displacment, immediate)
       (modRM match {
         case (Some(modRM)) => Array(modRM.get)
         case _ => Array.emptyByteArray
       }) ++ components.flatten.flatMap(_.getBytes)
+    }
+    
+    lazy val size: Int = {
+      val components = List(scaleIndexBase, displacment, immediate)
+      (modRM match {
+        case (Some(modRM)) => 1
+        case _ => 0
+      }) + components.flatten.map(imm => imm.size).sum
     }
   }
 

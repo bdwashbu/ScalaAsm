@@ -7,9 +7,7 @@ import com.scalaAsm.utils.Endian
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.x86Instruction
 
-case class Assembled(val code: Seq[Token], val data: Seq[Token]) {
-  def rawCode: Array[Byte] = code.collect{ case CodeToken(x) => x.getBytes}.reduce(_++_)
-}
+case class Assembled(val code: Seq[Token], val data: Seq[Token])
 
 trait CodeBuilder {
   val codeTokens = ListBuffer[Token]()
@@ -24,12 +22,6 @@ abstract class AsmProgram extends AsmData with AsmCode {
   def hex2Bytes(hex: String) = {
     def stripChars(s: String, ch: String) = s filterNot (ch contains _)
     stripChars(hex, " -").grouped(2).map(Integer.parseInt(_, 16).toByte).toArray
-  }
-
-  def alignStream(stream: Array[Byte], x: Int) = {
-    val size = stream.size
-    val poo = Array.fill[Byte]((x - (size % x)) % x)(0x00.toByte)
-    stream ++ poo
   }
 
   def assemble: Assembled = {

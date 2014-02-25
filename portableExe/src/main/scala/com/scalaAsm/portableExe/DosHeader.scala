@@ -1,11 +1,8 @@
 package com.scalaAsm.portableExe
 
-import java.io.DataOutputStream
-import java.io.ByteArrayOutputStream
 import com.scalaAsm.asm.AsmCodeSimple
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import com.scalaAsm.x86.Instructions.PUSH._
 
 class DosHeader {
     val e_magic = "MZ"  // Magic number

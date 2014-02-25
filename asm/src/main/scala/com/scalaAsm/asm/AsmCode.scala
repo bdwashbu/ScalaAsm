@@ -96,25 +96,11 @@ trait AsmCode extends Registers {
     def imm8(x: Byte) = Immediate8(x)
     def imm16(x: Short) = Immediate16(x)
     def imm32(x: Int) = Immediate32(x)
-    
-    def modRM(reg2: Register, offset82: Option[Immediate], isMemory2: Boolean): rm32 = new RegisterOrMemory {
-      type Size = DwordOperand
-      val reg = reg2
-      val isMemory = isMemory2
-      val offset = offset82
-      
-      
-    }
-
-    def b(bytes: Byte*): Array[Byte] = {
-      bytes.toArray
-    }
 
     var parserPos: Int = 0
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
-
 
     private def procRef(procName: String)(implicit code: CodeBuilder) =
       code.codeTokens += ProcRef(procName)
@@ -122,9 +108,8 @@ trait AsmCode extends Registers {
     def label(name: String)(implicit code: CodeBuilder) =
        code.codeTokens += Label(name)
 
-    def align(to: Int, filler: Byte = 0xCC.toByte)(implicit code: CodeBuilder) = {
+    def align(to: Int, filler: Byte = 0xCC.toByte)(implicit code: CodeBuilder) =
        code.codeTokens += Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
-    }
 
     def push(param: String)(implicit code: CodeBuilder) =
       code.codeTokens += Reference(param)

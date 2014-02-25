@@ -5,7 +5,6 @@ import com.scalaAsm.utils.Endian
 
 object AsmCompiler 
 {
-
   def compileData(addressOfData: Int, dataTokens: Seq[Token]): (Array[Byte], Map[String, Int]) = {
 
     val dataSection: Seq[PostToken] = {

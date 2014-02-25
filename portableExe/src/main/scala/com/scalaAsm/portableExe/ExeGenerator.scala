@@ -63,9 +63,10 @@ object ExeGenerator extends Sections {
     val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
     
     val dosHeader = new DosHeader
-    val peHeader = new PeHeader(optionalHeader, directories)
+    val fileHeader = new FileHeader(optionalHeader, directories)
+    val ntHeader = new NtHeader(fileHeader, optionalHeader)
     
-    new PortableExecutable(dosHeader, peHeader, optionalHeader, directories, sections, code, rawData, compiledImports)
+    new PortableExecutable(dosHeader, ntHeader, directories, sections, code, rawData, compiledImports)
   }
   
   

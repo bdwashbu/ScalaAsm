@@ -1,8 +1,8 @@
 package com.scalaAsm.portableExe
 
+
 class PortableExecutable(val dosHeader: DosHeader,
-                         val peHeader: PeHeader,
-                         val optionalHeader: OptionalHeader,
+						 val ntHeader: NtHeader,
                  		 val directories: DataDirectories,
                  		 val sections: CompiledSections,
                  		 val code: Array[Byte],
@@ -11,11 +11,10 @@ class PortableExecutable(val dosHeader: DosHeader,
  {
   	def get(): Array[Byte] = {
   	  val result = ExeGenerator.align(ExeGenerator.align(dosHeader(),16,0) ++
-  	                                  peHeader() ++
-  	                                  optionalHeader() ++
+  	                                  ntHeader() ++
   	                                  directories() ++
-  	                                  sections.sections, optionalHeader.sizeOfCode, 0x00) ++
-  	               ExeGenerator.align(code, optionalHeader.fileAlignment, 0x00) ++
+  	                                  sections.sections, ntHeader.optionalHeader.sizeOfCode, 0x00) ++
+  	               ExeGenerator.align(code, ntHeader.optionalHeader.fileAlignment, 0x00) ++
   	               rawData ++
   	               compiledImports.rawData
   	  ExeGenerator.align(result, 0x100, 0x00)

@@ -3,8 +3,7 @@ package com.scalaAsm.portableExe
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class PeHeader(optionalHeader: OptionalHeader, directories: DataDirectories) {
-    var signature = "PE"
+class FileHeader(optionalHeader: OptionalHeader, directories: DataDirectories) {
     var machine: Short = 0x14C
     var numberOfSections: Short = 2
     var timeDateStamp: Int = 0x5132F2E5
@@ -16,7 +15,6 @@ class PeHeader(optionalHeader: OptionalHeader, directories: DataDirectories) {
     def apply() = {
       val bbuf = ByteBuffer.allocate(256);
       bbuf.order(ByteOrder.LITTLE_ENDIAN)
-      bbuf.put(signature.toCharArray().map(_.toByte) ++ Array[Byte](0,0)) // end of signature is always 0x0000
       bbuf.putShort(machine)
       bbuf.putShort(numberOfSections)
       bbuf.putInt(timeDateStamp)

@@ -8,7 +8,7 @@ import scala.collection.mutable.LinkedHashMap
 import scala.collection.immutable.TreeMap
 import java.io.ByteArrayOutputStream
 
-trait ExeWriter {
+private trait ExeWriter {
 
     def write(stream: DataOutputStream)
   
@@ -49,45 +49,45 @@ trait ExeWriter {
     }
   }
 
-	case class SectionHeader(name: String,
-      virtualSize: Int,
-      virtualAddress: Int,
-      sizeOfRawData: Int,
-      pointerOrRawData: Int,
-      relocPtr: Int,
-      linenumPtr: Int,
-      relocations: Short,
-      lineNumbers: Short,
-      characteristics: Int) {
+private case class SectionHeader(name: String,
+  virtualSize: Int,
+  virtualAddress: Int,
+  sizeOfRawData: Int,
+  pointerOrRawData: Int,
+  relocPtr: Int,
+  linenumPtr: Int,
+  relocations: Short,
+  lineNumbers: Short,
+  characteristics: Int) {
 
-      def write: Array[Byte] = {
-        val bbuf = ByteBuffer.allocate(256);
-        bbuf.order(ByteOrder.LITTLE_ENDIAN)
-        bbuf.put(name.padTo(8, 0.toChar).map(_.toByte).toArray)
-        bbuf.putInt(virtualSize)
-        bbuf.putInt(virtualAddress)
-        bbuf.putInt(sizeOfRawData)
-        bbuf.putInt(pointerOrRawData)
-        bbuf.putInt(relocPtr)
-        bbuf.putInt(linenumPtr)
-        bbuf.putShort(relocations)
-        bbuf.putShort(lineNumbers)
-        bbuf.putInt(characteristics)
-        bbuf.array().take(bbuf.position())
-      }
-    }
+  def write: Array[Byte] = {
+    val bbuf = ByteBuffer.allocate(256);
+    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+    bbuf.put(name.padTo(8, 0.toChar).map(_.toByte).toArray)
+    bbuf.putInt(virtualSize)
+    bbuf.putInt(virtualAddress)
+    bbuf.putInt(sizeOfRawData)
+    bbuf.putInt(pointerOrRawData)
+    bbuf.putInt(relocPtr)
+    bbuf.putInt(linenumPtr)
+    bbuf.putShort(relocations)
+    bbuf.putShort(lineNumbers)
+    bbuf.putInt(characteristics)
+    bbuf.array().take(bbuf.position())
+  }
+}
 
-    object Characteristic extends Enumeration {
-      type characteristic = Value
-      val CODE = Value(0x00000020)
-      val INITIALIZED = Value(0x00000040)
-      val UNINIT_DATA = Value(0x00000080)
-      val NOT_CACHE = Value(0x04000000)
-      val NOT_PAGE = Value(0x08000000)
-      val SHARED = Value(0x10000000)
-      val EXECUTE = Value(0x20000000)
-      val READ = Value(0x40000000)
-      val WRITE = Value(0x80000000)
-    }
+private object Characteristic extends Enumeration {
+  type characteristic = Value
+  val CODE = Value(0x00000020)
+  val INITIALIZED = Value(0x00000040)
+  val UNINIT_DATA = Value(0x00000080)
+  val NOT_CACHE = Value(0x04000000)
+  val NOT_PAGE = Value(0x08000000)
+  val SHARED = Value(0x10000000)
+  val EXECUTE = Value(0x20000000)
+  val READ = Value(0x40000000)
+  val WRITE = Value(0x80000000)
+}
   
   

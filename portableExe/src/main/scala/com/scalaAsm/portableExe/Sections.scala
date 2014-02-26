@@ -1,10 +1,10 @@
 package com.scalaAsm.portableExe
 
-case class CompiledSections(sectionHeaders: SectionHeader*) {
+private[portableExe] case class CompiledSections(sectionHeaders: SectionHeader*) {
   val sections = sectionHeaders.map(_.write).reduce(_ ++ _)
 }
 
-trait Sections {
+private[portableExe] trait Sections {
 
   def compileSections(codeSize: Int, dataSize: Int): CompiledSections = {
 

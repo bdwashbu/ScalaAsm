@@ -4,14 +4,14 @@ import java.io.DataOutputStream
 import scala.collection.immutable.TreeMap
 import java.io.ByteArrayOutputStream
 
-case class Directory(virtualAddress: Int, size: Int) extends ExeWriter {
+private[portableExe] case class Directory(virtualAddress: Int, size: Int) extends ExeWriter {
   def write(stream: DataOutputStream) {
     write(stream, virtualAddress)
     write(stream, size)
   }
 }
 
-case class DataDirectories(imports: Directory, importAddressTable: Directory) extends Function0[Array[Byte]]{
+private[portableExe] case class DataDirectories(imports: Directory, importAddressTable: Directory) extends Function0[Array[Byte]]{
   
     object DirectoryTypes extends Enumeration {
       type characteristic = Value

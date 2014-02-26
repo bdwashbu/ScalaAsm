@@ -13,7 +13,7 @@ import com.scalaAsm.asm.Assembled
 import com.scalaAsm.asm.AsmCompiler
 import com.scalaAsm.utils.Endian
   
- case class CompiledImports(rawData: Array[Byte],
+private[portableExe] case class CompiledImports(rawData: Array[Byte],
                             boundImportSize: Int,
                             nameTableSize: Int,
                             imports: Map[String, Int],
@@ -41,7 +41,7 @@ object ExeGenerator extends Sections {
     array ++ Array.fill(numPadding)(filler)
   }
   
-  def compileImports(addressOfData: Int, dataSize: Int): CompiledImports = { 
+  private def compileImports(addressOfData: Int, dataSize: Int): CompiledImports = { 
     
     val test = Imports(externs = Seq(Extern("kernel32.dll", List("ExitProcess", "GetStdHandle", "WriteFile", "FlushConsoleInputBuffer", "Sleep"))),
                        nonExterns = Seq(Extern("msvcrt.dll", List("printf", "_kbhit", "_getch"))),

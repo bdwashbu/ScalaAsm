@@ -5,28 +5,28 @@ import java.io.ByteArrayOutputStream
 import scala.collection.mutable.ListBuffer
 import scala.collection.immutable.TreeMap
 
-case class Extern(dllName: String, functionNames: Seq[String])
+private[portableExe] case class Extern(dllName: String, functionNames: Seq[String])
 
-case class ImageThunkDataRVA(offset: Int) extends AnyVal
+private[portableExe] case class ImageThunkDataRVA(offset: Int) extends AnyVal
 
-case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val offset: Int) {
+private[portableExe] case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val offset: Int) {
 
-  def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0" else name
+  private def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0" else name
 
-  trait Positionable extends ExeWriter {
+  private trait Positionable extends ExeWriter {
     var position: Int = 0
   }
 
-  case class ImageImportByNameRVA(var offset: Int, dllName: String = "")
+  private case class ImageImportByNameRVA(var offset: Int, dllName: String = "")
 
-  case class ImageThunkData(imagePointer: ImageImportByNameRVA, name: String) extends Positionable {
+  private case class ImageThunkData(imagePointer: ImageImportByNameRVA, name: String) extends Positionable {
     def write(stream: DataOutputStream) {
       position = stream.size
       write(stream, imagePointer.offset)
     }
   }
 
-  case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String) extends Positionable {
+  private case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String) extends Positionable {
 
     def write(stream: DataOutputStream) {
       position = stream.size
@@ -35,11 +35,11 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
 
-  trait ImportSymbol extends Positionable {
+  private trait ImportSymbol extends Positionable {
     val name: String
   }
 
-  case class ImageImportByName(hint: Short = 0, name: String) extends ImportSymbol {
+  private case class ImageImportByName(hint: Short = 0, name: String) extends ImportSymbol {
 
     def write(stream: DataOutputStream) {
       position = stream.size
@@ -48,7 +48,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
 
-  case class DLLName(name: String) extends ImportSymbol {
+  private case class DLLName(name: String) extends ImportSymbol {
 
     def write(stream: DataOutputStream) {
       position = stream.size
@@ -56,7 +56,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
 
-  case class ImageImportDescriptor(
+  private case class ImageImportDescriptor(
     var originalFirstThunk: ImageThunkDataRVA,
     val timeStamp: Int,
     val forwarderChain: Int, // -1 if no forwarders
@@ -74,7 +74,7 @@ case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val of
     }
   }
 
-  object ImageImportDescriptor {
+  private object ImageImportDescriptor {
     val size = 20;
   }
 

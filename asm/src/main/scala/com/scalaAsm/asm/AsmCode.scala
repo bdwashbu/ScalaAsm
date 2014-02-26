@@ -22,60 +22,53 @@ trait AsmCodeSimple extends Registers {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
     
-    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1,p2)
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: TwoOperands[O1,O2], code: SimpleCodeBuilder) = {
+      ev.set(p1,p2)
+      code.codeTokens += ev.getInstruction
+    }
+    
+    def oneOp[O1](p1:O1, ev: OneOperand[O1], code: SimpleCodeBuilder) = {
+      ev.set(p1)
+      code.codeTokens += ev.getInstruction
+    }
+    
+    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 
-    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
       
-    def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 
-    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1, p2)
+    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 
-    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: SimpleCodeBuilder) = 
-      code.codeTokens += ev.get(p1, p2)
+    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: SimpleCodeBuilder) = 
-      code.codeTokens += ev.get(p1, p2)
+    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1, p2)
+    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
     
-    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
     
-    def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
     
-    def int[O1](p1: O1)(implicit ev: INT_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def int[O1](p1: O1)(implicit ev: INT_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 
-    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1,p2)
+    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1, p2)
+    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 
-    def retn(implicit ev: RET, code: SimpleCodeBuilder) = code.codeTokens += ev.get
+    def retn(implicit ev: RET, code: SimpleCodeBuilder) = code.codeTokens += ev.getInstruction
 
-    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1, p2)
+    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = code.codeTokens += ev.get
+    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = code.codeTokens += ev.getInstruction
 
-    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: SimpleCodeBuilder) =
-      code.codeTokens += ev.get(p1)
+    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 }
 
 trait AsmCode extends Registers {
@@ -102,6 +95,16 @@ trait AsmCode extends Registers {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
 
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: TwoOperands[O1,O2], code: CodeBuilder) = {
+      ev.set(p1,p2)
+      code.codeTokens += CodeToken(ev.getInstruction)
+    }
+    
+    def oneOp[O1](p1:O1, ev: OneOperand[O1], code: CodeBuilder) = {
+      ev.set(p1)
+      code.codeTokens += CodeToken(ev.getInstruction)
+    }
+    
     private def procRef(procName: String)(implicit code: CodeBuilder) =
       code.codeTokens += ProcRef(procName)
 
@@ -114,63 +117,50 @@ trait AsmCode extends Registers {
     def push(param: String)(implicit code: CodeBuilder) =
       code.codeTokens += Reference(param)
 
-    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1,p2))
+    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) = {
+      ev.set(p1,p2)
+      code.codeTokens += CodeToken(ev.getInstruction)
+    }
 
-    def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
-    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
       
-    def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
-    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
-    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: CodeBuilder) = 
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: CodeBuilder) = 
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
     def jnz(labelRef: String)(implicit code: CodeBuilder) =
       code.codeTokens += LabelRef(labelRef, 0x75.toByte)
     
-    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
     def jz(labelRef: String)(implicit code: CodeBuilder) =
       code.codeTokens += LabelRef(labelRef, 0x74.toByte)
     
-    def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
     
-    def int[O1](p1: O1)(implicit ev: INT_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def int[O1](p1: O1)(implicit ev: INT_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
-    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1,p2))
+    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
-    def retn(implicit ev: RET, code: CodeBuilder) = code.codeTokens += CodeToken(ev.get)
+    def retn(implicit ev: RET, code: CodeBuilder) = code.codeTokens += CodeToken(ev.getInstruction)
 
-    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1, p2))
+    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def leave(implicit ev: LEAVE, code: CodeBuilder) = code.codeTokens += CodeToken(ev.get)
+    def leave(implicit ev: LEAVE, code: CodeBuilder) = code.codeTokens += CodeToken(ev.getInstruction)
 
     def call(refName: String)(implicit code: CodeBuilder) =
       code.codeTokens += Reference(refName)
@@ -178,8 +168,7 @@ trait AsmCode extends Registers {
     def jmp(ref: String)(implicit code: CodeBuilder) =
       code.codeTokens += JmpRef(ref)
       
-    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: CodeBuilder) =
-      code.codeTokens += CodeToken(ev.get(p1))
+    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
   }
 
 }

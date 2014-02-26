@@ -1,22 +1,21 @@
 package com.scalaAsm.x86.Instructions
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.TwoOperands
+import com.scalaAsm.x86.OperandEncoding
 import com.scalaAsm.x86.{ModRM, x86Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand, ByteOperand}
 import com.scalaAsm.x86.AddressingFormSpecifier
 import com.scalaAsm.x86.x86Registers._
+import com.scalaAsm.x86.Instruction
 
-class SHL extends x86Instruction("SHL")
+abstract class SHL extends x86Instruction("SHL")
 
-trait SHL_2[-O1, -O2] extends SHL {
-  def get(x: O1, y: O2): Instruction
-}
+trait SHL_2[-O1, -O2] extends SHL with TwoOperands[O1,O2] with OperandEncoding
 
 object SHL {
   
   implicit object shl1 extends SHL_2[rm8, One] {
-    def get(x: rm8, y: One) = new Instruction {
-      val operands = M1(x)
-      val opcode = OneOpcode(0xD0) /+ 4
-     }
+      def operands = M1(x)
+      def opcode = OneOpcode(0xD0) /+ 4
   }
 }

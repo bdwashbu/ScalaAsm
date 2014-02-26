@@ -16,6 +16,6 @@ object SHR {
   
   implicit object shr1 extends SHR_2[r32, imm8] {
       def operands = MI(x,y)
-      def opcode = 0xC1 /+ 5
+      val opcode = 0xC1 /+ 5
   }
 }

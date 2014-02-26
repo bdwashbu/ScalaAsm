@@ -15,6 +15,6 @@ object LEA {
 
   implicit object lea1 extends LEA_2[r32, rm32] {
       def operands = RM(x,y)
-      def opcode = 0x8D /+ 0
+      val opcode = 0x8D /+ 0
   }
 }

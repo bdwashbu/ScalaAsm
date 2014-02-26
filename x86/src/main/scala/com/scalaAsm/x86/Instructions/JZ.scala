@@ -21,6 +21,6 @@ object JZ {
 		    val displacment = None
 		    val immediate = Some(x)
 	     })}
-      def opcode = OneOpcode(0x74)
+      val opcode = OneOpcode(0x74)
   }
 }

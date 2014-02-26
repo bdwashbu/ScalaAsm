@@ -15,6 +15,6 @@ object JNZ {
   
   implicit object jnz1 extends JNZ_1[imm8] {
       def operands = new OneOperand[imm8](x) {def getAddressingForm = null}
-      def opcode = OneOpcode(0x75)
+      val opcode = OneOpcode(0x75)
   }
 }

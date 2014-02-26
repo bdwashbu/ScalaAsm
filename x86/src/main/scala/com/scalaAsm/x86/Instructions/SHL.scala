@@ -16,6 +16,6 @@ object SHL {
   
   implicit object shl1 extends SHL_2[rm8, One] {
       def operands = M1(x)
-      def opcode = OneOpcode(0xD0) /+ 4
+      val opcode = OneOpcode(0xD0) /+ 4
   }
 }

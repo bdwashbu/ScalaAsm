@@ -14,12 +14,12 @@ trait ADD_2[-O1, -O2] extends ADD with TwoOperands[O1,O2] with OperandEncoding
 object ADD {
   
   implicit object add1 extends ADD_2[r32, imm8] {
-      def opcode = 0x83 /+ 0
+      val opcode = 0x83 /+ 0
       def operands = MI(x,y)
   }
   
   implicit object add2 extends ADD_2[r16, imm8] {
-      def opcode = 0x83 /+ 0
+      val opcode = 0x83 /+ 0
       def operands = MI(x,y)
   }
 }

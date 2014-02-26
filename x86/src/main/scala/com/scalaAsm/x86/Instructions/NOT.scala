@@ -15,6 +15,6 @@ object NOT {
   
   implicit object not1 extends NOT_1[rm32] {
       def operands = M(x)
-      def opcode = 0xF7 /+ 2
+      val opcode = 0xF7 /+ 2
   }
 }

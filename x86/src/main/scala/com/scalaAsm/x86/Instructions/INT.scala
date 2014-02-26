@@ -15,6 +15,6 @@ object INT {
 
   implicit object int1 extends INT_1[imm8] {
     def operands = I[imm8](x)
-    def opcode = OneOpcode(0xCD)
+    val opcode = OneOpcode(0xCD)
   }
 }

@@ -13,6 +13,6 @@ object AND {
   
   implicit object and1 extends AND_2[r32, rm32] {
       def operands = RM(x,y)
-      def opcode: Opcodes = 0x23
+      val opcode: Opcodes = 0x23
   }
 }

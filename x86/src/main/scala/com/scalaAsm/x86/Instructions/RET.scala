@@ -10,6 +10,6 @@ object RET {
 
   implicit object NearReturn extends RET {
       def operands = NA
-      def opcode: Opcodes = 0xC3
+      val opcode: Opcodes = 0xC3
   }
 }

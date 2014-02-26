@@ -1,6 +1,6 @@
 ScalaAsm
 ========
-#### x86 Assembler written in Scala
+#### State-of-the-art x86 Assembler written in Scala
 
 * Have you ever wondered how executable files work?
 

@@ -3,7 +3,7 @@ package com.scalaAsm.portableExe
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class OptionalHeader {
+class OptionalHeader(val directories: DataDirectories) {
     val magic: Short = 0x10b
     var majorLinkerVersion: Char = 2
     var minorLinkerVersion: Char = 50
@@ -37,8 +37,10 @@ class OptionalHeader {
     var loaderFlags: Int = 0
     var NnumberOfRvaAndSizes: Int = 16
 
+    def size: Int = 96 + directories.size
+    
     def apply() = {
-      val bbuf = ByteBuffer.allocate(512);
+      val bbuf = ByteBuffer.allocate(96);
       bbuf.order(ByteOrder.LITTLE_ENDIAN)
       bbuf.putShort(magic)
       bbuf.put(majorLinkerVersion.toByte)
@@ -70,6 +72,6 @@ class OptionalHeader {
       bbuf.putInt(sizeOfHeapCommit)
       bbuf.putInt(loaderFlags)
       bbuf.putInt(NnumberOfRvaAndSizes)
-      bbuf.array().take(bbuf.position())
+      bbuf.array()
     }
   }

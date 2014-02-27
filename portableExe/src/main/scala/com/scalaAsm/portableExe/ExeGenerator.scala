@@ -19,15 +19,15 @@ private[portableExe] case class CompiledImports(rawData: Array[Byte],
                             imports: Map[String, Int],
                             externs: Map[String, Int]) {
   
-  def getImportsDirectory(optionalHeader: OptionalHeader, dataSize: Int) = {
+  def getImportsDirectory(addressOfData: Int, dataSize: Int) = {
     
-    val importsLocation = optionalHeader.addressOfData + dataSize
+    val importsLocation = addressOfData + dataSize
     Directory(importsLocation, boundImportSize)
   }
   
-  def getIATDirectory(optionalHeader: OptionalHeader, dataSize: Int) = {
+  def getIATDirectory(addressOfData: Int, dataSize: Int) = {
     
-    val endOfData = optionalHeader.addressOfData + dataSize
+    val endOfData = addressOfData + dataSize
     val IATlocation = endOfData + boundImportSize + nameTableSize
     Directory(IATlocation, nameTableSize)
   }  
@@ -50,20 +50,23 @@ object ExeGenerator extends Sections {
     test.link
   }
 
-  def compile(asm: Assembled): PortableExecutable = {
+  def compile(asm: Assembled, addressOfData: Int): PortableExecutable = {
 
-    val optionalHeader = new OptionalHeader
-    val (rawData, variables) = AsmCompiler.compileData(optionalHeader.addressOfData, asm.data)
-    val compiledImports = compileImports(optionalHeader.addressOfData, rawData.size)
+    val (rawData, variables) = AsmCompiler.compileData(addressOfData, asm.data)
+    val compiledImports = compileImports(addressOfData, rawData.size)
+    val directories: DataDirectories = DataDirectories(imports = compiledImports.getImportsDirectory(addressOfData, rawData.size),
+                                      importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size))
+    
+    val optionalHeader = new OptionalHeader(directories)
+    
     val code = AsmCompiler.compileAssembly(optionalHeader.imageBase, asm, compiledImports.imports, compiledImports.externs, variables)
     
-    val directories = DataDirectories(imports = compiledImports.getImportsDirectory(optionalHeader, rawData.size),
-                                      importAddressTable = compiledImports.getIATDirectory(optionalHeader, rawData.size))
+    
     
     val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
     
     val dosHeader = new DosHeader
-    val fileHeader = new FileHeader(optionalHeader, directories)
+    val fileHeader = new FileHeader(optionalHeader)
     val ntHeader = new NtHeader(fileHeader, optionalHeader)
     
     new PortableExecutable(dosHeader, ntHeader, directories, sections, code, rawData, compiledImports)

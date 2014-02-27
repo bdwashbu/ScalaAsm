@@ -22,7 +22,7 @@ private[portableExe] case class DataDirectories(imports: Directory, importAddres
     import DirectoryTypes._
     
     // Virtual Address and Size
-    val directories = TreeMap(
+    private val directories = TreeMap(
       Export -> None,
       Import -> Some(imports),
       Resource -> None,
@@ -40,6 +40,10 @@ private[portableExe] case class DataDirectories(imports: Directory, importAddres
       DelayImport -> None,
       Reserved -> None)
 
+    def size: Int = {
+      directories.size * 8
+    }
+      
     def apply(): Array[Byte] = {
       val directoryOutput = new ByteArrayOutputStream()
       val stream = new DataOutputStream(directoryOutput)

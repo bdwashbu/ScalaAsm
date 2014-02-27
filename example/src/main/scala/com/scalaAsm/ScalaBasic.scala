@@ -13,7 +13,7 @@ object ScalaBasic {
 
       val beginTime = System.nanoTime()
       val assembled = HelloWorld.assemble
-      val exe = ExeGenerator.compile(assembled)
+      val exe = ExeGenerator.compile(assembled, 0x2000)
       outputStream.write(exe.get)
 
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

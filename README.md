@@ -11,14 +11,38 @@ Scala x86
 Scala x86 can help with all these things.  The library performs two main functions: emit x86 machine code + assemble this into a portable executable file for execution on windows.  
 
 
-#### Implementing x86 is a huge pain
+#### Implementing x86
 
-Lets face it, implenting the whole of x86 is a massive undertaking.  There are over 1000 instructions, and each instruction could have upwards of 20 different types of inputs!
+Lets face it, implementing the whole of x86 is a massive undertaking.  There are over 1000 instructions, and each instruction could have upwards of 20 different types of inputs!
 
-Scala x86 makes the process of defining instructions as easy as possible.  It also strives to resemble the specification at all times.  
+Scala x86 makes the process of defining instructions as easy as possible.  It also strives to resemble the specification at all times.  Scalas type safety and consise notation help reduce the chance of errors and promote readability.
 
+Heres an example of some one-operand PUSH implementations for a 16-bit register, 8-bit immediate value, and 16-bit immediate value.
 
-Heres an example ScalaAsm program:
+```scala
+implicit object push8 extends PUSH_1[r16] {
+  def operands = O(x)
+  def opcode = OpcodePlusRd(0x50, x)
+}
+  
+implicit object push4 extends PUSH_1[imm8] {
+  def operands = I[imm8](x)
+  val opcode: Opcodes = 0x6A
+}
+  
+implicit object push5 extends PUSH_1[imm16] {
+  def operands = I[imm16](x)
+  val opcode: Opcodes = 0x68
+}
+```
+
+Each instruction takes only 4 lines of code!
+
+### Using Scala x86
+
+You can use Scala x86 to power any sort of programming language you'd like.  
+
+Heres an example some low-level assembly:
 
 ```scala
 object HelloWorld extends AsmProgram {

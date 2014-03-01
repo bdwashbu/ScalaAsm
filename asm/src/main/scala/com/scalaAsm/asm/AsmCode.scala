@@ -117,11 +117,10 @@ trait AsmCode extends Registers {
     def push(param: String)(implicit code: CodeBuilder) =
       code.codeTokens += Reference(param)
 
-    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) = {
-      ev.set(p1,p2)
-      code.codeTokens += CodeToken(ev.getInstruction)
-    }
+    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
+    def mul[O1](p1: O1)(implicit ev: MUL_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    
     def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
     def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)

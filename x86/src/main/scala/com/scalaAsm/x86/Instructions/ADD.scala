@@ -22,4 +22,9 @@ object ADD {
       val opcode = 0x83 /+ 0
       def operands = MI(x,y)
   }
+  
+  implicit object add3 extends ADD_2[r32, rm32] {
+      def operands = RM(x,y)
+      val opcode: Opcodes = 0x03
+  }
 }

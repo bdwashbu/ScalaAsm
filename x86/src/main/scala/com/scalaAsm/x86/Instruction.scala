@@ -2,6 +2,7 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.ModRM._
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.x86Registers._
 
 trait TwoOperands[-O1,-O2] {
   protected[this] var x: O1 = _
@@ -35,6 +36,7 @@ abstract class x86Instruction(val mnemonic: String) {
   
   def opcode: Opcodes
   def operands: OperandFormat
+  def destinationReg: Option[Register] = None
 }
 
 trait Instruction extends OperandEncoding {

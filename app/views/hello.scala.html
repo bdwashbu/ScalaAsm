@@ -1,0 +1,15 @@
+@(instructions: List[String])
+
+@main("Here is the result:") {
+
+    <ul style="color: inherited")">
+        @for(inst <- instructions) {
+            <li>Hello @inst!</li>
+        }
+    </ul>
+
+    <p class="buttons">
+        <a href="@routes.Application.index">Back to the form</a>
+    </p>
+
+}

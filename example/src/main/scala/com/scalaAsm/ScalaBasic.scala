@@ -12,7 +12,7 @@ object ScalaBasic {
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 
       val beginTime = System.nanoTime()
-      val assembled = HelloWorld2.assemble
+      val assembled = HelloWorld.assemble
       val exe = ExeGenerator.compile(assembled, 0x2000)
       outputStream.write(exe.get)
 

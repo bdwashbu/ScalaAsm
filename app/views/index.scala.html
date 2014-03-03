@@ -1,0 +1,22 @@
+@(helloForm: Form[x86App])
+
+@import helper._
+
+@main(title = "The 'helloworld' application") {
+
+    <h1>Configure your 'Hello world':</h1>
+
+    @form(action = routes.Application.sayHello, args = 'id -> "helloform") {
+
+        @inputText(
+            field = helloForm("expression"),
+            args = '_label -> "Enter a math expression", 'placeholder -> "World"
+        )
+
+        <p class="buttons">
+            <input type="submit" id="submit">
+        <p>
+
+    }
+
+}

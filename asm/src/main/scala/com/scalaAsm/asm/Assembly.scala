@@ -17,7 +17,7 @@ trait SimpleCodeBuilder {
   val codeTokens = ListBuffer[Instruction]()
 }
 
-abstract class AsmProgram extends AsmData with AsmCode {
+trait AsmProgram extends AsmData with AsmCode {
   
   def hex2Bytes(hex: String) = {
     def stripChars(s: String, ch: String) = s filterNot (ch contains _)

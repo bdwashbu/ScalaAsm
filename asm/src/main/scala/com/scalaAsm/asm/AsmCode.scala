@@ -32,6 +32,9 @@ trait AsmCodeSimple extends Registers {
       code.codeTokens += ev.getInstruction
     }
     
+    
+    def sub[O1, O2](p1: O1, p2: O2)(implicit ev: SUB_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)  
+    
     def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
     def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
@@ -117,6 +120,8 @@ trait AsmCode extends Registers {
     def push(param: String)(implicit code: CodeBuilder) =
       code.codeTokens += Reference(param)
 
+    def sub[O1, O2](p1: O1, p2: O2)(implicit ev: SUB_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code) 
+      
     def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
     def mul[O1](p1: O1)(implicit ev: MUL_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)

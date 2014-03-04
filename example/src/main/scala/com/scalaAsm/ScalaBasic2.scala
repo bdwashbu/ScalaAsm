@@ -97,6 +97,11 @@ object x86Parser {
 			      add(resultReg, imm8(y.toInt))
 	              RESULT(resultReg)
 	            }
+	            case MINUS(IMM(x),IMM(y)) => {
+	              mov(resultReg, imm32(x.toInt))
+			      sub(resultReg, imm8(y.toInt))
+	              RESULT(resultReg)
+	            }
 	            case TIMES(IMM(x),IMM(y)) => {
 		             mov(eax, imm32(x.toInt))
 				     mov(resultReg, imm32(y.toInt))
@@ -111,6 +116,16 @@ object x86Parser {
 	            }
 	            case ADD(RESULT(x),IMM(z)) => {
 	              transform(ADD(IMM(z), RESULT(x)), resultReg)
+	            }
+	            case MINUS(IMM(x),RESULT(y)) => {
+	              mov(resultReg, imm32(x.toInt))
+			      sub(resultReg, y)
+	              RESULT(resultReg)
+	            }
+	            case MINUS(RESULT(x),IMM(z)) => {
+	              mov(resultReg, x)
+			      sub(resultReg, imm8(z.toInt))
+	              RESULT(resultReg)
 	            }
 	            case TIMES(IMM(x),RESULT(y)) => {
 	                 mov(eax, imm32(x.toInt))
@@ -127,6 +142,11 @@ object x86Parser {
 			      add(resultReg, z)
 	              RESULT(resultReg)
 	            }
+	            case MINUS(RESULT(x),RESULT(z)) => {
+	              mov(resultReg, x)
+			      sub(resultReg, z)
+	              RESULT(resultReg)
+	            }
 	            case TIMES(RESULT(x),RESULT(y)) => {
 	                 mov(eax, x)
 				     mov(resultReg, y)
@@ -135,10 +155,13 @@ object x86Parser {
 				     RESULT(resultReg)
 	            }
 	            case ADD(x,IMM(y)) => transform(ADD(transform(x, edi), IMM(y) ), resultReg)
+	            case MINUS(x,IMM(y)) => transform(MINUS(transform(x, edi), IMM(y)), resultReg)
 	            case TIMES(x,IMM(y)) => transform(TIMES(transform(x, edi), IMM(y)), resultReg)
 	            case ADD(IMM(x),y) => transform(ADD(IMM(x), transform(y, edx)), resultReg)
+	            case MINUS(IMM(x),y) => transform(MINUS(IMM(x), transform(y, edx)), resultReg)
 	            case TIMES(IMM(x),y) => transform(TIMES(IMM(x), transform(y, edx)), resultReg)
 	            case ADD(x,y) => transform(ADD(transform(x, edi), transform(y, edx)), resultReg)
+	            case MINUS(x,y) => transform(MINUS(transform(x, edi), transform(y, edx)), resultReg)
 	            case TIMES(x,y) => transform(TIMES(transform(x, edi), transform(y, edx)), resultReg)
 	            case _ => if (inst != null) println(inst); null
 	          }

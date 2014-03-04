@@ -12,6 +12,7 @@ import java.io.FileOutputStream
 import java.io.File
 import com.scalaAsm.asm.AsmProgram
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.data.validation.Constraints._
 
 import views._
 
@@ -22,9 +23,20 @@ object Application extends Controller {
   /**
    * Describes the hello form.
    */
+
+  
   val helloForm = Form(
 	  mapping(
-	    "expression" -> text
+	    "expression" -> (
+	        nonEmptyText 
+	        verifying ("Invalid math expression", expr => { 
+	          try {
+	            val app = x86Parser.parse(expr)
+	            true
+	          } catch {
+	            case _ => false
+	          }
+	       }))
 	  )(x86App.apply)(x86App.unapply)
   )
 
@@ -62,9 +74,6 @@ object Application extends Controller {
 		    content = new java.io.File("test.exe"),
 		    fileName = _ => "result.exe"
 		  )
-        
-        //Ok.stream(instStream(app))
-        //Ok(html.hello(x86Parser.getCodeString(app)))}
       }
       }
     )

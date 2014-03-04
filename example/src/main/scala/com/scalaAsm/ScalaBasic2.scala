@@ -88,122 +88,64 @@ object x86Parser {
 		    val ebp = new EBP
 		    val edx = new EDX
 		    val esp = new ESP 
-		  
-		    val availableRegs = HashSet(edi, ecx, ebp, edx, eax)
-	
-	        def transform(inst: Inst): RESULT = {
+
+	        def transform(inst: Inst, resultReg: Register32): RESULT = {
 	          
 	          inst match {
 	            case ADD(IMM(x),IMM(y)) => {
-	              val regs = availableRegs.take(1).toList
-	              val temp = regs(0)
-	              mov(temp, imm32(x.toInt))
-			      add(temp, imm8(y.toInt))
-			      availableRegs -= temp
-	              RESULT(temp)
+	              mov(resultReg, imm32(x.toInt))
+			      add(resultReg, imm8(y.toInt))
+	              RESULT(resultReg)
 	            }
 	            case TIMES(IMM(x),IMM(y)) => {
-	              val regs = availableRegs.take(3).toList
-	              val temp = regs(0)
-	              val temp2 = regs(1)
-	              val result = regs(2)
-	              if (availableRegs contains eax) {
-	                 availableRegs -= eax
 		             mov(eax, imm32(x.toInt))
-				     mov(temp2, imm32(y.toInt))
-				     mul(temp2)  
-				     RESULT(eax)
-	              } else {
-	                 mov(temp, eax) // save whatever was in eax
-		             mov(eax, imm32(x.toInt))
-				     mov(temp2, imm32(y.toInt))
-				     mul(temp2)
-				     mov(result, eax) // restore whatever was in eax
-				     mov(eax, temp) // restore whatever was in eax
-				     RESULT(result)
-	              }
+				     mov(resultReg, imm32(y.toInt))
+				     mul(resultReg)  
+				     mov(resultReg, eax)
+				     RESULT(resultReg)
 	            }
 	            case ADD(IMM(x),RESULT(y)) => {
-	              val regs = availableRegs.take(2).toList
-	              val temp = regs(0)
-	              val result = regs(1)
-	              mov(temp, imm32(x.toInt))
-			      add(temp, y)
-			      mov(result, temp)
-			      availableRegs -= result
-			      println("returning: " + result)
-	              RESULT(result)
-	            }
-	            case TIMES(IMM(x),RESULT(y)) => {
-	              availableRegs -= eax
-	              val regs = availableRegs.take(3).toList
-	              val temp = regs(0)
-	              val temp2 = regs(1)
-	              val result = regs(2)
-	              mov(temp, eax) // save whatever was in eax
-	              mov(eax, imm32(x.toInt))
-			      mov(temp2, y)
-			      mul(temp2)
-			      mov(result, eax) // restore whatever was in eax
-			      mov(eax, temp) // restore whatever was in eax
-			      availableRegs += eax
-			      RESULT(result)
-	            }
-	
-	            case ADD(RESULT(x),RESULT(y)) => {
-	              add(x, y)
-	              RESULT(x)
+	              mov(resultReg, imm32(x.toInt))
+			      add(resultReg, y)
+	              RESULT(resultReg)
 	            }
 	            case ADD(RESULT(x),IMM(z)) => {
-	              add(x, imm8(z.toInt))
-	              RESULT(x)
+	              transform(ADD(IMM(z), RESULT(x)), resultReg)
+	            }
+	            case TIMES(IMM(x),RESULT(y)) => {
+	                 mov(eax, imm32(x.toInt))
+				     mov(resultReg, y)
+				     mul(resultReg)  
+				     mov(resultReg, eax)
+				     RESULT(resultReg)
+	            }
+	            case TIMES(RESULT(y), IMM(x)) => {
+	                 transform(TIMES(IMM(x), RESULT(y)), resultReg)
+	            }
+	            case ADD(RESULT(x),RESULT(z)) => {
+	              mov(resultReg, x)
+			      add(resultReg, z)
+	              RESULT(resultReg)
 	            }
 	            case TIMES(RESULT(x),RESULT(y)) => {
-	              availableRegs -= eax
-	              val regs = availableRegs.take(2).toList
-	              val temp = regs(0)
-	              val result = regs(1)
-	              mov(eax, x)
-			      mov(temp, y)
-			      mul(temp)
-			      availableRegs += eax
-			      RESULT(eax)
+	                 mov(eax, x)
+				     mov(resultReg, y)
+				     mul(resultReg)  
+				     mov(resultReg, eax)
+				     RESULT(resultReg)
 	            }
-	            case TIMES(RESULT(reg: EAX),IMM(z)) => {
-	              val temp = availableRegs.head
-	              mov(temp, imm32(z.toInt)) // save whatever was in eax
-	              mul(temp)
-	              RESULT(eax)
-	            }
-	            case TIMES(RESULT(x),IMM(y)) => {
-	              availableRegs -= eax
-	              val regs = availableRegs.take(3).toList
-	              val temp = regs(0)
-	              val temp2 = regs(1)
-	              val result = regs(2)
-	              mov(temp, eax) // save whatever was in eax
-	              mov(eax, x)
-			      mov(temp2, imm32(y.toInt))
-			      mul(temp2)
-			      mov(result, eax) // restore whatever was in eax
-			      mov(eax, temp) // restore whatever was in eax
-			      availableRegs += eax
-			      RESULT(result)
-	            }
-	            case ADD(RESULT(x),y) => transform(ADD(RESULT(x), transform(y)))
-	            case TIMES(RESULT(x),y) => transform(TIMES(RESULT(x), transform(y)))
-	            case ADD(x,IMM(y)) => transform(ADD(transform(x), IMM(y) ))
-	            case TIMES(x,IMM(y)) => transform(TIMES(transform(x), IMM(y) ))
-	            case ADD(IMM(x),y) => transform(ADD(IMM(x), transform(y) ))
-	            case TIMES(IMM(x),y) => transform(TIMES(IMM(x), transform(y) ))
-	            case ADD(x,y) => transform(ADD(transform(x), transform(y)))
-	            case TIMES(x,y) => transform(TIMES(transform(x), transform(y)))
+	            case ADD(x,IMM(y)) => transform(ADD(transform(x, edi), IMM(y) ), resultReg)
+	            case TIMES(x,IMM(y)) => transform(TIMES(transform(x, edi), IMM(y)), resultReg)
+	            case ADD(IMM(x),y) => transform(ADD(IMM(x), transform(y, edx)), resultReg)
+	            case TIMES(IMM(x),y) => transform(TIMES(IMM(x), transform(y, edx)), resultReg)
+	            case ADD(x,y) => transform(ADD(transform(x, edi), transform(y, edx)), resultReg)
+	            case TIMES(x,y) => transform(TIMES(transform(x, edi), transform(y, edx)), resultReg)
 	            case _ => if (inst != null) println(inst); null
 	          }
 	        }	        
 	        val result = parseAll(expr, expression).get
 	        println(result)
-	        val transformed = transform(result)
+	        val transformed = transform(result, ebp)
 	        builder.codeTokens.foreach(println)
 	
 	      push(transformed.reg)
@@ -234,7 +176,7 @@ object ScalaBasic2 extends Arith {
     try {
 
         //val input = "2*2*2*2" 
-        val input = "(1+2) * (4+5)"
+        val input = "3*(1 + 2)"
         
         
         

@@ -13,3 +13,4 @@ test.exe
 .idea/
 *.class
 *.iml
+*.log

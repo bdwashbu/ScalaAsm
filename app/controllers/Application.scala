@@ -29,7 +29,10 @@ object Application extends Controller {
 	  mapping(
 	    "expression" -> (
 	        nonEmptyText 
-	        verifying ("Invalid math expression", expr => { 
+	        verifying ("Expression too long!", expr => { 
+	          expr.length < 20
+	       })
+	        verifying ("Invalid math expression!", expr => { 
 	          try {
 	            val app = x86Parser.parse(expr)
 	            true

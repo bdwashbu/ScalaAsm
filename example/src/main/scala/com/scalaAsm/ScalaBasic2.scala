@@ -87,8 +87,12 @@ object x86Parser {
 				     RESULT(resultReg)
 	            }
 	            case ADD(IMM(x),RESULT(y)) => {
-	              mov(resultReg, imm32(x.toInt))
-			      add(resultReg, y)
+	              if (resultReg != y) {
+		              mov(resultReg, imm32(x.toInt))
+				      add(resultReg, y)
+	              } else {
+	                add(resultReg, imm8(x.toInt))
+	              }
 	              RESULT(resultReg)
 	            }
 	            case ADD(RESULT(x),IMM(z)) => {

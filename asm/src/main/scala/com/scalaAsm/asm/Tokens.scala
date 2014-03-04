@@ -2,7 +2,7 @@ package com.scalaAsm.asm
 
 import com.scalaAsm.x86.Instruction
 
-private[asm] object Tokens {
+object Tokens {
   sealed trait Token
   case class Reference(name: String) extends Token
   case class JmpRef(name: String) extends Token

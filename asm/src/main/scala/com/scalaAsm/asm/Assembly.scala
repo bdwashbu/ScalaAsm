@@ -11,6 +11,7 @@ case class Assembled(val code: Seq[Token], val data: Seq[Token])
 
 trait CodeBuilder {
   val codeTokens = ListBuffer[Token]()
+  val importantTokens = ListBuffer[Token]()
 }
 
 trait SimpleCodeBuilder {

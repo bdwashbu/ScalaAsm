@@ -1,15 +1,16 @@
-@(instructions: List[String])
+@(instructions: (List[String], String))
 
-@main("Here is the result:") {
+@main("Generated code for: " + instructions._2) {
 
     <ul style="color: inherited")">
-        @for(inst <- instructions) {
-            <li>Hello @inst!</li>
+        @for(inst <- instructions._1) {
+            <li>@inst</li>
         }
     </ul>
 
     <p class="buttons">
-        <a href="@routes.Application.index">Back to the form</a>
+        <a href="@routes.Application.getFile(instructions._2)">Get File</a>
+        <a href="@routes.Application.index">Enter another</a>
     </p>
 
 }

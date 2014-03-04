@@ -14,3 +14,4 @@ test.exe
 *.class
 *.iml
 *.log
+logs/application.log

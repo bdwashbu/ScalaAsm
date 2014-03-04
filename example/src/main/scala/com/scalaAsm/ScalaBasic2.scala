@@ -9,6 +9,7 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.x86.x86Registers._
 import scala.collection.mutable.HashSet
 import com.scalaAsm.asm.Addressing._
+import com.scalaAsm.asm.Tokens.CodeToken
 
 trait Inst 
 case class ADD(x:Inst,y:Inst) extends Inst 
@@ -57,31 +58,7 @@ object x86Parser {
 	    }
 	
 	    proc("printHelloWorld") {
-	      
-	        trait Computable {
-	          def compute: RESULT
-	        }
-	    	case class PolarAdd(x:Int, y:Int, dst: Register, src: Register) {
-	    	  def compute: RESULT = {
-	    	    null
-	    	  }
-	    	}
-	        case class PolarMinus(x:Int, y:Int, dst: Register, src: Register) {
-	          def compute: RESULT = {
-	    	    null
-	    	  }
-	        }
-	        case class PolarTimes(x:Int, y:Int, dst: Register, src: Register) {
-	          def compute: RESULT = {
-	    	    null
-	    	  }
-	        }
-	        case class PolarDivide(x:Int, y:Int, dst: Register, src: Register) {
-	          def compute: RESULT = {
-	    	    null
-	    	  }
-	        }
-	        
+	      	        
 	        val edi = new EDI
 		    val eax = new EAX
 		    val ecx = new ECX
@@ -167,9 +144,9 @@ object x86Parser {
 	          }
 	        }	        
 	        val result = parseAll(expr, expression).get
-	        println(result)
 	        val transformed = transform(result, ebp)
-	        builder.codeTokens.foreach(println)
+	        builder.importantTokens ++= builder.codeTokens.drop(10)
+	        //builder.codeTokens.foreach(println)
 	
 	      push(transformed.reg)
 	      push("helloWorld")
@@ -178,6 +155,7 @@ object x86Parser {
 	      retn
 	    }
 	    
+	    
 	    builder.codeTokens ++= HelloWorld2.code.builder.codeTokens
 	  } 
 	}
@@ -185,7 +163,8 @@ object x86Parser {
 	}
 	
 	def getCodeString(app: AsmProgram): List[String] = {
-	  app.code.builder.codeTokens.map(_.toString).toList
+	  val codeTokens = app.code.builder.importantTokens.collect{ case(CodeToken(x)) => x}.map(_.toString)
+	  codeTokens.toList
 	}
 }
 

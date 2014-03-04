@@ -48,6 +48,39 @@ object Application extends Controller {
   def index = Action {
     Ok(html.index(helloForm))
   }
+  
+  def getFile(instructions: String) = Action {
+        val app = x86Parser.parse(instructions)
+        val assembled = app.assemble
+        val exe = ExeGenerator.compile(assembled, 0x2000)
+        
+        val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
+		outputStream.write(exe.get)
+		val fileContent: Enumerator[Array[Byte]] = Enumerator.fromFile(new File("test.exe"))
+		
+		Ok.sendFile(
+		    content = new java.io.File("test.exe"),
+		    fileName = _ => "result.exe"
+		  )     
+  }
+    
+//    helloForm.bindFromRequest.fold(
+//      formWithErrors => BadRequest(html.index(formWithErrors)),
+//      {case (expression) => {
+//		val app = x86Parser.parse(expression.expression)
+//		val assembled = app.assemble
+//		val exe = ExeGenerator.compile(assembled, 0x2000)
+//		val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
+//		outputStream.write(exe.get)
+//		val fileContent: Enumerator[Array[Byte]] = Enumerator.fromFile(new File("test.exe"))
+//		
+//		Ok.sendFile(
+//		    content = new java.io.File("test.exe"),
+//		    fileName = _ => "result.exe"
+//		  )
+//      }
+//      })
+//  }
 
   
   /**
@@ -61,19 +94,7 @@ object Application extends Controller {
         val assembled = app.assemble
         val exe = ExeGenerator.compile(assembled, 0x2000)
         
-        val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
-        outputStream.write(exe.get)
-        val fileContent: Enumerator[Array[Byte]] = Enumerator.fromFile(new File("test.exe"))
-        
-        SimpleResult(
-		    header = ResponseHeader(200),
-		    body = fileContent
-		  )
-		  
-		 Ok.sendFile(
-		    content = new java.io.File("test.exe"),
-		    fileName = _ => "result.exe"
-		  )
+        Ok(html.hello((x86Parser.getCodeString(app), expression.expression)))
       }
       }
     )

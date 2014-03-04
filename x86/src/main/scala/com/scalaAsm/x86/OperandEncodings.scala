@@ -96,6 +96,19 @@ trait OperandEncoding {
     def getAddressingForm: Option[AddressingFormSpecifier] = new M(op1).getAddressingForm
   }
   
+  case class OI[R <: ModRM.reg, I <: Immediate](op1: R, op2: I) extends TwoOperands[R,I](op1, op2) {
+    
+     def getAddressingForm: Option[AddressingFormSpecifier] = {
+      Some(new AddressingFormSpecifier {
+	     val modRM = None
+		 val scaleIndexBase = None
+		 val displacment = None
+		 val immediate = Some(op2)
+	  })
+     }
+    
+  }
+  
   case class I[I <: Immediate](op1: I) extends OneOperand[I](op1) {
     
      def getAddressingForm: Option[AddressingFormSpecifier] = {

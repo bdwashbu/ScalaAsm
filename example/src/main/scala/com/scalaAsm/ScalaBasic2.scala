@@ -99,13 +99,21 @@ object x86Parser {
 	              transform(ADD(IMM(z), RESULT(x)), resultReg)
 	            }
 	            case MINUS(IMM(x),RESULT(y)) => {
-	              mov(resultReg, imm32(x.toInt))
-			      sub(resultReg, y)
+	              if (resultReg != y) {
+		              mov(resultReg, imm32(x.toInt))
+				      sub(resultReg, y)
+	              } else {
+	                sub(resultReg, imm8(x.toInt))
+	              }
 	              RESULT(resultReg)
 	            }
 	            case MINUS(RESULT(x),IMM(z)) => {
-	              mov(resultReg, x)
-			      sub(resultReg, imm8(z.toInt))
+	              if (resultReg != x) {
+		              mov(resultReg, x)
+				      sub(resultReg, imm8(z.toInt))
+	              } else {
+	                sub(resultReg, imm8(z.toInt))
+	              }
 	              RESULT(resultReg)
 	            }
 	            case TIMES(IMM(x),RESULT(y)) => {

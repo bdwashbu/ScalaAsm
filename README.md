@@ -17,6 +17,8 @@ Lets face it, you have to be a little crazy to go this low-level.  x86 has been 
 
 That being said, Scala x86 strives to make the process of defining instructions as easy as possible.  It was designed for this.  It also resembles the intel specification at all times, especially when it comes to terminology.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this.
 
+Another thing Scala x86 offers is compile-time safety for the user.  If the user passes bad operand types into an instruction the compiler will see this and flag an error, using type classes. 
+
 Heres an example of some one-operand PUSH implementations for a 16-bit register, 8-bit immediate value, and 16-bit immediate value.
 
 ```scala
@@ -37,6 +39,14 @@ implicit object push5 extends PUSH_1[imm16] {
 ```
 
 Each instruction takes only 4 lines of code!
+
+Assuming those are the only versions of PUSH available, if you tried calling:
+
+```scala
+push(rcx)
+```
+
+It would be a compile time error because there is no PUSH implementation defined that takes a single 64-bit register.
 
 ### Using Scala x86
 
@@ -201,15 +211,8 @@ outputStream.close
 
 ScalaAsm currently supports many useful Assembly features such as procedures, loops, labels, and variables.  Some of these, like variables and loops, are implemented using first-class scala constructs.
 
-Additionally, many errors can be caught at compile time:
-
-If an instruction is not supported or not yet implemented it will throw an error based on the parameters passed in e.g
-
-```scala
-lea(rcx, *(rdi - imm32(0x1010101))) // compile-time error (64-bit is not yet supported)
-```
-
-Typeclasses are used to implement the many forms of x86 instructions.  A primary goal was to have the code resemble the intel x86 reference manual.
+References:
+========
 
 x86 reference can be found here: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
 

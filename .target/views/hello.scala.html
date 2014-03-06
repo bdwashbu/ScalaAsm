@@ -1,0 +1,16 @@
+@(instructions: (List[String], String))
+
+@main("Generated code for: " + instructions._2) {
+
+    <ul style="color: inherited")">
+        @for(inst <- instructions._1) {
+            <li>@inst</li>
+        }
+    </ul>
+
+    <p class="buttons">
+        <a href="@routes.Application.getFile(instructions._2)">Get Executable</a>
+        <a href="@routes.Application.index">Enter another</a>
+    </p>
+
+}

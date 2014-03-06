@@ -37,7 +37,7 @@ object Application extends Controller {
 	            val app = x86Parser.parse(expr)
 	            true
 	          } catch {
-	            case _ => false
+	            case _: Throwable => false
 	          }
 	       }))
 	  )(x86App.apply)(x86App.unapply)

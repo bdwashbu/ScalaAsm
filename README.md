@@ -2,20 +2,20 @@ Scala x86
 ========
 #### State-of-the-art x86 Assembler written in Scala
 
+* Have you ever wanted to design your own programming language?
+
 * Have you ever wondered how executable files work?
 
-* Have you ever wanted to learn x86/assembly?
+* Perhaps you've wanted to learn x86/assembly?
 
-* Perhaps you'd like to make your own programming language?
-
-Scala x86 can help with all these things.  The library performs two main functions: emit x86 machine code + assemble this into a portable executable file for execution on windows.  
+Scala x86 can help teach  all these things.  The library performs two main functions: emit x86 machine code + assemble this into a portable executable file for execution on windows.  
 
 
 #### Implementing x86
 
-Lets face it, implementing the whole of x86 is a massive undertaking.  There are over 1000 instructions, and each instruction could have upwards of 20 different types of inputs!
+Lets face it, you have to be a little crazy to go this low-level.  x86 has been developed over decades and it has grown into a very large instruction set.  There are over 1000 base instructions, and each instruction could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10's of thousands of instructions needing to be implemented if you want to be thorough.  
 
-Scala x86 makes the process of defining instructions as easy as possible.  It also strives to resemble the specification at all times.  Scalas type safety and consise notation help reduce the chance of errors and promote readability.
+That being said, Scala x86 strives to make the process of defining instructions as easy as possible.  It was designed for this.  It also resembles the intel specification at all times, especially when it comes to terminology.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this.
 
 Heres an example of some one-operand PUSH implementations for a 16-bit register, 8-bit immediate value, and 16-bit immediate value.
 

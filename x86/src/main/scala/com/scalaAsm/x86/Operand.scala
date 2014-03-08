@@ -2,17 +2,16 @@ package com.scalaAsm.x86
 
 import x86Registers._
 
-
-
 sealed class OperandSize {
-  type OpType
+  type size
 }
 
-class ByteOperand extends OperandSize { type OpType = Byte }
-class WordOperand extends OperandSize { type OpType = Short }
-class DwordOperand extends OperandSize { type OpType = Int }
+class ByteOperand extends OperandSize { type size = Byte }
+class WordOperand extends OperandSize { type size = Short }
+class DwordOperand extends OperandSize { type size = Int }
+class QwordOperand extends OperandSize { type size = Long }
 
-trait RegisterOrMemory {
+trait RegisterOrMemory extends Any {
   type Size <: OperandSize
   val reg: Register
   val isMemory: Boolean
@@ -42,13 +41,16 @@ object Operands {
   type imm16 = Immediate16
   type imm32 = Immediate32
   
-  type rm8 = RegisterOrMemory { type Size = ByteOperand }
-  type rm16 = RegisterOrMemory { type Size = WordOperand }
-  type rm32 = RegisterOrMemory { type Size = DwordOperand }
+  type rm = RegisterOrMemory
+  type rm8 = rm { type Size = ByteOperand }
+  type rm16 = rm { type Size = WordOperand }
+  type rm32 = rm { type Size = DwordOperand }
+  type rm64 = rm { type Size = QwordOperand }
   
   type r8 = Register8 
   type r16 = Register16
   type r32 = Register32
+  type r64 = Register64
   
   trait One
 }

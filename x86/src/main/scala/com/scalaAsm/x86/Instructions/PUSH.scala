@@ -16,7 +16,7 @@ trait PUSH_1[-O1] extends PUSH with OneOperand[O1] with OperandEncoding
 
 trait POWLow {
     
-  implicit object push6 extends PUSH_1[rm32] {
+  implicit object highPush extends PUSH_1[rm] {
       def operands = M(x)
       val opcode = 0xFF /+ 6
   }
@@ -24,12 +24,12 @@ trait POWLow {
 
 object PUSH extends POWLow {
   
-  implicit object push1 extends PUSH_1[r32] {
+  implicit object push2 extends PUSH_1[r32] {
       def operands = O(x)
       def opcode = OpcodePlusRd(0x50, x)
   }
   
-  implicit object push8 extends PUSH_1[r16] {
+  implicit object push3 extends PUSH_1[r16] {
       def operands = O(x)
       def opcode = OpcodePlusRd(0x50, x)
   }
@@ -41,6 +41,11 @@ object PUSH extends POWLow {
   
   implicit object push5 extends PUSH_1[imm16] {
       def operands = I[imm16](x)
+      val opcode: Opcodes = 0x68
+  }
+  
+  implicit object push6 extends PUSH_1[imm32] {
+      def operands = I[imm32](x)
       val opcode: Opcodes = 0x68
   }
   

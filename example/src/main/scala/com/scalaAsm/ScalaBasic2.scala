@@ -59,12 +59,19 @@ object x86Parser {
 	
 	    proc("printHelloWorld") {
 	      	        
-	        val edi = new EDI
-		    val eax = new EAX
-		    val ecx = new ECX
-		    val ebp = new EBP
-		    val edx = new EDX
-		    val esp = new ESP 
+	    val rdi = new RDI with Addressable[RDI]
+	    val rax = new RAX with Addressable[RAX]
+	    val rcx = new RCX with Addressable[RCX]
+	    val rbp = new RBP with Addressable[RBP]
+	    val rdx = new RDX with Addressable[RDX]
+	    val rsp = new RSP with Addressable[RSP]
+	  
+	    val edi = new rdi.EDI with Addressable[rdi.EDI]
+	    val eax = new rax.EAX with Addressable[rax.EAX]
+	    val ecx = new rcx.ECX with Addressable[rcx.ECX]
+	    val ebp = new rbp.EBP with Addressable[rbp.EBP]
+	    val edx = new rdx.EDX with Addressable[rdx.EDX]
+	    val esp = new rsp.ESP with Addressable[rsp.ESP]
 
 	        def transform(inst: Inst, resultReg: Register32 with RegisterID): RESULT = {
 	          

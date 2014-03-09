@@ -30,23 +30,33 @@ object Addressing {
 
 trait Registers {
   import Addressing._
-    val edi = new EDI with Addressable[EDI]
-    val eax = new EAX with Addressable[EAX]
-    val ecx = new ECX with Addressable[ECX]
-    val ebp = new EBP with Addressable[EBP]
-    val edx = new EDX with Addressable[EDX]
-    val esp = new ESP with Addressable[ESP]
+  
+    object rdi extends RDI with Addressable[RDI]
+    object rax extends RAX with Addressable[RAX]
+    object rcx extends RCX with Addressable[RCX]
+    object rbp extends RBP with Addressable[RBP]
+    object rdx extends RDX with Addressable[RDX]
+    object rsp extends RSP with Addressable[RSP]
+  
+    object edi extends rdi.EDI with Addressable[rdi.EDI]
+    object eax extends rax.EAX with Addressable[rax.EAX]
+    object ecx extends rcx.ECX with Addressable[rcx.ECX]
+    object ebp extends rbp.EBP with Addressable[rbp.EBP]
+    object edx extends rdx.EDX with Addressable[rdx.EDX]
+    object esp extends rsp.ESP with Addressable[rsp.ESP]
     
-    val cl = new CL with Addressable[CL]
+    object ax extends eax.AX with Addressable[eax.AX]
+    object cx extends ecx.CX with Addressable[ecx.CX]
+    object dx extends edx.DX with Addressable[edx.DX]
     
-    val es = new ES
-    val cs = new CS
-    val ss = new SS
-    val ds = new DS
+    object ah extends ax.AH with Addressable[ax.AH]
+  
+    object cl extends cx.CL with Addressable[cx.CL]
     
-    val ax = new AX with Addressable[AX]
-    val cx = new CX with Addressable[CX]
-    val dx = new DX with Addressable[DX]
+    object es extends ES
+    object cs extends CS
+    object ss extends SS
+    object ds extends DS
     
-    val ah = new AH with Addressable[AH]
+   
 }

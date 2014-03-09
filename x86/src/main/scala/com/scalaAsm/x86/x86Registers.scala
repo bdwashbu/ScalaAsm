@@ -49,45 +49,88 @@ object x86Registers {
   // esi - Pointer to data in the segment pointed to by the DS register
   // edi - Pointer to data (or destination) in the segment pointed to by ES register
 
-  class EAX extends Register32("eax") with GeneralPurposeA
-  class EBX extends Register32("ebx") with GeneralPurposeB
-  class ECX extends Register32("ecx") with GeneralPurposeC
-  class EDX extends Register32("edx") with GeneralPurposeD
+  class RAX extends Register64("rax") with GeneralPurposeA {
+    class EAX extends Register32("eax") with GeneralPurposeA {
+	    class AX extends Register16("ax") with GeneralPurposeA {
+	      class AL extends Register8("al") with GeneralPurposeA
+	      class AH extends Register8("ah") with GeneralPurpose {val ID = 4}
+	    }
+	  }
+  }
+  
+  class RBX extends Register64("rbx") with GeneralPurposeB {
+	   class EBX extends Register32("ebx") with GeneralPurposeB {
+	    class BX extends Register16("bx") with GeneralPurposeB {
+	      class BL extends Register8("bl") with GeneralPurposeB
+	      class BH extends Register8("bh") with GeneralPurpose {val ID = 7}
+	    }
+	  } 
+  }
+  
+  class RCX extends Register64("rcx") with GeneralPurposeC {
+    class ECX extends Register32("ecx") with GeneralPurposeC {
+	     class CX extends Register16("cx") with GeneralPurposeC {
+	         class CL extends Register8("cl") with GeneralPurposeC
+	         class CH extends Register8("ch") with GeneralPurpose {val ID = 5}
+	     } 
+	  }
+  }
+  
+  class RDX extends Register64("rdx") with GeneralPurposeD {
+    class EDX extends Register32("edx") with GeneralPurposeD {
+	    class DX extends Register16("dx") with GeneralPurposeD {
+	      class DL extends Register8("dl") with GeneralPurposeD
+	      class DH extends Register8("dh") with GeneralPurpose {val ID = 6}
+	    }
+	  }
+  }
+
+  class RSP extends Register64("rsp") with StackPointer {
+    class ESP extends Register32("esp") with StackPointer {
+      class SP extends Register16("sp") with StackPointer
+    }
+  }
+  
+  class RBP extends Register64("rbp") with BasePointer {
+    class EBP extends Register32("ebp") with BasePointer {
+      class BP extends Register16("bp") with BasePointer
+    }
+  }
+  
+  class RSI extends Register64("rsi") with SourceIndex {
+    class ESI extends Register32("esi") with SourceIndex {
+      class SI extends Register16("si") with SourceIndex
+    }
+  }
+  
+  class RDI extends Register64("rdi") with DestinationIndex {
+    class EDI extends Register32("edi") with DestinationIndex {
+       class DI extends Register16("di") with DestinationIndex 
+    }
+  }
+  
  
-  class ESP extends Register32("esp") with StackPointer
-  class EBP extends Register32("ebp") with BasePointer
-  class ESI extends Register32("esi") with SourceIndex
-  class EDI extends Register32("edi") with DestinationIndex
   
-  class AX extends Register16("ax") with GeneralPurposeA
-  class BX extends Register16("bx") with GeneralPurposeB
-  class CX extends Register16("cx") with GeneralPurposeC
-  class DX extends Register16("dx") with GeneralPurposeD
-
-  class SP extends Register16("sp") with StackPointer
-  class BP extends Register16("bp") with BasePointer
-  class SI extends Register16("si") with SourceIndex
-  class DI extends Register16("di") with DestinationIndex
   
-  class AL extends Register8("al") with GeneralPurposeA
-  class BL extends Register8("bl") with GeneralPurposeB
-  class CL extends Register8("cl") with GeneralPurposeC
-  class DL extends Register8("dl") with GeneralPurposeD
-
-  class AH extends Register8("ah") with GeneralPurpose {val ID = 4}
-  class BH extends Register8("bh") with GeneralPurpose {val ID = 7}
-  class CH extends Register8("ch") with GeneralPurpose {val ID = 5}
-  class DH extends Register8("dh") with GeneralPurpose {val ID = 6}
   
-  class RAX extends Register64("rax") with GeneralPurposeA
-  class RBX extends Register64("rbx") with GeneralPurposeB
-  class RCX extends Register64("rcx") with GeneralPurposeC
-  class RDX extends Register64("rdx") with GeneralPurposeD
+  
 
-  class RSP extends Register64("rsp") with StackPointer
-  class RBP extends Register64("rbp") with BasePointer
-  class RSI extends Register64("rsi") with SourceIndex
-  class RDI extends Register64("rdi") with DestinationIndex
+  
+  
+  
+
+  
+  
+  
+
+  
+
+  
+  
+
+  
+  
+
   
   // Segment registers
   type SegmentRegister = Register8

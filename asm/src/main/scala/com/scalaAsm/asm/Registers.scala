@@ -6,14 +6,14 @@ import com.scalaAsm.x86.DwordOperand
 
 object Addressing {
 
-  case class RegisterOffset[+T <: Register, S <: Immediate](offset2: S, x: T) extends RegisterOrMemory {
+  case class RegisterOffset[+T <: Register with RegisterID, S <: Immediate](offset2: S, x: T) extends RegisterOrMemory {
      type Size = DwordOperand
      val reg = x
      val isMemory = true
      val offset = Some(offset2)
   }
 
-  trait Addressable[X <: Register] {
+  trait Addressable[X <: Register with RegisterID] {
     self: X =>
     def -[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset.negate, this)
     def +[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset, this)
@@ -25,7 +25,7 @@ object Addressing {
      val isMemory = true
      val offset = x.offset
   }
-  type +[A <: Register, B <: Immediate] = RegisterOffset[A, B]
+  type +[A <: Register with RegisterID, B <: Immediate] = RegisterOffset[A, B]
 }
 
 trait Registers {
@@ -39,10 +39,10 @@ trait Registers {
     
     val cl = new CL with Addressable[CL]
     
-    val es = new ES with Addressable[ES]
-    val cs = new CS with Addressable[CS]
-    val ss = new SS with Addressable[SS]
-    val ds = new DS with Addressable[DS]
+    val es = new ES
+    val cs = new CS
+    val ss = new SS
+    val ds = new DS
     
     val ax = new AX with Addressable[AX]
     val cx = new CX with Addressable[CX]

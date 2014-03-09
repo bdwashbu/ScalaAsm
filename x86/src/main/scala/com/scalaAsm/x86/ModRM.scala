@@ -29,7 +29,7 @@ protected[x86] trait AddressingFormSpecifier {
 
 object ModRM {
   type rm = RegisterOrMemory
-  type reg = Register
+  type reg = Register with RegisterID
 }
 
  sealed class RegisterMode(val value: Byte)
@@ -42,7 +42,7 @@ trait ModRMFormat {
     def get: Byte
   }
   
-  case class ModRMByte(mod: RegisterMode, rm: Register, reg: Option[Register] = None, opEx: Option[Byte] = None) extends ModRMFormat {
+  case class ModRMByte(mod: RegisterMode, rm: Register with RegisterID, reg: Option[Register with RegisterID] = None, opEx: Option[Byte] = None) extends ModRMFormat {
     def get: Byte = {
       (reg, opEx) match {
         case (_, Some(opEx)) => ((mod.value << 6) + (opEx << 3) + rm.ID).toByte

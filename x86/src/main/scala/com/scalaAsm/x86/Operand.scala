@@ -13,9 +13,9 @@ class QwordOperand extends OperandSize { type size = Long }
 
 trait RegisterOrMemory extends Any {
   type Size <: OperandSize
-  val reg: Register
-  val isMemory: Boolean
-  val offset: Option[Immediate]
+  def reg: Register with RegisterID
+  def isMemory: Boolean
+  def offset: Option[Immediate]
   
   override def toString = {
     var result: String = ""
@@ -47,10 +47,10 @@ object Operands {
   type rm32 = rm { type Size = DwordOperand }
   type rm64 = rm { type Size = QwordOperand }
   
-  type r8 = Register8 
-  type r16 = Register16
-  type r32 = Register32
-  type r64 = Register64
+  type r8 = Register8 with RegisterID
+  type r16 = Register16 with RegisterID
+  type r32 = Register32 with RegisterID
+  type r64 = Register64 with RegisterID
   
   trait One
 }

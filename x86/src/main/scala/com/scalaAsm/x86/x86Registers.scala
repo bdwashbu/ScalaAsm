@@ -2,57 +2,43 @@ package com.scalaAsm.x86
 
 object x86Registers {
 
-  abstract class Register(val ID: Byte, val name: String) extends RegisterOrMemory {
-    val reg = this
-    val isMemory = false
-    val offset: Option[Immediate] = None
-    override def toString = name
-  }
+  abstract class Register(val name: String)
 
-  abstract class Register8(ID: Byte, name: String) extends Register(ID, name) {
+  abstract class Register8(name: String) extends Register(name) {
     type Size = ByteOperand
   }
   
-  abstract class Register16(ID: Byte, name: String) extends Register(ID, name) {
+  abstract class Register16(name: String) extends Register(name) {
     type Size = WordOperand
   }
   
-  abstract class Register32(ID: Byte, name: String) extends Register(ID, name) {
+  abstract class Register32(name: String) extends Register(name) {
     type Size = DwordOperand
   }
   
-  abstract class Register64(ID: Byte, name: String) extends Register(ID, name) {
+  abstract class Register64(name: String) extends Register(name) {
     type Size = QwordOperand
   }
+
+  trait RegisterID extends RegisterOrMemory { 
+    self:Register => 
+      val ID: Int
+       val isMemory = false
+       val offset: Option[Immediate] = None
+       override def toString = name
+  }
   
-  class AL extends Register8(0, "al")
-  class BL extends Register8(3, "bl")
-  class CL extends Register8(1, "cl")
-  class DL extends Register8(2, "dl")
-
-  class AH extends Register8(4, "ah")
-  class BH extends Register8(7, "bh")
-  class CH extends Register8(5, "ch")
-  class DH extends Register8(6, "dh")
-
-  // Segment registers
-  class ES extends Register8(0, "es")
-  class CS extends Register8(1, "cs")
-  class SS extends Register8(2, "ss")
-  class DS extends Register8(3, "ds")
-  class FS extends Register8(4, "fs")
-  class GS extends Register8(5, "gs")
-
-  class AX extends Register16(0, "ax")
-  class BX extends Register16(3, "bx")
-  class CX extends Register16(1, "cx")
-  class DX extends Register16(2, "dx")
-
-  class SP extends Register16(4, "sp")
-  class BP extends Register16(5, "bp")
-  class SI extends Register16(6, "si")
-  class DI extends Register16(7, "di")
-
+  trait GeneralPurpose extends RegisterID {self:Register => val reg = this}
+  trait GeneralPurposeA extends GeneralPurpose {self:Register => val ID = 0}
+  trait GeneralPurposeB extends GeneralPurpose {self:Register => val ID = 3}
+  trait GeneralPurposeC extends GeneralPurpose {self:Register => val ID = 1}
+  trait GeneralPurposeD extends GeneralPurpose {self:Register => val ID = 2}
+  
+  trait SourceIndex extends RegisterID {self:Register => val ID = 6; val reg = this}
+  trait DestinationIndex extends RegisterID {self:Register => val ID = 7; val reg = this}
+  trait BasePointer extends RegisterID {self:Register => val ID = 5; val reg = this}
+  trait StackPointer extends RegisterID {self:Register => val ID = 4; val reg = this}
+  
   // eax - Accumulator for operands and results
   // ebx - Pointer to data in the DS segment
   // ecx - Counter for string and loop operations
@@ -63,23 +49,54 @@ object x86Registers {
   // esi - Pointer to data in the segment pointed to by the DS register
   // edi - Pointer to data (or destination) in the segment pointed to by ES register
 
-  class EAX extends Register32(0, "eax")
-  class EBX extends Register32(3, "ebx")
-  class ECX extends Register32(1, "ecx")
-  class EDX extends Register32(2, "edx")
-
-  class ESP extends Register32(4, "esp")
-  class EBP extends Register32(5, "ebp")
-  class ESI extends Register32(6, "esi")
-  class EDI extends Register32(7, "edi")
+  class EAX extends Register32("eax") with GeneralPurposeA
+  class EBX extends Register32("ebx") with GeneralPurposeB
+  class ECX extends Register32("ecx") with GeneralPurposeC
+  class EDX extends Register32("edx") with GeneralPurposeD
+ 
+  class ESP extends Register32("esp") with StackPointer
+  class EBP extends Register32("ebp") with BasePointer
+  class ESI extends Register32("esi") with SourceIndex
+  class EDI extends Register32("edi") with DestinationIndex
   
-  class RAX extends Register64(0, "rax")
-  class RBX extends Register64(3, "rbx")
-  class RCX extends Register64(1, "rcx")
-  class RDX extends Register64(2, "rdx")
+  class AX extends Register16("ax") with GeneralPurposeA
+  class BX extends Register16("bx") with GeneralPurposeB
+  class CX extends Register16("cx") with GeneralPurposeC
+  class DX extends Register16("dx") with GeneralPurposeD
 
-  class RSP extends Register64(4, "rsp")
-  class RBP extends Register64(5, "rbp")
-  class RSI extends Register64(6, "rsi")
-  class RDI extends Register64(7, "rdi")
+  class SP extends Register16("sp") with StackPointer
+  class BP extends Register16("bp") with BasePointer
+  class SI extends Register16("si") with SourceIndex
+  class DI extends Register16("di") with DestinationIndex
+  
+  class AL extends Register8("al") with GeneralPurposeA
+  class BL extends Register8("bl") with GeneralPurposeB
+  class CL extends Register8("cl") with GeneralPurposeC
+  class DL extends Register8("dl") with GeneralPurposeD
+
+  class AH extends Register8("ah") with GeneralPurpose {val ID = 4}
+  class BH extends Register8("bh") with GeneralPurpose {val ID = 7}
+  class CH extends Register8("ch") with GeneralPurpose {val ID = 5}
+  class DH extends Register8("dh") with GeneralPurpose {val ID = 6}
+  
+  class RAX extends Register64("rax") with GeneralPurposeA
+  class RBX extends Register64("rbx") with GeneralPurposeB
+  class RCX extends Register64("rcx") with GeneralPurposeC
+  class RDX extends Register64("rdx") with GeneralPurposeD
+
+  class RSP extends Register64("rsp") with StackPointer
+  class RBP extends Register64("rbp") with BasePointer
+  class RSI extends Register64("rsi") with SourceIndex
+  class RDI extends Register64("rdi") with DestinationIndex
+  
+  // Segment registers
+  type SegmentRegister = Register8
+  class ES extends SegmentRegister("es")
+  class CS extends SegmentRegister("cs")
+  class SS extends SegmentRegister("ss")
+  class DS extends SegmentRegister("ds")
+  class FS extends SegmentRegister("fs")
+  class GS extends SegmentRegister("gs")
+
+  
 }

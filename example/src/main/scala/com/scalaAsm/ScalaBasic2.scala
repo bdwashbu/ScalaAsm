@@ -18,7 +18,7 @@ case class TIMES(x:Inst,y:Inst) extends Inst
 case class DIVIDE(x:Inst,y:Inst) extends Inst 
 
 case class IMM(x:Int) extends Inst 
-case class RESULT(reg: Register32) extends Inst 
+case class RESULT(reg: Register32 with RegisterID) extends Inst 
 
 class Arith extends JavaTokenParsers { 
 
@@ -66,7 +66,7 @@ object x86Parser {
 		    val edx = new EDX
 		    val esp = new ESP 
 
-	        def transform(inst: Inst, resultReg: Register32): RESULT = {
+	        def transform(inst: Inst, resultReg: Register32 with RegisterID): RESULT = {
 	          
 	          inst match {
 	            case ADD(IMM(x),IMM(y)) => {

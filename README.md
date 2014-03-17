@@ -1,6 +1,6 @@
 Scala x86
 ========
-#### State-of-the-art x86 Assembler written in Scala
+#### Modern x86 Assembler written in Scala
 
 * Have you ever wanted to design your own programming language?
 
@@ -13,7 +13,7 @@ Scala x86 can help teach  all these things.  The library performs two main funct
 
 #### Implementing x86
 
-Lets face it, you have to be a little crazy to go this low-level.  x86 has been developed over decades and it has grown into a very large instruction set.  There are over 1000 base instructions, and each instruction could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10's of thousands of instructions needing to be implemented if you want to be thorough.  
+Lets face it, you have to be a little crazy to go this low-level.  x86 has been developed over decades and it has grown into a very large instruction set.  There are hundreds of instructions, and each instruction could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10+ thousand instructions needing to be implemented if you want to be thorough.  
 
 That being said, Scala x86 strives to make the process of defining instructions as easy as possible.  It was designed for this.  It also resembles the intel specification at all times, especially when it comes to terminology.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this.
 

@@ -1,7 +1,6 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.ModRM._
-import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.x86Registers._
 
 trait TwoOperands[-O1,-O2] {

@@ -1,12 +1,5 @@
-package com.scalaAsm.x86.Instructions
-
-import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.x86Registers._
-import com.scalaAsm.x86.Instruction
-import com.scalaAsm.x86.OneOperand
-import com.scalaAsm.x86.OperandEncoding
-import com.scalaAsm.x86.{OpcodePlusRd, ModRM, x86Instruction, OperandSize, Opcodes, OneOpcode, DwordOperand, WordOperand}
-import com.scalaAsm.x86.AddressingFormSpecifier
+package com.scalaAsm.x86
+package Instructions
 
 abstract class DEC extends x86Instruction("DEC")
 

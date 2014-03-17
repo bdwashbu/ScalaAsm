@@ -1,12 +1,7 @@
-package com.scalaAsm.x86.Instructions
+package com.scalaAsm.x86
+package Instructions
 
-import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.OneOperand
-import com.scalaAsm.x86.OperandEncoding
-import com.scalaAsm.x86.{OpcodePlusRd, ModRM, x86Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
 import com.scalaAsm.x86.x86Registers._
-import com.scalaAsm.x86.AddressingFormSpecifier
-import com.scalaAsm.x86.Instruction
 
 abstract class POP extends x86Instruction("POP")
 

@@ -5,7 +5,6 @@ import com.scalaAsm.x86._
 import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.x86Registers._
-import com.scalaAsm.x86.Operands._
 
 trait AsmCodeSimple extends Registers {
     

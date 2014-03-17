@@ -1,12 +1,5 @@
-package com.scalaAsm.x86.Instructions
-
-import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.TwoOperands
-import com.scalaAsm.x86.OperandEncoding
-import com.scalaAsm.x86.{OpcodePlusRd, ModRM, x86Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
-import com.scalaAsm.x86.AddressingFormSpecifier
-import com.scalaAsm.utils.Endian
-import com.scalaAsm.x86.Instruction
+package com.scalaAsm.x86
+package Instructions
 
 abstract class MOV extends x86Instruction("MOV")
 

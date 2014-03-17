@@ -1,8 +1,5 @@
-package com.scalaAsm.x86.Instructions
-
-import com.scalaAsm.x86.{x86Instruction, Opcodes, OneOpcode}
-import com.scalaAsm.x86.Instruction
-import com.scalaAsm.x86.OperandEncoding
+package com.scalaAsm.x86
+package Instructions
 
 abstract class RET extends x86Instruction("RET") with OperandEncoding
 

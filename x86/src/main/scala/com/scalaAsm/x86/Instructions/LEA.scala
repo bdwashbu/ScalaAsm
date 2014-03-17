@@ -1,11 +1,5 @@
-package com.scalaAsm.x86.Instructions
-
-import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.Instruction
-import com.scalaAsm.x86.TwoOperands
-import com.scalaAsm.x86.OperandEncoding
-import com.scalaAsm.x86.{ModRM, x86Instruction, OperandSize, OneOpcode, Immediate, DwordOperand, WordOperand}
-import com.scalaAsm.x86.AddressingFormSpecifier
+package com.scalaAsm.x86
+package Instructions
 
 abstract class LEA extends x86Instruction("LEA")
 

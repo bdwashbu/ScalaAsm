@@ -1,11 +1,5 @@
-package com.scalaAsm.x86.Instructions
-
-import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.TwoOperands
-import com.scalaAsm.x86.OperandEncoding
-import com.scalaAsm.x86.Opcodes
-import com.scalaAsm.x86.OperandFormat
-import com.scalaAsm.x86.{x86Instruction, OneOpcode, TwoOpcodes}
+package com.scalaAsm.x86
+package Instructions
 
 abstract class ADD extends x86Instruction("ADD")
 

@@ -15,24 +15,24 @@ Scala x86 can help teach  all these things.  The library performs two main funct
 
 Lets face it, you have to be a little crazy to go this low-level.  x86 has been developed over decades and it has grown into a very large instruction set.  There are hundreds of instructions, and each instruction could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10+ thousand instructions needing to be implemented if you want to be thorough.  
 
-That being said, Scala x86 strives to make the process of defining instructions as easy as possible.  It was designed for this.  It also resembles the intel specification at all times, especially when it comes to terminology.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this.
+That being said, Scala x86 strives to make the process of defining instructions as easy as possible.  It was designed for this.  It also resembles the Intel specification at all times, especially when it comes to terminology.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this.
 
-Another thing Scala x86 offers is compile-time safety for the user.  If the user passes bad operand types into an instruction the compiler will see this and flag an error, using type classes. 
+Another thing Scala x86 offers is compile-time safety for the user.  If the user passes bad operand types into an instruction the Scala compiler will see this and flag an error, using type classes. 
 
 Heres an example of some one-operand PUSH implementations for a 16-bit register, 8-bit immediate value, and 16-bit immediate value.
 
 ```scala
-implicit object push8 extends PUSH_1[r16] {
+implicit object push1 extends PUSH_1[r16] {
   def operands = O(x)
   def opcode = OpcodePlusRd(0x50, x)
 }
   
-implicit object push4 extends PUSH_1[imm8] {
+implicit object push2 extends PUSH_1[imm8] {
   def operands = I[imm8](x)
   val opcode: Opcodes = 0x6A
 }
   
-implicit object push5 extends PUSH_1[imm16] {
+implicit object push3 extends PUSH_1[imm16] {
   def operands = I[imm16](x)
   val opcode: Opcodes = 0x68
 }
@@ -50,9 +50,11 @@ It would be a compile time error because there is no PUSH implementation defined
 
 ### Using Scala x86
 
-You can use Scala x86 to power any sort of programming language you'd like.  
+There is no reason to think Scala x86 could not be used to implement a turing-complete programming language, but this is still an area of research.
 
-Heres an example some low-level assembly:
+We do know Scala x86 can be used to implement low-level assembly code. This assembly currently supports many useful  features such as procedures, loops, labels, and variables.  Some of these, like variables and loops, are implemented using first-class scala constructs.
+
+Heres "Hello world!":
 
 ```scala
 object HelloWorld extends AsmProgram {
@@ -208,8 +210,6 @@ val exe = ExeGenerator.compile(assembled)
 outputStream.write(exe.get)
 outputStream.close
 ```
-
-ScalaAsm currently supports many useful Assembly features such as procedures, loops, labels, and variables.  Some of these, like variables and loops, are implemented using first-class scala constructs.
 
 References:
 ========

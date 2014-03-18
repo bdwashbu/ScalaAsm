@@ -1,6 +1,6 @@
 Scala x86
 ========
-#### Modern x86 Assembler written in Scala
+#### A Modern x86 Assembler written in Scala
 
 * Have you ever wanted to design your own programming language?
 
@@ -8,16 +8,16 @@ Scala x86
 
 * Perhaps you've wanted to learn x86/assembly?
 
-Scala x86 can help teach  all these things.  The library performs two main functions: emit x86 machine code + assemble this into a portable executable file for execution on windows.  
+You can learn all these things and more from Scala x86.  The library performs two main functions: emit x86 machine code + assemble this into a portable executable file for execution on windows.  
 
 
 #### Implementing x86
 
-Lets face it, you have to be a little crazy to go this low-level.  x86 has been developed over decades and it has grown into a very large instruction set.  There are hundreds of instructions, and each instruction could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10+ thousand instructions needing to be implemented if you want to be thorough.  
+Many shareholders, most notably Intel, have developed x86 over decades and it has grown into a very large instruction set.  There are hundreds of instructions, and each instruction could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10+ thousand instructions needing to be implemented if you want to be thorough.  
 
-That being said, Scala x86 strives to make the process of defining instructions as easy as possible.  It was designed for this.  It also resembles the Intel specification at all times, especially when it comes to terminology.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this.
+Scala x86 strives to make the process of defining instructions as easy as possible.  It was designed for this.  It also resembles the Intel specification at all times, especially when it comes to terminology.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this.
 
-Another thing Scala x86 offers is compile-time safety for the user.  If the user passes bad operand types into an instruction the Scala compiler will see this and flag an error, using type classes. 
+Another feature Scala x86 offers is compile-time safety for the user.  If the user passes bad operand types into an instruction the Scala compiler will see this and flag an error, using type classes. 
 
 Heres an example of some one-operand PUSH implementations for a 16-bit register, 8-bit immediate value, and 16-bit immediate value.
 

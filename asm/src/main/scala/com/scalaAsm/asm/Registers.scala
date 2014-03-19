@@ -6,14 +6,14 @@ import com.scalaAsm.x86.DwordOperand
 
 object Addressing {
 
-  case class RegisterOffset[+T <: Register with RegisterID, S <: Immediate](offset2: S, x: T) extends RegisterOrMemory {
+  case class RegisterOffset[+T <: GPR, S <: Immediate](offset2: S, x: T) extends RegisterOrMemory {
      type Size = DwordOperand
      val reg = x
      val isMemory = true
      val offset = Some(offset2)
   }
 
-  trait Addressable[X <: Register with RegisterID] {
+  trait Addressable[X <: GPR] {
     self: X =>
     def -[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset.negate, this)
     def +[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset, this)
@@ -25,7 +25,7 @@ object Addressing {
      val isMemory = true
      val offset = x.offset
   }
-  type +[A <: Register with RegisterID, B <: Immediate] = RegisterOffset[A, B]
+  type +[A <: GPR, B <: Immediate] = RegisterOffset[A, B]
 }
 
 trait Registers {
@@ -38,20 +38,20 @@ trait Registers {
     object rdx extends RDX with Addressable[RDX]
     object rsp extends RSP with Addressable[RSP]
   
-    object edi extends rdi.EDI with Addressable[rdi.EDI]
-    object eax extends rax.EAX with Addressable[rax.EAX]
-    object ecx extends rcx.ECX with Addressable[rcx.ECX]
-    object ebp extends rbp.EBP with Addressable[rbp.EBP]
-    object edx extends rdx.EDX with Addressable[rdx.EDX]
-    object esp extends rsp.ESP with Addressable[rsp.ESP]
+    object edi extends EDI with Addressable[EDI]
+    object eax extends EAX with Addressable[EAX]
+    object ecx extends ECX with Addressable[ECX]
+    object ebp extends EBP with Addressable[EBP]
+    object edx extends EDX with Addressable[EDX]
+    object esp extends ESP with Addressable[ESP]
     
-    object ax extends eax.AX with Addressable[eax.AX]
-    object cx extends ecx.CX with Addressable[ecx.CX]
-    object dx extends edx.DX with Addressable[edx.DX]
+    object ax extends AX with Addressable[AX]
+    object cx extends CX with Addressable[CX]
+    object dx extends DX with Addressable[DX]
     
-    object ah extends ax.AH with Addressable[ax.AH]
+    object ah extends AH with Addressable[AH]
   
-    object cl extends cx.CL with Addressable[cx.CL]
+    object cl extends CL with Addressable[CL]
     
     object es extends ES
     object cs extends CS

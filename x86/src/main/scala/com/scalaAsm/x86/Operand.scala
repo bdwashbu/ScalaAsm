@@ -13,7 +13,7 @@ class QwordOperand extends OperandSize { type size = Long }
 
 trait RegisterOrMemory extends Any {
   type Size <: OperandSize
-  def reg: Register with RegisterID
+  def reg: GPR
   def isMemory: Boolean
   def offset: Option[Immediate]
   

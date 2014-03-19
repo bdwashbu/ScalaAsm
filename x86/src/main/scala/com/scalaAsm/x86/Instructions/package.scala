@@ -13,10 +13,10 @@ package object Instructions {
   type rm32 = rm { type Size = DwordOperand }
   type rm64 = rm { type Size = QwordOperand }
   
-  type r8 = Register8 with RegisterID
-  type r16 = Register16 with RegisterID
-  type r32 = Register32 with RegisterID
-  type r64 = Register64 with RegisterID
+  type r8 = Register8 with GeneralPurpose
+  type r16 = Register16 with GeneralPurpose
+  type r32 = Register32 with GeneralPurpose
+  type r64 = Register64 with GeneralPurpose
   
   trait One
 }

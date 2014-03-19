@@ -18,11 +18,9 @@ case class TIMES(x:Inst,y:Inst) extends Inst
 case class DIVIDE(x:Inst,y:Inst) extends Inst 
 
 case class IMM(x:Int) extends Inst 
-case class RESULT(reg: Register32 with RegisterID) extends Inst 
+case class RESULT(reg: Register32 with GeneralPurpose) extends Inst 
 
 class Arith extends JavaTokenParsers { 
-
-  type D = Double 
 
   def expr:   Parser[Inst]    = term ~ rep(plus | minus)     ^^ {case a~b => (a /: b)((acc,f) => f(acc))} 
   def plus:   Parser[Inst=>Inst] = "+" ~ term                   ^^ {case "+"~b => ADD(_, b)} 
@@ -66,14 +64,14 @@ object x86Parser {
 	    val rdx = new RDX with Addressable[RDX]
 	    val rsp = new RSP with Addressable[RSP]
 	  
-	    val edi = new rdi.EDI with Addressable[rdi.EDI]
-	    val eax = new rax.EAX with Addressable[rax.EAX]
-	    val ecx = new rcx.ECX with Addressable[rcx.ECX]
-	    val ebp = new rbp.EBP with Addressable[rbp.EBP]
-	    val edx = new rdx.EDX with Addressable[rdx.EDX]
-	    val esp = new rsp.ESP with Addressable[rsp.ESP]
+	    val edi = new EDI with Addressable[EDI]
+	    val eax = new EAX with Addressable[EAX]
+	    val ecx = new ECX with Addressable[ECX]
+	    val ebp = new EBP with Addressable[EBP]
+	    val edx = new EDX with Addressable[EDX]
+	    val esp = new ESP with Addressable[ESP]
 
-	        def transform(inst: Inst, resultReg: Register32 with RegisterID): RESULT = {
+	        def transform(inst: Inst, resultReg: Register32 with GeneralPurpose): RESULT = {
 	          
 	          inst match {
 	            case ADD(IMM(x),IMM(y)) => {

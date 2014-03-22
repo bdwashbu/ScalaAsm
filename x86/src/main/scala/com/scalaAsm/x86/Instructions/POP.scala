@@ -15,7 +15,7 @@ object POP {
   }
   
   implicit object pop2 extends POP_1[DS] {
-      def operands = new OneOperand[DS](x) {def getAddressingForm = null}
+      def operands = new OneOperandFormat[DS](x) {def getAddressingForm = null}
       val opcode = OneOpcode(0x1F)
   }
 }

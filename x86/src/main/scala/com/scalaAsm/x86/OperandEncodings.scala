@@ -13,20 +13,17 @@ trait OperandEncoding {
     def getAddressingForm = None
   }
   
-  abstract class OneOperand[X](x:X) extends OperandFormat {
-     val operand1 = x
+  abstract class OneOperandFormat[X](x:X) extends OperandFormat {
      override def toString = x.toString
   }
   
-  abstract class TwoOperands[X,Y](x:X, y:Y) extends OperandFormat {
-     val operand1 = x
-     val operand2 = y
+  abstract class TwoOperandsFormat[X,Y](x:X, y:Y) extends OperandFormat {
      override def toString = x.toString + ", " + y.toString
   }
   
   object NA extends NoOperand  
   
-  case class MI[M <: ModRM.reg, I <: Immediate](op1: M, op2: I) extends TwoOperands[M, I](op1, op2) {
+  case class MI[M <: ModRM.reg, I <: Immediate](op1: M, op2: I) extends TwoOperandsFormat[M, I](op1, op2) {
     
     def getAddressingForm: Option[AddressingFormSpecifier] = {
         
@@ -39,7 +36,7 @@ trait OperandEncoding {
     }
   }
   
-  case class RM[R <: ModRM.reg, M <: ModRM.rm](op1: R, op2: M) extends TwoOperands[R,M](op1, op2) {
+  case class RM[R <: ModRM.reg, M <: ModRM.rm](op1: R, op2: M) extends TwoOperandsFormat[R,M](op1, op2) {
     
      def getAddressingForm: Option[AddressingFormSpecifier] = {
       
@@ -76,7 +73,7 @@ trait OperandEncoding {
     
   }
   
-  case class MR[M <: ModRM.rm, R <: ModRM.reg](op1: M, op2: R) extends TwoOperands[M,R](op1, op2) {
+  case class MR[M <: ModRM.rm, R <: ModRM.reg](op1: M, op2: R) extends TwoOperandsFormat[M,R](op1, op2) {
     
      def getAddressingForm: Option[AddressingFormSpecifier] = {
        RM(op2, op1).getAddressingForm
@@ -84,11 +81,11 @@ trait OperandEncoding {
     
   }
   
-  case class O[R <: ModRM.reg](op1: R) extends OneOperand[R](op1) {
+  case class O[R <: ModRM.reg](op1: R) extends OneOperandFormat[R](op1) {
     def getAddressingForm: Option[AddressingFormSpecifier] = new M(op1).getAddressingForm
   }
   
-  case class OI[R <: ModRM.reg, I <: Immediate](op1: R, op2: I) extends TwoOperands[R,I](op1, op2) {
+  case class OI[R <: ModRM.reg, I <: Immediate](op1: R, op2: I) extends TwoOperandsFormat[R,I](op1, op2) {
     
      def getAddressingForm: Option[AddressingFormSpecifier] = {
       Some(new AddressingFormSpecifier {
@@ -99,7 +96,7 @@ trait OperandEncoding {
     
   }
   
-  case class I[I <: Immediate](op1: I) extends OneOperand[I](op1) {
+  case class I[I <: Immediate](op1: I) extends OneOperandFormat[I](op1) {
     
      def getAddressingForm: Option[AddressingFormSpecifier] = {
       Some(new AddressingFormSpecifier {
@@ -110,7 +107,7 @@ trait OperandEncoding {
     
   }
   
-  case class M[M <: ModRM.rm](op1: M) extends OneOperand[M](op1) {
+  case class M[M <: ModRM.rm](op1: M) extends OneOperandFormat[M](op1) {
     
     def getAddressingForm: Option[AddressingFormSpecifier] = {
       
@@ -135,7 +132,7 @@ trait OperandEncoding {
     }
   }
   
-  case class M1[M <: ModRM.rm](op1: M) extends OneOperand[M](op1) {
+  case class M1[M <: ModRM.rm](op1: M) extends OneOperandFormat[M](op1) {
     def getAddressingForm: Option[AddressingFormSpecifier] = M(op1).getAddressingForm
   }
 }

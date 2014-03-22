@@ -8,7 +8,7 @@ trait JNZ_1[-O1] extends JNZ with OneOperand[O1] with OperandEncoding
 object JNZ {
   
   implicit object jnz1 extends JNZ_1[imm8] {
-      def operands = new OneOperand[imm8](x) {def getAddressingForm = null}
+      def operands = new OneOperandFormat[imm8](x) {def getAddressingForm = null}
       val opcode = OneOpcode(0x75)
   }
 }

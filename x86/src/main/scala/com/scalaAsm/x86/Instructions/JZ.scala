@@ -8,7 +8,7 @@ trait JZ_1[-O1] extends JZ with OneOperand[O1] with OperandEncoding
 object JZ {
   
   implicit object jz1 extends JZ_1[imm8] {
-      def operands = new OneOperand[imm8](x) {
+      def operands = new OneOperandFormat[imm8](x) {
         def getAddressingForm = Some(new AddressingFormSpecifier {
 	        val modRM = None
 		    val scaleIndexBase = None

@@ -45,7 +45,7 @@ object PUSH extends POWLow {
   }
   
   implicit object push7 extends PUSH_1[CS] {
-      def operands = new OneOperand[CS](x) {def getAddressingForm = null}
+      def operands = new OneOperandFormat[CS](x) {def getAddressingForm = null}
       val opcode: Opcodes = 0x0E
   }
 }

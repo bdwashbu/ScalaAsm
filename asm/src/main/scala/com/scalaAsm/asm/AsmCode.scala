@@ -21,14 +21,14 @@ trait AsmCodeSimple extends Registers {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
     
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: TwoOperands[O1,O2], code: SimpleCodeBuilder) = {
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: InstructionFormat with TwoOperands[O1,O2], code: SimpleCodeBuilder) = {
       ev.set(p1,p2)
-      code.codeTokens += ev.getInstruction
+      code.codeTokens += ev.build
     }
     
-    def oneOp[O1](p1:O1, ev: OneOperand[O1], code: SimpleCodeBuilder) = {
+    def oneOp[O1](p1:O1, ev: InstructionFormat with OneOperand[O1], code: SimpleCodeBuilder) = {
       ev.set(p1)
-      code.codeTokens += ev.getInstruction
+      code.codeTokens += ev.build
     }
     
     
@@ -64,11 +64,11 @@ trait AsmCodeSimple extends Registers {
 
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 
-    def retn(implicit ev: RET, code: SimpleCodeBuilder) = code.codeTokens += ev.getInstruction
+    def retn(implicit ev: RET, code: SimpleCodeBuilder) = code.codeTokens += ev.build
 
     def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = code.codeTokens += ev.getInstruction
+    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = code.codeTokens += ev.build
 
     def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 }
@@ -97,14 +97,14 @@ trait AsmCode extends Registers {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
 
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: TwoOperands[O1,O2], code: CodeBuilder) = {
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: InstructionFormat with TwoOperands[O1,O2], code: CodeBuilder) = {
       ev.set(p1,p2)
-      code.codeTokens += CodeToken(ev.getInstruction)
+      code.codeTokens += CodeToken(ev.build)
     }
     
-    def oneOp[O1](p1:O1, ev: OneOperand[O1], code: CodeBuilder) = {
+    def oneOp[O1](p1:O1, ev: InstructionFormat with OneOperand[O1], code: CodeBuilder) = {
       ev.set(p1)
-      code.codeTokens += CodeToken(ev.getInstruction)
+      code.codeTokens += CodeToken(ev.build)
     }
     
     private def procRef(procName: String)(implicit code: CodeBuilder) =
@@ -159,11 +159,11 @@ trait AsmCode extends Registers {
 
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
-    def retn(implicit ev: RET, code: CodeBuilder) = code.codeTokens += CodeToken(ev.getInstruction)
+    def retn(implicit ev: RET, code: CodeBuilder) = code.codeTokens += CodeToken(ev.build)
 
     def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def leave(implicit ev: LEAVE, code: CodeBuilder) = code.codeTokens += CodeToken(ev.getInstruction)
+    def leave(implicit ev: LEAVE, code: CodeBuilder) = code.codeTokens += CodeToken(ev.build)
 
     def call(refName: String)(implicit code: CodeBuilder) =
       code.codeTokens += Reference(refName)

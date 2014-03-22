@@ -2,6 +2,26 @@ package com.scalaAsm.x86
 
 import x86Registers._
 
+trait Operands
+
+trait TwoOperands[-O1,-O2] extends Operands {
+  self: InstructionFormat =>
+  protected[this] var x: O1 = _
+  protected[this] var y: O2 = _
+  def set(op1:O1, op2:O2) = {
+    x = op1
+    y = op2
+  }
+}
+
+trait OneOperand[-O1] extends Operands {
+  self: InstructionFormat =>
+  protected[this] var x: O1 = _
+  def set(op1:O1) = {
+    x = op1
+  }
+}
+
 sealed class OperandSize {
   type size
 }

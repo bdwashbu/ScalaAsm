@@ -5,7 +5,7 @@ import x86Registers._
 trait Operands
 
 trait TwoOperands[-O1,-O2] extends Operands {
-  self: InstructionFormat =>
+  self: Instruction =>
   protected[this] var x: O1 = _
   protected[this] var y: O2 = _
   def set(op1:O1, op2:O2) = {
@@ -15,7 +15,7 @@ trait TwoOperands[-O1,-O2] extends Operands {
 }
 
 trait OneOperand[-O1] extends Operands {
-  self: InstructionFormat =>
+  self: Instruction =>
   protected[this] var x: O1 = _
   def set(op1:O1) = {
     x = op1

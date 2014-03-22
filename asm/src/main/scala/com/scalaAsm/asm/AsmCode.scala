@@ -15,18 +15,18 @@ trait AsmCodeSimple extends Registers {
     def imm32(x: Int) = Immediate32(x)
     
     def getRawBytes: Array[Byte] = {
-      builder.codeTokens.flatMap(x => x.getBytes).toArray
+      builder.codeTokens.flatMap(x => x.code).toArray
     }
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
     
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: InstructionFormat with TwoOperands[O1,O2], code: SimpleCodeBuilder) = {
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2], code: SimpleCodeBuilder) = {
       ev.set(p1,p2)
       code.codeTokens += ev.build
     }
     
-    def oneOp[O1](p1:O1, ev: InstructionFormat with OneOperand[O1], code: SimpleCodeBuilder) = {
+    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1], code: SimpleCodeBuilder) = {
       ev.set(p1)
       code.codeTokens += ev.build
     }
@@ -97,12 +97,12 @@ trait AsmCode extends Registers {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
 
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: InstructionFormat with TwoOperands[O1,O2], code: CodeBuilder) = {
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2], code: CodeBuilder) = {
       ev.set(p1,p2)
       code.codeTokens += CodeToken(ev.build)
     }
     
-    def oneOp[O1](p1:O1, ev: InstructionFormat with OneOperand[O1], code: CodeBuilder) = {
+    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1], code: CodeBuilder) = {
       ev.set(p1)
       code.codeTokens += CodeToken(ev.build)
     }

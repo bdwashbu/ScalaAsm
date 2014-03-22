@@ -5,7 +5,7 @@ import java.nio.ByteOrder
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.x86.Instruction
+import com.scalaAsm.x86.MachineCode
 
 case class Assembled(val code: Seq[Token], val data: Seq[Token])
 
@@ -15,7 +15,7 @@ trait CodeBuilder {
 }
 
 trait SimpleCodeBuilder {
-  val codeTokens = ListBuffer[Instruction]()
+  val codeTokens = ListBuffer[MachineCode]()
 }
 
 trait AsmProgram extends AsmData with AsmCode {

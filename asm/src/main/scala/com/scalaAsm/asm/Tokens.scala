@@ -1,6 +1,6 @@
 package com.scalaAsm.asm
 
-import com.scalaAsm.x86.Instruction
+import com.scalaAsm.x86.MachineCode
 
 object Tokens {
   sealed trait Token
@@ -12,7 +12,7 @@ object Tokens {
   case class LabelRef(labelRef: String, opCode: Byte) extends Token
 
   abstract class SizedToken(val size: Int) extends Token
-  case class CodeToken(inst: Instruction) extends SizedToken(inst.size)
+  case class CodeToken(inst: MachineCode) extends SizedToken(inst.size)
   case class BeginProc(name: String) extends SizedToken(0)
   case class Padding(to: Int, tokenSize: Int) extends SizedToken(tokenSize)
   case class ProcRef(procName: String) extends SizedToken(5)

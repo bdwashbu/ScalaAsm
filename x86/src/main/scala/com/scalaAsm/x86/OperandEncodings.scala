@@ -7,7 +7,7 @@ trait OperandFormat {
 }
 
 trait OperandEncoding {
-  self: InstructionFormat =>
+  self: Instruction =>
   
   class NoOperand extends OperandFormat {
     def getAddressingForm = None

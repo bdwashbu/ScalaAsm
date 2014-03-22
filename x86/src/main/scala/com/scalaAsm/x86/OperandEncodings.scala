@@ -42,34 +42,34 @@ trait OperandEncoding {
       
       op2 match { 
         case mem: Memory =>
-      (mem.reg.ID, mem.offset) match {
+      (mem.base.ID, mem.offset) match {
         case (4, Some(Immediate8(offset))) =>
           Some(new AddressingFormSpecifier {
-	       val modRM = Some(ModRMByte(Displacment8, reg = Some(op1.reg), rm = mem.reg))
+	       val modRM = Some(ModRMByte(Displacment8, reg = Some(op1), rm = mem.base))
 		   val scaleIndexBase = Some(Immediate8(0x24.toByte))
 		   val displacment = None
 		   val immediate = Some(Immediate8(offset))
 	      })
         case (_, Some(Immediate32(offset))) =>
           Some(new AddressingFormSpecifier {
-	       val modRM = Some(ModRMByte(Displacment32, reg = Some(op1.reg), rm = mem.reg))
+	       val modRM = Some(ModRMByte(Displacment32, reg = Some(op1), rm = mem.base))
 	       val (scaleIndexBase, displacment, immediate) = (None, None, Some(Immediate32(offset)))
 	      })
         case (_, Some(offset)) =>
           Some(new AddressingFormSpecifier {
-	       val modRM = Some(ModRMByte(Displacment8, reg = Some(op1), rm = mem.reg))
+	       val modRM = Some(ModRMByte(Displacment8, reg = Some(op1), rm = mem.base))
 	       val (scaleIndexBase, displacment, immediate) = (None, None, Some(offset))
 	      })
         case (_, None) =>
           Some(new AddressingFormSpecifier {
-	       val modRM = Some(ModRMByte(NoDisplacment, reg = Some(op1), rm = mem.reg))
+	       val modRM = Some(ModRMByte(NoDisplacment, reg = Some(op1), rm = mem.base))
 		   val (scaleIndexBase, displacment, immediate) = (None, None, None)
 	      })
       }
       case reg: GPR =>
           Some(new AddressingFormSpecifier {
 	       val modRM = Some(ModRMByte(Register, reg = Some(op1), rm = reg))
-	       val (scaleIndexBase, displacment, immediate) = (None, None, op1.offset)
+	       val (scaleIndexBase, displacment, immediate) = (None, None, None)
 	     })
       }
     }
@@ -121,12 +121,12 @@ trait OperandEncoding {
 	       (mem.offset) match {
 	       case (Some(offset)) =>
 	         Some(new AddressingFormSpecifier {
-		        val modRM = Some(ModRMByte(Displacment8, opEx = Some(opcode.opcodeExtension.get), rm = mem.reg))
+		        val modRM = Some(ModRMByte(Displacment8, opEx = Some(opcode.opcodeExtension.get), rm = mem.base))
 		        val (scaleIndexBase, displacment, immediate) = (None, None, Some(offset))
 		     })
 	       case (None) =>
 	         Some(new AddressingFormSpecifier {
-		        val modRM = Some(ModRMByte(NoDisplacment, opEx = Some(opcode.opcodeExtension.get), rm = mem.reg))
+		        val modRM = Some(ModRMByte(NoDisplacment, opEx = Some(opcode.opcodeExtension.get), rm = mem.base))
 			    val (scaleIndexBase, displacment, immediate) = (None, None, None)
 		    })
 	       }

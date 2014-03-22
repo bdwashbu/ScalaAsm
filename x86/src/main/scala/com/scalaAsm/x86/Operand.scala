@@ -33,13 +33,13 @@ class QwordOperand extends OperandSize { type size = Long }
 
 trait Memory extends RegisterOrMemory {
   type Size <: OperandSize
-  def reg: GPR
+  def base: GPR
   def offset: Option[Immediate]
   
   override def toString = {
     var result: String = ""
     
-    result = "[" + reg.toString
+    result = "[" + base.toString
     if (offset.isDefined) {
       if (!offset.get.isNegative)
     	  result += " + " + offset.get.toString
@@ -54,7 +54,6 @@ trait Memory extends RegisterOrMemory {
 
 trait RegisterOrMemory extends Any {
   type Size <: OperandSize
-  def isMemory: Boolean
 }
 
 

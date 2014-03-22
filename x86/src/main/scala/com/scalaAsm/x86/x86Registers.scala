@@ -22,10 +22,7 @@ object x86Registers {
 
   trait GeneralPurpose extends RegisterOrMemory {
     self:Register => 
-      val reg = this
       val ID: Int
-      val isMemory = false
-      val offset: Option[Immediate] = None
       override def toString = name
   }
   

@@ -1,12 +1,12 @@
 package com.scalaAsm.asm
 
 import com.scalaAsm.x86.x86Registers._
-import com.scalaAsm.x86.{Immediate, RegisterOrMemory}
+import com.scalaAsm.x86.{Immediate, RegisterOrMemory, Memory}
 import com.scalaAsm.x86.DwordOperand
 
 object Addressing {
 
-  case class RegisterOffset[+T <: GPR, S <: Immediate](offset2: S, x: T) extends RegisterOrMemory {
+  case class RegisterOffset[+T <: GPR, S <: Immediate](offset2: S, x: T) extends Memory {
      type Size = DwordOperand
      val reg = x
      val isMemory = true
@@ -19,12 +19,20 @@ object Addressing {
     def +[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[X, Z](offset, this)
   }
 
-  case class *[+A <: RegisterOrMemory](x: A) extends RegisterOrMemory {
+  def *(x: GPR) = new Memory {
+    type Size = DwordOperand
+     val reg = x
+     val isMemory = true
+     val offset = None
+  }
+  
+  def *(x: Memory) = new Memory {
     type Size = DwordOperand
      val reg = x.reg
      val isMemory = true
      val offset = x.offset
   }
+  
   type +[A <: GPR, B <: Immediate] = RegisterOffset[A, B]
 }
 

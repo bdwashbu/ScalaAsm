@@ -3,13 +3,6 @@ package com.scalaAsm.x86
 import com.scalaAsm.x86.ModRM._
 import com.scalaAsm.x86.x86Registers._
 
-trait MachineCode {
-  val code: Array[Byte]
-  val size: Int
-  val line: String
-  override def toString = line
-}
-
 abstract class x86Instruction(mnemonic: String) extends Instruction {
   implicit def toByte(x:Int) = x.toByte
   implicit def toOneOpcode(x:Int): OneOpcode = OneOpcode(x.toByte)

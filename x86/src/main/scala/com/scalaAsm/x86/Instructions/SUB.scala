@@ -7,7 +7,7 @@ trait SUB_2[-O1, -O2] extends SUB with TwoOperands[O1,O2] with OperandEncoding
 
 object SUB {
   
-  implicit object sub1 extends SUB_2[r32, imm8] {
+  implicit object sub1 extends SUB_2[rm32, imm8] {
       val opcode = 0x83 /+ 5
       def operands = MI(x,y)
   }

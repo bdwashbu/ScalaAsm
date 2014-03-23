@@ -12,7 +12,7 @@ object TEST {
       val opcode: Opcodes = 0x85
   }
   
-  implicit object test2 extends TEST_2[r32, imm32] {
+  implicit object test2 extends TEST_2[rm32, imm32] {
       def operands = MI(x,y)
       val opcode: Opcodes = 0xF7 /+ 0
   }

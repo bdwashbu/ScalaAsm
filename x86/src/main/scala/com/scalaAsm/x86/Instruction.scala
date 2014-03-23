@@ -1,7 +1,6 @@
 package com.scalaAsm.x86
 
-import com.scalaAsm.x86.Operands.ModRM._
-import com.scalaAsm.x86.Operands.x86Registers._
+import com.scalaAsm.x86.Operands._
 
 abstract class x86Instruction(mnemonic: String) extends Instruction {
   implicit def toByte(x:Int) = x.toByte

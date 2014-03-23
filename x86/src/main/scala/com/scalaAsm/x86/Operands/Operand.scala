@@ -1,11 +1,9 @@
 package com.scalaAsm.x86
 package Operands
 
-import x86Registers._
-
 trait Operand
 
-trait TwoOperands[-O1,-O2] extends Operand {
+trait DualOperand[-O1,-O2] extends Operand {
   self: Instruction =>
   protected[this] var x: O1 = _
   protected[this] var y: O2 = _
@@ -15,7 +13,7 @@ trait TwoOperands[-O1,-O2] extends Operand {
   }
 }
 
-trait OneOperand[-O1] extends Operand {
+trait SingleOperand[-O1] extends Operand {
   self: Instruction =>
   protected[this] var x: O1 = _
   def set(op1:O1) = {
@@ -33,7 +31,6 @@ class DwordOperand extends OperandSize { type size = Int }
 class QwordOperand extends OperandSize { type size = Long }
 
 trait Memory extends RegisterOrMemory {
-  type Size <: OperandSize
   def base: Option[GPR]
   def offset: Option[Immediate]
   

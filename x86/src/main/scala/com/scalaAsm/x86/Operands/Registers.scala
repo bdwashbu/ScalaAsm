@@ -1,8 +1,6 @@
 package com.scalaAsm.x86
 package Operands
 
-object x86Registers {
-
   abstract class Register(val name: String)
 
   abstract class Register8(name: String) extends Register(name) {
@@ -27,8 +25,6 @@ object x86Registers {
       override def toString = name
   }
   
-  
-  
   trait GeneralPurposeA extends GeneralPurpose {self:Register => val ID = 0}
   trait GeneralPurposeB extends GeneralPurpose {self:Register => val ID = 3}
   trait GeneralPurposeC extends GeneralPurpose {self:Register => val ID = 1}
@@ -38,35 +34,29 @@ object x86Registers {
   trait DestinationIndex extends GeneralPurpose {self:Register => val ID = 7}
   trait BasePointer extends GeneralPurpose {self:Register => val ID = 5}
   trait StackPointer extends GeneralPurpose {self:Register => val ID = 4}
-  
-  // eax - Accumulator for operands and results
-  // ebx - Pointer to data in the DS segment
-  // ecx - Counter for string and loop operations
-  // edx - I/O pointer
 
-  // esp - Stack pointer
-  // ebp - Pointer to data on the stack
-  // esi - Pointer to data in the segment pointed to by the DS register
-  // edi - Pointer to data (or destination) in the segment pointed to by ES register
-
+  // "A" family - Accumulator for operands and results
   class RAX extends Register64("rax") with GeneralPurposeA
   class EAX extends Register32("eax") with GeneralPurposeA
   class AX extends Register16("ax") with GeneralPurposeA
   class AL extends Register8("al") with GeneralPurposeA
   class AH extends Register8("ah") with GeneralPurposeA {override val ID = 4}
   
+  // "B" family - Pointer to data in the DS segment
   class RBX extends Register64("rbx") with GeneralPurposeB
   class EBX extends Register32("ebx") with GeneralPurposeB
   class BX extends Register16("bx") with GeneralPurposeB
   class BL extends Register8("bl") with GeneralPurposeB
   class BH extends Register8("bh") with GeneralPurposeB {override val ID = 7}
   
+  // "C" family - Counter for string and loop operations
   class RCX extends Register64("rcx") with GeneralPurposeC
   class ECX extends Register32("ecx") with GeneralPurposeC
   class CX extends Register16("cx") with GeneralPurposeC
   class CL extends Register8("cl") with GeneralPurposeC
   class CH extends Register8("ch") with GeneralPurposeC {override val ID = 5}
 
+  // "D" family - I/O pointer
   class RDX extends Register64("rdx") with GeneralPurposeD
   class EDX extends Register32("edx") with GeneralPurposeD
   class DX extends Register16("dx") with GeneralPurposeD
@@ -88,14 +78,10 @@ object x86Registers {
   class RDI extends Register64("rdi") with DestinationIndex
   class EDI extends Register32("edi") with DestinationIndex
   class DI extends Register16("di") with DestinationIndex 
-    
-  type SegmentRegister = Register8
+  
   class ES extends SegmentRegister("es")
   class CS extends SegmentRegister("cs")
   class SS extends SegmentRegister("ss")
   class DS extends SegmentRegister("ds")
   class FS extends SegmentRegister("fs")
   class GS extends SegmentRegister("gs")
-
-  
-}

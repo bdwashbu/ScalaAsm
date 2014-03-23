@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
 package Instructions
 
-import com.scalaAsm.x86.Operands.x86Registers._
+import com.scalaAsm.x86.Operands._
 import scala.annotation.implicitNotFound
 
 abstract class RDRAND extends x86Instruction("RDRAND")

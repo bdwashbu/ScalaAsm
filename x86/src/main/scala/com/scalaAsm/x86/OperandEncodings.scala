@@ -1,7 +1,6 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.Operands.x86Registers._
 
 trait OperandFormat {
   def getAddressingForm: Option[AddressingFormSpecifier]
@@ -29,7 +28,7 @@ trait OperandEncoding {
     def getAddressingForm: Option[AddressingFormSpecifier] = {
         
       Some(new AddressingFormSpecifier {
-	     val modRM = Some(ModRMByte(Register, opEx = Some(opcode.opcodeExtension.get), rm = op1))
+	     val modRM = Some(ModRMByte(OtherRegister, opEx = Some(opcode.opcodeExtension.get), rm = op1))
 		 val scaleIndexBase = None
 		 val displacment = None
 		 val immediate = if (op2.value == 0) None else Some(op2)
@@ -53,7 +52,7 @@ trait OperandEncoding {
 	      })
         case (Some(base), Some(Immediate32(offset))) =>
           Some(new AddressingFormSpecifier {
-	       val modRM = Some(ModRMByte(Displacment32, reg = Some(op1), rm = base))
+	       val modRM = Some(ModRMByte(Displacment16or32, reg = Some(op1), rm = base))
 	       val (scaleIndexBase, displacment, immediate) = (None, None, Some(Immediate32(offset)))
 	      })
         case (Some(base), Some(offset)) =>
@@ -69,7 +68,7 @@ trait OperandEncoding {
       }
       case reg: GPR =>
           Some(new AddressingFormSpecifier {
-	       val modRM = Some(ModRMByte(Register, reg = Some(op1), rm = reg))
+	       val modRM = Some(ModRMByte(OtherRegister, reg = Some(op1), rm = reg))
 	       val (scaleIndexBase, displacment, immediate) = (None, None, None)
 	     })
       }
@@ -154,7 +153,7 @@ trait OperandEncoding {
         case reg: GPR =>
           if (!opcode.opcodeExtension.isDefined) None else
          Some(new AddressingFormSpecifier {
-	        val modRM = Some(ModRMByte(Register, opEx = Some(opcode.opcodeExtension.get), rm = reg))
+	        val modRM = Some(ModRMByte(OtherRegister, opEx = Some(opcode.opcodeExtension.get), rm = reg))
 	        val (scaleIndexBase, displacment, immediate) = (None, None, None)
 	    })
      }

@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
 package Instructions
 
-import com.scalaAsm.x86.Operands.x86Registers._
+import com.scalaAsm.x86.Operands._
 
 abstract class POP extends x86Instruction("POP")
 

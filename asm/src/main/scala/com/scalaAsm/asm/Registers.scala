@@ -1,9 +1,6 @@
 package com.scalaAsm.asm
 
-import com.scalaAsm.x86.Operands.x86Registers._
-import com.scalaAsm.x86.Operands.{Immediate, RegisterOrMemory, Memory}
-import com.scalaAsm.x86.Operands.DwordOperand
-import com.scalaAsm.x86.Operands.GPR
+import com.scalaAsm.x86.Operands._
 
 object Addressing {
 
@@ -15,8 +12,8 @@ object Addressing {
 
   trait Addressable[X <: GPR] {
     self: X =>
-    def -[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[Z,X](offset.negate, this)
-    def +[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[Z,X](offset, this)
+    def -[Z <: Immediate {type Imm = Z }](offset: Z) = RegisterOffset[Z,X](offset.negate, this)
+    def +[Z <: Immediate {type Imm = Z }](offset: Z) = RegisterOffset[Z,X](offset, this)
   }
 
   def *(gpr: GPR) = new Memory {

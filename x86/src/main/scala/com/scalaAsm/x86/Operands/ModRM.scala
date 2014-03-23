@@ -2,7 +2,6 @@ package com.scalaAsm.x86
 package Operands
 
 import com.scalaAsm.utils.Endian
-import x86Registers._
 
 protected[x86] trait AddressingFormSpecifier {
     val modRM: Option[ModRMFormat]
@@ -35,8 +34,8 @@ object ModRM {
  sealed class RegisterMode(val value: Byte)
   case object NoDisplacment extends RegisterMode(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacemen
   case object Displacment8 extends RegisterMode(1)  // Eight-bit displacement, sign-extended to 16 bits
-  case object Displacment32 extends RegisterMode(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
-  case object Register extends RegisterMode(3)     // r/m is treated as a second "reg" field
+  case object Displacment16or32 extends RegisterMode(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
+  case object OtherRegister extends RegisterMode(3)     // r/m is treated as a second "reg" field
 
 trait ModRMFormat {
     def get: Byte

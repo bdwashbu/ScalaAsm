@@ -3,7 +3,7 @@ package Instructions
 
 abstract class JMP extends x86Instruction("JMP")
 
-trait JMP_1[-O1] extends JMP with OneOperand[O1] with OperandEncoding
+trait JMP_1[-O1] extends JMP with OneOperand[O1] with InstructionFormat
 
 object JMP {
 

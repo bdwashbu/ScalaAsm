@@ -12,7 +12,7 @@ trait InstructionField extends Any {
   def getBytes: Array[Byte]
 }
 
-trait Instruction extends OperandEncoding {
+trait Instruction {
   def opcode: Opcodes
   def operands: OperandFormat
   val mnemonic: String = ""

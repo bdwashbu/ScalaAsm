@@ -6,7 +6,7 @@ import scala.annotation.implicitNotFound
 
 abstract class RDRAND extends x86Instruction("RDRAND")
 
-trait RDRAND_1[-O1] extends RDRAND with OneOperand[O1] with OperandEncoding
+trait RDRAND_1[-O1] extends RDRAND with OneOperand[O1] with InstructionFormat
 
 object RDRAND {
   

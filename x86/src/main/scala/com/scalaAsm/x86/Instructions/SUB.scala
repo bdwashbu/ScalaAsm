@@ -3,7 +3,7 @@ package Instructions
 
 abstract class SUB extends x86Instruction("SUB")
 
-trait SUB_2[-O1, -O2] extends SUB with TwoOperands[O1,O2] with OperandEncoding
+trait SUB_2[-O1, -O2] extends SUB with TwoOperands[O1,O2] with InstructionFormat
 
 object SUB {
   

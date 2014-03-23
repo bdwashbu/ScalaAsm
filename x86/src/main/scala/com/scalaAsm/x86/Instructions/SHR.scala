@@ -3,7 +3,7 @@ package Instructions
 
 abstract class SHR extends x86Instruction("SHR")
 
-trait SHR_2[-O1, -O2] extends SHR with TwoOperands[O1,O2] with OperandEncoding
+trait SHR_2[-O1, -O2] extends SHR with TwoOperands[O1,O2] with InstructionFormat
 
 object SHR {
   

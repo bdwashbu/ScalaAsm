@@ -3,7 +3,7 @@ package Instructions
 
 abstract class JZ extends x86Instruction("JZ")
 
-trait JZ_1[-O1] extends JZ with OneOperand[O1] with OperandEncoding
+trait JZ_1[-O1] extends JZ with OneOperand[O1] with InstructionFormat
 
 object JZ {
   

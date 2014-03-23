@@ -6,7 +6,7 @@ import scala.annotation.implicitNotFound
 
 abstract class RETN extends x86Instruction("RETN")
 
-trait RETN_1[-O1] extends RETN with OneOperand[O1] with OperandEncoding
+trait RETN_1[-O1] extends RETN with OneOperand[O1] with InstructionFormat
 
 object RETN {
   

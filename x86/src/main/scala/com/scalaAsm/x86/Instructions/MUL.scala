@@ -3,7 +3,7 @@ package Instructions
 
 abstract class MUL extends x86Instruction("MUL")
 
-trait MUL_1[-O1] extends MUL with OneOperand[O1] with OperandEncoding
+trait MUL_1[-O1] extends MUL with OneOperand[O1] with InstructionFormat
 
 object MUL {
   

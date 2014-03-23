@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class RET extends x86Instruction("RET") with OperandEncoding
+abstract class RET extends x86Instruction("RET") with InstructionFormat
 
 object RET {
 

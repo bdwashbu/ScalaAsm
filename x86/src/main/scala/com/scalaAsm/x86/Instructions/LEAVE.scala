@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class LEAVE extends x86Instruction("LEAVE") with OperandEncoding
+abstract class LEAVE extends x86Instruction("LEAVE") with InstructionFormat
 
 object LEAVE {
   

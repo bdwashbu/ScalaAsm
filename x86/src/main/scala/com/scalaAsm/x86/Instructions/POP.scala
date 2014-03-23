@@ -5,7 +5,7 @@ import com.scalaAsm.x86.Operands._
 
 abstract class POP extends x86Instruction("POP")
 
-trait POP_1[-O1] extends POP with OneOperand[O1] with OperandEncoding
+trait POP_1[-O1] extends POP with OneOperand[O1] with InstructionFormat
 
 object POP {
   

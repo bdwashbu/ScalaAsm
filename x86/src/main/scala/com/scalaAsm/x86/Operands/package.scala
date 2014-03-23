@@ -4,5 +4,5 @@ package object Operands {
 
   type GeneralPurposeRegister = Register with GeneralPurpose
   type GPR = GeneralPurposeRegister
-  type SegmentRegister = Register8
+  type SegmentRegister = Register16
 }

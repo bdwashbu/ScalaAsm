@@ -14,6 +14,6 @@ object JMP {
 
   implicit object jmp2 extends JMP_1[rm32] {
     val opcode = 0xFF /+ 4
-    def operands = M(x)
+    def operands = M(op1)
   }
 }

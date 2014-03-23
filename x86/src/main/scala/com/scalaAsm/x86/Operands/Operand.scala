@@ -4,20 +4,18 @@ package Operands
 trait Operand
 
 trait DualOperand[-O1,-O2] extends Operand {
-  self: Instruction =>
-  protected[this] var x: O1 = _
-  protected[this] var y: O2 = _
-  def set(op1:O1, op2:O2) = {
-    x = op1
-    y = op2
+  protected[this] var op1: O1 = _
+  protected[this] var op2: O2 = _
+  def set(x:O1, y:O2) = {
+    op1 = x
+    op2 = y
   }
 }
 
 trait SingleOperand[-O1] extends Operand {
-  self: Instruction =>
-  protected[this] var x: O1 = _
-  def set(op1:O1) = {
-    x = op1
+  protected[this] var op1: O1 = _
+  def set(x:O1) = {
+    op1 = x
   }
 }
 

@@ -9,6 +9,6 @@ object MUL {
   
   implicit object mul1 extends MUL_1[rm32] {
       val opcode = 0xF7 /+ 4
-      def operands = M(x)
+      def operands = M(op1)
   }
 }

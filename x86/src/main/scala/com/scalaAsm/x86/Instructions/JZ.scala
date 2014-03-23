@@ -8,12 +8,12 @@ trait JZ_1[-O1] extends JZ with OneOperand[O1] with InstructionFormat
 object JZ {
   
   implicit object jz1 extends JZ_1[imm8] {
-      def operands = new OneOperandFormat[imm8](x) {
+      def operands = new OneOperandFormat[imm8](op1) {
         def getAddressingForm = Some(new AddressingFormSpecifier {
 	        val modRM = None
 		    val sib = None
 		    val displacment = None
-		    val immediate = Some(x)
+		    val immediate = Some(op1)
 	     })}
       val opcode = OneOpcode(0x74)
   }

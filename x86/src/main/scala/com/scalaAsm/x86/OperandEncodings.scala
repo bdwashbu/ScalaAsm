@@ -21,55 +21,49 @@ trait InstructionFormat {
     override def toString = x.toString + ", " + y.toString
   }
 
-  trait OperandEncoding[-O1 <: ModRM.rm,-O2] {
-    protected[this] var op1: O1 = _
-    protected[this] var op2: O2 = _
-    def set(o1:O1, o2:O2) = {
-	    op1 = o1
-	    op2 = o2
-	  }
+  trait OperandEncoding[-O1 <: ModRM.rm, -O2] extends DualOperand[O1,O2]{
     def encode: (Option[ModRM], Option[SIB])
   }
-  
-  def getEncoding[O1 <: ModRM.rm,O2](op1: O1, op2: O2)(implicit operands: OperandEncoding[O1,O2]) = {
+
+  def getEncoding[O1 <: ModRM.rm, O2](op1: O1, op2: O2)(implicit operands: OperandEncoding[O1, O2]) = {
     operands.set(op1, op2)
     operands.encode
   }
-  
+
   implicit object test1 extends OperandEncoding[GPR, Immediate] {
     def encode: (Option[ModRM], Option[SIB]) = {
       val modRM = Some(ModRM(TwoRegisters, opEx = opcode.opcodeExtension, rm = op1))
-	  (modRM, None)
+      (modRM, None)
     }
   }
-  
+
   implicit object test2 extends OperandEncoding[GPR, Memory] {
     def encode: (Option[ModRM], Option[SIB]) = {
-	    (op2.base, op2.offset, op2.immediate) match {
-	        case (Some(base), offset @ Some(off: Displacement8), None) if base.ID == 4 =>
-	            val modRM = Some(ModRM(DisplacementByte, reg = Some(op1), rm = base))
-	            val sib = Some(SIB(One, new ESP, base))
-	            (modRM, sib)
-	        case (Some(base), offset @ Some(off: Displacement32), None) =>
-	            val modRM = Some(ModRM(DisplacementDword, reg = Some(op1), rm = base))
-	            (modRM, None)
-	        case (Some(base), offset @ Some(_: Displacement), None) =>
-	            val modRM = Some(ModRM(DisplacementByte, reg = Some(op1), rm = base))
-	            (modRM, None)
-	        case (Some(base), None, None) =>
-	            val modRM = Some(ModRM(NoDisplacement, reg = Some(op1), rm = base))
-	            (modRM, None)
-	      }
+      (op2.base, op2.offset, op2.immediate) match {
+        case (Some(base), offset @ Some(off: Displacement8), None) if base.ID == 4 =>
+          val modRM = Some(ModRM(DisplacementByte, reg = Some(op1), rm = base))
+          val sib = Some(SIB(One, new ESP, base))
+          (modRM, sib)
+        case (Some(base), offset @ Some(off: Displacement32), None) =>
+          val modRM = Some(ModRM(DisplacementDword, reg = Some(op1), rm = base))
+          (modRM, None)
+        case (Some(base), offset @ Some(_: Displacement), None) =>
+          val modRM = Some(ModRM(DisplacementByte, reg = Some(op1), rm = base))
+          (modRM, None)
+        case (Some(base), None, None) =>
+          val modRM = Some(ModRM(NoDisplacement, reg = Some(op1), rm = base))
+          (modRM, None)
+      }
     }
   }
-  
+
   implicit object test3 extends OperandEncoding[GPR, GPR] {
     def encode: (Option[ModRM], Option[SIB]) = {
-        val modRM = Some(ModRM(TwoRegisters, reg = Some(op1), rm = op2))
-        (modRM, None)
+      val modRM = Some(ModRM(TwoRegisters, reg = Some(op1), rm = op2))
+      (modRM, None)
     }
   }
-  
+
   object NA extends NoOperand
 
   case class MI[M <: ModRM.rm, I <: Immediate](op1: M, op2: I) extends TwoOperandsFormat[M, I](op1, op2) {
@@ -78,11 +72,10 @@ trait InstructionFormat {
 
       op1 match {
         case reg: GPR =>
-	      Some(new AddressingFormSpecifier {
-	        val (modRM, sib) = getEncoding(reg, op2)
-	        val displacment = None
-	        val immediate = if (op2.value == 0) None else Some(op2)
-	      })
+          Some(new AddressingFormSpecifier {
+            val (modRM, sib) = getEncoding(reg, op2)
+            val (displacment, immediate) = (None, Some(op2))
+          })
       }
     }
   }
@@ -93,29 +86,10 @@ trait InstructionFormat {
 
       op2 match {
         case mem: Memory =>
-          (mem.base, mem.offset, mem.immediate) match {
-            case (Some(base), offset @ Some(off: Displacement8), None) if base.ID == 4 =>
-              Some(new AddressingFormSpecifier {
-                val (modRM, sib) = getEncoding(op1, mem)
-                val displacment = offset
-                val immediate = None
-              })
-            case (Some(base), offset @ Some(off: Displacement32), None) =>
-              Some(new AddressingFormSpecifier {
-                val (modRM, sib) = getEncoding(op1, mem)
-                val (displacment, immediate) = (offset, None)
-              })
-            case (Some(base), offset @ Some(_: Displacement), None) =>
-              Some(new AddressingFormSpecifier {
-                val (modRM, sib) = getEncoding(op1, mem)
-                val (displacment, immediate) = (offset, None)
-              })
-            case (Some(base), None, None) =>
-              Some(new AddressingFormSpecifier {
-                val (modRM, sib) = getEncoding(op1, mem)
-                val (displacment, immediate) = (None, None)
-              })
-          }
+          Some(new AddressingFormSpecifier {
+            val (modRM, sib) = getEncoding(op1, mem)
+            val (displacment, immediate) = (mem.offset, mem.immediate)
+          })
         case reg: GPR =>
           Some(new AddressingFormSpecifier {
             val (modRM, sib) = getEncoding(op1, reg)
@@ -191,7 +165,7 @@ trait InstructionFormat {
               Some(new AddressingFormSpecifier {
                 val modRM = Some(ModRM(NoDisplacement, opEx = opcode.opcodeExtension, rm = base))
                 val (sib, displacment, immediate) = (None, None, None)
-              }) 
+              })
             case (None, None, imm @ Some(_: Immediate), true) =>
               Some(new AddressingFormSpecifier {
                 val modRM = Some(ModRM(NoDisplacement, opEx = opcode.opcodeExtension, rm = new Displacement32))

@@ -1,4 +1,5 @@
 package com.scalaAsm.x86
+package Operands
 
 import com.scalaAsm.utils.Endian
 import x86Registers._

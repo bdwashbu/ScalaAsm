@@ -1,8 +1,9 @@
 package com.scalaAsm.asm
 
-import com.scalaAsm.x86.x86Registers._
-import com.scalaAsm.x86.{Immediate, RegisterOrMemory, Memory}
-import com.scalaAsm.x86.DwordOperand
+import com.scalaAsm.x86.Operands.x86Registers._
+import com.scalaAsm.x86.Operands.{Immediate, RegisterOrMemory, Memory}
+import com.scalaAsm.x86.Operands.DwordOperand
+import com.scalaAsm.x86.Operands.GPR
 
 object Addressing {
 

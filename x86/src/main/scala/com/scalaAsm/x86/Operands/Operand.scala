@@ -1,10 +1,11 @@
 package com.scalaAsm.x86
+package Operands
 
 import x86Registers._
 
-trait Operands
+trait Operand
 
-trait TwoOperands[-O1,-O2] extends Operands {
+trait TwoOperands[-O1,-O2] extends Operand {
   self: Instruction =>
   protected[this] var x: O1 = _
   protected[this] var y: O2 = _
@@ -14,7 +15,7 @@ trait TwoOperands[-O1,-O2] extends Operands {
   }
 }
 
-trait OneOperand[-O1] extends Operands {
+trait OneOperand[-O1] extends Operand {
   self: Instruction =>
   protected[this] var x: O1 = _
   def set(op1:O1) = {

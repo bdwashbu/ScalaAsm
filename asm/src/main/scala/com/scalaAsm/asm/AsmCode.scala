@@ -4,7 +4,8 @@ import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86._
 import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.x86.x86Registers._
+import com.scalaAsm.x86.Operands.x86Registers._
+import com.scalaAsm.x86.Operands.{Immediate8, Immediate16, Immediate32}
 
 trait AsmCodeSimple extends Registers {
     

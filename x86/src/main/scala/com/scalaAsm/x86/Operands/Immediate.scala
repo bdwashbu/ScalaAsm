@@ -1,4 +1,5 @@
 package com.scalaAsm.x86
+package Operands
 
 trait Immediate extends Any  {
   type Size <: OperandSize

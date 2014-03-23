@@ -1,4 +1,5 @@
 package com.scalaAsm.x86
+package Operands
 
 object x86Registers {
 
@@ -26,8 +27,7 @@ object x86Registers {
       override def toString = name
   }
   
-  type GeneralPurposeRegister = Register with GeneralPurpose
-  type GPR = GeneralPurposeRegister
+  
   
   trait GeneralPurposeA extends GeneralPurpose {self:Register => val ID = 0}
   trait GeneralPurposeB extends GeneralPurpose {self:Register => val ID = 3}

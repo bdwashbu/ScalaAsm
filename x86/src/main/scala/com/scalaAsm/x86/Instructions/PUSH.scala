@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
 package Instructions
 
-import com.scalaAsm.x86.x86Registers._
+import com.scalaAsm.x86.Operands.x86Registers._
 import scala.annotation.implicitNotFound
 
 abstract class PUSH extends x86Instruction("PUSH")

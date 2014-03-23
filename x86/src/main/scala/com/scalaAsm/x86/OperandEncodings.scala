@@ -1,6 +1,7 @@
 package com.scalaAsm.x86
 
-import x86Registers._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.x86Registers._
 
 trait OperandFormat {
   def getAddressingForm: Option[AddressingFormSpecifier]

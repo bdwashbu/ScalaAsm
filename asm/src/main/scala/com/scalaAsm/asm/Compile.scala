@@ -3,7 +3,7 @@ package com.scalaAsm.asm
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.x86.Instructions.CALL
-import com.scalaAsm.x86.{Immediate16, Immediate32}
+import com.scalaAsm.x86.Operands.{Immediate16, Immediate32}
 import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.x86.Instructions.JMP
 import com.scalaAsm.x86.Instructions.PUSH

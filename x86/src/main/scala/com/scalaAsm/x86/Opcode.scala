@@ -1,5 +1,7 @@
 package com.scalaAsm.x86
 
+import com.scalaAsm.x86.Operands.ModRM
+
 trait Opcodes {
   def get: Array[Byte]
   def size: Int

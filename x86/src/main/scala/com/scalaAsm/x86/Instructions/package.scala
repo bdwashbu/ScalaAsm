@@ -1,11 +1,17 @@
 package com.scalaAsm.x86
 
+import com.scalaAsm.x86.Operands._
+
 package object Instructions {
   import x86Registers._
   
   type imm8 = Immediate8
   type imm16 = Immediate16
   type imm32 = Immediate32
+  
+  type TwoOperands[-O1,-O2] = Operands.TwoOperands[O1,O2]
+  type OneOperand[-O1] = Operands.OneOperand[O1]
+  type AddressingFormSpecifier = Operands.AddressingFormSpecifier
   
   type rm = RegisterOrMemory
   type rm8 = rm { type Size = ByteOperand }

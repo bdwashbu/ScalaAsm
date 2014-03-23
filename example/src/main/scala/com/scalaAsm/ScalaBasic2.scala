@@ -6,7 +6,7 @@ import com.scalaAsm.portableExe.OptionalHeader
 import scala.util.parsing.combinator.JavaTokenParsers
 import com.scalaAsm.asm.AsmCodeSimple
 import com.scalaAsm.asm.AsmProgram
-import com.scalaAsm.x86.x86Registers._
+import com.scalaAsm.x86.Operands.x86Registers._
 import scala.collection.mutable.HashSet
 import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.asm.Tokens.CodeToken

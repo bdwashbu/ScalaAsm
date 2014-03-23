@@ -33,7 +33,7 @@ class QwordOperand extends OperandSize { type size = Long }
 
 trait Memory extends RegisterOrMemory {
   type Size <: OperandSize
-  def base: GPR
+  def base: Option[GPR]
   def offset: Option[Immediate]
   
   override def toString = {

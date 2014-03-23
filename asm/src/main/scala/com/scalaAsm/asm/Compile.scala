@@ -2,6 +2,10 @@ package com.scalaAsm.asm
 
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
+import com.scalaAsm.x86.Instructions.CALL
+import com.scalaAsm.x86.Immediate32
+import com.scalaAsm.asm.Addressing._
+
 
 object AsmCompiler 
 {
@@ -99,7 +103,7 @@ object AsmCompiler
         case ByteOutputPost(code) => code
         case ProcState(offset, name) => 0xE8.toByte +: Endian.swap(procs(name) - offset - 5)
         case VarState(_, name) => 0x68.toByte +: Endian.swap(variables(name) + baseOffset)
-        case ImportState(_, name) => Array[Byte](0xFF.toByte, 0x15) ++ Endian.swap(imports(name) + baseOffset)
+        case ImportState(_, name) => CALL.call(*(Immediate32((imports(name) + baseOffset)))).build.code
         case JmpState(_, name) => Array[Byte](0xFF.toByte, 0x25) ++ Endian.swap(externs(name) + baseOffset)
         case LabelRefResolved(offset, name, opCode) => Array(opCode, (labels(name) - offset - 2).toByte)
         case _ => Array[Byte]()

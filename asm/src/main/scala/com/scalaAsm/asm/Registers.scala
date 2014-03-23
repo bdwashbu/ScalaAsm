@@ -8,7 +8,7 @@ object Addressing {
 
   case class RegisterOffset[S <: Immediate, +T <: GPR](offset2: S, reg: T) extends Memory {
      type Size = DwordOperand
-     val base = reg
+     val base = Some(reg)
      val offset = Some(offset2)
   }
 
@@ -18,16 +18,22 @@ object Addressing {
     def +[Z <: Immediate {type X = Z }](offset: Z) = RegisterOffset[Z,X](offset, this)
   }
 
-  def *(x: GPR) = new Memory {
-    type Size = DwordOperand
-     val base = x
+  def *(gpr: GPR) = new Memory {
+    type Size = gpr.Size
+     val base = Some(gpr)
      val offset = None
   }
   
-  def *(x: Memory) = new Memory {
-    type Size = DwordOperand
-     val base = x.base
-     val offset = x.offset
+  def *(mem: Memory) = new Memory {
+    type Size = mem.Size
+     val base = mem.base
+     val offset = mem.offset
+  }
+  
+  def *(imm: Immediate) = new Memory {
+    type Size = imm.Size
+     val base = None
+     val offset = Some(imm)
   }
   
   type +[A <: Immediate, B <: GPR] = RegisterOffset[A, B]

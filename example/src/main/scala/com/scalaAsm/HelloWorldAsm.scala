@@ -33,10 +33,10 @@ object HelloWorld extends AsmProgram {
 
     proc("flushBuffer") {
 
-      val numberOfBytesToWrite = *(ebp - imm8(12))
-      val numberOfBytesWritten = *(ebp + imm8(-8))
-      val hFile = *(ebp + imm8(-4))
-      val lpBuffer = *(ebp + imm8(8))
+      val numberOfBytesToWrite = *(ebp - byte(12))
+      val numberOfBytesWritten = *(ebp + byte(-8))
+      val hFile = *(ebp + byte(-4))
+      val lpBuffer = *(ebp + byte(8))
       val STD_OUTPUT_HANDLE = imm8(-11)
 
       push(ebp)
@@ -83,8 +83,8 @@ object HelloWorld extends AsmProgram {
 
     proc("strlen") {
 
-      mov(eax, *(esp + imm8(4))) // pointer to string
-      lea(edx, *(eax + imm8(3)))
+      mov(eax, *(esp + byte(4))) // pointer to string
+      lea(edx, *(eax + byte(3)))
       push(ebp)
       push(edi)
       mov(ebp, imm32(0x80808080))
@@ -94,7 +94,7 @@ object HelloWorld extends AsmProgram {
       for (i <- 0 until 3) {
         mov(edi, *(eax)) // read first 4 bytes
         add(eax, imm8(4)) // increment pointer
-        lea(ecx, *(edi - imm32(0x1010101))) // subtract 1 from each byte
+        lea(ecx, *(edi - dword(0x1010101))) // subtract 1 from each byte
         not(edi) // invert all bytes
         and(ecx, edi)
         and(ecx, ebp)
@@ -103,7 +103,7 @@ object HelloWorld extends AsmProgram {
 
       mov(edi, *(eax))
       add(eax, imm8(4))
-      lea(ecx, *(edi - imm32(0x1010101)))
+      lea(ecx, *(edi - dword(0x1010101)))
       not(edi)
       and(ecx, edi)
       and(ecx, ebp)

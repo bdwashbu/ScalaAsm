@@ -11,7 +11,7 @@ object JZ {
       def operands = new OneOperandFormat[imm8](x) {
         def getAddressingForm = Some(new AddressingFormSpecifier {
 	        val modRM = None
-		    val scaleIndexBase = None
+		    val sib = None
 		    val displacment = None
 		    val immediate = Some(x)
 	     })}

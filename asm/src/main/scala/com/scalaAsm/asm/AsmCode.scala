@@ -14,6 +14,10 @@ trait AsmCodeSimple extends Registers {
     def imm16(x: Short) = Immediate16(x)
     def imm32(x: Int) = Immediate32(x)
     
+    def byte(x: Byte) = Displacement8(x)
+    def word(x: Short) = Displacement16(x)
+    def dword(x: Int) = Displacement32(x)
+    
     def getRawBytes: Array[Byte] = {
       builder.codeTokens.flatMap(x => x.code).toArray
     }
@@ -91,6 +95,10 @@ trait AsmCode extends Registers {
     def imm8(x: Byte) = Immediate8(x)
     def imm16(x: Short) = Immediate16(x)
     def imm32(x: Int) = Immediate32(x)
+    
+    def byte(x: Byte) = Displacement8(x)
+    def word(x: Short) = Displacement16(x)
+    def dword(x: Int) = Displacement32(x)
 
     var parserPos: Int = 0
 

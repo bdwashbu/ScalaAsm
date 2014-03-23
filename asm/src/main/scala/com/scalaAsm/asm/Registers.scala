@@ -4,37 +4,41 @@ import com.scalaAsm.x86.Operands._
 
 object Addressing {
 
-  case class RegisterOffset[S <: Immediate, +T <: GPR](offset2: S, reg: T) extends Memory {
+  case class RegisterOffset[S <: Displacement, +T <: GPR](offset2: S, reg: T) extends Memory {
      type Size = DwordOperand
      val base = Some(reg)
      val offset = Some(offset2)
+     val immediate = None
   }
 
   trait Addressable[X <: GPR] {
     self: X =>
-    def -[Z <: Immediate {type Imm = Z }](offset: Z) = RegisterOffset[Z,X](offset.negate, this)
-    def +[Z <: Immediate {type Imm = Z }](offset: Z) = RegisterOffset[Z,X](offset, this)
+    def -[Z <: Displacement {type Offset = Z }](offset: Z) = RegisterOffset[Z,X](offset.negate, this)
+    def +[Z <: Displacement {type Offset = Z }](offset: Z) = RegisterOffset[Z,X](offset, this)
   }
 
   def *(gpr: GPR) = new Memory {
     type Size = gpr.Size
      val base = Some(gpr)
      val offset = None
+     val immediate = None
   }
   
   def *(mem: Memory) = new Memory {
     type Size = mem.Size
      val base = mem.base
      val offset = mem.offset
+     val immediate = mem.immediate
   }
   
   def *(imm: Immediate) = new Memory {
     type Size = imm.Size
      val base = None
-     val offset = Some(imm)
+     val immediate = Some(imm)
+     val offset = None
   }
-  
-  type +[A <: Immediate, B <: GPR] = RegisterOffset[A, B]
+
+  type +[A <: Displacement, B <: GPR] = RegisterOffset[A, B]
 }
 
 trait Registers {

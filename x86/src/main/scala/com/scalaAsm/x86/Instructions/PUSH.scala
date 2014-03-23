@@ -35,17 +35,17 @@ object PUSH extends POWLow {
   }
   
   implicit object push4 extends PUSH_1[imm8] {
-      def operands = I[imm8](op1)
+      def operands = I(op1)
       val opcode: Opcodes = 0x6A
   }
   
   implicit object push5 extends PUSH_1[imm16] {
-      def operands = I[imm16](op1)
+      def operands = I(op1)
       val opcode: Opcodes = 0x68
   }
   
   implicit object push6 extends PUSH_1[imm32] {
-      def operands = I[imm32](op1)
+      def operands = I(op1)
       val opcode: Opcodes = 0x68
   }
   

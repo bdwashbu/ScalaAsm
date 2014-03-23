@@ -37,7 +37,13 @@ sealed class RegisterMode(val value: Byte)
 case object NoDisplacement extends RegisterMode(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacemen
 case object DisplacementByte extends RegisterMode(1) // Eight-bit displacement, sign-extended to 16 bits
 case object DisplacementDword extends RegisterMode(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
-case object OtherRegister extends RegisterMode(3) // r/m is treated as a second "reg" field
+case object TwoRegisters extends RegisterMode(3) // r/m is treated as a second "reg" field
+
+// Mod/RM format
+//   7                           0
+// +---+---+---+---+---+---+---+---+
+// |  mod  |    reg    |     rm    |
+// +---+---+---+---+---+---+---+---+
 
 case class ModRM(mod: RegisterMode, rm: GPR, reg: Option[GPR] = None, opEx: Option[Byte] = None) extends InstructionField {
   def getBytes = {
@@ -53,6 +59,12 @@ case object One extends SIBScale(0) // If r/m is 110, Displacement (16 bits) is 
 case object Two extends SIBScale(1) // Eight-bit displacement, sign-extended to 16 bits
 case object Four extends SIBScale(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
 case object Eight extends SIBScale(3) // r/m is treated as a second "reg" field
+
+// SIB format
+//   7                           0
+// +---+---+---+---+---+---+---+---+
+// | scale |   index   |    base   |
+// +---+---+---+---+---+---+---+---+
 
 case class SIB(scale: SIBScale, index: GPR, base: GPR) extends InstructionField {
   def getBytes = Array(((scale.value << 6) + (index.ID << 3) + base.ID).toByte)

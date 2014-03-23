@@ -23,16 +23,19 @@ trait OperandEncoding {
 
   object NA extends NoOperand
 
-  case class MI[M <: ModRM.reg, I <: Immediate](op1: M, op2: I) extends TwoOperandsFormat[M, I](op1, op2) {
+  case class MI[M <: ModRM.rm, I <: Immediate](op1: M, op2: I) extends TwoOperandsFormat[M, I](op1, op2) {
 
     def getAddressingForm: Option[AddressingFormSpecifier] = {
 
-      Some(new AddressingFormSpecifier {
-        val modRM = Some(ModRM(OtherRegister, opEx = opcode.opcodeExtension, rm = op1))
-        val sib = None
-        val displacment = None
-        val immediate = if (op2.value == 0) None else Some(op2)
-      })
+      op1 match {
+        case reg: GPR =>
+	      Some(new AddressingFormSpecifier {
+	        val modRM = Some(ModRM(TwoRegisters, opEx = opcode.opcodeExtension, rm = reg))
+	        val sib = None
+	        val displacment = None
+	        val immediate = if (op2.value == 0) None else Some(op2)
+	      })
+      }
     }
   }
 
@@ -68,7 +71,7 @@ trait OperandEncoding {
           }
         case reg: GPR =>
           Some(new AddressingFormSpecifier {
-            val modRM = Some(ModRM(OtherRegister, reg = Some(op1), rm = reg))
+            val modRM = Some(ModRM(TwoRegisters, reg = Some(op1), rm = reg))
             val (sib, displacment, immediate) = (None, None, None)
           })
       }
@@ -153,7 +156,7 @@ trait OperandEncoding {
         case reg: GPR =>
           if (!opcode.opcodeExtension.isDefined) None else
             Some(new AddressingFormSpecifier {
-              val modRM = Some(ModRM(OtherRegister, opEx = opcode.opcodeExtension, rm = reg))
+              val modRM = Some(ModRM(TwoRegisters, opEx = opcode.opcodeExtension, rm = reg))
               val (sib, displacment, immediate) = (None, None, None)
             })
       }

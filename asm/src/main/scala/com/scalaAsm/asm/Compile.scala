@@ -3,8 +3,10 @@ package com.scalaAsm.asm
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.x86.Instructions.CALL
-import com.scalaAsm.x86.Immediate32
+import com.scalaAsm.x86.{Immediate16, Immediate32}
 import com.scalaAsm.asm.Addressing._
+import com.scalaAsm.x86.Instructions.JMP
+import com.scalaAsm.x86.Instructions.PUSH
 
 
 object AsmCompiler 
@@ -101,10 +103,10 @@ object AsmCompiler
 
     val code: Array[Byte] = twoPass.map {
         case ByteOutputPost(code) => code
-        case ProcState(offset, name) => 0xE8.toByte +: Endian.swap(procs(name) - offset - 5)
-        case VarState(_, name) => 0x68.toByte +: Endian.swap(variables(name) + baseOffset)
-        case ImportState(_, name) => CALL.call(*(Immediate32((imports(name) + baseOffset)))).build.code
-        case JmpState(_, name) => Array[Byte](0xFF.toByte, 0x25) ++ Endian.swap(externs(name) + baseOffset)
+        case ProcState(offset, name) => CALL.callNear(*(Immediate32(procs(name) - offset - 5)).rel32).build.code
+        case VarState(_, name) => PUSH.push(Immediate32(variables(name) + baseOffset)).build.code
+        case ImportState(_, name) => CALL.callNear(*(Immediate32((imports(name) + baseOffset)))).build.code
+        case JmpState(_, name) => JMP.jmp(*(Immediate32((externs(name) + baseOffset)))).build.code
         case LabelRefResolved(offset, name, opCode) => Array(opCode, (labels(name) - offset - 2).toByte)
         case _ => Array[Byte]()
     }.reduce(_ ++ _)

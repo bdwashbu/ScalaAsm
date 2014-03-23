@@ -19,6 +19,11 @@ trait POWLow {
 
 object PUSH extends POWLow {
   
+  def push[O1](p1: O1)(implicit ev: PUSH_1[O1]): PUSH_1[O1] = {
+    ev.set(p1)
+    ev
+  }
+  
   implicit object push2 extends PUSH_1[r32] {
       def operands = O(x)
       def opcode = OpcodePlusRd(0x50, x)

@@ -36,6 +36,10 @@ trait Memory extends RegisterOrMemory {
   def base: Option[GPR]
   def offset: Option[Immediate]
   
+  def rel32: Relative32 = new Relative32 {
+    def offset = Memory.this.offset
+  }
+  
   override def toString = {
     var result: String = ""
     
@@ -50,6 +54,14 @@ trait Memory extends RegisterOrMemory {
     
     result
   }
+}
+
+trait Relative extends RegisterOrMemory {
+    def offset: Option[Immediate]
+}
+
+trait Relative32 extends Relative {
+  type Size = DwordOperand
 }
 
 trait RegisterOrMemory extends Any {

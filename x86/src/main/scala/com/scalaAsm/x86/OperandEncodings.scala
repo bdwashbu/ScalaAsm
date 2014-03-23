@@ -113,8 +113,9 @@ trait OperandEncoding {
   case class Offset[O <: Memory](op1: O) extends OneOperandFormat[O](op1) {
     
     def getAddressingForm: Option[AddressingFormSpecifier] = {
+      println(ModRMByte(NoDisplacment, opEx = Some(opcode.opcodeExtension.get), rm = new EBP).get)
       Some(new AddressingFormSpecifier {
-	        val modRM = Some(ModRMByte(NoDisplacment, opEx = Some(opcode.opcodeExtension.get), rm = new ECX))
+	        val modRM = Some(ModRMByte(NoDisplacment, opEx = Some(opcode.opcodeExtension.get), rm = new EBP))
 		    val (scaleIndexBase, displacment, immediate) = (None, None, op1.offset)
 	    })
     }
@@ -123,10 +124,15 @@ trait OperandEncoding {
   case class M[M <: ModRM.rm](op1: M) extends OneOperandFormat[M](op1) {
     
     def getAddressingForm: Option[AddressingFormSpecifier] = {
-      if (!opcode.opcodeExtension.isDefined) None else
-        op1 match {
-        case mem: Memory =>
       
+        op1 match {
+        case rel: Relative =>
+		    Some(new AddressingFormSpecifier {
+	        val modRM = None
+		    val (scaleIndexBase, displacment, immediate) = (None, None, rel.offset)
+	       })
+        case mem: Memory =>
+           if (!opcode.opcodeExtension.isDefined) None else
 	       (mem.base, mem.offset) match {
 	       case (Some(base), Some(offset)) =>
 	         Some(new AddressingFormSpecifier {
@@ -145,6 +151,7 @@ trait OperandEncoding {
 	    })
 	       }
         case reg: GPR =>
+          if (!opcode.opcodeExtension.isDefined) None else
          Some(new AddressingFormSpecifier {
 	        val modRM = Some(ModRMByte(Register, opEx = Some(opcode.opcodeExtension.get), rm = reg))
 	        val (scaleIndexBase, displacment, immediate) = (None, None, None)

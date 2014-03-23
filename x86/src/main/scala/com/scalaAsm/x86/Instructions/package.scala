@@ -14,6 +14,8 @@ package object Instructions {
   type rm64 = rm { type Size = QwordOperand }
   
   type m16 = Memory { type Size = WordOperand }
+  type rel16 = Relative { type Size = WordOperand }
+  type rel32 = Relative { type Size = DwordOperand }
   
   type r8 = Register8 with GeneralPurpose
   type r16 = Register16 with GeneralPurpose

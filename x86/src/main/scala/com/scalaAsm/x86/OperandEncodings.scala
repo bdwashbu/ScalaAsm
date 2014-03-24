@@ -134,11 +134,16 @@ trait InstructionFormat {
 
   }
 
-  case class O[R <: ModRM.reg](op1: R) extends OneOperandFormat[R](op1) {
-    def getAddressingForm: Option[AddressingFormSpecifier] = new M(op1).getAddressingForm
+  case class O[O <: ModRM.plusRd](op1: O) extends OneOperandFormat[O](op1) {
+    def getAddressingForm: Option[AddressingFormSpecifier] = {
+	  Some(new AddressingFormSpecifier {
+        val modRM = None
+        val (sib, displacment, immediate) = (None, None, None)
+      })
+    }
   }
 
-  case class OI[R <: ModRM.reg, I <: Immediate](op1: R, op2: I) extends TwoOperandsFormat[R, I](op1, op2) {
+  case class OI[O <: ModRM.plusRd, I <: Immediate](op1: O, op2: I) extends TwoOperandsFormat[O, I](op1, op2) {
 
     def getAddressingForm: Option[AddressingFormSpecifier] = {
       Some(new AddressingFormSpecifier {

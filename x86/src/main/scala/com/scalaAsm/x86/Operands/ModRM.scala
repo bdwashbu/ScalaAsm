@@ -31,6 +31,7 @@ protected[x86] trait AddressingFormSpecifier {
 object ModRM {
   type rm = RegisterOrMemory
   type reg = GPR
+  type plusRd = rm
 }
 
 sealed class RegisterMode(val value: Byte)

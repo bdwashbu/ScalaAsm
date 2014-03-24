@@ -12,6 +12,6 @@ object RETN {
   
   implicit object retn1 extends RETN_1[imm16] {
       def operands = I(op1)
-      val opcode: Opcodes = 0xC2
+      val opcode: OpcodeFormat = 0xC2
   }
 }

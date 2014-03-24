@@ -9,6 +9,6 @@ object SBB {
   
   implicit object sbb1 extends SBB_2[r32, rm32] {
       def operands = RM(op1,op2)
-      val opcode: Opcodes = 0x1B
+      val opcode: OpcodeFormat = 0x1B
   }
 }

@@ -20,7 +20,7 @@ object CALL extends CALLLow {
   }
 
   implicit object call3 extends CALL_1[rel32] {
-    val opcode: Opcodes = 0xE8
+    val opcode: OpcodeFormat = 0xE8
     def operands = M(op1)
   }
 

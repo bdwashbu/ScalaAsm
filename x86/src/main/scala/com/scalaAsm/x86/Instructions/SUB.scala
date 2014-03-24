@@ -13,7 +13,7 @@ object SUB {
   }
   
   implicit object sub2 extends SUB_2[r32, rm32] {
-    val opcode: Opcodes = 0x2B
+    val opcode: OpcodeFormat = 0x2B
       def operands = RM(op1,op2)
       
   }

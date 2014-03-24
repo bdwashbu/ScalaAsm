@@ -13,7 +13,7 @@ trait InstructionField extends Any {
 }
 
 trait Instruction {
-  def opcode: Opcodes
+  def opcode: OpcodeFormat
   def operands: OperandFormat
   val mnemonic: String = ""
     

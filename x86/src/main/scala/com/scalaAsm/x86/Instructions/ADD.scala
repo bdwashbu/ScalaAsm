@@ -19,6 +19,6 @@ object ADD {
   
   implicit object add3 extends ADD_2[r32, rm32] {
       def operands = RM(op1,op2)
-      val opcode: Opcodes = 0x03
+      val opcode: OpcodeFormat = 0x03
   }
 }

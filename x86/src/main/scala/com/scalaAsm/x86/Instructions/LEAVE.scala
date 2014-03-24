@@ -7,6 +7,6 @@ object LEAVE {
   
   implicit object lea1 extends LEAVE {
       def operands = NA
-      val opcode: Opcodes = 0xC9
+      val opcode: OpcodeFormat = 0xC9
   }
 }

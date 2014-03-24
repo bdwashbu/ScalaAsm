@@ -1,9 +1,9 @@
 package com.scalaAsm.x86
 package Operands
 
-trait Operand
+trait Operand extends Any
 
-trait DualOperand[-O1,-O2] extends Operand {
+trait DualOperand[-O1,-O2] {
   protected[this] var op1: O1 = _
   protected[this] var op2: O2 = _
   def set(x:O1, y:O2) = {
@@ -12,21 +12,22 @@ trait DualOperand[-O1,-O2] extends Operand {
   }
 }
 
-trait SingleOperand[-O1] extends Operand {
+trait SingleOperand[-O1] {
   protected[this] var op1: O1 = _
   def set(x:O1) = {
     op1 = x
   }
 }
 
-sealed class OperandSize {
+sealed trait OperandSize {
   type size
+  val length: Int
 }
 
-class ByteOperand extends OperandSize { type size = Byte }
-class WordOperand extends OperandSize { type size = Short }
-class DwordOperand extends OperandSize { type size = Int }
-class QwordOperand extends OperandSize { type size = Long }
+class ByteOperand extends OperandSize { type size = Byte; val length = 1 }
+class WordOperand extends OperandSize { type size = Short; val length = 2 }
+class DwordOperand extends OperandSize { type size = Int; val length = 4 }
+class QwordOperand extends OperandSize { type size = Long; val length = 8 }
 
 trait Displacement extends Any with InstructionField {
   type Size <: OperandSize
@@ -99,7 +100,7 @@ trait Relative32 extends Relative {
   type Size = DwordOperand
 }
 
-trait RegisterOrMemory extends Any {
+trait RegisterOrMemory extends Any with Operand {
   type Size <: OperandSize
 }
 

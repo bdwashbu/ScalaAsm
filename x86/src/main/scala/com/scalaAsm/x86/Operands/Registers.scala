@@ -79,9 +79,9 @@ package Operands
   class EDI extends Register32("edi") with DestinationIndex
   class DI extends Register16("di") with DestinationIndex 
   
-  class ES extends SegmentRegister("es")
-  class CS extends SegmentRegister("cs")
-  class SS extends SegmentRegister("ss")
-  class DS extends SegmentRegister("ds")
-  class FS extends SegmentRegister("fs")
-  class GS extends SegmentRegister("gs")
+  class ES extends SegmentRegister("es") with Operand
+  class CS extends SegmentRegister("cs") with Operand
+  class SS extends SegmentRegister("ss") with Operand
+  class DS extends SegmentRegister("ds") with Operand
+  class FS extends SegmentRegister("fs") with Operand
+  class GS extends SegmentRegister("gs") with Operand

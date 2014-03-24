@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
 package Operands
 
-trait Immediate extends Any with InstructionField {
+trait Immediate extends Any with InstructionField with Operand {
   type Size <: OperandSize
   def value: Size#size
   def getBytes: Array[Byte]

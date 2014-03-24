@@ -8,6 +8,8 @@ package object Instructions {
   type imm16 = Immediate16
   type imm32 = Immediate32
   
+  type Operand = com.scalaAsm.x86.Operands.Operand
+  
   type TwoOperands[-O1,-O2] = Operands.DualOperand[O1,O2]
   type OneOperand[-O1] = Operands.SingleOperand[O1]
   type AddressingFormSpecifier = Operands.AddressingFormSpecifier
@@ -19,6 +21,7 @@ package object Instructions {
   type rm64 = rm { type Size = QwordOperand }
   
   type m16 = Memory { type Size = WordOperand }
+  
   type rel16 = Relative { type Size = WordOperand }
   type rel32 = Relative { type Size = DwordOperand }
   

@@ -46,13 +46,17 @@ case object TwoRegisters extends RegisterMode(3) // r/m is treated as a second "
 // |  mod  |    reg    |     rm    |
 // +---+---+---+---+---+---+---+---+
 
-case class ModRM(mod: RegisterMode, rm: GPR, reg: Option[GPR] = None, opEx: Option[Byte] = None) extends InstructionField {
-  def getBytes = {
-    (reg, opEx) match {
-      case (_, Some(opEx)) => Array(((mod.value << 6) + (opEx << 3) + rm.ID).toByte)
-      case (_, _) => Array(((mod.value << 6) + (reg.get.ID << 3) + rm.ID).toByte)
-    }
-  }
+trait ModRM extends InstructionField {
+  val mod: RegisterMode
+  val rm: GPR
+}
+
+case class ModRMReg(mod: RegisterMode, reg: GPR, rm: GPR) extends ModRM {
+  def getBytes = Array(((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte)
+}
+
+case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR) extends ModRM {
+  def getBytes = Array(((mod.value << 6) + (opcodeExtended << 3) + rm.ID).toByte)
 }
 
 sealed class SIBScale(val value: Byte)

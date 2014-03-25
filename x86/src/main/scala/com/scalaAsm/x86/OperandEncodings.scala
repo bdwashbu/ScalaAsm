@@ -40,7 +40,7 @@ trait InstructionFormat {
 
   implicit object test1 extends DualOperandEncoding[GPR, Immediate] {
     def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
-      val modRM = Some(ModRM(TwoRegisters, opEx = opcodeExtend, rm = op1))
+      val modRM: Option[ModRM] = Some(ModRMOpcode(TwoRegisters, opcodeExtend.get, op1))
       (modRM, None)
     }
   }
@@ -49,17 +49,17 @@ trait InstructionFormat {
     def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
       (op2.base, op2.offset, op2.immediate) match {
         case (Some(base), offset @ Some(off: Displacement8), None) if base.ID == 4 =>
-          val modRM = Some(ModRM(DisplacementByte, reg = Some(op1), rm = base))
+          val modRM = Some(ModRMReg(DisplacementByte, op1, base))
           val sib = Some(SIB(One, new ESP, base))
           (modRM, sib)
         case (Some(base), offset @ Some(off: Displacement32), None) =>
-          val modRM = Some(ModRM(DisplacementDword, reg = Some(op1), rm = base))
+          val modRM = Some(ModRMReg(DisplacementDword, reg = op1, rm = base))
           (modRM, None)
         case (Some(base), offset @ Some(_: Displacement), None) =>
-          val modRM = Some(ModRM(DisplacementByte, reg = Some(op1), rm = base))
+          val modRM = Some(ModRMReg(DisplacementByte, reg = op1, rm = base))
           (modRM, None)
         case (Some(base), None, None) =>
-          val modRM = Some(ModRM(NoDisplacement, reg = Some(op1), rm = base))
+          val modRM = Some(ModRMReg(NoDisplacement, reg = op1, rm = base))
           (modRM, None)
       }
     }
@@ -67,7 +67,7 @@ trait InstructionFormat {
 
   implicit object test3 extends DualOperandEncoding[GPR, GPR] {
     def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
-      val modRM = Some(ModRM(TwoRegisters, reg = Some(op1), rm = op2))
+      val modRM: Option[ModRM] = Some(ModRMReg(TwoRegisters, op1, op2))
       (modRM, None)
     }
   }
@@ -76,16 +76,23 @@ trait InstructionFormat {
     def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
       (op1.base, op1.offset, op1.immediate) match {
         case (Some(base), offset @ Some(_: Displacement8), None) =>
-          val modRM = Some(ModRM(DisplacementByte, opEx = opcodeExtend, rm = base))
+          val modRM = Some(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))
           (modRM, None)
         case (Some(base), None, None) =>
-          val modRM = Some(ModRM(NoDisplacement, opEx = opcodeExtend, rm = base))
+          val modRM = Some(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
           (modRM, None)
         case (None, None, imm @ Some(_: Immediate)) =>
-          val modRM = Some(ModRM(NoDisplacement, opEx = opcodeExtend, rm = new EBP))
+          val modRM = Some(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP))
           (modRM, None)
         case _ => (None, None)
       }
+    }
+  }
+  
+  implicit object test5 extends SingleOperandEncoding[GPR] {
+    def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
+          val modRM = Some(ModRMOpcode(TwoRegisters, opcodeExtend.get, op1))
+          (modRM, None)
     }
   }
 
@@ -168,7 +175,7 @@ trait InstructionFormat {
 
     def getAddressingForm(opcode: OpcodeFormat): Option[AddressingFormSpecifier] = {
       Some(new AddressingFormSpecifier {
-        val modRM = Some(ModRM(NoDisplacement, opEx = opcode.opcodeExtension, rm = new EBP))
+        val modRM = Some(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP))
         val (sib, displacment, immediate) = (None, op1.offset, None)
       })
     }
@@ -193,8 +200,8 @@ trait InstructionFormat {
         case reg: GPR =>
           if (!opcode.opcodeExtension.isDefined) None else
             Some(new AddressingFormSpecifier {
-              val modRM = Some(ModRM(TwoRegisters, opEx = opcode.opcodeExtension, rm = reg))
-              val (sib, displacment, immediate) = (None, None, None)
+              val (modRM, sib) = getEncoding(reg, opcode.opcodeExtension)
+              val (displacment, immediate) = (None, None)
             })
       }
     }

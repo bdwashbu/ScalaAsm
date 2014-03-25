@@ -25,14 +25,14 @@ trait Instruction {
     }
 
   def getSize: Int = {
-    opcode.size + (operands.getAddressingForm match {
+    opcode.size + (operands.getAddressingForm(opcode) match {
       case Some(modRM) => modRM.size
       case _ => 0
     })
   }
   
    def getBytes: Array[Byte] = {
-    opcode.get ++ (operands.getAddressingForm match {
+    opcode.get ++ (operands.getAddressingForm(opcode) match {
       case Some(modRM) => modRM.getBytes
       case _ => Array.emptyByteArray
     })

@@ -68,11 +68,11 @@ trait AsmCodeSimple extends Registers {
 
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 
-    def retn(implicit ev: RET, code: SimpleCodeBuilder) = code.codeTokens += ev.build
+    def retn(implicit ev: RET, code: SimpleCodeBuilder) = ev.build
 
     def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = code.codeTokens += ev.build
+    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = ev.build
 
     def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 }
@@ -82,10 +82,10 @@ trait AsmCode extends Registers {
 
   val code: Code
   
-  def proc(name: String)(x: => Unit)(implicit code: CodeBuilder) = {
+  def proc(name: String, inst: List[Token])(implicit code: CodeBuilder) = {
     val result = Procedure(name)
     code.codeTokens += result
-    x
+    inst.foreach(x => code.codeTokens += x)
   }
 
   case class Code() {
@@ -105,27 +105,23 @@ trait AsmCode extends Registers {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
 
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2], code: CodeBuilder) = {
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2], code: CodeBuilder): Token = {
       ev.set(p1,p2)
-      code.codeTokens += CodeToken(ev.build)
+      CodeToken(ev.build)
     }
     
-    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1], code: CodeBuilder) = {
+    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1], code: CodeBuilder): Token = {
       ev.set(p1)
-      code.codeTokens += CodeToken(ev.build)
+      CodeToken(ev.build)
     }
     
-    private def procRef(procName: String)(implicit code: CodeBuilder) =
-      code.codeTokens += ProcRef(procName)
+    private def procRef(procName: String)(implicit code: CodeBuilder) = ProcRef(procName)
 
-    def label(name: String)(implicit code: CodeBuilder) =
-       code.codeTokens += Label(name)
+    def label(name: String)(implicit code: CodeBuilder) = Label(name)
 
-    def align(to: Int, filler: Byte = 0xCC.toByte)(implicit code: CodeBuilder) =
-       code.codeTokens += Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
+    def align(to: Int, filler: Byte = 0xCC.toByte)(implicit code: CodeBuilder) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 
-    def push(param: String)(implicit code: CodeBuilder) =
-      code.codeTokens += Reference(param)
+    def push(param: String)(implicit code: CodeBuilder) = Reference(param)
 
     def sub[O1, O2](p1: O1, p2: O2)(implicit ev: SUB_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code) 
       
@@ -149,13 +145,11 @@ trait AsmCode extends Registers {
 
     def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def jnz(labelRef: String)(implicit code: CodeBuilder) =
-      code.codeTokens += LabelRef(labelRef, 0x75.toByte)
+    def jnz(labelRef: String)(implicit code: CodeBuilder) = LabelRef(labelRef, 0x75.toByte)
     
     def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
-    def jz(labelRef: String)(implicit code: CodeBuilder) =
-      code.codeTokens += LabelRef(labelRef, 0x74.toByte)
+    def jz(labelRef: String)(implicit code: CodeBuilder) = LabelRef(labelRef, 0x74.toByte)
     
     def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
     
@@ -167,17 +161,15 @@ trait AsmCode extends Registers {
 
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
 
-    def retn(implicit ev: RET, code: CodeBuilder) = code.codeTokens += CodeToken(ev.build)
+    def retn(implicit ev: RET, code: CodeBuilder) = CodeToken(ev.build)
 
     def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
 
-    def leave(implicit ev: LEAVE, code: CodeBuilder) = code.codeTokens += CodeToken(ev.build)
+    def leave(implicit ev: LEAVE, code: CodeBuilder) =  CodeToken(ev.build)
 
-    def call(refName: String)(implicit code: CodeBuilder) =
-      code.codeTokens += Reference(refName)
+    def call(refName: String)(implicit code: CodeBuilder) = Reference(refName)
 
-    def jmp(ref: String)(implicit code: CodeBuilder) =
-      code.codeTokens += JmpRef(ref)
+    def jmp(ref: String)(implicit code: CodeBuilder) = JmpRef(ref)
       
     def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
   }

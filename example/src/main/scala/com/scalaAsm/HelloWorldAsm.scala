@@ -2,13 +2,16 @@ package com.scalaAsm
 
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Addressing._
+import com.scalaAsm.asm.Tokens
 
 object HelloWorld extends AsmProgram {
+  
+  import Tokens._
 
   val data = new Data {
-    val pressAnyKey = "Press any key to continue ...\0"
-    val newline = "\r\n\0"
-    val helloWorld = "Hello World!\n\0"
+    dataTokens += Variable("pressAnyKey", "Press any key to continue ...\0", "Press any key to continue ...\0".length)
+    dataTokens += Variable("newline", "\r\n\0", "\r\n\0".length)
+    dataTokens += Variable("helloWorld", "Hello World!\n\0", "Hello World!\n\0".length)
   }
 
   val code = new Code {

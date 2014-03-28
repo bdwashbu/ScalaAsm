@@ -27,14 +27,12 @@ trait AsmProgram extends AsmData with AsmCode {
 
   def assemble: Assembled = {
 
-    data.compile
-
     val tokens = code.builder.codeTokens map {
         case Procedure(name) => BeginProc(name)
         case token => token
     }
 
-    Assembled(tokens, dataTokens)
+    Assembled(tokens, data.compile)
   }
 
 //  def getAssembledPermutations: Iterator[Assembled] = {

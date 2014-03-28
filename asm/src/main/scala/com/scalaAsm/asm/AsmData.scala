@@ -1,6 +1,7 @@
 package com.scalaAsm.asm
 
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.HashMap
 
 trait AsmData {
   self: AsmProgram =>
@@ -8,24 +9,18 @@ trait AsmData {
   import Tokens._
     
   val data: Data
-  protected val dataTokens = new ListBuffer[Token]()
+
     
-  case class Data() {
+  class Data {
+    
+    protected val dataTokens = new ListBuffer[Token]()
 	
-    def compile = {
-      var isFirst = true
-      data.getClass().getDeclaredFields().foreach { field =>
-        field.setAccessible(true)
-    	dataTokens += Variable(field.getName(), field.get(data).asInstanceOf[String], field.get(data).asInstanceOf[String].length)
-    	if (!isFirst)
-    	  align(0x4, 0x00)
-    	else
-    	  isFirst = false
-      }
+    def compile: List[Token] = {
+      dataTokens.toList.head +: dataTokens.toList.tail.flatMap{ token => List(token, align(0x4, 0x00))}
     }
 
-    def align(to: Int, filler: Byte = 0xCC.toByte) = {
-      dataTokens += Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
+    def align(to: Int, filler: Byte = 0xCC.toByte): Token = {
+      Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
     }
   }
   

@@ -7,7 +7,7 @@ object Tokens {
   case class Reference(name: String) extends Token
   case class JmpRef(name: String) extends Token
 
-  case class Procedure(name: String) extends Token
+  case class Procedure(name: String, innerCode: List[Token]) extends Token
   case class Label(name: String) extends Token
   case class LabelRef(labelRef: String, opCode: Byte) extends Token
 

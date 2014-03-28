@@ -18,7 +18,10 @@ trait SimpleCodeBuilder {
   val codeTokens = ListBuffer[MachineCode]()
 }
 
-trait AsmProgram extends AsmData with AsmCode {
+trait AsmProgram {
+  
+  val codeSegments = new ListBuffer[CodeSegment]()
+  val dataSegments = new ListBuffer[DataSegment]()
   
   def hex2Bytes(hex: String) = {
     def stripChars(s: String, ch: String) = s filterNot (ch contains _)
@@ -27,12 +30,15 @@ trait AsmProgram extends AsmData with AsmCode {
 
   def assemble: Assembled = {
 
-    val tokens = code.builder.codeTokens map {
-        case Procedure(name) => BeginProc(name)
-        case token => token
-    }
+    val codeTokens = codeSegments.flatMap{seg => seg.builder flatMap {
+        case Procedure(name, code) => List(BeginProc(name)) ++ code
+        case token => List(token)
+    }}
+    
+    val dataTokens = dataSegments.flatMap{seg => seg.compile}
+    println(dataTokens.size)
 
-    Assembled(tokens, data.compile)
+    Assembled(codeTokens, dataTokens)
   }
 
 //  def getAssembledPermutations: Iterator[Assembled] = {

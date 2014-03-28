@@ -3,20 +3,22 @@ package com.scalaAsm
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.asm.Tokens
+import com.scalaAsm.asm.DataSegment
+import com.scalaAsm.asm.CodeSegment
 
 object HelloWorld extends AsmProgram {
   
   import Tokens._
 
-  val data = new Data {
-    dataTokens += Variable("pressAnyKey", "Press any key to continue ...\0", "Press any key to continue ...\0".length)
-    dataTokens += Variable("newline", "\r\n\0", "\r\n\0".length)
-    dataTokens += Variable("helloWorld", "Hello World!\n\0", "Hello World!\n\0".length)
+  dataSegments += new DataSegment {
+    builder += Variable("pressAnyKey", "Press any key to continue ...\0", "Press any key to continue ...\0".length)
+    builder += Variable("newline", "\r\n\0", "\r\n\0".length)
+    builder += Variable("helloWorld", "Hello World!\n\0", "Hello World!\n\0".length)
   }
 
-  val code = new Code {
+  codeSegments += new CodeSegment {
 
-    proc("start", List(
+    builder += Procedure("start", List(
       call("printHelloWorld"),
       push("pressAnyKey"),
       call("flushBuffer"),
@@ -27,7 +29,7 @@ object HelloWorld extends AsmProgram {
       call("ExitProcess")
     ))
 
-    proc("printHelloWorld", List(
+    builder += Procedure("printHelloWorld", List(
       push("helloWorld"),
       call("printf"),
       add(esp, imm8(4)),
@@ -40,7 +42,7 @@ object HelloWorld extends AsmProgram {
     val lpBuffer = *(ebp + byte(8))
     //val STD_OUTPUT_HANDLE = imm8(-11)
     
-    proc("flushBuffer", List(
+    builder += Procedure("flushBuffer", List(
       push(ebp),
       mov(ebp, esp),
       add(esp, imm8(-12)),
@@ -62,9 +64,9 @@ object HelloWorld extends AsmProgram {
       retn(imm16(4))
     ))
 
-    builder.codeTokens += align(0x10)
+    builder += align(0x10)
 
-    proc("waitForKeypress", List(
+    builder += Procedure("waitForKeypress", List(
       push(imm8(-10)),
       call("GetStdHandle"),
       push(eax),
@@ -78,48 +80,36 @@ object HelloWorld extends AsmProgram {
       retn
     ))
 
-    builder.codeTokens += align(0x10)
-
-    proc("strlen", List(
+    builder += align(0x10)
+    
+    builder += Procedure("strlen", List(
       mov(eax, *(esp + byte(4))),
       lea(edx, *(eax + byte(3))),
       push(ebp),
       push(edi),
       mov(ebp, imm32(0x80808080)),
       label("start"),
-
-//      for (i <- 0 until 3) {
-//        mov(edi, *(eax)) // read first 4 bytes
-//        add(eax, imm8(4)) // increment pointer
-//        lea(ecx, *(edi - dword(0x1010101))) // subtract 1 from each byte
-//        not(edi) // invert all bytes
-//        and(ecx, edi)
-//        and(ecx, ebp)
-//        jnz("test")
-//      }
-      
-        mov(edi, *(eax)), // read first 4 bytes
-        add(eax, imm8(4)), // increment pointer
-        lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
-        not(edi), // invert all bytes
-        and(ecx, edi),
-        and(ecx, ebp),
-        jnz("test"),
-        mov(edi, *(eax)), // read first 4 bytes
-        add(eax, imm8(4)), // increment pointer
-        lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
-        not(edi), // invert all bytes
-        and(ecx, edi),
-        and(ecx, ebp),
-        jnz("test"),
-        mov(edi, *(eax)), // read first 4 bytes
-        add(eax, imm8(4)), // increment pointer
-        lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
-        not(edi), // invert all bytes
-        and(ecx, edi),
-        and(ecx, ebp),
-        jnz("test"),
-
+      mov(edi, *(eax)), // read first 4 bytes
+	  add(eax, imm8(4)), // increment pointer
+      lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
+      not(edi), // invert all bytes
+      and(ecx, edi),
+      and(ecx, ebp),
+      jnz("test"),
+      mov(edi, *(eax)), // read first 4 bytes
+	  add(eax, imm8(4)), // increment pointer
+      lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
+      not(edi), // invert all bytes
+      and(ecx, edi),
+      and(ecx, ebp),
+      jnz("test"),
+      mov(edi, *(eax)), // read first 4 bytes
+	  add(eax, imm8(4)), // increment pointer
+      lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
+      not(edi), // invert all bytes
+      and(ecx, edi),
+      and(ecx, ebp),
+      jnz("test"),
       mov(edi, *(eax)),
       add(eax, imm8(4)),
       lea(ecx, *(edi - dword(0x1010101))),
@@ -141,12 +131,12 @@ object HelloWorld extends AsmProgram {
       retn(imm16(4))
     ))
 
-    builder.codeTokens += align(2)
+    builder += align(2)
 
-    proc("ExitProcess", List(jmp("ExitProcess")))
-    proc("GetStdHandle", List(jmp("GetStdHandle")))
-    proc("WriteFile", List(jmp("WriteFile")))
-    proc("FlushConsoleInputBuffer", List(jmp("FlushConsoleInputBuffer")))
-    proc("Sleep", List(jmp("Sleep")))
+    builder += Procedure("ExitProcess", List(jmp("ExitProcess")))
+    builder += Procedure("GetStdHandle", List(jmp("GetStdHandle")))
+    builder += Procedure("WriteFile", List(jmp("WriteFile")))
+    builder += Procedure("FlushConsoleInputBuffer", List(jmp("FlushConsoleInputBuffer")))
+    builder += Procedure("Sleep", List(jmp("Sleep")))
   }
 }

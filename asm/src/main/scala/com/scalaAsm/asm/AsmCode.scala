@@ -77,21 +77,8 @@ trait AsmCodeSimple extends Registers {
     def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
 }
 
-trait AsmCode extends Registers {
-  self: AsmProgram =>
+trait CodeSegment extends Registers with AsmSegment {
 
-  val code: Code
-  
-  def proc(name: String, inst: List[Token])(implicit code: CodeBuilder) = {
-    val result = Procedure(name)
-    code.codeTokens += result
-    inst.foreach(x => code.codeTokens += x)
-  }
-
-  case class Code() {
-    
-    implicit val builder = new CodeBuilder{}
-    
     def imm8(x: Byte) = Immediate8(x)
     def imm16(x: Short) = Immediate16(x)
     def imm32(x: Int) = Immediate32(x)
@@ -105,73 +92,72 @@ trait AsmCode extends Registers {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
 
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2], code: CodeBuilder): Token = {
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2]): Token = {
       ev.set(p1,p2)
       CodeToken(ev.build)
     }
     
-    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1], code: CodeBuilder): Token = {
+    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1]): Token = {
       ev.set(p1)
       CodeToken(ev.build)
     }
     
-    private def procRef(procName: String)(implicit code: CodeBuilder) = ProcRef(procName)
+    private def procRef(procName: String) = ProcRef(procName)
 
-    def label(name: String)(implicit code: CodeBuilder) = Label(name)
+    def label(name: String) = Label(name)
 
-    def align(to: Int, filler: Byte = 0xCC.toByte)(implicit code: CodeBuilder) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
+    def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 
-    def push(param: String)(implicit code: CodeBuilder) = Reference(param)
+    def push(param: String) = Reference(param)
 
-    def sub[O1, O2](p1: O1, p2: O2)(implicit ev: SUB_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code) 
+    def sub[O1, O2](p1: O1, p2: O2)(implicit ev: SUB_2[O1, O2]) = twoOps(p1,p2,ev) 
       
-    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
+    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def mul[O1](p1: O1)(implicit ev: MUL_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def mul[O1](p1: O1)(implicit ev: MUL_1[O1]) = oneOp(p1,ev)
     
-    def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def push[O1](p1: O1)(implicit ev: PUSH_1[O1]) = oneOp(p1,ev)
 
-    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def pop[O1](p1: O1)(implicit ev: POP_1[O1]) = oneOp(p1,ev)
       
-    def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def dec[O1](p1: O1)(implicit ev: DEC_1[O1]) = oneOp(p1,ev)
 
-    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
+    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def not[O1](p1: O1)(implicit ev: NOT_1[O1]) = oneOp(p1,ev)
 
-    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
+    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
+    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
+    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def jnz(labelRef: String)(implicit code: CodeBuilder) = LabelRef(labelRef, 0x75.toByte)
+    def jnz(labelRef: String) = LabelRef(labelRef, 0x75.toByte)
     
-    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1]) = oneOp(p1,ev)
 
-    def jz(labelRef: String)(implicit code: CodeBuilder) = LabelRef(labelRef, 0x74.toByte)
+    def jz(labelRef: String) = LabelRef(labelRef, 0x74.toByte)
     
-    def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def jz[O1](p1: O1)(implicit ev: JZ_1[O1]) = oneOp(p1,ev)
     
-    def int[O1](p1: O1)(implicit ev: INT_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def int[O1](p1: O1)(implicit ev: INT_1[O1]) = oneOp(p1,ev)
 
-    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
+    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2]) = twoOps(p1,p2,ev)
 
-    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
+    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
+    def retn[O1](p1: O1)(implicit ev: RETN_1[O1]) = oneOp(p1,ev)
 
-    def retn(implicit ev: RET, code: CodeBuilder) = CodeToken(ev.build)
+    def retn(implicit ev: RET) = CodeToken(ev.build)
 
-    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: CodeBuilder) = twoOps(p1,p2,ev,code)
+    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def leave(implicit ev: LEAVE, code: CodeBuilder) =  CodeToken(ev.build)
+    def leave(implicit ev: LEAVE) =  CodeToken(ev.build)
 
-    def call(refName: String)(implicit code: CodeBuilder) = Reference(refName)
+    def call(refName: String) = Reference(refName)
 
-    def jmp(ref: String)(implicit code: CodeBuilder) = JmpRef(ref)
+    def jmp(ref: String) = JmpRef(ref)
       
-    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: CodeBuilder) = oneOp(p1,ev,code)
-  }
+    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1]) = oneOp(p1,ev)
 
 }

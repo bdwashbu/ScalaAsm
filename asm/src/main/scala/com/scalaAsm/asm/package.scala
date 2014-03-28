@@ -5,8 +5,8 @@ import com.scalaAsm.asm.Tokens._
 
 package object asm {
 
-  trait AsmSegment {
-    val builder = new ListBuffer[Token]()
+  trait AsmSegment[X <: Token] {
+    val builder = new ListBuffer[X]()
   }
   
 }

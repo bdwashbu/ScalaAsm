@@ -1,8 +1,10 @@
 package com.scalaAsm.portableExe
 
-import com.scalaAsm.asm.AsmCodeSimple
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import com.scalaAsm.asm.CodeSegment
+import com.scalaAsm.asm.AsmProgram
+import com.scalaAsm.asm.Tokens.Procedure
 
 class DosHeader {
     val e_magic = "MZ"  // Magic number
@@ -50,14 +52,14 @@ class DosHeader {
       e_res2.foreach(field =>  bbuf.putShort(field))
       bbuf.putInt(e_lfanew)
       
-      val dosStub = new AsmCodeSimple {
-	     push(cs)
-	     pop(ds)
-	     mov(dx, imm16(0xE.toByte))
-	     mov(ah, imm8(0x9))
-	     int(imm8(0x21))
-	     mov(ax, imm16(0x4C01))
-	     int(imm8(0x21))
+      val dosStub = new CodeSegment {
+	     builder += push(cs)
+	     builder += pop(ds)
+	     builder += mov(dx, imm16(0xE.toByte))
+	     builder += mov(ah, imm8(0x9))
+	     builder += int(imm8(0x21))
+	     builder += mov(ax, imm16(0x4C01))
+	     builder += int(imm8(0x21))
 	  }
         
       bbuf.put(dosStub.getRawBytes)

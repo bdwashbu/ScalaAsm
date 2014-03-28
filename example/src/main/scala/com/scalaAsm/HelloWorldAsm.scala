@@ -2,14 +2,12 @@ package com.scalaAsm
 
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Addressing._
-import com.scalaAsm.asm.Tokens
+import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSegment
 import com.scalaAsm.asm.CodeSegment
 
 object HelloWorld extends AsmProgram {
   
-  import Tokens._
-
   dataSegments += new DataSegment {
     builder += Variable("pressAnyKey", "Press any key to continue ...\0", "Press any key to continue ...\0".length)
     builder += Variable("newline", "\r\n\0", "\r\n\0".length)

@@ -36,7 +36,6 @@ trait AsmProgram {
     }}
     
     val dataTokens = dataSegments.flatMap{seg => seg.compile}
-    println(dataTokens.size)
 
     Assembled(codeTokens, dataTokens)
   }

@@ -6,78 +6,78 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Instruction
 
-trait AsmCodeSimple extends Registers {
-    
-    implicit val builder = new SimpleCodeBuilder{}
-    
-    def imm8(x: Byte) = Immediate8(x)
-    def imm16(x: Short) = Immediate16(x)
-    def imm32(x: Int) = Immediate32(x)
-    
-    def byte(x: Byte) = Displacement8(x)
-    def word(x: Short) = Displacement16(x)
-    def dword(x: Int) = Displacement32(x)
-    
-    def getRawBytes: Array[Byte] = {
-      builder.codeTokens.flatMap(x => x.code).toArray
-    }
+//trait AsmCodeSimple extends Registers {
+//    
+//    implicit val builder = new SimpleCodeBuilder{}
+//    
+//    def imm8(x: Byte) = Immediate8(x)
+//    def imm16(x: Short) = Immediate16(x)
+//    def imm32(x: Int) = Immediate32(x)
+//    
+//    def byte(x: Byte) = Displacement8(x)
+//    def word(x: Short) = Displacement16(x)
+//    def dword(x: Int) = Displacement32(x)
+//    
+//    def getRawBytes: Array[Byte] = {
+//      builder.codeTokens.flatMap(x => x.code).toArray
+//    }
+//
+//    implicit def toByte(x: Int) = x.toByte
+//    val One = new One{}
+//    
+//    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2], code: SimpleCodeBuilder) = {
+//      ev.set(p1,p2)
+//      code.codeTokens += ev.build
+//    }
+//    
+//    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1], code: SimpleCodeBuilder) = {
+//      ev.set(p1)
+//      code.codeTokens += ev.build
+//    }
+//    
+//    
+//    def sub[O1, O2](p1: O1, p2: O2)(implicit ev: SUB_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)  
+//    
+//    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
+//
+//    def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//
+//    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//      
+//    def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//
+//    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
+//
+//    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//
+//    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
+//
+//    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
+//
+//    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
+//    
+//    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//    
+//    def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//    
+//    def int[O1](p1: O1)(implicit ev: INT_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//
+//    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
+//
+//    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
+//
+//    def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//
+//    def retn(implicit ev: RET, code: SimpleCodeBuilder) = ev.build
+//
+//    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
+//
+//    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = ev.build
+//
+//    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
+//}
 
-    implicit def toByte(x: Int) = x.toByte
-    val One = new One{}
-    
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2], code: SimpleCodeBuilder) = {
-      ev.set(p1,p2)
-      code.codeTokens += ev.build
-    }
-    
-    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1], code: SimpleCodeBuilder) = {
-      ev.set(p1)
-      code.codeTokens += ev.build
-    }
-    
-    
-    def sub[O1, O2](p1: O1, p2: O2)(implicit ev: SUB_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)  
-    
-    def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
-
-    def push[O1](p1: O1)(implicit ev: PUSH_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-
-    def pop[O1](p1: O1)(implicit ev: POP_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-      
-    def dec[O1](p1: O1)(implicit ev: DEC_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-
-    def and[O1, O2](p1: O1, p2: O2)(implicit ev: AND_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
-
-    def not[O1](p1: O1)(implicit ev: NOT_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-
-    def lea[O1, O2](p1: O1, p2: O2)(implicit ev: LEA_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
-
-    def mov[O1, O2](p1: O1, p2: O2)(implicit ev: MOV_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
-
-    def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
-    
-    def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-    
-    def jz[O1](p1: O1)(implicit ev: JZ_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-    
-    def int[O1](p1: O1)(implicit ev: INT_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-
-    def shl[O1, O2](p1: O1, p2: O2)(implicit ev: SHL_2[O1,O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
-
-    def sbb[O1, O2](p1: O1, p2: O2)(implicit ev: SBB_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
-
-    def retn[O1](p1: O1)(implicit ev: RETN_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-
-    def retn(implicit ev: RET, code: SimpleCodeBuilder) = ev.build
-
-    def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2], code: SimpleCodeBuilder) = twoOps(p1,p2,ev,code)
-
-    def leave(implicit ev: LEAVE, code: SimpleCodeBuilder) = ev.build
-
-    def rdrand[O1](p1: O1)(implicit ev: RDRAND_1[O1], code: SimpleCodeBuilder) = oneOp(p1,ev,code)
-}
-
-trait CodeSegment extends Registers with AsmSegment {
+trait CodeSegment extends Registers with AsmSegment[CodeToken] {
 
     def imm8(x: Byte) = Immediate8(x)
     def imm16(x: Short) = Immediate16(x)
@@ -91,15 +91,29 @@ trait CodeSegment extends Registers with AsmSegment {
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
+    
+//    val codeTokens = codeSegments.flatMap{seg => seg.builder flatMap {
+//        case Procedure(name, code) => List(BeginProc(name)) ++ code
+//        case token => List(token)
+//    }}
+    
+    def getRawBytes: Array[Byte] = {
+       def getInstTokens(tokens: List[CodeToken]): List[InstructionToken] = tokens.flatMap { x => x match {
+        case Procedure(name, code) => getInstTokens(code)
+        case token: InstructionToken => List(token)
+      }}
+       
+       getInstTokens(builder.toList).map{x => x.inst.code}.reduce(_ ++ _)
+    }
 
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2]): Token = {
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2]): CodeToken = {
       ev.set(p1,p2)
-      CodeToken(ev.build)
+      InstructionToken(ev.build)
     }
     
-    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1]): Token = {
+    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1]): CodeToken = {
       ev.set(p1)
-      CodeToken(ev.build)
+      InstructionToken(ev.build)
     }
     
     private def procRef(procName: String) = ProcRef(procName)
@@ -148,11 +162,11 @@ trait CodeSegment extends Registers with AsmSegment {
 
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1]) = oneOp(p1,ev)
 
-    def retn(implicit ev: RET) = CodeToken(ev.build)
+    def retn(implicit ev: RET) = InstructionToken(ev.build)
 
     def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def leave(implicit ev: LEAVE) =  CodeToken(ev.build)
+    def leave(implicit ev: LEAVE) =  InstructionToken(ev.build)
 
     def call(refName: String) = Reference(refName)
 

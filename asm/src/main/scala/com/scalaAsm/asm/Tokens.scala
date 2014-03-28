@@ -33,7 +33,7 @@ object Tokens {
   case class Proc(pos: Int, name: String) extends PostToken
   case class PostVar(name: String, value: String, val position: Int) extends PostToken
   case class ProcState(pos: Int, name: String) extends PostToken
-  case class VarState(pos: Int, name: String) extends PostToken
-  case class JmpState(pos: Int, name: String) extends PostToken
-  case class ImportState(pos: Int, name: String) extends PostToken
+  case class VarState(name: String) extends PostToken
+  case class JmpState(name: String) extends PostToken
+  case class ImportState(name: String) extends PostToken
 }

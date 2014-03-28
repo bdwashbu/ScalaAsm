@@ -72,20 +72,13 @@ object AsmCompiler
         case _ => None
     }
 
-    def twoPass: Seq[PostToken] = {
+    def positionPass: Seq[PostToken] = {
       var parserPosition = 0
-      for (token <- onePass) yield {
+      onePass flatMap { token =>
         val result = token match {
-	        case InstructionToken(inst) => ByteOutputPost(inst.code)
-	        case Align(to, filler, _) => ByteOutputPost(Array.fill((to - (parserPosition % to)) % to)(filler))
-	        case Padding(to, _) => ByteOutputPost(Array.fill(to)(0xCC.toByte))
-	        case BeginProc(name) => Proc(parserPosition, name)
-	        case ProcRef(name) => ProcState(parserPosition, name)
-	        case VarRef(name) => VarState(parserPosition, name)
-	        case JmpRefResolved(name) => JmpState(parserPosition, name)
-	        case ImportRef(name) => ImportState(parserPosition, name)
-	        case Label(name) => LabelResolved(parserPosition, name)
-	        case LabelRef(name, opCode) => LabelRefResolved(parserPosition, name, opCode)
+	        case BeginProc(name) => Some(Proc(parserPosition, name))
+	        case Label(name) => Some(LabelResolved(parserPosition, name))
+	        case _ => None
 	      }
          token match {
           case sizedToken: SizedToken => parserPosition += sizedToken.size
@@ -96,20 +89,36 @@ object AsmCompiler
          result
       }
     }
-    
+ 
     // Build procedure map
-    val procs = twoPass.collect{case Proc(offset, name) => (name, offset)}.toMap
-    val labels = twoPass.collect{case LabelResolved(offset, name) => (name, offset)}.toMap
-
-    val code: Array[Byte] = twoPass.map {
-        case ByteOutputPost(code) => code
-        case ProcState(offset, name) => CALL.callNear(*(Immediate32(procs(name) - offset - 5)).rel32).build.code
-        case VarState(_, name) => PUSH.push(Immediate32(variables(name) + baseOffset)).build.code
-        case ImportState(_, name) => CALL.callNear(*(Immediate32((imports(name) + baseOffset)))).build.code
-        case JmpState(_, name) => JMP.jmp(*(Immediate32((externs(name) + baseOffset)))).build.code
-        case LabelRefResolved(offset, name, opCode) => Array(opCode, (labels(name) - offset - 2).toByte)
-        case _ => Array[Byte]()
+    val procs = positionPass.collect{case Proc(offset, name) => (name, offset)}.toMap
+    val labels = positionPass.collect{case LabelResolved(offset, name) => (name, offset)}.toMap    
+    
+    val code: Array[Byte] = {
+      var parserPosition = 0
+      for (token <- onePass) yield {
+        val result = token match {
+	        case InstructionToken(inst) => inst.code
+	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
+	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
+	        case ProcRef(name) => CALL.callNear(*(Immediate32(procs(name) - parserPosition - 5)).rel32).build.code
+	        case VarRef(name) => PUSH.push(Immediate32(variables(name) + baseOffset)).build.code
+	        case JmpRefResolved(name) => JMP.jmp(*(Immediate32((externs(name) + baseOffset)))).build.code
+	        case ImportRef(name) => CALL.callNear(*(Immediate32((imports(name) + baseOffset)))).build.code
+	        case LabelRef(name, opCode) => Array(opCode, (labels(name) - parserPosition - 2).toByte)
+	        case _ => Array[Byte]()
+	      }
+         token match {
+          case sizedToken: SizedToken => parserPosition += sizedToken.size
+          case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+          case x:LabelRef => parserPosition += 2
+          case _ => 
+         }
+         result
+      }
     }.reduce(_ ++ _)
+    
+
     
     code 
   }

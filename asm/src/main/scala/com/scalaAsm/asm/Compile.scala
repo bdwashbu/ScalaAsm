@@ -3,7 +3,7 @@ package com.scalaAsm.asm
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.x86.Instructions.CALL
-import com.scalaAsm.x86.Operands.{Immediate16, Immediate32}
+import com.scalaAsm.x86.Operands.{Immediate16, Immediate32, Immediate8}
 import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.x86.Instructions.JMP
 import com.scalaAsm.x86.Instructions.PUSH
@@ -105,7 +105,7 @@ object AsmCompiler
 	        case VarRef(name) => PUSH.push(Immediate32(variables(name) + baseOffset)).build.code
 	        case JmpRefResolved(name) => JMP.jmp(*(Immediate32((externs(name) + baseOffset)))).build.code
 	        case ImportRef(name) => CALL.callNear(*(Immediate32((imports(name) + baseOffset)))).build.code
-	        case LabelRef(name, opCode) => Array(opCode, (labels(name) - parserPosition - 2).toByte)
+	        case LabelRef(name, inst) => inst.set(Immediate8((labels(name) - parserPosition - 2).toByte)); inst.build.code
 	        case _ => Array[Byte]()
 	      }
          token match {

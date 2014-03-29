@@ -54,11 +54,11 @@ trait ZeroOperandInstruction extends Instruction {
     }
 
   def getSize: Int = {
-    0
+    1
   }
   
    def getBytes: Array[Byte] = {
-    Array()
+     opcode.get(null)
   }
 }
 

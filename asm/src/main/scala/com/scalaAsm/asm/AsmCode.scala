@@ -24,14 +24,20 @@ trait CodeSegment extends Registers with AsmSegment[CodeToken] with Catalog {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
     
+    def build(code: List[CodeToken]): List[Token] =
+	   code flatMap {
+	    case Procedure(name, code) => List(BeginProc(name)) ++ build(code)
+	    case CodeGroup(code) => build(code)
+	    case token => List(token)
+	  }
 
     def getRawBytes: Array[Byte] = {
-       def getInstTokens(tokens: List[CodeToken]): List[InstructionToken] = tokens.flatMap { x => x match {
-        case Procedure(name, code) => getInstTokens(code)
-        case token: InstructionToken => List(token)
-      }}
-       
-       getInstTokens(builder.toList).map{x => x.inst.code}.reduce(_ ++ _)
+//       def getInstTokens(tokens: List[CodeToken]): List[InstructionToken] = tokens.flatMap { x => x match {
+//        case Procedure(name, code) => getInstTokens(code)
+//        case token: InstructionToken => List(token)
+//      }}
+//       
+       build(builder.toList).collect{ case x: InstructionToken => x}.map{x => x.inst.code}.reduce(_ ++ _)
     }
     
     private def procRef(procName: String) = ProcRef(procName)

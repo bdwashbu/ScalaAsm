@@ -1,44 +1,17 @@
 package com.scalaAsm.asm
 
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.utils.Endian
-import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.x86.MachineCode
+import com.scalaAsm.asm.Tokens.Token
 
 case class Assembled(val code: Seq[Token], val data: Seq[Token])
-
-trait CodeBuilder {
-  val codeTokens = ListBuffer[Token]()
-  val importantTokens = ListBuffer[Token]()
-}
-
-trait SimpleCodeBuilder {
-  val codeTokens = ListBuffer[MachineCode]()
-}
 
 trait AsmProgram {
   
   val codeSegments = new ListBuffer[CodeSegment]()
   val dataSegments = new ListBuffer[DataSegment]()
-  
-
-  def hex2Bytes(hex: String) = {
-    def stripChars(s: String, ch: String) = s filterNot (ch contains _)
-    stripChars(hex, " -").grouped(2).map(Integer.parseInt(_, 16).toByte).toArray
-  }
 
   def assemble: Assembled = {
-
-    def recurse(code: List[CodeToken]): List[Token] =
-       code flatMap {
-        case Procedure(name, code) => List(BeginProc(name)) ++ recurse(code)
-        case CodeGroup(code) => recurse(code)
-        case token => List(token)
-      }
-    
-    val codeTokens: ListBuffer[Token] = codeSegments.flatMap{seg => recurse(seg.builder.toList)}
+    val codeTokens: ListBuffer[Token] = codeSegments.flatMap{seg => seg.build(seg.builder.toList)}
     
     val dataTokens = dataSegments.flatMap{seg => seg.compile}
 

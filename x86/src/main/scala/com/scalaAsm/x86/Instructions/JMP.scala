@@ -8,7 +8,7 @@ trait JMP_1[-O1] extends JMP with OneOperandInstruction[O1] with InstructionForm
 object JMP {
 
   def jmp[O1](p1: O1)(implicit ev: JMP_1[O1]): MachineCode = {
-    ev.build(p1)
+    ev(p1)
   }
 
   implicit object jmp2 extends JMP_1[rm32] {

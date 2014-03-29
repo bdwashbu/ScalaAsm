@@ -105,7 +105,7 @@ object AsmCompiler
 	        case VarRef(name) => PUSH.push(Immediate32(variables(name) + baseOffset)).code
 	        case JmpRefResolved(name) => JMP.jmp(*(Immediate32((externs(name) + baseOffset)))).code
 	        case ImportRef(name) => CALL.callNear(*(Immediate32((imports(name) + baseOffset)))).code
-	        case LabelRef(name, inst) => inst.build(Immediate8((labels(name) - parserPosition - 2).toByte)).code
+	        case LabelRef(name, inst) => inst(Immediate8((labels(name) - parserPosition - 2).toByte)).code
 	        case _ => Array[Byte]()
 	      }
          token match {

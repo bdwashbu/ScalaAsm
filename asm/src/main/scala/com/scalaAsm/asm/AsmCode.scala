@@ -110,11 +110,11 @@ trait CodeSegment extends Registers with AsmSegment[CodeToken] {
     }
 
     def twoOps[O1,O2](p1:O1,p2:O2, ev: TwoOperandInstruction[O1,O2]): CodeToken = {
-      InstructionToken(ev.build(p1,p2))
+      InstructionToken(ev(p1,p2))
     }
     
     def oneOp[O1](p1:O1, ev: OneOperandInstruction[O1]): CodeToken = {
-      InstructionToken(ev.build(p1))
+      InstructionToken(ev(p1))
     }
     
     private def procRef(procName: String) = ProcRef(procName)
@@ -163,11 +163,11 @@ trait CodeSegment extends Registers with AsmSegment[CodeToken] {
 
     def retn[O1](p1: O1)(implicit ev: RETN_1[O1]) = oneOp(p1,ev)
 
-    def retn(implicit ev: RET) = InstructionToken(ev.build)
+    def retn(implicit ev: RET) = InstructionToken(ev.apply)
 
     def test[O1, O2](p1: O1, p2: O2)(implicit ev: TEST_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def leave(implicit ev: LEAVE) =  InstructionToken(ev.build)
+    def leave(implicit ev: LEAVE) =  InstructionToken(ev.apply)
 
     def call(refName: String) = Reference(refName)
 

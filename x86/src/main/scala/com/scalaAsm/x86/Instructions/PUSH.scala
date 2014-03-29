@@ -21,12 +21,12 @@ object PUSH extends POWLow {
 
   implicit object push2 extends PUSH_1[r32] {
       def operands = O()
-      def opcode = OpcodePlusRd(0x50)
+      val opcode = OpcodePlusRd(0x50)
   }
   
   implicit object push3 extends PUSH_1[r16] {
       def operands = O()
-      def opcode = OpcodePlusRd(0x50)
+      val opcode = OpcodePlusRd(0x50)
   }
   
   implicit object push4 extends PUSH_1[imm8] {

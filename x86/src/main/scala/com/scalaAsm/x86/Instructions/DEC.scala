@@ -14,6 +14,6 @@ object DEC {
   
   implicit object dec2 extends DEC_1[r16] {
      def operands = O()
-	 def opcode = OpcodePlusRd(0x48)
+	 val opcode = OpcodePlusRd(0x48)
   }
 }

@@ -11,7 +11,7 @@ object POP {
   
   implicit object pop1 extends POP_1[r32] {
       def operands = O()
-      def opcode = OpcodePlusRd(0x58)
+      val opcode = OpcodePlusRd(0x58)
   }
   
   implicit object pop2 extends POP_1[DS] {

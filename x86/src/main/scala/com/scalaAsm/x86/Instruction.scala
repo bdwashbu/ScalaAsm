@@ -12,7 +12,34 @@ trait InstructionField extends Any {
   def getBytes: Array[Byte]
 }
 
-trait Instruction
+trait Instruction {
+  case class OpcodePlusRd(opcode1:Byte) extends OpcodeFormat {
+	  def get(x: Any) = {
+	    if (x.isInstanceOf[ModRM.reg])
+	    	Array((opcode1 + x.asInstanceOf[ModRM.reg].ID).toByte)
+	    else
+	      Array()
+	    	  
+	  }
+	  val size = 1
+	  val opcodeExtension: Option[Byte] = None
+	  def /+ (x: Byte) = new OneOpcode(opcode1) { override val opcodeExtension = Some(x) }
+	}
+	
+	case class OneOpcode(operand1:Byte) extends OpcodeFormat {
+	  def get(x: Any) = Array(operand1)
+	  val size = 1
+	  val opcodeExtension: Option[Byte] = None
+	  def /+ (x: Byte) = new OneOpcode(operand1) { override val opcodeExtension = Some(x) }
+	}
+	
+	case class TwoOpcodes(opcode1:Byte, opcode2:Byte) extends OpcodeFormat {
+	  def get(x: Any) = Array(opcode1, opcode2)
+	  val size = 2
+	  val opcodeExtension: Option[Byte] = None
+	  def /+ (x: Byte) = new TwoOpcodes(opcode1, opcode2) { override val opcodeExtension = Some(x) }
+	}
+}
 
 trait ZeroOperandInstruction extends Instruction {
   def opcode: OpcodeFormat
@@ -60,6 +87,8 @@ trait OneOperandInstruction[-O1] extends SingleOperand[O1] with Instruction {
       case _ => Array.emptyByteArray
     })
   }
+   
+   
 }
 
 trait TwoOperandInstruction[-O1,-O2] extends DualOperand[O1,O2] with Instruction {
@@ -82,7 +111,7 @@ trait TwoOperandInstruction[-O1,-O2] extends DualOperand[O1,O2] with Instruction
   }
   
    def getBytes(x:O1,y:O2): Array[Byte] = {
-    opcode.get ++ (operands.getAddressingForm(x,y,opcode) match {
+    opcode.get(x) ++ (operands.getAddressingForm(x,y,opcode) match {
       case Some(modRM) => modRM.getBytes
       case _ => Array.emptyByteArray
     })

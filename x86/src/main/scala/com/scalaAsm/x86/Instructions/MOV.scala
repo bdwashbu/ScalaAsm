@@ -27,16 +27,16 @@ object MOV extends MOVLow {
   
   implicit object mov7 extends MOV_2[r16, imm16] {
       def operands = OI() // should be OI
-      def opcode = OpcodePlusRd(0xB8, op1)
+      def opcode = OpcodePlusRd(0xB8)
   }
   
   implicit object mov8 extends MOV_2[r8, imm8] {
       def operands = OI()
-      def opcode = OpcodePlusRd(0xB0, op1)
+      def opcode = OpcodePlusRd(0xB0)
   }
   
    implicit object mov6 extends MOV_2[r32, imm32] {
       def operands = OI()
-      def opcode = OpcodePlusRd(0xB8, op1)
+      def opcode = OpcodePlusRd(0xB8)
   }
 }

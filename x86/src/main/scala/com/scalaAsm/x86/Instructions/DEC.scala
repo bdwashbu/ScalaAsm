@@ -9,11 +9,11 @@ object DEC {
   
   implicit object dec1 extends DEC_1[r32] {
      def operands = O()
-     val opcode = OpcodePlusRd(0x48, op1)
+     val opcode = OpcodePlusRd(0x48)
   }
   
   implicit object dec2 extends DEC_1[r16] {
      def operands = O()
-	 def opcode = OpcodePlusRd(0x48, op1)
+	 def opcode = OpcodePlusRd(0x48)
   }
 }

@@ -5,6 +5,9 @@ import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Instruction
+import com.scalaAsm.x86.TwoOperandInstruction
+import com.scalaAsm.x86.OneOperandInstruction
+import com.scalaAsm.x86.One
 
 //trait AsmCodeSimple extends Registers {
 //    
@@ -106,14 +109,12 @@ trait CodeSegment extends Registers with AsmSegment[CodeToken] {
        getInstTokens(builder.toList).map{x => x.inst.code}.reduce(_ ++ _)
     }
 
-    def twoOps[O1,O2](p1:O1,p2:O2, ev: Instruction with TwoOperands[O1,O2]): CodeToken = {
-      ev.set(p1,p2)
-      InstructionToken(ev.build)
+    def twoOps[O1,O2](p1:O1,p2:O2, ev: TwoOperandInstruction[O1,O2]): CodeToken = {
+      InstructionToken(ev.build(p1,p2))
     }
     
-    def oneOp[O1](p1:O1, ev: Instruction with OneOperand[O1]): CodeToken = {
-      ev.set(p1)
-      InstructionToken(ev.build)
+    def oneOp[O1](p1:O1, ev: OneOperandInstruction[O1]): CodeToken = {
+      InstructionToken(ev.build(p1))
     }
     
     private def procRef(procName: String) = ProcRef(procName)

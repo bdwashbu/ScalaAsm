@@ -101,11 +101,11 @@ object AsmCompiler
 	        case InstructionToken(inst) => inst.code
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-	        case ProcRef(name) => CALL.callNear(*(Immediate32(procs(name) - parserPosition - 5)).rel32).build.code
-	        case VarRef(name) => PUSH.push(Immediate32(variables(name) + baseOffset)).build.code
-	        case JmpRefResolved(name) => JMP.jmp(*(Immediate32((externs(name) + baseOffset)))).build.code
-	        case ImportRef(name) => CALL.callNear(*(Immediate32((imports(name) + baseOffset)))).build.code
-	        case LabelRef(name, inst) => inst.set(Immediate8((labels(name) - parserPosition - 2).toByte)); inst.build.code
+	        case ProcRef(name) => CALL.callNear(*(Immediate32(procs(name) - parserPosition - 5)).rel32).code
+	        case VarRef(name) => PUSH.push(Immediate32(variables(name) + baseOffset)).code
+	        case JmpRefResolved(name) => JMP.jmp(*(Immediate32((externs(name) + baseOffset)))).code
+	        case ImportRef(name) => CALL.callNear(*(Immediate32((imports(name) + baseOffset)))).code
+	        case LabelRef(name, inst) => inst.build(Immediate8((labels(name) - parserPosition - 2).toByte)).code
 	        case _ => Array[Byte]()
 	      }
          token match {

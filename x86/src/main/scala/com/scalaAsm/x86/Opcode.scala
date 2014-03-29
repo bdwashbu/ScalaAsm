@@ -3,17 +3,16 @@ package com.scalaAsm.x86
 import com.scalaAsm.x86.Operands.ModRM
 
 trait OpcodeFormat {
-  def get: Array[Byte]
   def size: Int
   val opcodeExtension: Option[Byte]
   def /+ (x: Byte): OpcodeFormat
 }
 
-case class OpcodePlusRd(operand1:Byte, reg: ModRM.reg) extends OpcodeFormat {
-  def get = Array((operand1 + reg.ID).toByte)
+case class OpcodePlusRd(opcode1:Byte) extends OpcodeFormat {
+  def get(regID: Int) = Array((opcode1 + regID).toByte)
   val size = 1
   val opcodeExtension: Option[Byte] = None
-  def /+ (x: Byte) = new OneOpcode(operand1) { override val opcodeExtension = Some(x) }
+  def /+ (x: Byte) = new OneOpcode(opcode1) { override val opcodeExtension = Some(x) }
 }
 
 case class OneOpcode(operand1:Byte) extends OpcodeFormat {
@@ -23,9 +22,9 @@ case class OneOpcode(operand1:Byte) extends OpcodeFormat {
   def /+ (x: Byte) = new OneOpcode(operand1) { override val opcodeExtension = Some(x) }
 }
 
-case class TwoOpcodes(operand1:Byte, operand2:Byte) extends OpcodeFormat {
-  def get = Array(operand1, operand2)
+case class TwoOpcodes(opcode1:Byte, opcode2:Byte) extends OpcodeFormat {
+  def get = Array(opcode1, opcode2)
   val size = 2
   val opcodeExtension: Option[Byte] = None
-  def /+ (x: Byte) = new TwoOpcodes(operand1, operand2) { override val opcodeExtension = Some(x) }
+  def /+ (x: Byte) = new TwoOpcodes(opcode1, opcode2) { override val opcodeExtension = Some(x) }
 }

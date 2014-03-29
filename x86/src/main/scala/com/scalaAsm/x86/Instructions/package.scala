@@ -2,6 +2,9 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
 
+  
+  trait One
+
 package object Instructions {
 
   type imm8 = Immediate8
@@ -29,6 +32,5 @@ package object Instructions {
   type r16 = Register16 with GeneralPurpose
   type r32 = Register32 with GeneralPurpose
   type r64 = Register64 with GeneralPurpose
-  
-  trait One
+
 }

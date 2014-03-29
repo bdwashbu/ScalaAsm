@@ -4,6 +4,7 @@ import com.scalaAsm.x86.MachineCode
 import com.scalaAsm.x86.Instruction
 import com.scalaAsm.x86.Instructions.OneOperand
 import com.scalaAsm.x86.Operands.Immediate8
+import com.scalaAsm.x86.OneOperandInstruction
 
 object Tokens {
   trait Token
@@ -13,7 +14,7 @@ object Tokens {
 
   case class Procedure(name: String, innerCode: List[CodeToken]) extends CodeToken
   case class Label(name: String) extends CodeToken
-  case class LabelRef(labelRef: String, inst:Instruction with OneOperand[Immediate8]) extends CodeToken
+  case class LabelRef(labelRef: String, inst:OneOperandInstruction[Immediate8]) extends CodeToken
 
   trait CodeToken extends Token
   abstract class SizedToken(val size: Int) extends Token

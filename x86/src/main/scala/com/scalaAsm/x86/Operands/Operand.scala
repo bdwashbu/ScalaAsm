@@ -3,22 +3,6 @@ package Operands
 
 trait Operand extends Any
 
-trait DualOperand[-O1,-O2] {
-  protected[this] var op1: O1 = _
-  protected[this] var op2: O2 = _
-  def set(x:O1, y:O2) = {
-    op1 = x
-    op2 = y
-  }
-}
-
-trait SingleOperand[-O1] {
-  protected[this] var op1: O1 = _
-  def set(x:O1) = {
-    op1 = x
-  }
-}
-
 sealed trait OperandSize {
   type size
   val length: Int

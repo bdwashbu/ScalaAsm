@@ -2,7 +2,6 @@ package com.scalaAsm.asm
 
 import com.scalaAsm.x86.MachineCode
 import com.scalaAsm.x86.Instruction
-import com.scalaAsm.x86.Instructions.OneOperand
 import com.scalaAsm.x86.Operands.Immediate8
 import com.scalaAsm.x86.OneOperandInstruction
 

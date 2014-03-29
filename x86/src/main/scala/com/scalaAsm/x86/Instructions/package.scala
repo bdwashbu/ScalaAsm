@@ -13,8 +13,6 @@ package object Instructions {
   
   type Operand = com.scalaAsm.x86.Operands.Operand
   
-  type TwoOperands[-O1,-O2] = Operands.DualOperand[O1,O2]
-  type OneOperand[-O1] = Operands.SingleOperand[O1]
   type AddressingFormSpecifier = Operands.AddressingFormSpecifier
   
   type rm = RegisterOrMemory

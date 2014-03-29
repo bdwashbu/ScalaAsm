@@ -21,33 +21,31 @@ abstract class TwoOperandsFormat[-X, -Y] extends OperandFormat {
 
 trait InstructionFormat {
 
-  trait DualOperandEncoding[-O1 <: ModRM.rm, -O2 <: Operand] extends DualOperand[O1, O2] {
-    def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB])
+  trait DualOperandEncoding[-O1 <: ModRM.rm, -O2 <: Operand] {
+    def encode(x: O1, y: O2, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB])
   }
 
   def getEncoding[O1 <: ModRM.rm, O2 <: Operand](op1: O1, op2: O2, opcodeExtend: Option[Byte])(implicit operands: DualOperandEncoding[O1, O2]) = {
-    operands.set(op1, op2)
-    operands.encode(opcodeExtend)
+    operands.encode(op1, op2, opcodeExtend)
   }
 
-  trait SingleOperandEncoding[-O1 <: Operand] extends SingleOperand[O1] {
-    def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB])
+  trait SingleOperandEncoding[-O1 <: Operand] {
+    def encode(op1: O1, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB])
   }
 
   def getEncoding[O1 <: ModRM.rm](op1: O1, opcodeExtend: Option[Byte])(implicit operand: SingleOperandEncoding[O1]) = {
-    operand.set(op1)
-    operand.encode(opcodeExtend)
+    operand.encode(op1, opcodeExtend)
   }
 
   implicit object test1 extends DualOperandEncoding[GPR, Immediate] {
-    def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
+    def encode(op1: GPR, op2: Immediate, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
       val modRM: Option[ModRM] = Some(ModRMOpcode(TwoRegisters, opcodeExtend.get, op1))
       (modRM, None)
     }
   }
 
   implicit object test2 extends DualOperandEncoding[GPR, Memory] {
-    def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
+    def encode(op1: GPR, op2: Memory, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
       (op2.base, op2.offset, op2.immediate) match {
         case (Some(base), offset @ Some(off: Displacement8), None) if base.ID == 4 =>
           val modRM = Some(ModRMReg(DisplacementByte, op1, base))
@@ -67,14 +65,14 @@ trait InstructionFormat {
   }
 
   implicit object test3 extends DualOperandEncoding[GPR, GPR] {
-    def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
+    def encode(op1: GPR, op2: GPR, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
       val modRM: Option[ModRM] = Some(ModRMReg(TwoRegisters, op1, op2))
       (modRM, None)
     }
   }
 
   implicit object test4 extends SingleOperandEncoding[Memory] {
-    def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
+    def encode(op1: Memory, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
       (op1.base, op1.offset, op1.immediate) match {
         case (Some(base), offset @ Some(_: Displacement8), None) =>
           val modRM = Some(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))
@@ -91,7 +89,7 @@ trait InstructionFormat {
   }
   
   implicit object test5 extends SingleOperandEncoding[GPR] {
-    def encode(opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
+    def encode(op1: GPR, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
           val modRM = Some(ModRMOpcode(TwoRegisters, opcodeExtend.get, op1))
           (modRM, None)
     }

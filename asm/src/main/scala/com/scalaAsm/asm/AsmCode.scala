@@ -147,11 +147,11 @@ trait CodeSegment extends Registers with AsmSegment[CodeToken] {
 
     def shr[O1, O2](p1: O1, p2: O2)(implicit ev: SHR_2[O1, O2]) = twoOps(p1,p2,ev)
 
-    def jnz(labelRef: String)(implicit ev: JNZ_1[Immediate8] with OneOperand[Immediate8]) = LabelRef(labelRef, ev)
+    def jnz(labelRef: String)(implicit ev: JNZ_1[Immediate8]) = LabelRef(labelRef, ev)
     
     def jnz[O1](p1: O1)(implicit ev: JNZ_1[O1]) = oneOp(p1,ev)
 
-    def jz(labelRef: String)(implicit ev: JZ_1[Immediate8] with OneOperand[Immediate8]) = LabelRef(labelRef, ev)
+    def jz(labelRef: String)(implicit ev: JZ_1[Immediate8]) = LabelRef(labelRef, ev)
     
     def jz[O1](p1: O1)(implicit ev: JZ_1[O1]) = oneOp(p1,ev)
     

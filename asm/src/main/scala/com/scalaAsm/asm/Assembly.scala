@@ -31,10 +31,14 @@ trait AsmProgram {
 
   def assemble: Assembled = {
 
-    val codeTokens = codeSegments.flatMap{seg => seg.builder flatMap {
-        case Procedure(name, code) => List(BeginProc(name)) ++ code
+    def recurse(code: List[CodeToken]): List[Token] =
+       code flatMap {
+        case Procedure(name, code) => List(BeginProc(name)) ++ recurse(code)
+        case CodeGroup(code) => recurse(code)
         case token => List(token)
-    }}
+      }
+    
+    val codeTokens: ListBuffer[Token] = codeSegments.flatMap{seg => recurse(seg.builder.toList)}
     
     val dataTokens = dataSegments.flatMap{seg => seg.compile}
 

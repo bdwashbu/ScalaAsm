@@ -24,11 +24,7 @@ trait CodeSegment extends Registers with AsmSegment[CodeToken] with Catalog {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
     
-//    val codeTokens = codeSegments.flatMap{seg => seg.builder flatMap {
-//        case Procedure(name, code) => List(BeginProc(name)) ++ code
-//        case token => List(token)
-//    }}
-    
+
     def getRawBytes: Array[Byte] = {
        def getInstTokens(tokens: List[CodeToken]): List[InstructionToken] = tokens.flatMap { x => x match {
         case Procedure(name, code) => getInstTokens(code)
@@ -54,5 +50,11 @@ trait CodeSegment extends Registers with AsmSegment[CodeToken] with Catalog {
 
     def jmp(ref: String) = JmpRef(ref)
 
-
+    def repeat(numTimes: Int, code: List[CodeToken]): CodeGroup = {
+      val expanded = ListBuffer[CodeToken]()
+      for (i <- 0 until numTimes) {
+        expanded ++= code
+      }
+      CodeGroup(expanded.toList)
+    }
 }

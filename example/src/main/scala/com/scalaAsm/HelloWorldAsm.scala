@@ -87,27 +87,17 @@ object HelloWorld extends AsmProgram {
       push(edi),
       mov(ebp, imm32(0x80808080)),
       label("start"),
-      mov(edi, *(eax)), // read first 4 bytes
-	  add(eax, imm8(4)), // increment pointer
-      lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
-      not(edi), // invert all bytes
-      and(ecx, edi),
-      and(ecx, ebp),
-      jnz("test"),
-      mov(edi, *(eax)), // read first 4 bytes
-	  add(eax, imm8(4)), // increment pointer
-      lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
-      not(edi), // invert all bytes
-      and(ecx, edi),
-      and(ecx, ebp),
-      jnz("test"),
-      mov(edi, *(eax)), // read first 4 bytes
-	  add(eax, imm8(4)), // increment pointer
-      lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
-      not(edi), // invert all bytes
-      and(ecx, edi),
-      and(ecx, ebp),
-      jnz("test"),
+      
+      repeat(3, List(
+	      mov(edi, *(eax)), // read first 4 bytes
+		  add(eax, imm8(4)), // increment pointer
+	      lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
+	      not(edi), // invert all bytes
+	      and(ecx, edi),
+	      and(ecx, ebp),
+	      jnz("test")
+      )),
+      
       mov(edi, *(eax)),
       add(eax, imm8(4)),
       lea(ecx, *(edi - dword(0x1010101))),

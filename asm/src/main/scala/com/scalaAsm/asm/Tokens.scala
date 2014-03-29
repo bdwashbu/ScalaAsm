@@ -11,6 +11,7 @@ object Tokens {
   case class Reference(name: String) extends CodeToken
   case class JmpRef(name: String) extends CodeToken
 
+  case class CodeGroup(code: List[CodeToken]) extends CodeToken
   case class Procedure(name: String, innerCode: List[CodeToken]) extends CodeToken
   case class Label(name: String) extends CodeToken
   case class LabelRef(labelRef: String, inst:OneOperandInstruction[Immediate8]) extends CodeToken

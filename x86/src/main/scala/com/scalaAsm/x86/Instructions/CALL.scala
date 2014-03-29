@@ -14,10 +14,6 @@ trait CALLLow {
 
 object CALL extends CALLLow {
 
-  def callNear[O1](p1: O1)(implicit ev: CALL_1[O1]): MachineCode = {
-    ev(p1)
-  }
-
   implicit object call3 extends CALL_1[rel32] {
     val opcode: OpcodeFormat = 0xE8
     def operands = M()

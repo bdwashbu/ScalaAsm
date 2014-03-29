@@ -5,11 +5,10 @@ import com.scalaAsm.utils.Endian
 import com.scalaAsm.x86.Instructions.CALL
 import com.scalaAsm.x86.Operands.{Immediate16, Immediate32, Immediate8}
 import com.scalaAsm.asm.Addressing._
-import com.scalaAsm.x86.Instructions.JMP
-import com.scalaAsm.x86.Instructions.PUSH
+import com.scalaAsm.x86.Instructions.Catalog
 
 
-object AsmCompiler 
+object AsmCompiler extends Catalog
 {
   def compileData(addressOfData: Int, dataTokens: Seq[Token]): (Array[Byte], Map[String, Int]) = {
 
@@ -101,10 +100,10 @@ object AsmCompiler
 	        case InstructionToken(inst) => inst.code
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-	        case ProcRef(name) => CALL.callNear(*(Immediate32(procs(name) - parserPosition - 5)).rel32).code
-	        case VarRef(name) => PUSH.push(Immediate32(variables(name) + baseOffset)).code
-	        case JmpRefResolved(name) => JMP.jmp(*(Immediate32((externs(name) + baseOffset)))).code
-	        case ImportRef(name) => CALL.callNear(*(Immediate32((imports(name) + baseOffset)))).code
+	        case ProcRef(name) => callNear(*(Immediate32(procs(name) - parserPosition - 5)).rel32).code
+	        case VarRef(name) => push(Immediate32(variables(name) + baseOffset)).code
+	        case JmpRefResolved(name) => jmp(*(Immediate32((externs(name) + baseOffset)))).code
+	        case ImportRef(name) => callNear(*(Immediate32((imports(name) + baseOffset)))).code
 	        case LabelRef(name, inst) => inst(Immediate8((labels(name) - parserPosition - 2).toByte)).code
 	        case _ => Array[Byte]()
 	      }

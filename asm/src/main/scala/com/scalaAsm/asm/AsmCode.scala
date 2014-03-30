@@ -18,8 +18,6 @@ trait CodeSegment extends Registers with AsmSegment[CodeToken] with Catalog {
     def dword(x: Int) = Displacement32(x)
 
     implicit def toToken(code: MachineCode) = InstructionToken(code)
-    
-    var parserPos: Int = 0
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}

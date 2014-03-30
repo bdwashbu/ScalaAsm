@@ -61,13 +61,14 @@ object AsmCompiler extends Catalog
     def onePass: Seq[Token] = asm.code.flatMap {
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
+        case proc @ BeginProc(_) => Some(proc)
         case JmpRef(name) if externNames.contains(name) => Some(JmpRefResolved(name))
         case Reference(name) if importNames.contains(name) => Some(ImportRef(name))
         case Reference(name) if procNames.contains(name) => Some(ProcRef(name))
         case Reference(name) if varNames.contains(name) => Some(VarRef(name))
         case Reference(_) => throw new Exception("no reference found!")
-        case Label(name) => Some(Label(name))
-        case LabelRef(name,opcode) => Some(LabelRef(name,opcode))
+        case label @ Label(name) => Some(label)
+        case labelref @ LabelRef(name,opcode) => Some(labelref)
         case _ => None
     }
 

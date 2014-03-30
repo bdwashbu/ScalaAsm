@@ -8,27 +8,28 @@ import com.scalaAsm.x86.OneOperandInstruction
 object Tokens {
   trait Token
   
+  trait CodeToken extends Token
   case class Reference(name: String) extends CodeToken
   case class JmpRef(name: String) extends CodeToken
-
   case class CodeGroup(code: List[CodeToken]) extends CodeToken
   case class Procedure(name: String, innerCode: List[CodeToken]) extends CodeToken
   case class Label(name: String) extends CodeToken
   case class LabelRef(labelRef: String, inst:OneOperandInstruction[Immediate8]) extends CodeToken
-
-  trait CodeToken extends Token
-  abstract class SizedToken(val size: Int) extends Token
   case class InstructionToken(inst: MachineCode) extends SizedToken(inst.size) with CodeToken
-  case class BeginProc(name: String) extends SizedToken(0)
+  case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken
+  
+  abstract class SizedToken(val size: Int) extends Token
+  case class BeginProc(name: String) extends Token
   case class Padding(to: Int, tokenSize: Int) extends SizedToken(tokenSize)
   case class ProcRef(procName: String) extends SizedToken(5)
   case class VarRef(procName: String) extends SizedToken(5)
   case class ImportRef(varName: String) extends SizedToken(6)
   case class JmpRefResolved(varName: String) extends SizedToken(6)
-  case class Variable(name: String, val value: String, tokenSize: Int) extends SizedToken(tokenSize)
+  
+  trait DataToken extends Token
+  case class Variable(name: String, val value: String, tokenSize: Int) extends SizedToken(tokenSize) with DataToken
 
   abstract class DynamicSizedToken(val size: (Int) => Int) extends Token
-  case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken
 
   sealed trait PostToken
   case class LabelResolved(position: Int, name: String) extends PostToken

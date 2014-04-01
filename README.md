@@ -25,17 +25,17 @@ Heres an example of some PUSH instructions for 16-bit register, 8-bit immediate 
 
 ```scala
 implicit object push1 extends PUSH_1[r16] {
-  def operands = O(x)
-  def opcode = OpcodePlusRd(0x50, x)
+  def operands = O()
+  def opcode = OpcodePlusRd(0x50)
 }
   
 implicit object push2 extends PUSH_1[imm8] {
-  def operands = I[imm8](x)
+  def operands = I()
   val opcode: Opcodes = 0x6A
 }
   
 implicit object push3 extends PUSH_1[imm16] {
-  def operands = I[imm16](x)
+  def operands = I()
   val opcode: Opcodes = 0x68
 }
 ```

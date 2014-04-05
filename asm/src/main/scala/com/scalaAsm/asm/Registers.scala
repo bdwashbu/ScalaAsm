@@ -52,6 +52,7 @@ trait Registers {
     object rsp extends RSP with Addressable[RSP]
   
     object edi extends EDI with Addressable[EDI]
+    object ebx extends EBX with Addressable[EBX]
     object eax extends EAX with Addressable[EAX]
     object ecx extends ECX with Addressable[ECX]
     object ebp extends EBP with Addressable[EBP]

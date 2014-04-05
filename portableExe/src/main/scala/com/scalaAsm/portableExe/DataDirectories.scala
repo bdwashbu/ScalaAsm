@@ -4,18 +4,20 @@ import java.io.DataOutputStream
 import scala.collection.immutable.TreeMap
 import java.io.ByteArrayOutputStream
 
-private[portableExe] case class Directory(virtualAddress: Int, size: Int) extends ExeWriter {
+private[portableExe] case class ImageDataDirectory(virtualAddress: Int, size: Int) extends ExeWriter {
   def write(stream: DataOutputStream) {
     write(stream, virtualAddress)
     write(stream, size)
   }
 }
 
-private[portableExe] case class DataDirectories(imports: Directory, importAddressTable: Directory) extends Function0[Array[Byte]]{
+// Contains the addresses of all important data structures in the PE
+
+private[portableExe] case class DataDirectories(importSymbols: ImageDataDirectory, importAddressTable: ImageDataDirectory) extends Function0[Array[Byte]]{
   
     object DirectoryTypes extends Enumeration {
       type characteristic = Value
-      val Export, Import, Resource, Exception, Security, BaseReloc, Debug, Copyright,
+      val ExportSymbols, ImportSymbols, Resource, Exception, Security, BaseRelocation, Debug, Copyright,
             GlobalPtr, TLS, LoadConfig, BoundImport, IAT, COM, DelayImport, Reserved = Value
     }
 
@@ -23,12 +25,12 @@ private[portableExe] case class DataDirectories(imports: Directory, importAddres
     
     // Virtual Address and Size
     private val directories = TreeMap(
-      Export -> None,
-      Import -> Some(imports),
+      ExportSymbols -> None,
+      ImportSymbols -> Some(importSymbols),
       Resource -> None,
       Exception -> None,
       Security -> None,
-      BaseReloc -> None,
+      BaseRelocation -> None,
       Debug -> None,
       Copyright -> None,
       GlobalPtr -> None,
@@ -49,7 +51,7 @@ private[portableExe] case class DataDirectories(imports: Directory, importAddres
       val stream = new DataOutputStream(directoryOutput)
       
       for ((name, dict) <- directories) {
-        (dict getOrElse Directory(0, 0)).write(stream)
+        (dict getOrElse ImageDataDirectory(0, 0)).write(stream)
       }
       
       directoryOutput.toByteArray

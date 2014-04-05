@@ -20,16 +20,14 @@ private[portableExe] case class CompiledImports(rawData: Array[Byte],
                             externs: Map[String, Int]) {
   
   def getImportsDirectory(addressOfData: Int, dataSize: Int) = {
-    
     val importsLocation = addressOfData + dataSize
-    Directory(importsLocation, boundImportSize)
+    ImageDataDirectory(importsLocation, boundImportSize)
   }
   
   def getIATDirectory(addressOfData: Int, dataSize: Int) = {
-    
     val endOfData = addressOfData + dataSize
     val IATlocation = endOfData + boundImportSize + nameTableSize
-    Directory(IATlocation, nameTableSize)
+    ImageDataDirectory(IATlocation, nameTableSize)
   }  
 }
 
@@ -54,7 +52,7 @@ object ExeGenerator extends Sections {
 
     val (rawData, variables) = AsmCompiler.compileData(addressOfData, asm.data)
     val compiledImports = compileImports(addressOfData, rawData.size)
-    val directories: DataDirectories = DataDirectories(imports = compiledImports.getImportsDirectory(addressOfData, rawData.size),
+    val directories: DataDirectories = DataDirectories(importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
                                       importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size))
     
     val optionalHeader = new OptionalHeader(directories)

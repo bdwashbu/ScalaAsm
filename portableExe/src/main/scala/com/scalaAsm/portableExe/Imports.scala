@@ -86,8 +86,6 @@ private[portableExe] case class Imports(val externs: Seq[Extern], val nonExterns
     def getDllNames(externs: Seq[Extern]): List[String] = externs.map(_.dllName).toList
     def getFunctionNames(externs: Seq[Extern]): List[String] = externs.flatMap(_.functionNames).toList
 
-    case class BoundImport(val boundImportDescriptors: Seq[ImageImportDescriptor], val importAddressList: Seq[ThunkArray], val importNameList: Seq[ThunkArray])
-
     val initalLookupTableRVA: TreeMap[String, Int] = TreeMap.empty
 
     val nullImportDescriptor = ImageImportDescriptor(ImageThunkDataRVA(0), 0, 0, ImageImportByNameRVA(0, ""), ImageThunkDataRVA(0))

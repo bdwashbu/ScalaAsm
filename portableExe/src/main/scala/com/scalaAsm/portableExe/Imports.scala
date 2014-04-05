@@ -63,7 +63,7 @@ private[portableExe] case class Imports(val externs: Seq[Extern], val nonExterns
     var importedDLLname: ImageImportByNameRVA,
     var firstThunk: ImageThunkDataRVA)
     extends Positionable {
-    
+
     def write(stream: DataOutputStream) {
       position = stream.size
       write(stream, originalFirstThunk.offset)
@@ -78,37 +78,37 @@ private[portableExe] case class Imports(val externs: Seq[Extern], val nonExterns
     val size = 20;
   }
 
-  def link: CompiledImports = {
+  def generateImports: CompiledImports = {
 
     val imports = externs ++ nonExterns
     val numImportsPlusNull = imports.size + 1
 
-    def getDllNames(x: Seq[Extern]): List[String] = x.map(x => x.dllName).toList
-    def getFunctionNames(x: Seq[Extern]): List[String] = x.flatMap(_.functionNames).toList
+    def getDllNames(externs: Seq[Extern]): List[String] = externs.map(_.dllName).toList
+    def getFunctionNames(externs: Seq[Extern]): List[String] = externs.flatMap(_.functionNames).toList
 
     case class BoundImport(val boundImportDescriptors: Seq[ImageImportDescriptor], val importAddressList: Seq[ThunkArray], val importNameList: Seq[ThunkArray])
 
     val initalLookupTableRVA: TreeMap[String, Int] = TreeMap.empty
 
-      val nullImportDescriptor = ImageImportDescriptor(ImageThunkDataRVA(0), 0, 0, ImageImportByNameRVA(0, ""), ImageThunkDataRVA(0))
+    val nullImportDescriptor = ImageImportDescriptor(ImageThunkDataRVA(0), 0, 0, ImageImportByNameRVA(0, ""), ImageThunkDataRVA(0))
 
-      val importDescriptors = getDllNames(imports).map { dllName =>
+    val importDescriptors = getDllNames(imports).map { dllName =>
 
-        ImageImportDescriptor(
-          originalFirstThunk = ImageThunkDataRVA(0),
-          timeStamp = 0x00000000,
-          forwarderChain = 0x00000000,
-          importedDLLname = ImageImportByNameRVA(0, dllName),
-          firstThunk = ImageThunkDataRVA(0))
+      ImageImportDescriptor(
+        originalFirstThunk = ImageThunkDataRVA(0),
+        timeStamp = 0x00000000,
+        forwarderChain = 0x00000000,
+        importedDLLname = ImageImportByNameRVA(0, dllName),
+        firstThunk = ImageThunkDataRVA(0))
 
-      } :+ nullImportDescriptor
+    } :+ nullImportDescriptor
 
-      def toAddressTable(extern: Extern): ThunkArray = {
-        ThunkArray(extern.functionNames.map(x => ImageThunkData(ImageImportByNameRVA(0), x)), extern.dllName)
-      }
+    def toAddressTable(extern: Extern): ThunkArray = {
+      ThunkArray(extern.functionNames.map(name => ImageThunkData(ImageImportByNameRVA(0), name)), extern.dllName)
+    }
 
-      val importAddressTable = imports.map(toAddressTable)
-      val importNameTable = imports.map(toAddressTable)
+    val importAddressTable = imports.map(toAddressTable)
+    val importNameTable = imports.map(toAddressTable)
 
     val firstByteOutput = new ByteArrayOutputStream()
     val firstStream = new DataOutputStream(firstByteOutput)
@@ -118,59 +118,64 @@ private[portableExe] case class Imports(val externs: Seq[Extern], val nonExterns
     }
 
     // first, just place everything into a temp stream. we dont care about the contents, we just want position values.
-      
+
     importDescriptors.foreach(_.write(firstStream))
-    importNameTable.foreach { x => x.write(firstStream) } // (INT)
-    importAddressTable.foreach { x => x.write(firstStream) } // (IAT)
+    importNameTable.foreach {_.write(firstStream) } // (INT)
+    importAddressTable.foreach {_.write(firstStream) } // (IAT)
     importByNames.foreach(_.write(firstStream))
-    
+
     // use the position values to fill in contents
-    
+
     for (descriptor <- importDescriptors.take(importDescriptors.size - 1)) {
-      
-      val firstThunkRVA = offset + importAddressTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position 
-      val originalFirstThunkRVA = offset + importNameTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position 
-      
+
+      val firstThunkRVA = offset + importAddressTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position
+      val originalFirstThunkRVA = offset + importNameTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position
+
       descriptor.importedDLLname = ImageImportByNameRVA(offset + importByNames.find(x => x.name.trim == descriptor.importedDLLname.dllName).get.position)
       descriptor.firstThunk = ImageThunkDataRVA(firstThunkRVA) //point to Import Address Table (IAT)
       descriptor.originalFirstThunk = ImageThunkDataRVA(originalFirstThunkRVA) //point to Import Name Table (INT)
     }
-    
-    for (thunkArray <- importNameTable;
-         thunk <- thunkArray.thunks) {
-      thunk.imagePointer.offset = offset + importByNames.find(x => x.name contains thunk.name).get.position
+
+    for (
+      thunkArray <- importNameTable;
+      thunk <- thunkArray.thunks
+    ) {
+      thunk.imagePointer.offset = offset + importByNames.find(importEntry => importEntry.name contains thunk.name).get.position
     }
-    
-    for (thunkArray <- importAddressTable;
-         thunk <- thunkArray.thunks) {
-      thunk.imagePointer.offset = offset + importByNames.find(x => x.name contains thunk.name).get.position
+
+    for (
+      thunkArray <- importAddressTable;
+      thunk <- thunkArray.thunks
+    ) {
+      thunk.imagePointer.offset = offset + importByNames.find(importEntry => importEntry.name contains thunk.name).get.position
     }
 
     val getCompleteFunctionMap = {
-      (for (table <- importAddressTable;
-            thunk <- table.thunks)
-       yield ((thunk.name.trim(), offset + thunk.position))).toMap
+      (for (
+        table <- importAddressTable;
+        thunk <- table.thunks
+      ) yield ((thunk.name.trim(), offset + thunk.position))).toMap
     }
-    
+
     val byteOutput = new ByteArrayOutputStream()
     val stream = new DataOutputStream(byteOutput)
 
     // write the contents to the real stream
-    
+
     importDescriptors.foreach(_.write(stream))
-    importNameTable.foreach { x => x.write(stream) } // (INT)
-    importAddressTable.foreach { x => x.write(stream) } // (IAT)
+    importNameTable.foreach { _.write(stream) } // (INT)
+    importAddressTable.foreach { _.write(stream) } // (IAT)
     importByNames.foreach(_.write(stream)) // Function names follow by dll name
 
     def getFunctionMap(externList: Seq[Extern]) = {
       val functionNames = getFunctionNames(externList)
-      getCompleteFunctionMap.filter(x => functionNames.contains(x._1))
+      getCompleteFunctionMap.filter { case (fcnName, _) => functionNames contains fcnName }
     }
 
     CompiledImports(
       byteOutput.toByteArray(),
       importDescriptors.size * ImageImportDescriptor.size,
-      importAddressTable.map(x => (x.thunks.size + 1) * 4).reduce(_ + _),
+      importAddressTable.map(table => (table.thunks.size + 1) * 4).reduce(_ + _),
       getFunctionMap(nonExterns),
       getFunctionMap(externs))
   }

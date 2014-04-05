@@ -47,10 +47,10 @@ object ExeGenerator extends Sections {
                        nonExterns = Seq(Extern("msvcrt.dll", List("printf", "_kbhit", "_getch"))),
                        offset = addressOfData + dataSize)
     
-    test.link
+    test.generateImports
   }
 
-  def compile(asm: Assembled, addressOfData: Int): PortableExecutable = {
+  def link(asm: Assembled, addressOfData: Int): PortableExecutable = {
 
     val (rawData, variables) = AsmCompiler.compileData(addressOfData, asm.data)
     val compiledImports = compileImports(addressOfData, rawData.size)

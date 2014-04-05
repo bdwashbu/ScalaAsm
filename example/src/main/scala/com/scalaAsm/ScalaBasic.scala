@@ -12,8 +12,8 @@ object ScalaBasic {
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 
       val beginTime = System.nanoTime()
-      val assembled = HelloWorld2.assemble
-      val exe = ExeGenerator.compile(assembled, 0x2000)
+      val assembled = HelloWorld.assemble
+      val exe = ExeGenerator.link(assembled, 0x2000)
       outputStream.write(exe.get)
 
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

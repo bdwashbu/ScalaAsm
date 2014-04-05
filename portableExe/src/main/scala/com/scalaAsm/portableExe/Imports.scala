@@ -9,7 +9,7 @@ private[portableExe] case class Extern(dllName: String, functionNames: Seq[Strin
 
 private[portableExe] case class ImageThunkDataRVA(offset: Int) extends AnyVal
 
-private[portableExe] case class Imports(val externs: Seq[Extern], val nonExterns: Seq[Extern], val offset: Int) {
+private[portableExe] case class Imports(val imports: Seq[Extern], val offset: Int) {
 
   private def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0" else name
 
@@ -80,7 +80,6 @@ private[portableExe] case class Imports(val externs: Seq[Extern], val nonExterns
 
   def generateImports: CompiledImports = {
 
-    val imports = externs ++ nonExterns
     val numImportsPlusNull = imports.size + 1
 
     def getDllNames(externs: Seq[Extern]): List[String] = externs.map(_.dllName).toList
@@ -174,7 +173,6 @@ private[portableExe] case class Imports(val externs: Seq[Extern], val nonExterns
       byteOutput.toByteArray(),
       importDescriptors.size * ImageImportDescriptor.size,
       importAddressTable.map(table => (table.thunks.size + 1) * 4).reduce(_ + _),
-      getFunctionMap(nonExterns),
-      getFunctionMap(externs))
+      getFunctionMap(imports))
   }
 }

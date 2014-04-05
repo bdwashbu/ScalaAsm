@@ -16,8 +16,7 @@ import com.scalaAsm.utils.Endian
 private[portableExe] case class CompiledImports(rawData: Array[Byte],
                             boundImportSize: Int,
                             nameTableSize: Int,
-                            imports: Map[String, Int],
-                            externs: Map[String, Int]) {
+                            imports: Map[String, Int]) {
   
   def getImportsDirectory(addressOfData: Int, dataSize: Int) = {
     val importsLocation = addressOfData + dataSize
@@ -41,8 +40,8 @@ object ExeGenerator extends Sections {
   
   private def compileImports(addressOfData: Int, dataSize: Int): CompiledImports = { 
     
-    val test = Imports(externs = Seq(Extern("kernel32.dll", List("ExitProcess", "GetStdHandle", "WriteFile", "FlushConsoleInputBuffer", "Sleep"))),
-                       nonExterns = Seq(Extern("msvcrt.dll", List("printf", "_kbhit", "_getch"))),
+    val test = Imports(imports = Seq(Extern("kernel32.dll", List("ExitProcess", "GetStdHandle", "WriteFile", "FlushConsoleInputBuffer", "Sleep")),
+                                     Extern("msvcrt.dll", List("printf", "_kbhit", "_getch"))),
                        offset = addressOfData + dataSize)
     
     test.generateImports
@@ -57,7 +56,7 @@ object ExeGenerator extends Sections {
     
     val optionalHeader = new OptionalHeader(directories)
     
-    val code = AsmCompiler.compileAssembly(optionalHeader.imageBase, asm, compiledImports.imports, compiledImports.externs, variables)
+    val code = AsmCompiler.compileAssembly(optionalHeader.imageBase, asm, compiledImports.imports, variables)
     
     
     

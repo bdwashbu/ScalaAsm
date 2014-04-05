@@ -50,11 +50,9 @@ object AsmCompiler extends Catalog
   def compileAssembly(baseOffset: Int, 
                       asm: Assembled,
                       imports: Map[String, Int],
-                      externs: Map[String, Int],
                       variables: Map[String, Int]): Array[Byte] = {
 
     lazy val importNames = imports.keys.toList
-    lazy val externNames = externs.keys.toList
     lazy val varNames    = variables.keys.toList
     lazy val procNames   = asm.code.collect{ case BeginProc(name) => name }
     
@@ -62,7 +60,6 @@ object AsmCompiler extends Catalog
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
-        case JmpRef(name) if externNames.contains(name) => Some(JmpRefResolved(name))
         case Reference(name) if importNames.contains(name) => Some(ImportRef(name))
         case Reference(name) if procNames.contains(name) => Some(ProcRef(name))
         case Reference(name) if varNames.contains(name) => Some(VarRef(name))
@@ -103,7 +100,6 @@ object AsmCompiler extends Catalog
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
 	        case ProcRef(name) => callNear(*(Immediate32(procs(name) - parserPosition - 5)).rel32).code
 	        case VarRef(name) => push(Immediate32(variables(name) + baseOffset)).code
-	        case JmpRefResolved(name) => jmp(*(Immediate32((externs(name) + baseOffset)))).code
 	        case ImportRef(name) => callNear(*(Immediate32((imports(name) + baseOffset)))).code
 	        case LabelRef(name, inst) => inst(Immediate8((labels(name) - parserPosition - 2).toByte)).code
 	        case _ => Array[Byte]()

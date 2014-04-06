@@ -3,18 +3,18 @@ package com.scalaAsm
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.asm.DataSegment
-import com.scalaAsm.asm.CodeSegment
+import com.scalaAsm.asm.DataSection
+import com.scalaAsm.asm.CodeSection
 
 object HelloWorld extends AsmProgram {
   
-  dataSegments += new DataSegment {
+  dataSegments += new DataSection {
     builder += Variable("pressAnyKey", "Press any key to continue ...\0", "Press any key to continue ...\0".length)
     builder += Variable("newline", "\r\n\0", "\r\n\0".length)
     builder += Variable("helloWorld", "Hello World!\n\0", "Hello World!\n\0".length)
   }
 
-  codeSegments += new CodeSegment {
+  codeSegments += new CodeSection {
 
     builder += Procedure("start", List(
       call("printHelloWorld"),

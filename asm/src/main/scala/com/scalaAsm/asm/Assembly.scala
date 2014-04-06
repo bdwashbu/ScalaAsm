@@ -7,8 +7,8 @@ case class Assembled(val code: Seq[Token], val data: Seq[Token])
 
 trait AsmProgram {
   
-  val codeSegments = new ListBuffer[CodeSegment]()
-  val dataSegments = new ListBuffer[DataSegment]()
+  val codeSegments = new ListBuffer[CodeSection]()
+  val dataSegments = new ListBuffer[DataSection]()
 
   def assemble: Assembled = {
     val codeTokens: ListBuffer[Token] = codeSegments.flatMap{seg => seg.build(seg.builder.toList)}

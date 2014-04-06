@@ -4,6 +4,11 @@ import java.io.DataOutputStream
 import java.io.ByteArrayOutputStream
 import scala.collection.mutable.ListBuffer
 import scala.collection.immutable.TreeMap
+import java.io.DataInputStream
+import java.io.FileInputStream
+import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 private[portableExe] case class Extern(dllName: String, functionNames: Seq[String])
 
@@ -78,8 +83,26 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     val size = 20;
   }
 
+  def getExportSymbols = {
+    val file = new File("C:/Windows/System32/kernel32.dll");
+ 
+    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
+      
+    //convert file into array of bytes
+    val fileInputStream = new FileInputStream(file);
+    fileInputStream.read(bFile);
+    fileInputStream.close();
+    
+    val bbuf = ByteBuffer.wrap(bFile)
+    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+    
+    val dosHeader = DosHeader.getDosHeader(bbuf)
+    println(dosHeader.e_cparhdr)
+    
+  }
+  
   def generateImports: CompiledImports = {
-
+    	getExportSymbols
     val numImportsPlusNull = imports.size + 1
 
     def getDllNames(externs: Seq[Extern]): List[String] = externs.map(_.dllName).toList

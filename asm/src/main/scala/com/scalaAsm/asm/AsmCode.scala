@@ -7,7 +7,7 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.One
 import com.scalaAsm.x86.MachineCode
 
-trait CodeSegment extends Registers with AsmSegment[CodeToken] with Catalog {
+trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
 
     def imm8(x: Byte) = Immediate8(x)
     def imm16(x: Short) = Immediate16(x)

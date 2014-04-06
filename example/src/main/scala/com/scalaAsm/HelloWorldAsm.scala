@@ -8,13 +8,13 @@ import com.scalaAsm.asm.CodeSection
 
 object HelloWorld extends AsmProgram {
   
-  dataSegments += new DataSection {
+  dataSections += new DataSection {
     builder += Variable("pressAnyKey", "Press any key to continue ...\0", "Press any key to continue ...\0".length)
     builder += Variable("newline", "\r\n\0", "\r\n\0".length)
     builder += Variable("helloWorld", "Hello World!\n\0", "Hello World!\n\0".length)
   }
 
-  codeSegments += new CodeSection {
+  codeSections += new CodeSection {
 
     builder += Procedure("start", List(
       call("printHelloWorld"),

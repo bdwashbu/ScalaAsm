@@ -54,7 +54,8 @@ object ExeGenerator extends Sections {
     val directories: DataDirectories = DataDirectories(importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
                                       importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size))
     
-    val optionalHeader = new OptionalHeader(directories)
+    val optionalHeader = new OptionalHeader()
+    optionalHeader.directories = directories;
     
     val code = AsmCompiler.compileAssembly(optionalHeader.imageBase, asm, compiledImports.imports, variables)
     
@@ -63,7 +64,7 @@ object ExeGenerator extends Sections {
     val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
     
     val dosHeader = new DosHeader
-    val fileHeader = new FileHeader(optionalHeader)
+    val fileHeader = new FileHeader
     val ntHeader = new NtHeader(fileHeader, optionalHeader)
     
     new PortableExecutable(dosHeader, ntHeader, directories, sections, code, rawData, compiledImports)

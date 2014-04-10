@@ -13,6 +13,7 @@ object DosHeader {
     header.e_magic = List(input.get.toChar, input.get.toChar).mkString
     header.e_cblp = input.getShort()
     header.e_cp = input.getShort()
+    header.e_crlc = input.getShort()
     header.e_cparhdr = input.getShort()
     header.e_minalloc = input.getShort()
     header.e_maxalloc = input.getShort()
@@ -28,6 +29,7 @@ object DosHeader {
     header.e_oeminfo = input.getShort()
     header.e_res2 = (for (i <- 0 until 10) yield input.getShort()).toArray
     header.e_lfanew = input.getInt()
+    input.position(header.e_lfanew) // skip dos stub
     header
   }
 }

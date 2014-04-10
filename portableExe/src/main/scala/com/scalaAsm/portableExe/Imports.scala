@@ -84,7 +84,8 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
   }
 
   def getExportSymbols = {
-    val file = new File("C:/Windows/System32/kernel32.dll");
+    //val file = new File("C:/Windows/System32/kernel32.dll");
+    val file = new File("C:/Users/Antares/Desktop/kernel32 - Copy.dll");
  
     val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
       
@@ -97,7 +98,10 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     
     val dosHeader = DosHeader.getDosHeader(bbuf)
-    println(dosHeader.e_cparhdr)
+    val peHeader = PeHeader.getPeHeader(bbuf)
+    println(dosHeader.e_lfanew)
+    println(peHeader.optionalHeader.sizeOfStackReserve)
+    println(peHeader.optionalHeader.numberOfRvaAndSizes)
     
   }
   

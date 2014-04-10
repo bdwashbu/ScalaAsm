@@ -3,13 +3,32 @@ package com.scalaAsm.portableExe
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class FileHeader(optionalHeader: OptionalHeader) {
+// aka COFF Header
+
+object FileHeader {
+  def getFileHeader(input: ByteBuffer): FileHeader = {
+    input.order(ByteOrder.LITTLE_ENDIAN)
+    val header = new FileHeader {
+        machine = input.getShort()
+        numberOfSections = input.getShort()
+    	timeDateStamp = input.getInt()
+    	pointerToSymbolTable = input.getInt()
+    	numberOfSymbols = input.getInt()
+    	sizeOfOptionalHeader = input.getShort()
+    	characteristics = input.getShort()
+    }
+   
+    header
+  }
+}
+
+class FileHeader {
     var machine: Short = 0x14C
     var numberOfSections: Short = 2
     var timeDateStamp: Int = 0x5132F2E5
     var pointerToSymbolTable: Int = _ // no importance
     var numberOfSymbols: Int = _ // no importance
-    var sizeOfOptionalHeader: Short = optionalHeader.size.toShort
+    var sizeOfOptionalHeader: Short = 0x0E0
     var characteristics: Short = 271
 
     def apply() = {

@@ -118,13 +118,5 @@ object HelloWorld extends AsmProgram {
       pop(ebp),
       retn(imm16(4))
     ))
-
-    builder += align(2)
-
-    builder += Procedure("ExitProcess", List(jmp("ExitProcess")))
-    builder += Procedure("GetStdHandle", List(jmp("GetStdHandle")))
-    builder += Procedure("WriteFile", List(jmp("WriteFile")))
-    builder += Procedure("FlushConsoleInputBuffer", List(jmp("FlushConsoleInputBuffer")))
-    builder += Procedure("Sleep", List(jmp("Sleep")))
   }
 }

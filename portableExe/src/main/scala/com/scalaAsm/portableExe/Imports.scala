@@ -114,7 +114,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
 
     val initalLookupTableRVA: TreeMap[String, Int] = TreeMap.empty
 
-    val nullImportDescriptor = ImageImportDescriptor(ImageThunkDataRVA(0), 0, 0, ImageImportByNameRVA(0, ""), ImageThunkDataRVA(0))
+    val terminator = ImageImportDescriptor(ImageThunkDataRVA(0), 0, 0, ImageImportByNameRVA(0, ""), ImageThunkDataRVA(0))
 
     val importDescriptors = getDllNames(imports).map { dllName =>
 
@@ -125,7 +125,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
         importedDLLname = ImageImportByNameRVA(0, dllName),
         firstThunk = ImageThunkDataRVA(0))
 
-    } :+ nullImportDescriptor
+    } :+ terminator
 
     def toAddressTable(extern: Extern): ThunkArray = {
       ThunkArray(extern.functionNames.map(name => ImageThunkData(ImageImportByNameRVA(0), name)), extern.dllName)
@@ -200,6 +200,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
       byteOutput.toByteArray(),
       importDescriptors.size * ImageImportDescriptor.size,
       importAddressTable.map(table => (table.thunks.size + 1) * 4).reduce(_ + _),
-      getFunctionMap(imports))
+      getFunctionMap(imports)
+    )
   }
 }

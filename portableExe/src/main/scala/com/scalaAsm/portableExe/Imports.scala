@@ -97,12 +97,28 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     val bbuf = ByteBuffer.wrap(bFile)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     
+    val bbuf2 = ByteBuffer.wrap(bFile)
+    bbuf2.order(ByteOrder.LITTLE_ENDIAN)
+    
     val dosHeader = DosHeader.getDosHeader(bbuf)
     val peHeader = PeHeader.getPeHeader(bbuf)
+    val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.numberOfRvaAndSizes)
+    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
     println(dosHeader.e_lfanew)
     println(peHeader.optionalHeader.sizeOfStackReserve)
     println(peHeader.optionalHeader.numberOfRvaAndSizes)
-    
+    sections.foreach(println)
+    println("virt: " + dirs(0).virtualAddress)
+    bbuf.position(dirs(0).virtualAddress - 4096)
+    val export = ImageExportDirectory.getExports(bbuf)
+    println(export)
+    println("num names: " + (export.numberOfNames))
+    println("addy: " + (export.addressOfNames - 4096))
+    bbuf.position(export.addressOfNames - 4096)
+    val RVA = bbuf.getInt
+    println(RVA)
+    bbuf.position(RVA - 4096)
+    println(List(bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar).mkString)
   }
   
   def generateImports: CompiledImports = {

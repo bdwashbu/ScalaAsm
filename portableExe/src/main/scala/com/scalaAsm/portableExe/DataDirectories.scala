@@ -3,6 +3,7 @@ package com.scalaAsm.portableExe
 import java.io.DataOutputStream
 import scala.collection.immutable.TreeMap
 import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 
 private[portableExe] case class ImageDataDirectory(virtualAddress: Int, size: Int) extends ExeWriter {
   def write(stream: DataOutputStream) {
@@ -10,6 +11,42 @@ private[portableExe] case class ImageDataDirectory(virtualAddress: Int, size: In
     write(stream, size)
   }
 }
+
+object DataDirectories {
+  def getDirectories(input: ByteBuffer, numDirs: Int): Seq[ImageDataDirectory] = {
+    for (i <- 0 until numDirs) yield ImageDataDirectory(input.getInt, input.getInt)
+  }
+}
+
+object ImageExportDirectory {
+  def getExports(input: ByteBuffer): ImageExportDirectory = {
+    ImageExportDirectory(
+    characteristics = input.getInt,
+    timeDateStamp = input.getInt,
+    majorVersion = input.getShort,
+    minorVersion = input.getShort,
+    name = input.getInt,
+    base = input.getInt,
+    numberOfFunctions = input.getInt,
+    numberOfNames = input.getInt,
+    addressOfFunctions = input.getInt,
+    addressOfNames = input.getInt,
+    addressOfNameOrdinals = input.getInt)
+  }
+}
+
+case class ImageExportDirectory(
+    characteristics: Int,
+    timeDateStamp: Int,
+    majorVersion: Short,
+    minorVersion: Short,
+    name: Int,
+    base: Int,
+    numberOfFunctions: Int,
+    numberOfNames: Int,
+    addressOfFunctions: Int,
+    addressOfNames: Int,
+    addressOfNameOrdinals: Int)
 
 // Contains the addresses of all important data structures in the PE
 

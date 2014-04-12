@@ -111,14 +111,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     println("virt: " + dirs(0).virtualAddress)
     bbuf.position(dirs(0).virtualAddress - 4096)
     val export = ImageExportDirectory.getExports(bbuf)
-    println(export)
-    println("num names: " + (export.numberOfNames))
-    println("addy: " + (export.addressOfNames - 4096))
-    bbuf.position(export.addressOfNames - 4096)
-    val RVA = bbuf.getInt
-    println(RVA)
-    bbuf.position(RVA - 4096)
-    println(List(bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar, bbuf.get.toChar).mkString)
+    export.functionNames.foreach(println)
   }
   
   def generateImports: CompiledImports = {

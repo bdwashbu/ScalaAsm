@@ -20,7 +20,7 @@ object DataDirectories {
 
 object ImageExportDirectory {
   def getExports(input: ByteBuffer): ImageExportDirectory = {
-    ImageExportDirectory(
+    new ImageExportDirectory(
     characteristics = input.getInt,
     timeDateStamp = input.getInt,
     majorVersion = input.getShort,
@@ -31,7 +31,20 @@ object ImageExportDirectory {
     numberOfNames = input.getInt,
     addressOfFunctions = input.getInt,
     addressOfNames = input.getInt,
-    addressOfNameOrdinals = input.getInt)
+    addressOfNameOrdinals = input.getInt) {
+      override def functionNames = {    
+	    for (i <- 0 until numberOfNames) yield {
+	      input.position(addressOfNames - 4096 + i*4)
+	      val RVA = input.getInt
+	      input.position(RVA - 4096)
+	      while (input.get != '\0') {}
+	      val name = Array.fill(input.position() - (RVA - 4096))(0.toByte)
+	      input.position(RVA - 4096)
+	      input.get(name)
+	      name.map(_.toChar).mkString
+	    }
+      }
+    }
   }
 }
 
@@ -46,7 +59,9 @@ case class ImageExportDirectory(
     numberOfNames: Int,
     addressOfFunctions: Int,
     addressOfNames: Int,
-    addressOfNameOrdinals: Int)
+    addressOfNameOrdinals: Int) {
+  def functionNames: Seq[String] = Nil
+}
 
 // Contains the addresses of all important data structures in the PE
 

@@ -104,18 +104,13 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     val peHeader = PeHeader.getPeHeader(bbuf)
     val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.numberOfRvaAndSizes)
     val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
-    println(dosHeader.e_lfanew)
-    println(peHeader.optionalHeader.sizeOfStackReserve)
-    println(peHeader.optionalHeader.numberOfRvaAndSizes)
-    sections.foreach(println)
-    println("virt: " + dirs(0).virtualAddress)
+
     bbuf.position(dirs(0).virtualAddress - 4096)
     val export = ImageExportDirectory.getExports(bbuf)
     export.functionNames.foreach(println)
   }
   
   def generateImports: CompiledImports = {
-    	getExportSymbols
     val numImportsPlusNull = imports.size + 1
 
     def getDllNames(externs: Seq[Extern]): List[String] = externs.map(_.dllName).toList

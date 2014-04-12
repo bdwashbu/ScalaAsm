@@ -38,7 +38,11 @@ object ExeGenerator extends Sections {
     array ++ Array.fill(numPadding)(filler)
   }
   
-  private def compileImports(addressOfData: Int, dataSize: Int): CompiledImports = { 
+  private def compileImports(addressOfData: Int, dataSize: Int, dlls: List[String]): CompiledImports = { 
+    
+    for (dll <- dlls) yield {
+      
+    }
     
     val test = Imports(imports = Seq(Extern("kernel32.dll", List("ExitProcess", "GetStdHandle", "WriteFile", "FlushConsoleInputBuffer", "Sleep")),
                                      Extern("msvcrt.dll", List("printf", "_kbhit", "_getch"))),
@@ -47,19 +51,20 @@ object ExeGenerator extends Sections {
     test.generateImports
   }
 
-  def link(asm: Assembled, addressOfData: Int): PortableExecutable = {
+  def link(asm: Assembled, addressOfData: Int, dlls: List[String]): PortableExecutable = {
 
     val (rawData, variables) = AsmCompiler.compileData(addressOfData, asm.data)
-    val compiledImports = compileImports(addressOfData, rawData.size)
+    
+    val compiledAsm = AsmCompiler.compileAssembly(asm, variables)
+    
+    val compiledImports = compileImports(addressOfData, rawData.size, dlls)
     val directories: DataDirectories = DataDirectories(importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
                                       importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size))
     
     val optionalHeader = new OptionalHeader()
     optionalHeader.directories = directories;
     
-    val code = AsmCompiler.compileAssembly(optionalHeader.imageBase, asm, compiledImports.imports, variables)
-    
-    
+    val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.imageBase)
     
     val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
     

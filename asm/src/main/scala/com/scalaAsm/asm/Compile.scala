@@ -47,12 +47,11 @@ object AsmCompiler extends Catalog
     (data, createDefMap)
   }
   
-  def compileAssembly(baseOffset: Int, 
-                      asm: Assembled,
-                      imports: Map[String, Int],
-                      variables: Map[String, Int]): Array[Byte] = {
+  case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
+  
+  def compileAssembly(asm: Assembled,
+                      variables: Map[String, Int]): CompiledAssembly = {
 
-    lazy val importNames = imports.keys.toList
     lazy val varNames    = variables.keys.toList
     lazy val procNames   = asm.code.collect{ case BeginProc(name) => name }
     
@@ -60,9 +59,9 @@ object AsmCompiler extends Catalog
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
-        case Reference(name) if importNames.contains(name) => Some(ImportRef(name))
         case Reference(name) if procNames.contains(name) => Some(ProcRef(name))
         case Reference(name) if varNames.contains(name) => Some(VarRef(name))
+        case Reference(name) => Some(ImportRef(name))
         case Reference(_) => throw new Exception("no reference found!")
         case label @ Label(name) => Some(label)
         case labelref @ LabelRef(name,opcode) => Some(labelref)
@@ -87,13 +86,19 @@ object AsmCompiler extends Catalog
       }
     }
  
+    CompiledAssembly(onePass, positionPass)
+  }
+  
+  def finalizeAssembly(asm: CompiledAssembly, variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte] = {
+    
+    lazy val varNames = variables.keys.toList
     // Build procedure map
-    val procs = positionPass.collect{case Proc(offset, name) => (name, offset)}.toMap
-    val labels = positionPass.collect{case LabelResolved(offset, name) => (name, offset)}.toMap    
+    val procs = asm.positionPass.collect{case Proc(offset, name) => (name, offset)}.toMap
+    val labels = asm.positionPass.collect{case LabelResolved(offset, name) => (name, offset)}.toMap    
     
     val code: Array[Byte] = {
       var parserPosition = 0
-      for (token <- onePass) yield {
+      for (token <- asm.onePass) yield {
         val result = token match {
 	        case InstructionToken(inst) => inst.code
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)

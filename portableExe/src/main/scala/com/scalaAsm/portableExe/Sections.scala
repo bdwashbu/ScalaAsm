@@ -83,9 +83,10 @@ object Sections {
 
 private[portableExe] trait Sections {
 
-  def compileSections(codeSize: Int, dataSize: Int): CompiledSections = {
+  def compileSections(codeSize: Int, dataSize: Int): Seq[SectionHeader] = {
 
-    val textSection = SectionHeader(name = ".text",
+    val textSection = SectionHeader(
+      name = ".text",
       virtualSize = codeSize,
       virtualAddress = 0x1000,
       sizeOfRawData = 0x200,
@@ -98,7 +99,8 @@ private[portableExe] trait Sections {
         Characteristic.EXECUTE.id |
         Characteristic.READ.id)
 
-    val dataSection = SectionHeader(name = ".data",
+    val dataSection = SectionHeader(
+      name = ".data",
       virtualSize = dataSize,
       virtualAddress = 0x2000,
       sizeOfRawData = 0x200,
@@ -111,6 +113,6 @@ private[portableExe] trait Sections {
         Characteristic.READ.id |
         Characteristic.WRITE.id)
 
-    CompiledSections(textSection, dataSection)
+    Seq(textSection, dataSection)
   }
 }

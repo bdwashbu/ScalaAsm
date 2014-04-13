@@ -82,18 +82,31 @@ object ExeGenerator extends Sections {
     val unboundSymbols = compiledAsm.onePass.collect { case ImportRef(name) => name}
     
     val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols)
-    val directories: DataDirectories = DataDirectories(imports = compiledImports.getImportsDirectory(addressOfData, rawData.size),
-                                      importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size))
+    val directories = DataDirectories(
+         importSymbols = Some(compiledImports.getImportsDirectory(addressOfData, rawData.size)),
+         importAddressTable = Some(compiledImports.getIATDirectory(addressOfData, rawData.size))
+    )
     
     val dosHeader = new DosHeader
-    val fileHeader = new FileHeader
+    
     val optionalHeader = new OptionalHeader()
     optionalHeader.directories = directories;
-    val peHeader = new NtHeader(fileHeader, optionalHeader)
+    
     
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.imageBase)
     
     val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
+    
+    val fileHeader = FileHeader(
+		machine = 0x14C,
+	    numberOfSections = 2,
+	    timeDateStamp = 0x5132F2E5,
+	    pointerToSymbolTable = 0, // no importance
+	    numberOfSymbols = 0, // no importance
+	    sizeOfOptionalHeader = 0x0E0,
+	    characteristics = 271
+	)
+	val peHeader = new NtHeader(fileHeader, optionalHeader)
     
     new PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports)
   }

@@ -73,24 +73,23 @@ case class ImageExportDirectory(
 
 // Contains the addresses of all important data structures in the PE
 
-private[portableExe] case class DataDirectories(imports: ImageDataDirectory, importAddressTable: ImageDataDirectory) extends Function0[Array[Byte]]{
-
-    val exportSymbols = None
-    val importSymbols = Some(imports)
-    val resource  = None
-    val exception = None
-    val security  = None
-    val baseRelocation = None
-    val debug = None
-    val copyRight = None
-    val globalPtr = None
-    val tls = None
-    val loadConfig = None
-    val boundImport = None
-    val iat = Some(importAddressTable)
-    val com = None
-    val delayedImport = None
-    val reserved = None
+private[portableExe] case class DataDirectories(
+    exportSymbols: Option[ImageDataDirectory] = None,
+    importSymbols: Option[ImageDataDirectory] = None,
+    resource: Option[ImageDataDirectory] = None,
+    exception: Option[ImageDataDirectory] = None,
+    security: Option[ImageDataDirectory] = None,
+    baseRelocation: Option[ImageDataDirectory] = None,
+    debug: Option[ImageDataDirectory] = None,
+    copyRight: Option[ImageDataDirectory] = None,
+    globalPtr: Option[ImageDataDirectory] = None,
+    tls: Option[ImageDataDirectory] = None,
+    loadConfig: Option[ImageDataDirectory] = None,
+    boundImport: Option[ImageDataDirectory] = None,
+    importAddressTable: Option[ImageDataDirectory] = None,
+    com: Option[ImageDataDirectory] = None,
+    delayedImport: Option[ImageDataDirectory] = None,
+    reserved: Option[ImageDataDirectory] = None) extends Function0[Array[Byte]] {
     
     def size: Int = {
       15 * 8
@@ -117,7 +116,7 @@ private[portableExe] case class DataDirectories(imports: ImageDataDirectory, imp
       write(tls)
       write(loadConfig)
       write(boundImport)
-      write(iat)
+      write(importAddressTable)
       write(com)
       write(delayedImport)
       write(reserved)

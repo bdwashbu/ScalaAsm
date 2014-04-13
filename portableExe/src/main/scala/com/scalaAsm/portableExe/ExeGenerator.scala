@@ -82,7 +82,7 @@ object ExeGenerator extends Sections {
     val unboundSymbols = compiledAsm.onePass.collect { case ImportRef(name) => name}
     
     val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols)
-    val directories: DataDirectories = DataDirectories(importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
+    val directories: DataDirectories = DataDirectories(imports = compiledImports.getImportsDirectory(addressOfData, rawData.size),
                                       importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size))
     
     val dosHeader = new DosHeader

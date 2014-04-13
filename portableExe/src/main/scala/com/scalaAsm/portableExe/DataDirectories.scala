@@ -73,46 +73,54 @@ case class ImageExportDirectory(
 
 // Contains the addresses of all important data structures in the PE
 
-private[portableExe] case class DataDirectories(importSymbols: ImageDataDirectory, importAddressTable: ImageDataDirectory) extends Function0[Array[Byte]]{
-  
-    object DirectoryTypes extends Enumeration {
-      type characteristic = Value
-      val ExportSymbols, ImportSymbols, Resource, Exception, Security, BaseRelocation, Debug, Copyright,
-            GlobalPtr, TLS, LoadConfig, BoundImport, IAT, COM, DelayImport, Reserved = Value
-    }
+private[portableExe] case class DataDirectories(imports: ImageDataDirectory, importAddressTable: ImageDataDirectory) extends Function0[Array[Byte]]{
 
-    import DirectoryTypes._
+    val exportSymbols = None
+    val importSymbols = Some(imports)
+    val resource  = None
+    val exception = None
+    val security  = None
+    val baseRelocation = None
+    val debug = None
+    val copyRight = None
+    val globalPtr = None
+    val tls = None
+    val loadConfig = None
+    val boundImport = None
+    val iat = Some(importAddressTable)
+    val com = None
+    val delayedImport = None
+    val reserved = None
     
-    // Virtual Address and Size
-    private val directories = TreeMap(
-      ExportSymbols -> None,
-      ImportSymbols -> Some(importSymbols),
-      Resource -> None,
-      Exception -> None,
-      Security -> None,
-      BaseRelocation -> None,
-      Debug -> None,
-      Copyright -> None,
-      GlobalPtr -> None,
-      TLS -> None,
-      LoadConfig -> None,
-      BoundImport -> None,
-      IAT -> Some(importAddressTable),
-      COM -> None,
-      DelayImport -> None,
-      Reserved -> None)
-
     def size: Int = {
-      directories.size * 8
+      15 * 8
     }
       
     def apply(): Array[Byte] = {
       val directoryOutput = new ByteArrayOutputStream()
       val stream = new DataOutputStream(directoryOutput)
       
-      for ((name, dict) <- directories) {
-        (dict getOrElse ImageDataDirectory(0, 0)).write(stream)
+      def write(dir: Option[ImageDataDirectory]) = dir match {
+        case Some(dir) => dir.write(stream)
+        case None => ImageDataDirectory(0,0).write(stream)
       }
+      
+      write(exportSymbols)
+      write(importSymbols)
+      write(resource)
+      write(exception)
+      write(security)
+      write(baseRelocation)
+      write(debug)
+      write(copyRight)
+      write(globalPtr)
+      write(tls)
+      write(loadConfig)
+      write(boundImport)
+      write(iat)
+      write(com)
+      write(delayedImport)
+      write(reserved)
       
       directoryOutput.toByteArray
     }

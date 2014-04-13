@@ -15,7 +15,7 @@ class PortableExecutable(val dosHeader: DosHeader,
   	                                  directories() ++
   	                                  sections.map(_.write).reduce(_ ++ _), 
   	                                  ntHeader.optionalHeader.sizeOfCode, 0x00) ++
-  	               ExeGenerator.align(code, ntHeader.optionalHeader.fileAlignment, 0x00) ++
+  	               ExeGenerator.align(code, ntHeader.optionalHeader.additionalFields.fileAlignment, 0x00) ++
   	               rawData ++
   	               compiledImports.rawData
   	  ExeGenerator.align(result, 0x100, 0x00)

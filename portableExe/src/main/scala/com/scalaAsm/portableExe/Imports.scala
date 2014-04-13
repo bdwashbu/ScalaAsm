@@ -100,7 +100,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     val dosHeader = DosHeader.getDosHeader(bbuf)
     val peHeader = PeHeader.getPeHeader(bbuf)
     
-    val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.numberOfRvaAndSizes)
+    val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.additionalFields.numberOfRvaAndSizes)
     val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
     println(dirs(0).virtualAddress - 4096)
     bbuf.position(dirs(0).virtualAddress - 4096)

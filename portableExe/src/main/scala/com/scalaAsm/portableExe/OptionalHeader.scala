@@ -5,91 +5,121 @@ import java.nio.ByteOrder
 
 object OptionalHeader {
   def getOptionalHeader(input: ByteBuffer): OptionalHeader = {
-    val header = new OptionalHeader {
-      magic = input.getShort()
-      majorLinkerVersion = input.get()
-      minorLinkerVersion = input.get()
-      sizeOfCode = input.getInt()
-      sizeOfInitializedData = input.getInt()
-      sizeOfUninitData = input.getInt()
-      addressOfEntryPoint = input.getInt()
-      baseOfCode = input.getInt()
-      baseOfData = input.getInt()
+    val magic = input.getShort()
+    val header = OptionalHeader(
+      magic = magic,
+      majorLinkerVersion = input.get(),
+      minorLinkerVersion = input.get(),
+      sizeOfCode = input.getInt(),
+      sizeOfInitializedData = input.getInt(),
+      sizeOfUninitData = input.getInt(),
+      addressOfEntryPoint = input.getInt(),
+      baseOfCode = input.getInt(),
+      baseOfData = input.getInt(),
 
-      // Additional fields
-      imageBase = input.getInt()
-      sectionAlignment = input.getInt()
-      fileAlignment = input.getInt()
-      majorOperatingSystemVersion = input.getShort()
-      minorOperatingSystemVersion = input.getShort()
-      majorImageVersion = input.getShort()
-      minorImageVersion = input.getShort()
-      majorSubsystemVersion = input.getShort()
-      minorSubsystemVersion = input.getShort()
-      win32Version = input.getInt()
-      sizeOfImage = input.getInt()
-      sizeOfHeaders = input.getInt()
-      checksum = input.getInt()
-      subsystem = input.getShort()
-      dllCharacteristics = input.getShort()
-      if (magic == 0x020B) { // 64 bit
-	      sizeOfStackReserve = input.getLong()
-	      sizeOfStackCommit = input.getLong()
-	      sizeOfHeapReserve = input.getLong()
-	      sizeOfHeapCommit = input.getLong()
-      } else {
-  	      sizeOfStackReserve = input.getInt()
-	      sizeOfStackCommit = input.getInt()
-	      sizeOfHeapReserve = input.getInt()
-	      sizeOfHeapCommit = input.getInt()      
-      }
-      loaderFlags = input.getInt()
-      numberOfRvaAndSizes = input.getInt()
-      directories = null
-    }
+      AdditionalFields(
+	      imageBase = input.getInt(),
+	      sectionAlignment = input.getInt(),
+	      fileAlignment = input.getInt(),
+	      majorOperatingSystemVersion = input.getShort(),
+	      minorOperatingSystemVersion = input.getShort(),
+	      majorImageVersion = input.getShort(),
+	      minorImageVersion = input.getShort(),
+	      majorSubsystemVersion = input.getShort(),
+	      minorSubsystemVersion = input.getShort(),
+	      win32Version = input.getInt(),
+	      sizeOfImage = input.getInt(),
+	      sizeOfHeaders = input.getInt(),
+	      checksum = input.getInt(),
+	      subsystem = input.getShort(),
+	      dllCharacteristics = input.getShort(),
+	      sizeOfStackReserve = if (magic == 0x020B) input.getLong() else input.getInt(),
+	      sizeOfStackCommit = if (magic == 0x020B) input.getLong() else input.getInt(),
+	      sizeOfHeapReserve = if (magic == 0x020B) input.getLong() else input.getInt(),
+	      sizeOfHeapCommit = if (magic == 0x020B) input.getLong() else input.getInt(),
+	      loaderFlags = input.getInt(),
+	      numberOfRvaAndSizes = input.getInt()
+	  )
+    )
     input.order(ByteOrder.LITTLE_ENDIAN)
 
     header
   }
 }
 
-class OptionalHeader {
-  var directories: DataDirectories = null
-  
-  var magic: Short = 0x10b
-  var majorLinkerVersion: Byte = 2
-  var minorLinkerVersion: Byte = 50
-  var sizeOfCode: Int = 512
-  var sizeOfInitializedData: Int = 512
-  var sizeOfUninitData: Int = 0
-  var addressOfEntryPoint: Int = 0x1000
-  var baseOfCode: Int = 0x1000
-  var baseOfData: Int = 0x2000
+/*
+ *  magic: Short = 0x10b,
+  majorLinkerVersion: Byte = 2,
+  minorLinkerVersion: Byte = 50,
+  sizeOfCode: Int = 512,
+  sizeOfInitializedData: Int = 512,
+  sizeOfUninitData: Int = 0,
+  addressOfEntryPoint: Int = 0x1000
+  baseOfCode: Int = 0x1000
+  baseOfData: Int = 0x2000
 
   // Additional fields
-  var imageBase: Int = 0x400000
-  var sectionAlignment: Int = 0x1000
-  var fileAlignment: Int = 0x200
-  var majorOperatingSystemVersion: Short = 4
-  var minorOperatingSystemVersion: Short = 0
-  var majorImageVersion: Short = 0
-  var minorImageVersion: Short = 0
-  var majorSubsystemVersion: Short = 4
-  var minorSubsystemVersion: Short = 0
-  var win32Version: Int = 0
-  var sizeOfImage: Int = 0x3000
-  var sizeOfHeaders: Int = 0x200
-  var checksum: Int = 0
-  var subsystem: Short = 3
-  var dllCharacteristics: Short = 0
-  var sizeOfStackReserve: Long = 0x100000
-  var sizeOfStackCommit: Long = 0x1000
-  var sizeOfHeapReserve: Long = 0x100000
-  var sizeOfHeapCommit: Long = 0x1000
-  var loaderFlags: Int = 0
-  var numberOfRvaAndSizes: Int = 16
+  imageBase: Int = 0x400000
+  sectionAlignment: Int = 0x1000
+  fileAlignment: Int = 0x200
+  majorOperatingSystemVersion: Short = 4
+  minorOperatingSystemVersion: Short = 0
+  majorImageVersion: Short = 0
+  minorImageVersion: Short = 0
+  majorSubsystemVersion: Short = 4
+  minorSubsystemVersion: Short = 0
+  win32Version: Int = 0
+  sizeOfImage: Int = 0x3000
+  sizeOfHeaders: Int = 0x200
+  checksum: Int = 0
+  subsystem: Short = 3
+  dllCharacteristics: Short = 0
+  sizeOfStackReserve: Long = 0x100000
+  sizeOfStackCommit: Long = 0x1000
+  sizeOfHeapReserve: Long = 0x100000
+  sizeOfHeapCommit: Long = 0x1000
+  loaderFlags: Int = 0
+  numberOfRvaAndSizes: Int = 16
+  directories: DataDirectories = null
+ */
 
-  def size: Int = 96 + directories.size
+case class AdditionalFields(
+  imageBase: Int,
+  sectionAlignment: Int,
+  fileAlignment: Int,
+  majorOperatingSystemVersion: Short,
+  minorOperatingSystemVersion: Short,
+  majorImageVersion: Short,
+  minorImageVersion: Short,
+  majorSubsystemVersion: Short,
+  minorSubsystemVersion: Short,
+  win32Version: Int,
+  sizeOfImage: Int,
+  sizeOfHeaders: Int,
+  checksum: Int,
+  subsystem: Short,
+  dllCharacteristics: Short,
+  sizeOfStackReserve: Long,
+  sizeOfStackCommit: Long,
+  sizeOfHeapReserve: Long,
+  sizeOfHeapCommit: Long,
+  loaderFlags: Int,
+  numberOfRvaAndSizes: Int 
+)
+
+case class OptionalHeader(
+  magic: Short,
+  majorLinkerVersion: Byte,
+  minorLinkerVersion: Byte,
+  sizeOfCode: Int,
+  sizeOfInitializedData: Int,
+  sizeOfUninitData: Int,
+  addressOfEntryPoint: Int,
+  baseOfCode: Int,
+  baseOfData: Int,
+  additionalFields: AdditionalFields) {
+
+  def size: Int = 96 + 15 * 8
 
   def apply() = {
     val bbuf = ByteBuffer.allocate(96);
@@ -104,35 +134,35 @@ class OptionalHeader {
     bbuf.putInt(baseOfCode)
     bbuf.putInt(baseOfData)
     
-    bbuf.putInt(imageBase)
-    bbuf.putInt(sectionAlignment)
-    bbuf.putInt(fileAlignment)
-    bbuf.putShort(majorOperatingSystemVersion)
-    bbuf.putShort(minorOperatingSystemVersion)
-    bbuf.putShort(majorImageVersion)
-    bbuf.putShort(minorImageVersion)
-    bbuf.putShort(majorSubsystemVersion)
-    bbuf.putShort(minorSubsystemVersion)
-    bbuf.putInt(win32Version)
-    bbuf.putInt(sizeOfImage)
-    bbuf.putInt(sizeOfHeaders)
-    bbuf.putInt(checksum)
-    bbuf.putShort(subsystem)
-    bbuf.putShort(dllCharacteristics)
+    bbuf.putInt(additionalFields.imageBase)
+    bbuf.putInt(additionalFields.sectionAlignment)
+    bbuf.putInt(additionalFields.fileAlignment)
+    bbuf.putShort(additionalFields.majorOperatingSystemVersion)
+    bbuf.putShort(additionalFields.minorOperatingSystemVersion)
+    bbuf.putShort(additionalFields.majorImageVersion)
+    bbuf.putShort(additionalFields.minorImageVersion)
+    bbuf.putShort(additionalFields.majorSubsystemVersion)
+    bbuf.putShort(additionalFields.minorSubsystemVersion)
+    bbuf.putInt(additionalFields.win32Version)
+    bbuf.putInt(additionalFields.sizeOfImage)
+    bbuf.putInt(additionalFields.sizeOfHeaders)
+    bbuf.putInt(additionalFields.checksum)
+    bbuf.putShort(additionalFields.subsystem)
+    bbuf.putShort(additionalFields.dllCharacteristics)
     if (magic == 0x020B) { // 64 bit
-	    bbuf.putLong(sizeOfStackReserve)
-	    bbuf.putLong(sizeOfStackCommit)
-	    bbuf.putLong(sizeOfHeapReserve)
-	    bbuf.putLong(sizeOfHeapCommit)
+	    bbuf.putLong(additionalFields.sizeOfStackReserve)
+	    bbuf.putLong(additionalFields.sizeOfStackCommit)
+	    bbuf.putLong(additionalFields.sizeOfHeapReserve)
+	    bbuf.putLong(additionalFields.sizeOfHeapCommit)
     } else {
-	    bbuf.putInt(sizeOfStackReserve.toInt)
-	    bbuf.putInt(sizeOfStackCommit.toInt)
-	    bbuf.putInt(sizeOfHeapReserve.toInt)
-	    bbuf.putInt(sizeOfHeapCommit.toInt)     
+	    bbuf.putInt(additionalFields.sizeOfStackReserve.toInt)
+	    bbuf.putInt(additionalFields.sizeOfStackCommit.toInt)
+	    bbuf.putInt(additionalFields.sizeOfHeapReserve.toInt)
+	    bbuf.putInt(additionalFields.sizeOfHeapCommit.toInt)     
     }
 
-    bbuf.putInt(loaderFlags)
-    bbuf.putInt(numberOfRvaAndSizes)
+    bbuf.putInt(additionalFields.loaderFlags)
+    bbuf.putInt(additionalFields.numberOfRvaAndSizes)
     bbuf.array()
   }
 }

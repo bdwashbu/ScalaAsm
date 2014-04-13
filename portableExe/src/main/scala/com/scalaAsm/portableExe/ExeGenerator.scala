@@ -59,7 +59,7 @@ object ExeGenerator extends Sections {
 	    
 	    val dosHeader = DosHeader.getDosHeader(bbuf)
 	    val peHeader = PeHeader.getPeHeader(bbuf)
-	    val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.numberOfRvaAndSizes)
+	    val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.additionalFields.numberOfRvaAndSizes)
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs(0))
@@ -82,24 +82,58 @@ object ExeGenerator extends Sections {
     val unboundSymbols = compiledAsm.onePass.collect { case ImportRef(name) => name}
     
     val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols)
-    val directories = DataDirectories(
-         importSymbols = Some(compiledImports.getImportsDirectory(addressOfData, rawData.size)),
-         importAddressTable = Some(compiledImports.getIATDirectory(addressOfData, rawData.size))
-    )
-    
+
     val dosHeader = new DosHeader
     
-    val optionalHeader = new OptionalHeader()
-    optionalHeader.directories = directories;
     
+    val optionalHeader = OptionalHeader(
+      magic = 0x10b,
+	  majorLinkerVersion = 2,
+	  minorLinkerVersion = 50,
+	  sizeOfCode = 512,
+	  sizeOfInitializedData = 512,
+	  sizeOfUninitData = 0,
+	  addressOfEntryPoint = 0x1000,
+	  baseOfCode = 0x1000,
+	  baseOfData = 0x2000,
+	
+	  AdditionalFields(
+		  imageBase = 0x400000,
+		  sectionAlignment = 0x1000,
+		  fileAlignment = 0x200,
+		  majorOperatingSystemVersion = 4,
+		  minorOperatingSystemVersion = 0,
+		  majorImageVersion = 0,
+		  minorImageVersion = 0,
+		  majorSubsystemVersion = 4,
+		  minorSubsystemVersion = 0,
+		  win32Version = 0,
+		  sizeOfImage = 0x3000,
+		  sizeOfHeaders = 0x200,
+		  checksum = 0,
+		  subsystem = 3,
+		  dllCharacteristics = 0,
+		  sizeOfStackReserve = 0x100000,
+		  sizeOfStackCommit = 0x1000,
+		  sizeOfHeapReserve = 0x100000,
+		  sizeOfHeapCommit = 0x1000,
+		  loaderFlags = 0,
+		  numberOfRvaAndSizes = 16
+	  )
+    )
     
-    val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.imageBase)
+    val directories = DataDirectories(
+      importSymbols = Some(compiledImports.getImportsDirectory(addressOfData, rawData.size)),
+      importAddressTable = Some(compiledImports.getIATDirectory(addressOfData, rawData.size))
+    )
+    
+    val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.additionalFields.imageBase)
     
     val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
     
     val fileHeader = FileHeader(
 		machine = 0x14C,
-	    numberOfSections = 2,
+	    numberOfSections = sections.size.toShort,
 	    timeDateStamp = 0x5132F2E5,
 	    pointerToSymbolTable = 0, // no importance
 	    numberOfSymbols = 0, // no importance

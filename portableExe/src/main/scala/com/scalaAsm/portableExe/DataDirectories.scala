@@ -19,7 +19,15 @@ object DataDirectories {
 }
 
 object ImageExportDirectory {
-  def getExports(input: ByteBuffer): ImageExportDirectory = {
+  def getExports(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ImageExportDirectory = {
+    
+    val section = sections.find(section => section.virtualAddress <= dir.virtualAddress && 
+                                           section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)
+    
+    val exportFileOffset = section.get.virtualAddress - section.get.pointerToRawData 
+    println(dir.virtualAddress - exportFileOffset)
+    input.position(dir.virtualAddress - exportFileOffset)
+    
     new ImageExportDirectory(
     characteristics = input.getInt,
     timeDateStamp = input.getInt,
@@ -32,14 +40,14 @@ object ImageExportDirectory {
     addressOfFunctions = input.getInt,
     addressOfNames = input.getInt,
     addressOfNameOrdinals = input.getInt) {
-      override def functionNames = {    
+      override def functionNames = { 
 	    for (i <- 0 until numberOfNames) yield {
-	      input.position(addressOfNames - 4096 + i*4)
+	      input.position(addressOfNames - exportFileOffset + i*4)
 	      val RVA = input.getInt
-	      input.position(RVA - 4096)
+	      input.position(RVA - exportFileOffset)
 	      while (input.get != '\0') {}
-	      val name = Array.fill(input.position() - (RVA - 4096))(0.toByte)
-	      input.position(RVA - 4096)
+	      val name = Array.fill(input.position() - (RVA - exportFileOffset) - 1)(0.toByte)
+	      input.position(RVA - exportFileOffset)
 	      input.get(name)
 	      name.map(_.toChar).mkString
 	    }
@@ -60,7 +68,7 @@ case class ImageExportDirectory(
     addressOfFunctions: Int,
     addressOfNames: Int,
     addressOfNameOrdinals: Int) {
-  def functionNames: Seq[String] = Nil
+  def functionNames(): Seq[String] = Nil
 }
 
 // Contains the addresses of all important data structures in the PE

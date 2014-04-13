@@ -84,8 +84,8 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
   }
 
   def getExportSymbols = {
-    //val file = new File("C:/Windows/System32/kernel32.dll");
-    val file = new File("C:/Users/Antares/Desktop/kernel32 - Copy.dll");
+    val file = new File("C:/Windows/System32/msvcrt.dll");
+    //val file = new File("C:/Users/Antares/Desktop/kernel32 - Copy.dll");
  
     val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
       
@@ -97,16 +97,14 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     val bbuf = ByteBuffer.wrap(bFile)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     
-    val bbuf2 = ByteBuffer.wrap(bFile)
-    bbuf2.order(ByteOrder.LITTLE_ENDIAN)
-    
     val dosHeader = DosHeader.getDosHeader(bbuf)
     val peHeader = PeHeader.getPeHeader(bbuf)
+    
     val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.numberOfRvaAndSizes)
     val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
-
+    println(dirs(0).virtualAddress - 4096)
     bbuf.position(dirs(0).virtualAddress - 4096)
-    val export = ImageExportDirectory.getExports(bbuf)
+    val export = ImageExportDirectory.getExports(bbuf, sections, dirs(0))
     export.functionNames.foreach(println)
   }
   

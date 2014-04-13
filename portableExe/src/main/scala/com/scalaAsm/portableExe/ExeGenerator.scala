@@ -12,6 +12,9 @@ import java.io.DataOutputStream
 import com.scalaAsm.asm.Assembled
 import com.scalaAsm.asm.AsmCompiler
 import com.scalaAsm.utils.Endian
+import java.io.File
+import java.io.FileInputStream
+import com.scalaAsm.asm.Tokens.ImportRef
   
 private[portableExe] case class CompiledImports(rawData: Array[Byte],
                             boundImportSize: Int,
@@ -38,16 +41,35 @@ object ExeGenerator extends Sections {
     array ++ Array.fill(numPadding)(filler)
   }
   
-  private def compileImports(addressOfData: Int, dataSize: Int, dlls: List[String]): CompiledImports = { 
+  private def compileImports(addressOfData: Int, dataSize: Int, dlls: List[String], possibleFunctions: Seq[String]): CompiledImports = { 
     
-    for (dll <- dlls) yield {
-      
+    val dllImports = for (dll <- dlls) yield {
+      println(dll)
+	    val file = new File("C:/Windows/System32/" + dll);
+	 
+	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
+	      
+	    //convert file into array of bytes
+	    val fileInputStream = new FileInputStream(file);
+	    fileInputStream.read(bFile);
+	    fileInputStream.close();
+	    
+	    val bbuf = ByteBuffer.wrap(bFile)
+	    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+	    
+	    val dosHeader = DosHeader.getDosHeader(bbuf)
+	    val peHeader = PeHeader.getPeHeader(bbuf)
+	    val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.numberOfRvaAndSizes)
+	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
+	
+	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs(0))
+
+	    Extern(dll, export.functionNames intersect possibleFunctions)
     }
     
-    val test = Imports(imports = Seq(Extern("kernel32.dll", List("ExitProcess", "GetStdHandle", "WriteFile", "FlushConsoleInputBuffer", "Sleep")),
-                                     Extern("msvcrt.dll", List("printf", "_kbhit", "_getch"))),
+    val test = Imports(imports = dllImports,
                        offset = addressOfData + dataSize)
-    
+    println(test)
     test.generateImports
   }
 
@@ -57,20 +79,21 @@ object ExeGenerator extends Sections {
     
     val compiledAsm = AsmCompiler.compileAssembly(asm, variables)
     
-    val compiledImports = compileImports(addressOfData, rawData.size, dlls)
+    val unboundSymbols = compiledAsm.onePass.collect { case imp @ ImportRef(name) => name}
+    
+    val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols)
     val directories: DataDirectories = DataDirectories(importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
                                       importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size))
     
+    val dosHeader = new DosHeader
+    val fileHeader = new FileHeader
     val optionalHeader = new OptionalHeader()
     optionalHeader.directories = directories;
+    val ntHeader = new NtHeader(fileHeader, optionalHeader)
     
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.imageBase)
     
     val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
-    
-    val dosHeader = new DosHeader
-    val fileHeader = new FileHeader
-    val ntHeader = new NtHeader(fileHeader, optionalHeader)
     
     new PortableExecutable(dosHeader, ntHeader, directories, sections, code, rawData, compiledImports)
   }

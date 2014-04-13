@@ -17,7 +17,7 @@ object SectionHeader {
          virtualSize = input.getInt(),
          virtualAddress   = input.getInt(),
          sizeOfRawData    = input.getInt(),
-         pointerOrRawData = input.getInt(),
+         pointerToRawData = input.getInt(),
          relocPtr    = input.getInt(),
          linenumPtr  = input.getInt(),
          relocations = input.getShort(),
@@ -32,7 +32,7 @@ case class SectionHeader(
   virtualSize: Int,
   virtualAddress: Int,
   sizeOfRawData: Int,
-  pointerOrRawData: Int,
+  pointerToRawData: Int,
   relocPtr: Int,
   linenumPtr: Int,
   relocations: Short,
@@ -46,7 +46,7 @@ case class SectionHeader(
     bbuf.putInt(virtualSize)
     bbuf.putInt(virtualAddress)
     bbuf.putInt(sizeOfRawData)
-    bbuf.putInt(pointerOrRawData)
+    bbuf.putInt(pointerToRawData)
     bbuf.putInt(relocPtr)
     bbuf.putInt(linenumPtr)
     bbuf.putShort(relocations)
@@ -89,7 +89,7 @@ private[portableExe] trait Sections {
       virtualSize = codeSize,
       virtualAddress = 0x1000,
       sizeOfRawData = 0x200,
-      pointerOrRawData = 0x200,
+      pointerToRawData = 0x200,
       relocPtr = 0,
       linenumPtr = 0,
       relocations = 0,
@@ -102,7 +102,7 @@ private[portableExe] trait Sections {
       virtualSize = dataSize,
       virtualAddress = 0x2000,
       sizeOfRawData = 0x200,
-      pointerOrRawData = 0x400,
+      pointerToRawData = 0x400,
       relocPtr = 0,
       linenumPtr = 0,
       relocations = 0,

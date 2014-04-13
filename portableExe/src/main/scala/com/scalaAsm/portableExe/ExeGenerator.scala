@@ -41,7 +41,7 @@ object ExeGenerator extends Sections {
     array ++ Array.fill(numPadding)(filler)
   }
   
-  private def compileImports(addressOfData: Int, dataSize: Int, dlls: List[String], possibleFunctions: Seq[String]): CompiledImports = { 
+  private def compileImports(addressOfData: Int, dataSize: Int, dlls: Seq[String], possibleFunctions: Seq[String]): CompiledImports = { 
     
     val dllImports = for (dll <- dlls) yield {
       println(dll)
@@ -73,13 +73,13 @@ object ExeGenerator extends Sections {
     test.generateImports
   }
 
-  def link(asm: Assembled, addressOfData: Int, dlls: List[String]): PortableExecutable = {
+  def link(asm: Assembled, addressOfData: Int, dlls: String*): PortableExecutable = {
 
     val (rawData, variables) = AsmCompiler.compileData(addressOfData, asm.data)
     
     val compiledAsm = AsmCompiler.compileAssembly(asm, variables)
     
-    val unboundSymbols = compiledAsm.onePass.collect { case imp @ ImportRef(name) => name}
+    val unboundSymbols = compiledAsm.onePass.collect { case ImportRef(name) => name}
     
     val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols)
     val directories: DataDirectories = DataDirectories(importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
@@ -89,13 +89,13 @@ object ExeGenerator extends Sections {
     val fileHeader = new FileHeader
     val optionalHeader = new OptionalHeader()
     optionalHeader.directories = directories;
-    val ntHeader = new NtHeader(fileHeader, optionalHeader)
+    val peHeader = new NtHeader(fileHeader, optionalHeader)
     
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.imageBase)
     
     val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
     
-    new PortableExecutable(dosHeader, ntHeader, directories, sections, code, rawData, compiledImports)
+    new PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports)
   }
   
   

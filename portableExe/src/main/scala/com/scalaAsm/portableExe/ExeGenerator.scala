@@ -83,8 +83,27 @@ object ExeGenerator extends Sections {
     
     val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols)
 
-    val dosHeader = new DosHeader
-    
+    val dosHeader = DosHeader(
+	    e_magic = "MZ", // Magic number
+	    e_cblp = 144, // Bytes on last page of file
+	    e_cp = 3, // Pages in file
+	    e_crlc = 0, // Relocations
+	    e_cparhdr = 4, // Size of header in paragraphs
+	    e_minalloc = 0, // Minimum extra paragraphs needed
+	    e_maxalloc = 65535.toShort, // Maximum extra paragraphs needed
+	    e_ss = 0, // Initial (relative) SS value
+	    e_sp = 184, // Initial SP value
+	    e_csum = 0, // Checksum
+	    e_ip = 0, // Initial IP value
+	    e_cs = 0, // Initial (relative) CS value
+	    e_lfarlc = 64, // File address of relocation table
+	    e_ovno = 0, // Overlay number
+	    e_res = Array.fill(4)(0.toShort), // Reserved words
+	    e_oemid = 0, // OEM identifier (for e_oeminfo)
+	    e_oeminfo = 0, // OEM information; e_oemid specific
+	    e_res2 = Array.fill(10)(0.toShort), // Reserved words
+	    e_lfanew = 128 // File address of new exe header
+    )
     
     val optionalHeader = OptionalHeader(
       magic = 0x10b,
@@ -142,7 +161,7 @@ object ExeGenerator extends Sections {
 	)
 	val peHeader = new NtHeader(fileHeader, optionalHeader)
     
-    new PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports)
+    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports)
   }
   
   

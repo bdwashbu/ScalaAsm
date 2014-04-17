@@ -59,10 +59,10 @@ object ExeGenerator extends Sections {
 	    
 	    val dosHeader = DosHeader.getDosHeader(bbuf)
 	    val peHeader = PeHeader.getPeHeader(bbuf)
-	    val dirs = DataDirectories.getDirectories(bbuf, peHeader.optionalHeader.additionalFields.numberOfRvaAndSizes)
+	    val dirs = DataDirectories.getDirectories(bbuf)
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
-	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs(0))
+	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
 
 	    Extern(dll, export.functionNames intersect possibleFunctions)
     }
@@ -142,8 +142,8 @@ object ExeGenerator extends Sections {
     )
     
     val directories = DataDirectories(
-      importSymbols = Some(compiledImports.getImportsDirectory(addressOfData, rawData.size)),
-      importAddressTable = Some(compiledImports.getIATDirectory(addressOfData, rawData.size))
+      importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
+      importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size)
     )
     
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.additionalFields.imageBase)

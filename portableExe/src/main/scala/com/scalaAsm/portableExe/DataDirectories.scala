@@ -13,8 +13,24 @@ private[portableExe] case class ImageDataDirectory(virtualAddress: Int, size: In
 }
 
 object DataDirectories {
-  def getDirectories(input: ByteBuffer, numDirs: Int): Seq[ImageDataDirectory] = {
-    for (i <- 0 until numDirs) yield ImageDataDirectory(input.getInt, input.getInt)
+  def getDirectories(input: ByteBuffer): DataDirectories = {
+    DataDirectories(
+	    exportSymbols = ImageDataDirectory(input.getInt, input.getInt),
+	    importSymbols = ImageDataDirectory(input.getInt, input.getInt),
+	    resource = ImageDataDirectory(input.getInt, input.getInt),
+	    exception = ImageDataDirectory(input.getInt, input.getInt),
+	    security = ImageDataDirectory(input.getInt, input.getInt),
+	    baseRelocation = ImageDataDirectory(input.getInt, input.getInt),
+	    debug = ImageDataDirectory(input.getInt, input.getInt),
+	    copyRight = ImageDataDirectory(input.getInt, input.getInt),
+	    globalPtr = ImageDataDirectory(input.getInt, input.getInt),
+	    tls = ImageDataDirectory(input.getInt, input.getInt),
+	    loadConfig = ImageDataDirectory(input.getInt, input.getInt),
+	    boundImport = ImageDataDirectory(input.getInt, input.getInt),
+	    importAddressTable = ImageDataDirectory(input.getInt, input.getInt),
+	    com = ImageDataDirectory(input.getInt, input.getInt),
+	    delayedImport = ImageDataDirectory(input.getInt, input.getInt),
+	    reserved = ImageDataDirectory(input.getInt, input.getInt))
   }
 }
 
@@ -25,7 +41,6 @@ object ImageExportDirectory {
                                            section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)
     
     val exportFileOffset = section.get.virtualAddress - section.get.pointerToRawData 
-    println(dir.virtualAddress - exportFileOffset)
     input.position(dir.virtualAddress - exportFileOffset)
     
     new ImageExportDirectory(
@@ -71,25 +86,65 @@ case class ImageExportDirectory(
   def functionNames(): Seq[String] = Nil
 }
 
+object ImageResourceDirectory {
+  def getResources(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ImageResourceDirectory = {
+    
+    val section = sections.find(section => section.virtualAddress <= dir.virtualAddress && 
+                                           section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)
+    
+    val exportFileOffset = section.get.virtualAddress - section.get.pointerToRawData 
+    input.position(dir.virtualAddress - exportFileOffset)
+    ImageResourceDirectory(
+	    characteristics = input.getInt,
+	    timeDateStamp = input.getInt,
+	    majorVersion = input.getShort,
+	    minorVersion = input.getShort,
+	    numberOfNamedEntries = input.getShort,
+	    numberOfIdEntries = input.getShort
+    )
+  }
+}
+
+case class ImageResourceDirectory(
+    characteristics: Int,
+    timeDateStamp: Int,
+    majorVersion: Short,
+    minorVersion: Short,
+    numberOfNamedEntries: Short,
+    numberOfIdEntries: Short
+)
+
+case class ImageResourceDirectoryEntry(
+    name: Int,
+    offsetToData: Int
+)
+
+case class ImageResourceDataEntry(
+    offsetToData: Int,
+    size: Int,
+    codePage: Int,
+    reserved: Int
+)
+
 // Contains the addresses of all important data structures in the PE
 
 private[portableExe] case class DataDirectories(
-    exportSymbols: Option[ImageDataDirectory] = None,
-    importSymbols: Option[ImageDataDirectory] = None,
-    resource: Option[ImageDataDirectory] = None,
-    exception: Option[ImageDataDirectory] = None,
-    security: Option[ImageDataDirectory] = None,
-    baseRelocation: Option[ImageDataDirectory] = None,
-    debug: Option[ImageDataDirectory] = None,
-    copyRight: Option[ImageDataDirectory] = None,
-    globalPtr: Option[ImageDataDirectory] = None,
-    tls: Option[ImageDataDirectory] = None,
-    loadConfig: Option[ImageDataDirectory] = None,
-    boundImport: Option[ImageDataDirectory] = None,
-    importAddressTable: Option[ImageDataDirectory] = None,
-    com: Option[ImageDataDirectory] = None,
-    delayedImport: Option[ImageDataDirectory] = None,
-    reserved: Option[ImageDataDirectory] = None) extends Function0[Array[Byte]] {
+    exportSymbols: ImageDataDirectory = ImageDataDirectory(0,0),
+    importSymbols: ImageDataDirectory = ImageDataDirectory(0,0),
+    resource: ImageDataDirectory = ImageDataDirectory(0,0),
+    exception: ImageDataDirectory = ImageDataDirectory(0,0),
+    security: ImageDataDirectory = ImageDataDirectory(0,0),
+    baseRelocation: ImageDataDirectory = ImageDataDirectory(0,0),
+    debug: ImageDataDirectory = ImageDataDirectory(0,0),
+    copyRight: ImageDataDirectory = ImageDataDirectory(0,0),
+    globalPtr: ImageDataDirectory = ImageDataDirectory(0,0),
+    tls: ImageDataDirectory = ImageDataDirectory(0,0),
+    loadConfig: ImageDataDirectory = ImageDataDirectory(0,0),
+    boundImport: ImageDataDirectory = ImageDataDirectory(0,0),
+    importAddressTable: ImageDataDirectory = ImageDataDirectory(0,0),
+    com: ImageDataDirectory = ImageDataDirectory(0,0),
+    delayedImport: ImageDataDirectory = ImageDataDirectory(0,0),
+    reserved: ImageDataDirectory = ImageDataDirectory(0,0)) extends Function0[Array[Byte]] {
     
     def size: Int = {
       15 * 8
@@ -104,22 +159,22 @@ private[portableExe] case class DataDirectories(
         case None => ImageDataDirectory(0,0).write(stream)
       }
       
-      write(exportSymbols)
-      write(importSymbols)
-      write(resource)
-      write(exception)
-      write(security)
-      write(baseRelocation)
-      write(debug)
-      write(copyRight)
-      write(globalPtr)
-      write(tls)
-      write(loadConfig)
-      write(boundImport)
-      write(importAddressTable)
-      write(com)
-      write(delayedImport)
-      write(reserved)
+      exportSymbols.write(stream)
+      importSymbols.write(stream)
+      resource.write(stream)
+      exception.write(stream)
+      security.write(stream)
+      baseRelocation.write(stream)
+      debug.write(stream)
+      copyRight.write(stream)
+      globalPtr.write(stream)
+      tls.write(stream)
+      loadConfig.write(stream)
+      boundImport.write(stream)
+      importAddressTable.write(stream)
+      com.write(stream)
+      delayedImport.write(stream)
+      reserved.write(stream)
       
       directoryOutput.toByteArray
     }

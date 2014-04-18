@@ -63,6 +63,9 @@ object ExeGenerator extends Sections {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
+	    val resources = ImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
+	    println(resources)
+	    println(resources.namedEntries)
 
 	    Extern(dll, export.functionNames intersect possibleFunctions)
     }

@@ -89,33 +89,88 @@ case class ImageExportDirectory(
 object ImageResourceDirectory {
   def getResources(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ImageResourceDirectory = {
     
+    
     val section = sections.find(section => section.virtualAddress <= dir.virtualAddress && 
                                            section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)
     
-    val exportFileOffset = section.get.virtualAddress - section.get.pointerToRawData 
-    input.position(dir.virtualAddress - exportFileOffset)
+    val resourceFileOffset = section.get.virtualAddress - section.get.pointerToRawData 
+    input.position(dir.virtualAddress - resourceFileOffset)
+    val beginningFileLocation = input.position
+    println(beginningFileLocation)
+    
+    val characteristics = input.getInt
+    val timeDateStamp = input.getInt
+    val majorVersion = input.getShort
+    val minorVersion = input.getShort
+    val numberOfNamedEntries = input.getShort
+	val numberOfIdEntries = input.getShort
+	  
+    val namedEntries = for (i <- 0 until numberOfNamedEntries) yield {
+      val namePointer = input.getInt & 0x7FFF
+      val offsetToData = input.getInt
+      val savedPos = input.position
+      println("NAMEPTR: " + namePointer)
+      input.position(beginningFileLocation + namePointer)
+      val stringLength = input.getShort
+      var name: String = ""
+        for (i <- 0 until stringLength) {
+          name += input.getShort.toChar
+        }
+
+      val dirs = ImageResourceDirectoryEntry(
+        name,
+        offsetToData
+      )
+      input.position(savedPos)
+      dirs
+    }
+    
+    val idEntries = for (i <- 0 until numberOfIdEntries) yield {
+      val namePointer = input.getInt & 0x7FFF
+      val offsetToData = input.getInt
+      val savedPos = input.position
+      input.position(beginningFileLocation + namePointer)
+      val stringLength = input.getShort
+      var name: String = ""
+        for (i <- 0 until stringLength) {
+          name += input.getShort.toChar
+        }
+      
+      val dirs = ImageResourceDirectoryEntry(
+        name,
+        offsetToData
+      )
+      input.position(savedPos)
+      dirs
+    }
+    
     ImageResourceDirectory(
-	    characteristics = input.getInt,
-	    timeDateStamp = input.getInt,
-	    majorVersion = input.getShort,
-	    minorVersion = input.getShort,
-	    numberOfNamedEntries = input.getShort,
-	    numberOfIdEntries = input.getShort
+	    characteristics,
+	    timeDateStamp,
+	    majorVersion,
+	    minorVersion,
+	    namedEntries,
+	    idEntries
     )
   }
 }
+
+case class ImageResourceDirString (
+    length: Short,
+    name: String
+)
 
 case class ImageResourceDirectory(
     characteristics: Int,
     timeDateStamp: Int,
     majorVersion: Short,
     minorVersion: Short,
-    numberOfNamedEntries: Short,
-    numberOfIdEntries: Short
+    namedEntries: Seq[ImageResourceDirectoryEntry],
+    numberOfIdEntries: Seq[ImageResourceDirectoryEntry]
 )
 
 case class ImageResourceDirectoryEntry(
-    name: Int,
+    name: String,
     offsetToData: Int
 )
 
@@ -125,6 +180,21 @@ case class ImageResourceDataEntry(
     codePage: Int,
     reserved: Int
 )
+
+object ResourceType extends Enumeration {
+  type ResourceType = Value
+  val cursor = Value(1)
+  val bitmap = Value(2)
+  val icon = Value(3)
+  val menu = Value(4)
+  val dialog = Value(5)
+  val string = Value(6)
+  val fontdir = Value(7)
+  val font = Value(8)
+  val accelerator = Value(9)
+  val rcData = Value(10)
+  val messageTable = Value(11)
+}
 
 // Contains the addresses of all important data structures in the PE
 

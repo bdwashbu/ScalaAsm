@@ -52,7 +52,7 @@ It would be a compile time error because there is no PUSH implementation defined
 
 ### Using Scala x86
 
-There is no reason not to think that Scala x86 could be used to implement a turing-complete programming language, but this is still an area of research.
+The hope is that Scala x86 can be used to implement a turing-complete programming language, but this is still an area of research.
 
 We do know Scala x86 can be used to implement low-level assembly code. This assembly currently supports many useful  features such as procedures, loops, labels, and variables.  Some of these, like variables and loops, are implemented using first-class scala constructs.
 
@@ -177,28 +177,6 @@ object HelloWorld extends AsmProgram {
       pop(ebp)
       retn(imm16(4))
     }
-
-    align(2)
-
-    proc("ExitProcess") {
-      jmp("ExitProcess")
-    }
-
-    proc("GetStdHandle") {
-      jmp("GetStdHandle")
-    }
-
-    proc("WriteFile") {
-      jmp("WriteFile")
-    }
-
-    proc("FlushConsoleInputBuffer") {
-      jmp("FlushConsoleInputBuffer")
-    }
-
-    proc("Sleep") {
-      jmp("Sleep")
-    }
   }
 }
 ```
@@ -207,8 +185,9 @@ Heres code to output the executable:
 
 ```scala
 val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
-val assembled = HelloWorld.assemble
-val exe = ExeGenerator.compile(assembled)
+val asm = HelloWorld.assemble
+val exe = ExeGenerator.link(asm, 0x2000, "kernel32.dll", "msvcrt.dll")
+
 outputStream.write(exe.get)
 outputStream.close
 ```

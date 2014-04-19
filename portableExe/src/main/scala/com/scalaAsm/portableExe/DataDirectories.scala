@@ -106,42 +106,11 @@ object ImageResourceDirectory {
 	val numberOfIdEntries = input.getShort
 	  
     val namedEntries = for (i <- 0 until numberOfNamedEntries) yield {
-      val namePointer = input.getInt & 0x7FFF
-      val offsetToData = input.getInt
-      val savedPos = input.position
-      println("NAMEPTR: " + namePointer)
-      input.position(beginningFileLocation + namePointer)
-      val stringLength = input.getShort
-      var name: String = ""
-        for (i <- 0 until stringLength) {
-          name += input.getShort.toChar
-        }
-
-      val dirs = ImageResourceDirectoryEntry(
-        name,
-        offsetToData
-      )
-      input.position(savedPos)
-      dirs
+      ImageResourceDirectoryEntry.getDirectoryEntry(input, beginningFileLocation)
     }
     
     val idEntries = for (i <- 0 until numberOfIdEntries) yield {
-      val namePointer = input.getInt & 0x7FFF
-      val offsetToData = input.getInt
-      val savedPos = input.position
-      input.position(beginningFileLocation + namePointer)
-      val stringLength = input.getShort
-      var name: String = ""
-        for (i <- 0 until stringLength) {
-          name += input.getShort.toChar
-        }
-      
-      val dirs = ImageResourceDirectoryEntry(
-        name,
-        offsetToData
-      )
-      input.position(savedPos)
-      dirs
+      ImageResourceDirectoryEntry.getDirectoryEntry(input, beginningFileLocation)
     }
     
     ImageResourceDirectory(
@@ -166,13 +135,43 @@ case class ImageResourceDirectory(
     majorVersion: Short,
     minorVersion: Short,
     namedEntries: Seq[ImageResourceDirectoryEntry],
-    numberOfIdEntries: Seq[ImageResourceDirectoryEntry]
+    idEntries: Seq[ImageResourceDirectoryEntry]
 )
 
-case class ImageResourceDirectoryEntry(
+object ImageResourceDirectoryEntry {
+  def getDirectoryEntry(input: ByteBuffer, beginningFileLocation: Int): ImageResourceDirectoryEntry = {
+    val namePtr = input.getInt
+    val offsetToData = input.getInt
+    val savedPos = input.position
+    val result = if (namePtr >>> 31 == 1) {
+      val pointer =  namePtr & 0x7FFFFFFF
+      input.position(beginningFileLocation + pointer)
+      val stringLength = input.getShort
+      var name: String = ""
+      for (i <- 0 until stringLength) {
+        name += input.getShort.toChar
+      }
+      NamedImageResourceDirectoryEntry(name, offsetToData)
+    } else {
+      val id = namePtr & 0x7FFFFFFF
+      IdImageResourceDirectoryEntry(id, offsetToData)
+    }
+    input.position(savedPos)
+    result
+  }
+}
+
+trait ImageResourceDirectoryEntry
+
+case class NamedImageResourceDirectoryEntry (
     name: String,
     offsetToData: Int
-)
+) extends ImageResourceDirectoryEntry
+
+case class IdImageResourceDirectoryEntry (
+    id: Int,
+    offsetToData: Int
+) extends ImageResourceDirectoryEntry
 
 case class ImageResourceDataEntry(
     offsetToData: Int,

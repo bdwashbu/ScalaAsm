@@ -43,6 +43,34 @@ object ExeGenerator extends Sections {
   
   private def compileImports(addressOfData: Int, dataSize: Int, dlls: Seq[String], possibleFunctions: Seq[String]): CompiledImports = { 
     
+    
+     for (dll <- Seq("C:/Scala/ScalaBasic/tools/PEInfo.exe")) yield {
+      println(dll)
+	    val file = new File(dll);
+	 
+	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
+	      
+	    //convert file into array of bytes
+	    val fileInputStream = new FileInputStream(file);
+	    fileInputStream.read(bFile);
+	    fileInputStream.close();
+	    
+	    val bbuf = ByteBuffer.wrap(bFile)
+	    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+	    
+	    val dosHeader = DosHeader.getDosHeader(bbuf)
+	    val peHeader = PeHeader.getPeHeader(bbuf)
+	    val dirs = DataDirectories.getDirectories(bbuf)
+	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
+	
+	    //val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
+	    val resources = ImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
+	    println(resources)
+	    println(resources.namedEntries)
+
+	   // Extern(dll, export.functionNames intersect possibleFunctions)
+    }
+    
     val dllImports = for (dll <- dlls) yield {
       println(dll)
 	    val file = new File("C:/Windows/System32/" + dll);
@@ -63,9 +91,9 @@ object ExeGenerator extends Sections {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-	    val resources = ImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
-	    println(resources)
-	    println(resources.namedEntries)
+//	    val resources = ImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
+//	    println(resources)
+//	    println(resources.namedEntries)
 
 	    Extern(dll, export.functionNames intersect possibleFunctions)
     }

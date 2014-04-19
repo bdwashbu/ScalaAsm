@@ -4,6 +4,7 @@ import java.io.DataOutputStream
 import scala.collection.immutable.TreeMap
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
+import java.io.FileOutputStream
 
 private[portableExe] case class ImageDataDirectory(virtualAddress: Int, size: Int) extends ExeWriter {
   def write(stream: DataOutputStream) {
@@ -87,17 +88,8 @@ case class ImageExportDirectory(
 }
 
 object ImageResourceDirectory {
-  def getResources(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ImageResourceDirectory = {
-    
-    
-    val section = sections.find(section => section.virtualAddress <= dir.virtualAddress && 
-                                           section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)
-    
-    val resourceFileOffset = section.get.virtualAddress - section.get.pointerToRawData 
-    input.position(dir.virtualAddress - resourceFileOffset)
-    val beginningFileLocation = input.position
-    println(beginningFileLocation)
-    
+  
+  def getResourceDir(input: ByteBuffer, beginningFileLocation: Int, level: Int, beginningOfSection: Int): ImageResourceDirectory = {
     val characteristics = input.getInt
     val timeDateStamp = input.getInt
     val majorVersion = input.getShort
@@ -106,11 +98,49 @@ object ImageResourceDirectory {
 	val numberOfIdEntries = input.getShort
 	  
     val namedEntries = for (i <- 0 until numberOfNamedEntries) yield {
-      ImageResourceDirectoryEntry.getDirectoryEntry(input, beginningFileLocation)
+      val entry = ImageResourceDirectoryEntry.getNamedDirectoryEntry(input, beginningFileLocation)
+      println("offset: " + entry.offsetToData)
+      
+      
+      val savedPos = input.position
+      input.position((entry.offsetToData & 0x7FFFFFFF) + beginningFileLocation)
+      if (level < 2) {
+    	  val resDir = getResourceDir(input, beginningFileLocation, level + 1, beginningOfSection)  
+    	  println("what2: " + resDir)
+      }
+      input.position(savedPos)
+      entry
     }
     
     val idEntries = for (i <- 0 until numberOfIdEntries) yield {
-      ImageResourceDirectoryEntry.getDirectoryEntry(input, beginningFileLocation)
+      val entry = ImageResourceDirectoryEntry.getIdDirectoryEntry(input, beginningFileLocation)
+      
+      if (entry.id == 0x409 || entry.id == 0x415) {
+        input.position((entry.offsetToData & 0x7FFFFFFF) + beginningFileLocation)
+        val data = ImageResourceDataEntry(
+		    offsetToData = input.getInt,
+		    size = input.getInt,
+		    codePage = input.getInt,
+		    reserved = input.getInt
+		)
+		val blah = Array.fill(data.size)(0.toByte)
+		println(data.offsetToData - beginningFileLocation)
+		input.position(data.offsetToData - beginningOfSection)
+		input.get(blah)
+		val outputStream = new DataOutputStream(new FileOutputStream("test2.cur"));
+        outputStream.write(blah)
+        outputStream.close
+		println(data)
+      } else if (entry.id == 2) {
+	      val savedPos = input.position
+	      input.position((entry.offsetToData & 0x7FFFFFFF) + beginningFileLocation)
+	      if (level < 2) {
+	    	  val resDir = getResourceDir(input, beginningFileLocation, level + 1, beginningOfSection)  
+	    	  println("what1: " + resDir)
+	      }
+	      input.position(savedPos)
+      }
+      entry
     }
     
     ImageResourceDirectory(
@@ -121,6 +151,19 @@ object ImageResourceDirectory {
 	    namedEntries,
 	    idEntries
     )
+  }
+  
+  def getResources(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ImageResourceDirectory = {
+    
+    
+    val section = sections.find(section => section.virtualAddress <= dir.virtualAddress && 
+                                           section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)
+    
+    val resourceFileOffset = section.get.virtualAddress - section.get.pointerToRawData 
+    input.position(dir.virtualAddress - resourceFileOffset)
+    val beginningFileLocation = input.position
+    
+    getResourceDir(input, beginningFileLocation, 0, resourceFileOffset)
   }
 }
 
@@ -139,11 +182,11 @@ case class ImageResourceDirectory(
 )
 
 object ImageResourceDirectoryEntry {
-  def getDirectoryEntry(input: ByteBuffer, beginningFileLocation: Int): ImageResourceDirectoryEntry = {
+  def getNamedDirectoryEntry(input: ByteBuffer, beginningFileLocation: Int): NamedImageResourceDirectoryEntry = {
     val namePtr = input.getInt
     val offsetToData = input.getInt
     val savedPos = input.position
-    val result = if (namePtr >>> 31 == 1) {
+    //val result = if (namePtr >>> 31 == 1) {
       val pointer =  namePtr & 0x7FFFFFFF
       input.position(beginningFileLocation + pointer)
       val stringLength = input.getShort
@@ -151,17 +194,26 @@ object ImageResourceDirectoryEntry {
       for (i <- 0 until stringLength) {
         name += input.getShort.toChar
       }
-      NamedImageResourceDirectoryEntry(name, offsetToData)
-    } else {
-      val id = namePtr & 0x7FFFFFFF
-      IdImageResourceDirectoryEntry(id, offsetToData)
-    }
+      val result = NamedImageResourceDirectoryEntry(name, offsetToData)
+   //}
+    input.position(savedPos)
+    result
+  }
+  
+  def getIdDirectoryEntry(input: ByteBuffer, beginningFileLocation: Int): IdImageResourceDirectoryEntry = {
+    val namePtr = input.getInt
+    val offsetToData = input.getInt
+    val savedPos = input.position
+    val id = namePtr & 0x7FFFFFFF
+    val result = IdImageResourceDirectoryEntry(id, offsetToData)
     input.position(savedPos)
     result
   }
 }
 
-trait ImageResourceDirectoryEntry
+trait ImageResourceDirectoryEntry {
+  val offsetToData: Int
+}
 
 case class NamedImageResourceDirectoryEntry (
     name: String,
@@ -178,7 +230,7 @@ case class ImageResourceDataEntry(
     size: Int,
     codePage: Int,
     reserved: Int
-)
+) extends ImageResourceDirectoryEntry
 
 object ResourceType extends Enumeration {
   type ResourceType = Value

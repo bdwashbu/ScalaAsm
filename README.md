@@ -40,7 +40,9 @@ implicit object push3 extends PUSH_1[imm16] {
 }
 ```
 
-Each instruction takes only 4 lines of code!
+Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here, and that along with the opcode gives us enough information to completely implement the instruction!  The "Op/En" field is an abbreviation for the type of expected operands e.g "I" means "Immediate".
+
+![Alt text](/example/push.png "PUSH examples")
 
 Assuming those are the only versions of PUSH available, if you tried calling:
 

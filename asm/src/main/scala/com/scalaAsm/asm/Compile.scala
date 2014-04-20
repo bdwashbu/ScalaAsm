@@ -28,7 +28,7 @@ object AsmCompiler extends Catalog
       }      
     }
     
-    val dataBytes = (dataSection.flatMap {
+    val dataBytes = (dataSection flatMap {
         case ByteOutputPost(padding) => Some(padding)
         case PostVar(_,value,_) => Some(value.toCharArray().map(_.toByte))
         case _ => None
@@ -38,10 +38,10 @@ object AsmCompiler extends Catalog
 
     // a map of variable to its RVA
     def createDefMap: Map[String, Int] = {
-    	dataSection.flatMap {
+    	dataSection flatMap {
 	      case PostVar(name, value, pos) => Some((name, pos + addressOfData + 8))
 	      case _ => None
-	    }.toMap
+	    } toMap
     }
     
     (data, createDefMap)
@@ -55,7 +55,7 @@ object AsmCompiler extends Catalog
     lazy val varNames    = variables.keys.toList
     lazy val procNames   = asm.code.collect{ case BeginProc(name) => name }
     
-    def onePass: Seq[Token] = asm.code.flatMap {
+    def onePass: Seq[Token] = asm.code flatMap {
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
@@ -93,8 +93,8 @@ object AsmCompiler extends Catalog
     
     lazy val varNames = variables.keys.toList
     // Build procedure map
-    val procs = asm.positionPass.collect{case Proc(offset, name) => (name, offset)}.toMap
-    val labels = asm.positionPass.collect{case LabelResolved(offset, name) => (name, offset)}.toMap    
+    val procs = asm.positionPass collect {case Proc(offset, name) => (name, offset)} toMap
+    val labels = asm.positionPass collect {case LabelResolved(offset, name) => (name, offset)} toMap    
     
     val code: Array[Byte] = {
       var parserPosition = 0

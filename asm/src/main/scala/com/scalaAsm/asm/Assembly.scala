@@ -13,7 +13,7 @@ trait AsmProgram {
   def assemble: Assembled = {
     val codeTokens: ListBuffer[Token] = codeSections.flatMap{seg => seg.build(seg.builder.toList)}
     
-    val dataTokens = dataSections.flatMap{seg => seg.compile}
+    val dataTokens = dataSections flatMap {seg => seg.compile}
 
     Assembled(codeTokens, dataTokens)
   }

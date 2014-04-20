@@ -35,7 +35,7 @@ trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
 //        case token: InstructionToken => List(token)
 //      }}
 //       
-       build(builder.toList).collect{ case x: InstructionToken => x}.map{x => x.inst.code}.reduce(_ ++ _)
+       build(builder.toList) collect { case x: InstructionToken => x} map {x => x.inst.code} reduce (_ ++ _)
     }
     
     private def procRef(procName: String) = ProcRef(procName)

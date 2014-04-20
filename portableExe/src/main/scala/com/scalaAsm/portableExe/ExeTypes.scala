@@ -18,7 +18,7 @@ private trait ExeWriter {
 
     def hex2Bytes(hex: String) = {
 	    def stripChars(s: String, ch: String) = s filterNot (ch contains _)
-	    stripChars(hex, " -").grouped(2).map(Integer.parseInt(_, 16).toByte).toArray
+	    stripChars(hex, " -") grouped (2) map (Integer.parseInt(_, 16) toByte) toArray
 	  }
 
     def write(stream: OutputStream, value: Short) = {

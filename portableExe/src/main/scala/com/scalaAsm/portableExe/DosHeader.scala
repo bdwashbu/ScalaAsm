@@ -52,7 +52,7 @@ object DosStub {
     }
 
     bbuf.put(dosStub.getRawBytes)
-    bbuf.put(dosWarning.toCharArray().map(_.toByte))
+    bbuf.put(dosWarning.toCharArray() map (_.toByte))
   }
 }
 
@@ -80,7 +80,7 @@ case class DosHeader(
   def apply() = {
     val bbuf = ByteBuffer.allocate(256);
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    bbuf.put(e_magic.toCharArray().map(_.toByte))
+    bbuf.put(e_magic.toCharArray() map (_.toByte))
     bbuf.putShort(e_cblp)
     bbuf.putShort(e_cp)
     bbuf.putShort(e_crlc)

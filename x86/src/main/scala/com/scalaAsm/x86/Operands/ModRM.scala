@@ -15,7 +15,7 @@ protected[x86] trait AddressingFormSpecifier {
 
   lazy val getBytes: Array[Byte] = {
     val components: List[Option[InstructionField]] = List(modRM, sib, displacment, immediate)
-    components.flatten.flatMap(_.getBytes).toArray
+    components.flatten flatMap (_.getBytes) toArray
   }
 
   lazy val size: Int = {
@@ -35,10 +35,10 @@ object ModRM {
 }
 
 sealed class RegisterMode(val value: Byte)
-case object NoDisplacement extends RegisterMode(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacemen
-case object DisplacementByte extends RegisterMode(1) // Eight-bit displacement, sign-extended to 16 bits
+case object NoDisplacement    extends RegisterMode(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacemen
+case object DisplacementByte  extends RegisterMode(1) // Eight-bit displacement, sign-extended to 16 bits
 case object DisplacementDword extends RegisterMode(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
-case object TwoRegisters extends RegisterMode(3) // r/m is treated as a second "reg" field
+case object TwoRegisters      extends RegisterMode(3) // r/m is treated as a second "reg" field
 
 // Mod/RM format
 //   7                           0
@@ -60,9 +60,9 @@ case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR) extends
 }
 
 sealed class SIBScale(val value: Byte)
-case object One extends SIBScale(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacemen
-case object Two extends SIBScale(1) // Eight-bit displacement, sign-extended to 16 bits
-case object Four extends SIBScale(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
+case object One   extends SIBScale(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacement
+case object Two   extends SIBScale(1) // Eight-bit displacement, sign-extended to 16 bits
+case object Four  extends SIBScale(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
 case object Eight extends SIBScale(3) // r/m is treated as a second "reg" field
 
 // SIB format

@@ -8,7 +8,7 @@ Scala x86
 
 * Perhaps you've wanted to learn x86/assembly?
 
-You can learn all these things and more from Scala x86.  Scala x86 can assemble x86 code as well as link this into a portable executable (PE) file for execution on win32 or win64 bit platforms.  
+You can learn all these things and more from Scala x86.  Scala x86 can assemble x86 code as well as link this into a portable executable (PE) file for execution on windows 32 or 64-bit platforms.  
 
 
 #### Implementing x86
@@ -40,9 +40,14 @@ implicit object push3 extends PUSH_1[imm16] {
 }
 ```
 
-Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. Op/En along with the opcode gives us enough information to completely implement the instruction!  The "Op/En" field is an abbreviation for the type of expected operands e.g "I" means "Immediate".
+Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. Op/En along with the opcode gives us enough information to completely implement the instruction!
 
 ![Alt text](/example/push.png "PUSH examples")
+
+The "Op/En" field is an abbreviation for the type of expected operands e.g "I" means "Immediate".
+
+![Alt text](/example/pushOpEncoding.png "PUSH examples")
+
 
 Assuming those are the only versions of PUSH available, if you tried calling:
 

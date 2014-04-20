@@ -69,6 +69,27 @@ case class ImageResourceDirectory(
     idEntries: Seq[ImageResourceEntry]
 )
 
+trait ImageResourceEntry {
+  val offsetToData: Int
+}
+
+trait ImageResourceDirectoryEntry extends ImageResourceEntry {
+  val offsetToData: Int
+  val directory: ImageResourceDirectory
+}
+
+case class NamedImageResourceDirectoryEntry (
+    name: String,
+    offsetToData: Int,
+    directory: ImageResourceDirectory
+) extends ImageResourceDirectoryEntry
+
+case class IdImageResourceDirectoryEntry (
+    id: Int,
+    offsetToData: Int,
+    directory: ImageResourceDirectory
+) extends ImageResourceDirectoryEntry
+
 object ImageResourceDirectoryEntry {
   def getNamedDirectoryEntry(input: ByteBuffer, beginningFileLocation: Int, beginningOfSection: Int, level: Int): NamedImageResourceDirectoryEntry = {
     val namePtr = input.getInt
@@ -122,26 +143,7 @@ object ImageResourceDirectoryEntry {
   }
 }
 
-trait ImageResourceEntry {
-  val offsetToData: Int
-}
 
-trait ImageResourceDirectoryEntry extends ImageResourceEntry {
-  val offsetToData: Int
-  val directory: ImageResourceDirectory
-}
-
-case class NamedImageResourceDirectoryEntry (
-    name: String,
-    offsetToData: Int,
-    directory: ImageResourceDirectory
-) extends ImageResourceDirectoryEntry
-
-case class IdImageResourceDirectoryEntry (
-    id: Int,
-    offsetToData: Int,
-    directory: ImageResourceDirectory
-) extends ImageResourceDirectoryEntry
 
 object ImageResourceDataEntry {
   def getDataEntry(input: ByteBuffer, beginningOfSection: Int): ImageResourceDataEntry = {
@@ -171,12 +173,12 @@ object ResourceType extends Enumeration {
   type ResourceType = Value
   val cursor = Value(1)
   val bitmap = Value(2)
-  val icon = Value(3)
-  val menu = Value(4)
+  val icon   = Value(3)
+  val menu   = Value(4)
   val dialog = Value(5)
   val string = Value(6)
   val fontdir = Value(7)
-  val font = Value(8)
+  val font   = Value(8)
   val accelerator = Value(9)
   val rcData = Value(10)
   val messageTable = Value(11)

@@ -59,15 +59,15 @@ case class Section(
 
 object Characteristic extends Enumeration {
   type characteristic = Value
-  val CODE = Value(0x00000020)
+  val CODE        = Value(0x00000020)
   val INITIALIZED = Value(0x00000040)
   val UNINIT_DATA = Value(0x00000080)
-  val NOT_CACHE = Value(0x04000000)
-  val NOT_PAGE = Value(0x08000000)
-  val SHARED = Value(0x10000000)
-  val EXECUTE = Value(0x20000000)
-  val READ = Value(0x40000000)
-  val WRITE = Value(0x80000000)
+  val NOT_CACHE   = Value(0x04000000)
+  val NOT_PAGE    = Value(0x08000000)
+  val SHARED      = Value(0x10000000)
+  val EXECUTE     = Value(0x20000000)
+  val READ        = Value(0x40000000)
+  val WRITE       = Value(0x80000000)
 }
 
 object Sections {

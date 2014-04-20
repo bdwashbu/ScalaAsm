@@ -71,8 +71,7 @@ object ExeGenerator extends Sections {
 	   // Extern(dll, export.functionNames intersect possibleFunctions)
     }
     
-    val dllImports = for (dll <- dlls) yield {
-      println(dll)
+    val dllImports = dlls flatMap { dll =>
 	    val file = new File("C:/Windows/System32/" + dll);
 	 
 	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
@@ -91,11 +90,12 @@ object ExeGenerator extends Sections {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-//	    val resources = ImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
-//	    println(resources)
-//	    println(resources.namedEntries)
+	    val importedSymbols = export.functionNames intersect possibleFunctions
 
-	    Extern(dll, export.functionNames intersect possibleFunctions)
+	    if (importedSymbols.isEmpty)
+	      None
+	    else
+	      Some(Extern(dll, importedSymbols))
     }
     
     val test = Imports(imports = dllImports,

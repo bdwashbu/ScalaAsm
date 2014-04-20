@@ -1,5 +1,6 @@
 package com.scalaAsm.portableExe
 
+import sections._
 
 case class PortableExecutable(dosHeader: DosHeader,
 						      peHeader: NtHeader,

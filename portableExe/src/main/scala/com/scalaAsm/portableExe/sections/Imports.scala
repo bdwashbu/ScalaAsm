@@ -1,4 +1,5 @@
 package com.scalaAsm.portableExe
+package sections
 
 import java.io.DataOutputStream
 import java.io.ByteArrayOutputStream

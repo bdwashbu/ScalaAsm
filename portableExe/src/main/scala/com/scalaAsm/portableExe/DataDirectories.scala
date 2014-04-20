@@ -5,6 +5,7 @@ import scala.collection.immutable.TreeMap
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.io.FileOutputStream
+import sections._
 
 private[portableExe] case class ImageDataDirectory(virtualAddress: Int, size: Int) extends ExeWriter {
   def write(stream: DataOutputStream) {

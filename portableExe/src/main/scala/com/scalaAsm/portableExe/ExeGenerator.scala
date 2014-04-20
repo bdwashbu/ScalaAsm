@@ -15,6 +15,7 @@ import com.scalaAsm.utils.Endian
 import java.io.File
 import java.io.FileInputStream
 import com.scalaAsm.asm.Tokens.ImportRef
+import sections._
   
 private[portableExe] case class CompiledImports(rawData: Array[Byte],
                             boundImportSize: Int,
@@ -33,7 +34,7 @@ private[portableExe] case class CompiledImports(rawData: Array[Byte],
   }  
 }
 
-object ExeGenerator extends Sections {
+object ExeGenerator {
   
   def align(array: Array[Byte], to: Int, filler: Byte = 0xCC.toByte) = {
     val currentSize = array.size
@@ -179,7 +180,34 @@ object ExeGenerator extends Sections {
     
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.additionalFields.imageBase)
     
-    val sections = compileSections(code.size, rawData.size + compiledImports.rawData.size)
+    val sections = List(SectionHeader(
+      name = ".text",
+      virtualSize = code.size,
+      virtualAddress = 0x1000,
+      sizeOfRawData = 0x200,
+      pointerToRawData = 0x200,
+      relocPtr = 0,
+      linenumPtr = 0,
+      relocations = 0,
+      lineNumbers = 0,
+      characteristics = Characteristic.CODE.id |
+        Characteristic.EXECUTE.id |
+        Characteristic.READ.id),
+
+    SectionHeader(
+      name = ".data",
+      virtualSize = rawData.size + compiledImports.rawData.size,
+      virtualAddress = 0x2000,
+      sizeOfRawData = 0x200,
+      pointerToRawData = 0x400,
+      relocPtr = 0,
+      linenumPtr = 0,
+      relocations = 0,
+      lineNumbers = 0,
+      characteristics = Characteristic.INITIALIZED.id |
+        Characteristic.READ.id |
+        Characteristic.WRITE.id)
+    )
     
     val fileHeader = FileHeader(
 		machine = 0x14C,

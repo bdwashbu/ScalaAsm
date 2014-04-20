@@ -46,7 +46,6 @@ object ExeGenerator {
     
     
      for (dll <- Seq("C:/Scala/ScalaBasic/tools/PEInfo.exe")) yield {
-      println(dll)
 	    val file = new File(dll);
 	 
 	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
@@ -66,10 +65,6 @@ object ExeGenerator {
 	
 	    //val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
 	    val resources = ImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
-	    println(resources)
-	    println(resources.namedEntries)
-
-	   // Extern(dll, export.functionNames intersect possibleFunctions)
     }
     
     val dllImports = dlls flatMap { dll =>
@@ -180,7 +175,8 @@ object ExeGenerator {
     
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.additionalFields.imageBase)
     
-    val sections = List(SectionHeader(
+    val sections = List(
+    Section(
       name = ".text",
       virtualSize = code.size,
       virtualAddress = 0x1000,
@@ -194,7 +190,7 @@ object ExeGenerator {
         Characteristic.EXECUTE.id |
         Characteristic.READ.id),
 
-    SectionHeader(
+    Section(
       name = ".data",
       virtualSize = rawData.size + compiledImports.rawData.size,
       virtualAddress = 0x2000,

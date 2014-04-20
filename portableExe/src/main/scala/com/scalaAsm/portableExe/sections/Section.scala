@@ -5,16 +5,16 @@ import java.nio.ByteBuffer
 import scala.collection.mutable.ListBuffer
 import java.nio.ByteOrder
 
-private[portableExe] case class CompiledSections(sectionHeaders: SectionHeader*) {
-  val sections = sectionHeaders.map(_.write).reduce(_ ++ _)
+private[portableExe] case class CompiledSections(sectionheaders: Section*) {
+  val sections = sectionheaders map(_.write) reduce(_ ++ _)
 }
 
-object SectionHeader {
-  def getSectionHeader(input: ByteBuffer): SectionHeader = {
+object Section {
+  def getSection(input: ByteBuffer): Section = {
      val name = Array.fill(8)(0.toByte)
      input.get(name)
-     SectionHeader(
-         name = name.map(_.toChar).mkString,
+     Section(
+         name = name map(_.toChar) mkString,
          virtualSize = input.getInt(),
          virtualAddress   = input.getInt(),
          sizeOfRawData    = input.getInt(),
@@ -28,7 +28,7 @@ object SectionHeader {
   }
 }
 
-case class SectionHeader(
+case class Section(
   name: String,
   virtualSize: Int,
   virtualAddress: Int,
@@ -43,7 +43,7 @@ case class SectionHeader(
   def write: Array[Byte] = {
     val bbuf = ByteBuffer.allocate(256);
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    bbuf.put(name.padTo(8, 0.toChar).map(_.toByte).toArray)
+    bbuf.put(name.padTo(8, 0.toChar) map(_.toByte) toArray)
     bbuf.putInt(virtualSize)
     bbuf.putInt(virtualAddress)
     bbuf.putInt(sizeOfRawData)
@@ -71,11 +71,11 @@ object Characteristic extends Enumeration {
 }
 
 object Sections {
-  def getSections(input: ByteBuffer, numSections: Int): Seq[SectionHeader] = {
-    val sectionHeaders = new ListBuffer[SectionHeader]()
+  def getSections(input: ByteBuffer, numSections: Int): Seq[Section] = {
+    val sectionHeaders = new ListBuffer[Section]()
 
     for (i <- 0 until numSections) {
-      val sectionHeader = SectionHeader.getSectionHeader(input)
+      val sectionHeader = Section.getSection(input)
       sectionHeaders += sectionHeader
     }
     sectionHeaders.toSeq

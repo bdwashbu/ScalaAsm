@@ -6,7 +6,7 @@ import java.nio.ByteOrder
 object PeHeader {
   def getPeHeader(input: ByteBuffer): PeHeader = {
     input.order(ByteOrder.LITTLE_ENDIAN)
-    val magicNumber = List(input.get.toChar, input.get.toChar, input.get.toChar, input.get.toChar) mkString
+    val magicNumber = (0 until 4) map (x => input.get.toChar) mkString
     val fHeader = FileHeader.getFileHeader(input)
     val oHeader = OptionalHeader.getOptionalHeader(input)
     val peHeader = new PeHeader(magicNumber) {

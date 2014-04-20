@@ -5,7 +5,7 @@ import sections._
 case class PortableExecutable(dosHeader: DosHeader,
 						      peHeader: NtHeader,
                  		      directories: DataDirectories,
-                 		      sections: Seq[SectionHeader],
+                 		      sections: Seq[Section],
                  		      code: Array[Byte],
                  		      rawData: Array[Byte],
                  		      compiledImports: CompiledImports)

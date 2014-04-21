@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import com.scalaAsm.portableExe.ImageDataDirectory
 
 object ImageExportDirectory {
-  def getExports(input: ByteBuffer, sections: Seq[Section], dir: ImageDataDirectory): ImageExportDirectory = {
+  def getExports(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ImageExportDirectory = {
     
     val section = sections.find(section => section.virtualAddress <= dir.virtualAddress && 
                                            section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)

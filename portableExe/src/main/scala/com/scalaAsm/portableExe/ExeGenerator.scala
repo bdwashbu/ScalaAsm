@@ -111,25 +111,25 @@ object ExeGenerator {
     val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols)
 
     val dosHeader = DosHeader(
-	    e_magic = "MZ", // Magic number
-	    e_cblp = 144, // Bytes on last page of file
-	    e_cp = 3, // Pages in file
-	    e_crlc = 0, // Relocations
-	    e_cparhdr = 4, // Size of header in paragraphs
-	    e_minalloc = 0, // Minimum extra paragraphs needed
-	    e_maxalloc = 65535.toShort, // Maximum extra paragraphs needed
-	    e_ss = 0, // Initial (relative) SS value
-	    e_sp = 184, // Initial SP value
-	    e_csum = 0, // Checksum
-	    e_ip = 0, // Initial IP value
-	    e_cs = 0, // Initial (relative) CS value
-	    e_lfarlc = 64, // File address of relocation table
-	    e_ovno = 0, // Overlay number
-	    e_res = Array.fill(4)(0.toShort), // Reserved words
-	    e_oemid = 0, // OEM identifier (for e_oeminfo)
-	    e_oeminfo = 0, // OEM information; e_oemid specific
-	    e_res2 = Array.fill(10)(0.toShort), // Reserved words
-	    e_lfanew = 128 // File address of new exe header
+	    e_magic = "MZ", 
+	    e_cblp = 144,
+	    e_cp = 3,
+	    e_crlc = 0,
+	    e_cparhdr = 4,
+	    e_minalloc = 0,
+	    e_maxalloc = 65535.toShort,
+	    e_ss = 0,
+	    e_sp = 184,
+	    e_csum = 0,
+	    e_ip = 0,
+	    e_cs = 0,
+	    e_lfarlc = 64,
+	    e_ovno = 0,
+	    e_res = Array.fill(4)(0.toShort),
+	    e_oemid = 0,
+	    e_oeminfo = 0,
+	    e_res2 = Array.fill(10)(0.toShort),
+	    e_lfanew = 128
     )
     
     val optionalHeader = OptionalHeader(
@@ -176,7 +176,7 @@ object ExeGenerator {
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.additionalFields.imageBase)
     
     val sections = List(
-    Section(
+    SectionHeader(
       name = ".text",
       virtualSize = code.size,
       virtualAddress = 0x1000,
@@ -190,7 +190,7 @@ object ExeGenerator {
         Characteristic.EXECUTE.id |
         Characteristic.READ.id),
 
-    Section(
+    SectionHeader(
       name = ".data",
       virtualSize = rawData.size + compiledImports.rawData.size,
       virtualAddress = 0x2000,

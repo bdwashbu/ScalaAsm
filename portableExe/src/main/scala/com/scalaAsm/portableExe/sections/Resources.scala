@@ -32,7 +32,7 @@ object ImageResourceDirectory {
     )
   }
   
-  def getResources(input: ByteBuffer, sections: Seq[Section], dir: ImageDataDirectory): ImageResourceDirectory = {
+  def getResources(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ImageResourceDirectory = {
     
     val section = sections.find(section => section.virtualAddress <= dir.virtualAddress && 
                                            section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)

@@ -5,15 +5,15 @@ import java.nio.ByteBuffer
 import scala.collection.mutable.ListBuffer
 import java.nio.ByteOrder
 
-private[portableExe] case class CompiledSections(sectionheaders: Section*) {
-  val sections = sectionheaders map(_.write) reduce(_ ++ _)
+private[portableExe] case class CompiledSections(sectionheaders: SectionHeader*) {
+  val sectionHeaders = sectionheaders map(_.write) reduce(_ ++ _)
 }
 
-object Section {
-  def getSection(input: ByteBuffer): Section = {
+object SectionHeader {
+  def getSectionHeader(input: ByteBuffer): SectionHeader = {
      val name = Array.fill(8)(0.toByte)
      input.get(name)
-     Section(
+     SectionHeader(
          name = name map(_.toChar) mkString,
          virtualSize = input.getInt(),
          virtualAddress   = input.getInt(),
@@ -28,7 +28,7 @@ object Section {
   }
 }
 
-case class Section(
+case class SectionHeader(
   name: String,
   virtualSize: Int,
   virtualAddress: Int,
@@ -71,11 +71,11 @@ object Characteristic extends Enumeration {
 }
 
 object Sections {
-  def getSections(input: ByteBuffer, numSections: Int): Seq[Section] = {
-    val sectionHeaders = new ListBuffer[Section]()
+  def getSections(input: ByteBuffer, numSections: Int): Seq[SectionHeader] = {
+    val sectionHeaders = new ListBuffer[SectionHeader]()
 
     for (i <- 0 until numSections) {
-      val sectionHeader = Section.getSection(input)
+      val sectionHeader = SectionHeader.getSectionHeader(input)
       sectionHeaders += sectionHeader
     }
     sectionHeaders.toSeq

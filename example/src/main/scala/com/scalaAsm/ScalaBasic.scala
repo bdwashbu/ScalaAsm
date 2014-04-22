@@ -13,7 +13,7 @@ object ScalaBasic {
 
       val beginTime = System.nanoTime()
       val assembled = HelloWorld.assemble
-      val exe = ExeGenerator.link(assembled, 0x2000, "kernel32.dll", "msvcrt.dll", "ADVAPI32.dll")
+      val exe = ExeGenerator.link(assembled, 0x2000, "kernel32.dll", "msvcrt.dll")
       println(exe)
       outputStream.write(exe.get)
 

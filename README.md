@@ -74,9 +74,12 @@ object HelloWorld extends AsmProgram {
   }
 
   codeSections += new CodeSection {
+    
+    val STD_OUTPUT_HANDLE = imm8(-11)
+    val STD_INPUT_HANDLE = imm8(-10)
 
     builder += Procedure("start", List(
-      push(imm8(-11)),
+      push(STD_OUTPUT_HANDLE),
       call("GetStdHandle"),
       mov(ebx, eax),
       push(imm8(0)),
@@ -91,7 +94,7 @@ object HelloWorld extends AsmProgram {
       push("pressAnyKey"),
       push(ebx),
       call("WriteFile"),
-      push(imm8(-10)),
+      push(STD_INPUT_HANDLE),
       call("GetStdHandle"),
       push(eax),
       call("FlushConsoleInputBuffer"),

@@ -9,14 +9,14 @@ import com.scalaAsm.asm.CodeSection
 object HelloWorld extends AsmProgram {
   
   dataSections += new DataSection {
-    builder += Variable("pressAnyKey", "Press any key to continue ...\0", "Press any key to continue ...\0".length)
-    builder += Variable("newline", "\r\n\0", "\r\n\0".length)
-    builder += Variable("helloWorld", "Hello World!\n\0", "Hello World!\n\0".length)
+    builder += Variable("pressAnyKey", "Press any key to continue ...\0")
+    builder += Variable("newline", "\r\n\0")
+    builder += Variable("helloWorld", "Hello World!\n\0")
   }
 
   codeSections += new CodeSection {
 
-    builder += Procedure("start", List(
+    procedure("start",
       call("printHelloWorld"),
       push("pressAnyKey"),
       call("flushBuffer"),
@@ -25,14 +25,14 @@ object HelloWorld extends AsmProgram {
       call("flushBuffer"),
       push(imm8(0)),
       call("ExitProcess")
-    ))
+    )
 
-    builder += Procedure("printHelloWorld", List(
+    procedure("printHelloWorld",
       push("helloWorld"),
       call("printf"),
       add(esp, imm8(4)),
       retn
-    ))
+    )
 
     val numberOfBytesToWrite = *(ebp - byte(12))
     val numberOfBytesWritten = *(ebp + byte(-8))
@@ -40,7 +40,7 @@ object HelloWorld extends AsmProgram {
     val lpBuffer = *(ebp + byte(8))
     //val STD_OUTPUT_HANDLE = imm8(-11)
     
-    builder += Procedure("flushBuffer", List(
+    procedure("flushBuffer",
       push(ebp),
       mov(ebp, esp),
       add(esp, imm8(-12)),
@@ -60,11 +60,11 @@ object HelloWorld extends AsmProgram {
       mov(eax, numberOfBytesWritten),
       leave,
       retn(imm16(4))
-    ))
+    )
 
     builder += align(0x10)
 
-    builder += Procedure("waitForKeypress", List(
+    procedure("waitForKeypress",
       push(imm8(-10)),
       call("GetStdHandle"),
       push(eax),
@@ -76,11 +76,11 @@ object HelloWorld extends AsmProgram {
       jz(imm8(-17)),
       call("_getch"),
       retn
-    ))
+    )
 
     builder += align(0x10)
     
-    builder += Procedure("strlen", List(
+    procedure("strlen",
       mov(eax, *(esp + byte(4))),
       lea(edx, *(eax + byte(3))),
       push(ebp),
@@ -117,6 +117,6 @@ object HelloWorld extends AsmProgram {
       pop(edi),
       pop(ebp),
       retn(imm16(4))
-    ))
+    )
   }
 }

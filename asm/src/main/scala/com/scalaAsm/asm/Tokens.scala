@@ -11,8 +11,8 @@ object Tokens {
   trait CodeToken extends Token
   case class Reference(name: String) extends CodeToken
   case class JmpRef(name: String) extends CodeToken
-  case class CodeGroup(code: List[CodeToken]) extends CodeToken
-  case class Procedure(name: String, innerCode: List[CodeToken]) extends CodeToken
+  case class CodeGroup(code: Seq[CodeToken]) extends CodeToken
+  case class ProcedureToken(name: String, innerCode: Seq[CodeToken]) extends CodeToken
   case class Label(name: String) extends CodeToken
   case class LabelRef(labelRef: String, inst:OneOperandInstruction[Immediate8]) extends CodeToken
   case class InstructionToken(inst: MachineCode) extends SizedToken(inst.size) with CodeToken
@@ -27,7 +27,7 @@ object Tokens {
   case class JmpRefResolved(varName: String) extends SizedToken(6)
   
   trait DataToken extends Token
-  case class Variable(name: String, val value: String, tokenSize: Int) extends SizedToken(tokenSize) with DataToken
+  case class Variable(name: String, val value: String) extends SizedToken(value.length) with DataToken
 
   abstract class DynamicSizedToken(val size: (Int) => Int) extends Token
 

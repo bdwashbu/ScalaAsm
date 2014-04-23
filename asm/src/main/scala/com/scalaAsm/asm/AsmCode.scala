@@ -22,9 +22,13 @@ trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
     
-    def build(code: List[CodeToken]): List[Token] =
+    def procedure(name: String, innerCode: CodeToken*) = {
+      builder += ProcedureToken(name, innerCode)
+    }
+    
+    def build(code: Seq[CodeToken]): Seq[Token] =
 	   code flatMap {
-	    case Procedure(name, code) => List(BeginProc(name)) ++ build(code)
+	    case ProcedureToken(name, code) => List(BeginProc(name)) ++ build(code)
 	    case CodeGroup(code) => build(code)
 	    case token => List(token)
 	  }
@@ -35,7 +39,7 @@ trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
 //        case token: InstructionToken => List(token)
 //      }}
 //       
-       build(builder.toList) collect { case x: InstructionToken => x} map {x => x.inst.code} reduce (_ ++ _)
+       build(builder.toSeq) collect { case x: InstructionToken => x} map {x => x.inst.code} reduce (_ ++ _)
     }
     
     private def procRef(procName: String) = ProcRef(procName)

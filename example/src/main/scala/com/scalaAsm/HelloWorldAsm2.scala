@@ -9,15 +9,17 @@ import com.scalaAsm.asm.CodeSection
 object HelloWorld2 extends AsmProgram {
   
   dataSections += new DataSection {
-    builder += Variable("helloWorld", "Hello World!\r\n\0", "Hello World!\r\n\0".length)
-    builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\0", "Press any key to continue ...\r\n\0".length)
+    builder += Variable("helloWorld", "Hello World!\r\n\0")
+    builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\0")
   }
 
-
   codeSections += new CodeSection {
+    
+    val STD_OUTPUT_HANDLE = imm8(-11)
+    val STD_INPUT_HANDLE = imm8(-10)
 
-    builder += Procedure("start", List(
-      push(imm8(-11)),
+    procedure("start",
+      push(STD_OUTPUT_HANDLE),
       call("GetStdHandle"),
       mov(ebx, eax),
       push(imm8(0)),
@@ -32,13 +34,13 @@ object HelloWorld2 extends AsmProgram {
       push("pressAnyKey"),
       push(ebx),
       call("WriteFile"),
-      push(imm8(-10)),
+      push(STD_INPUT_HANDLE),
       call("GetStdHandle"),
       push(eax),
       call("FlushConsoleInputBuffer"),
       call("_getch"),
       mov(eax, imm32(0)),
       retn
-    ))
+    )
   }
 }

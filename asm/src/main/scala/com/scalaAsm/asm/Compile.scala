@@ -16,7 +16,7 @@ object AsmCompiler extends Catalog
       var parserPosition = 0
       for (token <- dataTokens) yield {
         val result = token match {
-	      case Variable(name, value, _) => PostVar(name, value, parserPosition)
+	      case Variable(name, value) => PostVar(name, value, parserPosition)
 	      case Align(to, filler, _) => ByteOutputPost( Array.fill((to - (parserPosition % to)) % to)(filler))
         }
         token match {

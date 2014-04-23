@@ -4,7 +4,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import com.scalaAsm.asm.CodeSection
 import com.scalaAsm.asm.AsmProgram
-import com.scalaAsm.asm.Tokens.Procedure
 
 object DosHeader {
   def getDosHeader(input: ByteBuffer): DosHeader = {

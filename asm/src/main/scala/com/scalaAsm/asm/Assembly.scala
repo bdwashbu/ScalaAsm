@@ -11,7 +11,7 @@ trait AsmProgram {
   val dataSections = new ListBuffer[DataSection]()
 
   def assemble: Assembled = {
-    val codeTokens: ListBuffer[Token] = codeSections.flatMap{seg => seg.build(seg.builder.toList)}
+    val codeTokens: ListBuffer[Token] = codeSections.flatMap{seg => seg.build(seg.builder.toSeq)}
     
     val dataTokens = dataSections flatMap {seg => seg.compile}
 

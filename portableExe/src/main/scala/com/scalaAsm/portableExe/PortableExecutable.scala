@@ -19,7 +19,7 @@ case class PortableExecutable(dosHeader: DosHeader,
   	               ExeGenerator.align(code, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00) ++
   	               rawData ++
   	               compiledImports.rawData
-  	  ExeGenerator.align(result, 0x200, 0x00)
+  	  ExeGenerator.align(result, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00)
   	}
   	
   	override def toString = {

@@ -63,7 +63,7 @@ The hope is that Scala x86 can be used to implement a turing-complete programmin
 
 We do know Scala x86 can be used to implement low-level assembly code. This assembly currently supports many useful  features such as procedures, loops, labels, and variables.  Some of these, like variables and loops, are implemented using first-class scala constructs.
 
-Heres "Hello world!":
+Heres a windows console version of "Hello world!":
 
 ```scala
 object HelloWorld extends AsmProgram {

@@ -1,6 +1,6 @@
 Scala x86
 ========
-#### A Modern x86 Assembler/Linker written in Scala
+#### A x86 Assembler/Linker written in Scala
 
 * Have you ever wanted to design your own programming language?
 

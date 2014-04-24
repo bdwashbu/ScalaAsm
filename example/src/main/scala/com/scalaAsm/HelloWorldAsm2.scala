@@ -18,7 +18,7 @@ object HelloWorld2 extends AsmProgram {
     val STD_OUTPUT_HANDLE = imm8(-11)
     val STD_INPUT_HANDLE = imm8(-10)
 
-    procedure("start",
+    procedure(name = "start",
       push(STD_OUTPUT_HANDLE),
       call("GetStdHandle"),
       mov(ebx, eax),

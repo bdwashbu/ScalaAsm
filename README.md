@@ -40,7 +40,7 @@ implicit object push3 extends PUSH_1[imm16] {
 }
 ```
 
-Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. Op/En along with the opcode gives us enough information to completely implement the instruction!
+Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with the opcode gives us enough information to completely implement the instruction!
 
 ![Alt text](/example/push.png "PUSH examples")
 

@@ -66,11 +66,11 @@ We do know Scala x86 can be used to implement low-level assembly code. This asse
 Heres a windows console version of "Hello world!":
 
 ```scala
-object HelloWorld extends AsmProgram {
+object HelloWorld2 extends AsmProgram {
   
   dataSections += new DataSection {
-    builder += Variable("helloWorld", "Hello World!\r\n\0", "Hello World!\r\n\0".length)
-    builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\0", "Press any key to continue ...\r\n\0".length)
+    builder += Variable("helloWorld", "Hello World!\r\n\0")
+    builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\0")
   }
 
   codeSections += new CodeSection {
@@ -78,7 +78,7 @@ object HelloWorld extends AsmProgram {
     val STD_OUTPUT_HANDLE = imm8(-11)
     val STD_INPUT_HANDLE = imm8(-10)
 
-    builder += Procedure("start", List(
+    procedure(name = "start",
       push(STD_OUTPUT_HANDLE),
       call("GetStdHandle"),
       mov(ebx, eax),
@@ -101,7 +101,7 @@ object HelloWorld extends AsmProgram {
       call("_getch"),
       mov(eax, imm32(0)),
       retn
-    ))
+    )
   }
 }
 ```
@@ -109,10 +109,10 @@ object HelloWorld extends AsmProgram {
 Heres code to output the executable:
 
 ```scala
-val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 val asm = HelloWorld.assemble
 val exe = ExeGenerator.link(asm, 0x2000, "kernel32.dll", "msvcrt.dll")
 
+val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 outputStream.write(exe.get)
 outputStream.close
 ```

@@ -6,7 +6,7 @@ Scala x86
 
 * Have you ever wondered how executable files work on windows?
 
-* Perhaps you've wanted to learn assembly/x86?
+* You've wanted to learn assembly/x86?
 
 Scala x86 is a collaboration of all these concepts.  Scala x86 can assemble x86 code as well as link this into a portable executable (PE) file for execution on windows 32 or 64-bit platforms.  
 

@@ -28,6 +28,13 @@ private trait ExeWriter {
       stream.write(buffer.array())
     }
 
+    def write(stream: OutputStream, value: Long) = {
+      val buffer = ByteBuffer.allocate(8)
+      buffer.order(ByteOrder.LITTLE_ENDIAN)
+      buffer.putLong(value)
+      stream.write(buffer.array())
+    }
+    
     def write(stream: OutputStream, value: Int) = {
       val buffer = ByteBuffer.allocate(4)
       buffer.order(ByteOrder.LITTLE_ENDIAN)

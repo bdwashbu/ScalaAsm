@@ -122,7 +122,7 @@ case class OptionalHeader(
   def size: Int = 96 + 15 * 8
 
   def apply() = {
-    val bbuf = ByteBuffer.allocate(96);
+    val bbuf = if (magic == 0x020B) ByteBuffer.allocate(112) else ByteBuffer.allocate(96);
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     bbuf.putShort(magic)
     bbuf.put(majorLinkerVersion.toByte)

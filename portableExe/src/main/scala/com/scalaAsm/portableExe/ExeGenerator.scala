@@ -100,7 +100,7 @@ object ExeGenerator {
     test.generateImports
   }
 
-  def link(asm: Assembled, addressOfData: Int, dlls: String*): PortableExecutable = {
+  def link(asm: Assembled, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
 
     val (rawData, variables) = AsmCompiler.compileData(addressOfData, asm.data)
     
@@ -133,7 +133,7 @@ object ExeGenerator {
     )
     
     val optionalHeader = OptionalHeader(
-      magic = 0x10b,
+      magic = if (is64Bit) 0x20b else 0x10b,
 	  majorLinkerVersion = 2,
 	  minorLinkerVersion = 50,
 	  sizeOfCode = 512,
@@ -151,7 +151,7 @@ object ExeGenerator {
 		  minorOperatingSystemVersion = 0,
 		  majorImageVersion = 0,
 		  minorImageVersion = 0,
-		  majorSubsystemVersion = 4,
+		  majorSubsystemVersion = if (is64Bit) 5 else 4,
 		  minorSubsystemVersion = 0,
 		  win32Version = 0,
 		  sizeOfImage = 0x3000,
@@ -206,12 +206,12 @@ object ExeGenerator {
     )
     
     val fileHeader = FileHeader(
-		machine = 0x14C,
+		machine = if (is64Bit) 0x8664.toShort else 0x14C,
 	    numberOfSections = sections.size.toShort,
 	    timeDateStamp = 0x5132F2E5,
 	    pointerToSymbolTable = 0, // no importance
 	    numberOfSymbols = 0, // no importance
-	    sizeOfOptionalHeader = 0x0E0,
+	    sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
 	    characteristics = 271
 	)
 	val peHeader = new NtHeader(fileHeader, optionalHeader)

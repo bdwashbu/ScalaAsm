@@ -19,24 +19,15 @@ abstract class TwoOperandsFormat[-X, -Y] extends OperandFormat {
   def getAddressingForm(x:X,y:Y,opcode: OpcodeFormat): Option[AddressingFormSpecifier]
 }
 
-trait InstructionFormat {
-
-  trait DualOperandEncoding[-O1 <: ModRM.rm, -O2 <: Operand] {
+trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
+   trait DualOperandEncoding[-O1 <: ModRM.rm, -O2 <: Operand] {
     def encode(x: O1, y: O2, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB])
   }
 
   def getEncoding[O1 <: ModRM.rm, O2 <: Operand](op1: O1, op2: O2, opcodeExtend: Option[Byte])(implicit operands: DualOperandEncoding[O1, O2]) = {
     operands.encode(op1, op2, opcodeExtend)
   }
-
-  trait SingleOperandEncoding[-O1 <: Operand] {
-    def encode(op1: O1, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB])
-  }
-
-  def getEncoding[O1 <: ModRM.rm](op1: O1, opcodeExtend: Option[Byte])(implicit operand: SingleOperandEncoding[O1]) = {
-    operand.encode(op1, opcodeExtend)
-  }
-
+  
   implicit object test1 extends DualOperandEncoding[GPR, Immediate] {
     def encode(op1: GPR, op2: Immediate, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
       val modRM: Option[ModRM] = Some(ModRMOpcode(TwoRegisters, opcodeExtend.get, op1))
@@ -70,31 +61,7 @@ trait InstructionFormat {
       (modRM, None)
     }
   }
-
-  implicit object test4 extends SingleOperandEncoding[Memory] {
-    def encode(op1: Memory, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
-      (op1.base, op1.offset, op1.immediate) match {
-        case (Some(base), offset @ Some(_: Displacement8), None) =>
-          val modRM = Some(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))
-          (modRM, None)
-        case (Some(base), None, None) =>
-          val modRM = Some(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
-          (modRM, None)
-        case (None, None, imm @ Some(_: Immediate)) =>
-          val modRM = Some(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP))
-          (modRM, None)
-        case _ => (None, None)
-      }
-    }
-  }
   
-  implicit object test5 extends SingleOperandEncoding[GPR] {
-    def encode(op1: GPR, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
-          val modRM = Some(ModRMOpcode(TwoRegisters, opcodeExtend.get, op1))
-          (modRM, None)
-    }
-  }
-
   case class MI[M <: ModRM.rm, I <: Immediate]() extends TwoOperandsFormat[M, I] {
 
     def getAddressingForm(op1: M, op2: I, opcode: OpcodeFormat): Option[AddressingFormSpecifier] = {
@@ -136,6 +103,59 @@ trait InstructionFormat {
     }
 
   }
+  
+   case class OI[O <: ModRM.plusRd, I <: Immediate]() extends TwoOperandsFormat[O, I] {
+
+    def getAddressingForm(op1: O, op2: I, opcode: OpcodeFormat): Option[AddressingFormSpecifier] = {
+      Some(new AddressingFormSpecifier {
+        val modRM = None
+        val (sib, displacment, immediate) = (None, None, Some(op2))
+      })
+    }
+  }
+   
+    case class M1[M <: ModRM.rm]() extends TwoOperandsFormat[M, One] {
+    def getAddressingForm(op1: M, op2: One, opcode: OpcodeFormat): Option[AddressingFormSpecifier] = M().getAddressingForm(op1, opcode)
+  }
+}
+
+trait OneOperandInstructionFormat {
+
+  trait SingleOperandEncoding[-O1 <: Operand] {
+    def encode(op1: O1, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB])
+  }
+
+  def getEncoding[O1 <: ModRM.rm](op1: O1, opcodeExtend: Option[Byte])(implicit operand: SingleOperandEncoding[O1]) = {
+    operand.encode(op1, opcodeExtend)
+  }
+
+  
+
+  implicit object test4 extends SingleOperandEncoding[Memory] {
+    def encode(op1: Memory, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
+      (op1.base, op1.offset, op1.immediate) match {
+        case (Some(base), offset @ Some(_: Displacement8), None) =>
+          val modRM = Some(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))
+          (modRM, None)
+        case (Some(base), None, None) =>
+          val modRM = Some(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+          (modRM, None)
+        case (None, None, imm @ Some(_: Immediate)) =>
+          val modRM = Some(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP))
+          (modRM, None)
+        case _ => (None, None)
+      }
+    }
+  }
+  
+  implicit object test5 extends SingleOperandEncoding[GPR] {
+    def encode(op1: GPR, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
+          val modRM = Some(ModRMOpcode(TwoRegisters, opcodeExtend.get, op1))
+          (modRM, None)
+    }
+  }
+
+  
 
   case class O[O <: ModRM.plusRd]() extends OneOperandFormat[O] {
     def getAddressingForm(op1: O, opcode: OpcodeFormat): Option[AddressingFormSpecifier] = {
@@ -146,16 +166,7 @@ trait InstructionFormat {
     }
   }
 
-  case class OI[O <: ModRM.plusRd, I <: Immediate]() extends TwoOperandsFormat[O, I] {
-
-    def getAddressingForm(op1: O, op2: I, opcode: OpcodeFormat): Option[AddressingFormSpecifier] = {
-      Some(new AddressingFormSpecifier {
-        val modRM = None
-        val (sib, displacment, immediate) = (None, None, Some(op2))
-      })
-    }
-
-  }
+ 
 
   case class I[I <: Immediate]() extends OneOperandFormat[I] {
 
@@ -201,9 +212,5 @@ trait InstructionFormat {
             })
       }
     }
-  }
-
-  case class M1[M <: ModRM.rm]() extends TwoOperandsFormat[M, One] {
-    def getAddressingForm(op1: M, op2: One, opcode: OpcodeFormat): Option[AddressingFormSpecifier] = M().getAddressingForm(op1, opcode)
   }
 }

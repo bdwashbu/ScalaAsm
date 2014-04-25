@@ -3,7 +3,7 @@ package Instructions
 
 abstract class DEC extends x86Instruction("DEC")
 
-trait DEC_1[-O1] extends DEC with OneOperandInstruction[O1] with InstructionFormat
+trait DEC_1[-O1] extends DEC with OneOperandInstruction[O1]
 
 object DEC {
   

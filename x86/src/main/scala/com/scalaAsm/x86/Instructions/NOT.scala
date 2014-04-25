@@ -3,7 +3,7 @@ package Instructions
 
 abstract class NOT extends x86Instruction("NOT")
 
-trait NOT_1[-O1] extends NOT with OneOperandInstruction[O1] with InstructionFormat
+trait NOT_1[-O1] extends NOT with OneOperandInstruction[O1]
 
 object NOT {
   

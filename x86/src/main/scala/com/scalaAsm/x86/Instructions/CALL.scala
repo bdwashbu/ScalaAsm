@@ -3,7 +3,7 @@ package Instructions
 
 abstract class CALL extends x86Instruction("CALL")
 
-trait CALL_1[-O1] extends CALL with OneOperandInstruction[O1] with InstructionFormat
+trait CALL_1[-O1] extends CALL with OneOperandInstruction[O1]
 
 trait CALLLow {
   implicit object call2 extends CALL_1[rm32] {

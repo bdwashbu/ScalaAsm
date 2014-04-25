@@ -62,7 +62,7 @@ trait ZeroOperandInstruction extends Instruction {
   }
 }
 
-trait OneOperandInstruction[-O1] extends Instruction {
+trait OneOperandInstruction[-O1] extends Instruction with OneOperandInstructionFormat {
   val opcode: OpcodeFormat
   def operands: OneOperandFormat[O1]
   val mnemonic: String = ""
@@ -89,7 +89,7 @@ trait OneOperandInstruction[-O1] extends Instruction {
   }
 }
 
-trait TwoOperandInstruction[-O1, -O2] extends Instruction {
+trait TwoOperandInstruction[-O1, -O2] extends Instruction with TwoOperandInstructionFormat {
   val opcode: OpcodeFormat
   def operands: TwoOperandsFormat[O1, O2]
   val mnemonic: String = ""

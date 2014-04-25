@@ -7,7 +7,7 @@ import scala.annotation.implicitNotFound
 abstract class PUSH extends x86Instruction("PUSH")
 
 @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
-trait PUSH_1[-O1] extends PUSH with OneOperandInstruction[O1] with InstructionFormat
+trait PUSH_1[-O1] extends PUSH with OneOperandInstruction[O1]
 
 trait POWLow {
     

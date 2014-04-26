@@ -64,25 +64,25 @@ trait ZeroOperandInstruction extends Instruction {
 
 trait OneOperandInstruction[-O1] extends Instruction with OneOperandInstructionFormat {
   val opcode: OpcodeFormat
-  def operands: OneOperandFormat[O1]
+  def opEn: OneOperandFormat[O1]
   val mnemonic: String = ""
 
   def apply(x: O1): MachineCode =
     new MachineCode {
       val size = getSize(x)
       val code = getBytes(x)
-      val line = mnemonic + " " + operands.toString
+      val line = mnemonic + " " + opEn.toString
     }
 
   def getSize(x: O1): Int = {
-    opcode.size + (operands.getAddressingForm(x, opcode) match {
+    opcode.size + (opEn.getAddressingForm(x, opcode) match {
       case Some(modRM) => modRM.size
       case _ => 0
     })
   }
 
   def getBytes(x: O1): Array[Byte] = {
-    opcode.get(x) ++ (operands.getAddressingForm(x, opcode) match {
+    opcode.get(x) ++ (opEn.getAddressingForm(x, opcode) match {
       case Some(modRM) => modRM.getBytes
       case _ => Array.emptyByteArray
     })
@@ -91,25 +91,25 @@ trait OneOperandInstruction[-O1] extends Instruction with OneOperandInstructionF
 
 trait TwoOperandInstruction[-O1, -O2] extends Instruction with TwoOperandInstructionFormat {
   val opcode: OpcodeFormat
-  def operands: TwoOperandsFormat[O1, O2]
+  def opEn: TwoOperandsFormat[O1, O2]
   val mnemonic: String = ""
 
   def apply(x: O1, y: O2): MachineCode =
     new MachineCode {
       val size = getSize(x, y)
       val code = getBytes(x, y)
-      val line = mnemonic + " " + operands.toString
+      val line = mnemonic + " " + opEn.toString
     }
 
   def getSize(x: O1, y: O2): Int = {
-    opcode.size + (operands.getAddressingForm(x, y, opcode) match {
+    opcode.size + (opEn.getAddressingForm(x, y, opcode) match {
       case Some(modRM) => modRM.size
       case _ => 0
     })
   }
 
   def getBytes(x: O1, y: O2): Array[Byte] = {
-    opcode.get(x) ++ (operands.getAddressingForm(x, y, opcode) match {
+    opcode.get(x) ++ (opEn.getAddressingForm(x, y, opcode) match {
       case Some(modRM) => modRM.getBytes
       case _ => Array.emptyByteArray
     })

@@ -10,12 +10,12 @@ trait POP_1[-O1] extends POP with OneOperandInstruction[O1]
 object POP {
   
   implicit object pop1 extends POP_1[r32] {
-      def operands = O()
+      def opEn = O()
       val opcode = OpcodePlusRd(0x58)
   }
   
   implicit object pop2 extends POP_1[DS] {
-      def operands = new OneOperandFormat[DS]() {def getAddressingForm(op1: DS, opcode: OpcodeFormat) = null}
+      def opEn = new OneOperandFormat[DS]() {def getAddressingForm(op1: DS, opcode: OpcodeFormat) = null}
       val opcode = OneOpcode(0x1F)
   }
 }

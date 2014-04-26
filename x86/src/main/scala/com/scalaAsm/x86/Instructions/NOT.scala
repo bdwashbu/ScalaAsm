@@ -8,7 +8,7 @@ trait NOT_1[-O1] extends NOT with OneOperandInstruction[O1]
 object NOT {
   
   implicit object not1 extends NOT_1[rm32] {
-      def operands = M()
+      def opEn = M()
       val opcode = 0xF7 /+ 2
   }
 }

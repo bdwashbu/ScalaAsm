@@ -9,16 +9,16 @@ object ADD {
   
   implicit object add1 extends ADD_2[rm32, imm8] {
       val opcode = 0x83 /+ 0
-      def operands = MI()
+      def opEn = MI()
   }
   
   implicit object add2 extends ADD_2[rm16, imm8] {
       val opcode = 0x83 /+ 0
-      def operands = MI()
+      def opEn = MI()
   }
   
   implicit object add3 extends ADD_2[r32, rm32] {
-      def operands = RM()
+      def opEn = RM()
       val opcode: OpcodeFormat = 0x03
   }
 }

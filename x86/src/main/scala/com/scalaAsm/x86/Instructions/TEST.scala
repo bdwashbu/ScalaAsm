@@ -8,12 +8,12 @@ trait TEST_2[-O1, -O2] extends TEST with TwoOperandInstruction[O1,O2]
 object TEST {
   
   implicit object test1 extends TEST_2[r32, rm32] {
-      def operands = RM()
+      def opEn = RM()
       val opcode: OpcodeFormat = 0x85
   }
   
   implicit object test2 extends TEST_2[rm32, imm32] {
-      def operands = MI()
+      def opEn = MI()
       val opcode: OpcodeFormat = 0xF7 /+ 0
   }
 }

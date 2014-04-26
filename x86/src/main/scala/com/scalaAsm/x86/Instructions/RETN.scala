@@ -11,7 +11,7 @@ trait RETN_1[-O1] extends RETN with OneOperandInstruction[O1]
 object RETN {
   
   implicit object retn1 extends RETN_1[imm16] {
-      def operands = I()
+      def opEn = I()
       val opcode: OpcodeFormat = 0xC2
   }
 }

@@ -8,7 +8,7 @@ trait LEA_2[-O1, -O2] extends LEA with TwoOperandInstruction[O1,O2]
 object LEA {
 
   implicit object lea1 extends LEA_2[r32, rm32] {
-      def operands = RM()
+      def opEn = RM()
       val opcode = 0x8D /+ 0
   }
 }

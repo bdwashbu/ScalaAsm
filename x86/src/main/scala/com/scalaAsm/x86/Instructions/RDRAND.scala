@@ -11,12 +11,12 @@ trait RDRAND_1[-O1] extends RDRAND with OneOperandInstruction[O1]
 object RDRAND {
   
   implicit object rdrand1 extends RDRAND_1[rm32] {
-      def operands = M()
+      def opEn = M()
       val opcode = (0x0F, 0xC7) /+ 6
   }
   
   implicit object rdrand2 extends RDRAND_1[rm16] {
-      def operands = M()
+      def opEn = M()
       val opcode = (0x0F, 0xC7) /+ 6
   }
 }

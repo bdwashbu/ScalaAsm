@@ -147,7 +147,7 @@ object ExeGenerator {
 		  imageBase = 0x400000,
 		  sectionAlignment = 0x1000,
 		  fileAlignment = 0x200,
-		  majorOperatingSystemVersion = 4,
+		  majorOperatingSystemVersion = if (is64Bit) 5 else 4,
 		  minorOperatingSystemVersion = 0,
 		  majorImageVersion = 0,
 		  minorImageVersion = 0,
@@ -212,7 +212,7 @@ object ExeGenerator {
 	    pointerToSymbolTable = 0, // no importance
 	    numberOfSymbols = 0, // no importance
 	    sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
-	    characteristics = 271
+	    characteristics = if (is64Bit) 47 else 271
 	)
 	val peHeader = new NtHeader(fileHeader, optionalHeader)
     

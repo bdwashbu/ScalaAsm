@@ -6,7 +6,7 @@ Scala x86
 
 * Have you ever wondered how executable files work on windows?
 
-* You've wanted to learn assembly/x86?
+* Maybe you've wanted to learn assembly/x86?
 
 Scala x86 is a collaboration of all these concepts.  Scala x86 can assemble x86 code as well as link this into a portable executable (PE) file for execution on windows 32 or 64-bit platforms.  
 
@@ -46,7 +46,7 @@ Here we see PUSH definitions straight from the Intel x86 specification, and we s
 
 ![Alt text](/example/push.png "PUSH examples")
 
-The "Op/En" field is an abbreviation for the type of expected operands e.g "I" means "Immediate".
+The "Op/En" field is an abbreviation for the type of expected operands e.g "I" means either imm8, imm16, or imm32.
 
 ![Alt text](/example/pushOpEncoding.png "PUSH examples")
 

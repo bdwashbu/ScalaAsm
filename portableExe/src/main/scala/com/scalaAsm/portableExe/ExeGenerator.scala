@@ -42,30 +42,7 @@ object ExeGenerator {
     array ++ Array.fill(numPadding)(filler)
   }
   
-  private def compileImports(addressOfData: Int, dataSize: Int, dlls: Seq[String], possibleFunctions: Seq[String]): CompiledImports = { 
-    
-    
-     for (dll <- Seq("C:/Scala/ScalaBasic/tools/PEInfo.exe")) yield {
-	    val file = new File(dll);
-	 
-	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
-	      
-	    //convert file into array of bytes
-	    val fileInputStream = new FileInputStream(file);
-	    fileInputStream.read(bFile);
-	    fileInputStream.close();
-	    
-	    val bbuf = ByteBuffer.wrap(bFile)
-	    bbuf.order(ByteOrder.LITTLE_ENDIAN)
-	    
-	    val dosHeader = DosHeader.getDosHeader(bbuf)
-	    val peHeader = PeHeader.getPeHeader(bbuf)
-	    val dirs = DataDirectories.getDirectories(bbuf)
-	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
-	
-	    //val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-	    val resources = ImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
-    }
+  private def compileImports(addressOfData: Int, dataSize: Int, dlls: Seq[String], possibleFunctions: Seq[String], is64Bit: Boolean): CompiledImports = { 
     
     val dllImports = dlls flatMap { dll =>
 	    val file = new File("C:/Windows/System32/" + dll);
@@ -96,8 +73,8 @@ object ExeGenerator {
     
     val test = Imports(imports = dllImports,
                        offset = addressOfData + dataSize)
-    println(test)
-    test.generateImports
+
+    test.generateImports(is64Bit)
   }
 
   def link(asm: Assembled, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
@@ -108,7 +85,7 @@ object ExeGenerator {
     
     val unboundSymbols = compiledAsm.onePass.collect { case ImportRef(name) => name}
     
-    val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols)
+    val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols, is64Bit)
 
     val dosHeader = DosHeader(
 	    e_magic = "MZ", 
@@ -214,6 +191,7 @@ object ExeGenerator {
 	    sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
 	    characteristics = if (is64Bit) 47 else 271
 	)
+	
 	val peHeader = new NtHeader(fileHeader, optionalHeader)
     
     PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports)

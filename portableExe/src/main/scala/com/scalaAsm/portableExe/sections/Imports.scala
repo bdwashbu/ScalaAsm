@@ -23,21 +23,27 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     var position: Int = 0
   }
 
-  private case class ImageImportByNameRVA(var offset: Int, dllName: String = "")
+  private case class ImageImportByNameRVA(var offset: Long, dllName: String = "")
 
-  private case class ImageThunkData(imagePointer: ImageImportByNameRVA, name: String) extends Positionable {
+  private case class ImageThunkData(imagePointer: ImageImportByNameRVA, name: String, is64Bit: Boolean) extends Positionable {
     def write(stream: DataOutputStream) {
       position = stream.size
-      write(stream, imagePointer.offset)
+      if (is64Bit)
+    	  write(stream, imagePointer.offset)
+      else
+          write(stream, imagePointer.offset.toInt)
     }
   }
 
-  private case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String) extends Positionable {
+  private case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String, is64Bit: Boolean) extends Positionable {
 
     def write(stream: DataOutputStream) {
       position = stream.size
       thunks.foreach(_.write(stream))
-      stream.write(Array[Byte](0, 0, 0, 0))
+      if (is64Bit)
+        stream.write(Array[Byte](0, 0, 0, 0, 0, 0, 0, 0))
+      else
+        stream.write(Array[Byte](0, 0, 0, 0))
     }
   }
 
@@ -75,7 +81,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
       write(stream, originalFirstThunk.offset)
       write(stream, timeStamp)
       write(stream, forwarderChain)
-      write(stream, importedDLLname.offset)
+      write(stream, importedDLLname.offset.toInt)
       write(stream, firstThunk.offset)
     }
   }
@@ -84,7 +90,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     val size = 20;
   }
   
-  def generateImports: CompiledImports = {
+  def generateImports(is64Bit: Boolean): CompiledImports = {
     val numImportsPlusNull = imports.size + 1
 
     def getDllNames(externs: Seq[Extern]): List[String] = externs.map(_.dllName).toList
@@ -106,7 +112,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
     } :+ terminator
 
     def toAddressTable(extern: Extern): ThunkArray = {
-      ThunkArray(extern.functionNames.map(name => ImageThunkData(ImageImportByNameRVA(0), name)), extern.dllName)
+      ThunkArray(extern.functionNames.map(name => ImageThunkData(ImageImportByNameRVA(0), name, is64Bit)), extern.dllName, is64Bit)
     }
 
     val importAddressTable = imports.map(toAddressTable)
@@ -133,6 +139,7 @@ private[portableExe] case class Imports(val imports: Seq[Extern], val offset: In
       val firstThunkRVA = offset + importAddressTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position
       val originalFirstThunkRVA = offset + importNameTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position
 
+      println("FIRST THUNK: " + firstThunkRVA)
       descriptor.importedDLLname = ImageImportByNameRVA(offset + importByNames.find(x => x.name.trim == descriptor.importedDLLname.dllName).get.position)
       descriptor.firstThunk = ImageThunkDataRVA(firstThunkRVA) //point to Import Address Table (IAT)
       descriptor.originalFirstThunk = ImageThunkDataRVA(originalFirstThunkRVA) //point to Import Name Table (INT)

@@ -122,7 +122,16 @@ outputStream.close
 References:
 ========
 
-x86 reference can be found here: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
+Intel® 64 and IA-32 Architectures Software Developer Manuals: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
+
+The Portable Executable format from top to bottom:
+http://www.csn.ul.ie/~caolan/publink/winresdump/winresdump/doc/pefile2.html
+
+A Tour of the Win32 Portable Executable File Format:
+http://msdn.microsoft.com/en-us/library/ms809762.aspx
+
+X86 Opcode and Instruction Reference:
+http://ref.x86asm.net/index.html
 
 How to run:
 ========

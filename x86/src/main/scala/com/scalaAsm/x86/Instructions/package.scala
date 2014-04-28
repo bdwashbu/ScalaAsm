@@ -10,6 +10,7 @@ package object Instructions {
   type imm8 = Immediate8
   type imm16 = Immediate16
   type imm32 = Immediate32
+  type imm64 = Immediate64
   
   type Operand = com.scalaAsm.x86.Operands.Operand
   

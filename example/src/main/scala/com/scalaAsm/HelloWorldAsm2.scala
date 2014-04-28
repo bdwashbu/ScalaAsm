@@ -15,12 +15,16 @@ object HelloWorld2 extends AsmProgram {
 
   codeSections += new CodeSection {
     
-    val STD_OUTPUT_HANDLE = imm8(-11)
+    val STD_OUTPUT_HANDLE = imm64(-11)
     val STD_INPUT_HANDLE = imm8(-10)
 
     procedure(name = "start",
-      push(STD_OUTPUT_HANDLE),
-      call("GetStdHandle"),
+      push(rsp),
+      push(*(rsp)),
+      and(spl, imm8(0xF0)),
+      mov(rcx, STD_OUTPUT_HANDLE),
+      sub(rsp, imm8(0x20)),
+      
       mov(ebx, eax),
       push(imm8(0)),
       push(imm8(0)),

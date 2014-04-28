@@ -15,7 +15,7 @@ abstract class OneOperandFormat[-X] extends OperandFormat {
 }
 
 abstract class TwoOperandsFormat[-X, -Y] extends OperandFormat {
-  //override def toString = x.toString + ", " + y.toString
+  def getPrefixes(x:X,y:Y): Option[Array[Byte]]
   def getAddressingForm(x:X,y:Y,opcode: OpcodeFormat): Option[AddressingFormSpecifier]
 }
 
@@ -74,6 +74,16 @@ trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
           })
       }
     }
+    
+    def getPrefixes(op1: M, op2: I): Option[Array[Byte]] = {
+      op1 match {
+        case reg: UniformByteRegister =>
+          Some(REX.W(false).get)
+        case reg: Register64 =>
+          Some(REX.W(true).get)
+        case _ => None
+      }
+    }
   }
 
   case class RM[R <: ModRM.reg, M <: ModRM.rm]() extends TwoOperandsFormat[R, M] {
@@ -94,6 +104,7 @@ trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
       }
     }
 
+    def getPrefixes(op1: R, op2: M): Option[Array[Byte]] = None
   }
 
   case class MR[M <: ModRM.rm, R <: ModRM.reg]() extends TwoOperandsFormat[M, R] {
@@ -102,6 +113,7 @@ trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
       RM().getAddressingForm(op2, op1, opcode)
     }
 
+    def getPrefixes(op1: M, op2: R): Option[Array[Byte]] = None
   }
   
    case class OI[O <: ModRM.plusRd, I <: Immediate]() extends TwoOperandsFormat[O, I] {
@@ -112,10 +124,19 @@ trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
         val (sib, displacment, immediate) = (None, None, Some(op2))
       })
     }
+    
+    def getPrefixes(op1: O, op2: I): Option[Array[Byte]] = {
+      op1 match {
+        case reg: Register64 =>
+          Some(REX.W(true).get)
+        case _ => None
+      }
+    }
   }
    
-    case class M1[M <: ModRM.rm]() extends TwoOperandsFormat[M, One] {
+  case class M1[M <: ModRM.rm]() extends TwoOperandsFormat[M, One] {
     def getAddressingForm(op1: M, op2: One, opcode: OpcodeFormat): Option[AddressingFormSpecifier] = M().getAddressingForm(op1, opcode)
+    def getPrefixes(op1: M, op2: One): Option[Array[Byte]] = None
   }
 }
 

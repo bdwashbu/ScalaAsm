@@ -12,6 +12,7 @@ trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
     def imm8(x: Byte) = Immediate8(x)
     def imm16(x: Short) = Immediate16(x)
     def imm32(x: Int) = Immediate32(x)
+    def imm64(x: Long) = Immediate64(x)
     
     def byte(x: Byte) = Displacement8(x)
     def word(x: Short) = Displacement16(x)

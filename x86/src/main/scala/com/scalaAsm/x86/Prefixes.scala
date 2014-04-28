@@ -1,10 +1,10 @@
 package com.scalaAsm.x86
 
 object REX {
-  val W = REX(true, false, false, false)
-  val R = REX(false, true, false, false)
-  val X = REX(false, false, true, false)
-  val B = REX(false, false, false, true)
+  def W(value: Boolean) = REX(value, false, false, false)
+  def R(value: Boolean) = REX(false, value, false, false)
+  def X(value: Boolean) = REX(false, false, value, false)
+  def B(value: Boolean) = REX(false, false, false, value)
 }
 
 case class REX(W: Boolean, R: Boolean, X: Boolean, B: Boolean) {
@@ -14,6 +14,6 @@ case class REX(W: Boolean, R: Boolean, X: Boolean, B: Boolean) {
       (if (R) 4 else 0) +
       (if (X) 2 else 0) +
       (if (B) 1 else 0)).toByte
-     Some(Array(prefix))
+     Array(prefix)
   }
 }

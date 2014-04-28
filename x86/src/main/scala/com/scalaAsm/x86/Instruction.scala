@@ -102,14 +102,16 @@ trait TwoOperandInstruction[-O1, -O2] extends Instruction with TwoOperandInstruc
     }
 
   def getSize(x: O1, y: O2): Int = {
-    opcode.size + (opEn.getAddressingForm(x, y, opcode) match {
+    val prefixes = opEn.getPrefixes(x, y) getOrElse Array()
+    prefixes.size + opcode.size + (opEn.getAddressingForm(x, y, opcode) match {
       case Some(modRM) => modRM.size
       case _ => 0
     })
   }
 
   def getBytes(x: O1, y: O2): Array[Byte] = {
-    opcode.get(x) ++ (opEn.getAddressingForm(x, y, opcode) match {
+    val prefixes = opEn.getPrefixes(x, y) getOrElse Array()
+    prefixes ++ opcode.get(x) ++ (opEn.getAddressingForm(x, y, opcode) match {
       case Some(modRM) => modRM.getBytes
       case _ => Array.emptyByteArray
     })

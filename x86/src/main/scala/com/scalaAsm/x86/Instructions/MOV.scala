@@ -35,7 +35,12 @@ object MOV extends MOVLow {
       val opcode = OpcodePlusRd(0xB0)
   }
   
-   implicit object mov6 extends MOV_2[r32, imm32] {
+  implicit object mov6 extends MOV_2[r32, imm32] {
+      def opEn = OI()
+      val opcode = OpcodePlusRd(0xB8)
+  }
+   
+  implicit object mov10 extends MOV_2[r64, imm64] {
       def opEn = OI()
       val opcode = OpcodePlusRd(0xB8)
   }

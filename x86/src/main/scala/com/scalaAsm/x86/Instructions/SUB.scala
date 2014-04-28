@@ -12,6 +12,11 @@ object SUB {
       def opEn = MI()
   }
   
+  implicit object sub3 extends SUB_2[rm64, imm8] {
+      val opcode = 0x83 /+ 5
+      def opEn = MI()
+  }
+  
   implicit object sub2 extends SUB_2[r32, rm32] {
     val opcode: OpcodeFormat = 0x2B
       def opEn = RM()

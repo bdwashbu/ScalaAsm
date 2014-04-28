@@ -19,6 +19,11 @@ trait POWLow {
 
 object PUSH extends POWLow {
 
+  implicit object push1 extends PUSH_1[r64] {
+      def opEn = O()
+      val opcode = OpcodePlusRd(0x50)
+  }
+  
   implicit object push2 extends PUSH_1[r32] {
       def opEn = O()
       val opcode = OpcodePlusRd(0x50)

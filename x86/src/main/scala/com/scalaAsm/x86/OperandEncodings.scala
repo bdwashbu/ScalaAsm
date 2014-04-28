@@ -134,6 +134,10 @@ trait OneOperandInstructionFormat {
   implicit object test4 extends SingleOperandEncoding[Memory] {
     def encode(op1: Memory, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB]) = {
       (op1.base, op1.offset, op1.immediate) match {
+        case (Some(base: Register64), _, _) =>
+          val modRM = Some(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+          val sib = Some(SIB(One, new ESP, base))
+          (modRM, sib)
         case (Some(base), offset @ Some(_: Displacement8), None) =>
           val modRM = Some(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))
           (modRM, None)

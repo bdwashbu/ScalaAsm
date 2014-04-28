@@ -12,8 +12,8 @@ object ScalaBasic {
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 
       val beginTime = System.nanoTime()
-      val assembled = HelloWorld2.assemble
-      val exe = ExeGenerator.link(assembled, 0x2000, is64Bit = true, "kernel32.dll", "msvcrt.dll")
+      val assembled = HelloWorld.assemble
+      val exe = ExeGenerator.link(assembled, 0x2000, is64Bit = false, "kernel32.dll", "msvcrt.dll")
       println(exe)
       outputStream.write(exe.get)
 

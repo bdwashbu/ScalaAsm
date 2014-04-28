@@ -66,6 +66,8 @@ trait Registers {
     object ah extends AH with Addressable[AH]
   
     object cl extends CL with Addressable[CL]
+  
+    object spl extends SPL
     
     object es extends ES
     object cs extends CS

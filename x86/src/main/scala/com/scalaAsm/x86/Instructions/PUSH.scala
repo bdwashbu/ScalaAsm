@@ -11,7 +11,7 @@ trait PUSH_1[-O1] extends PUSH with OneOperandInstruction[O1]
 
 trait POWLow {
     
-  implicit object highPush extends PUSH_1[rm] {
+  implicit object LowPush extends PUSH_1[rm] {
       def opEn = M()
       val opcode = 0xFF /+ 6
   }

@@ -35,6 +35,10 @@ package Operands
   trait BasePointer extends GeneralPurpose {self:Register => val ID = 5}
   trait StackPointer extends GeneralPurpose {self:Register => val ID = 4}
 
+  trait UniformByteRegister extends GeneralPurpose {
+    self:Register => 
+  }
+  
   // "A" family - Accumulator for operands and results
   class RAX extends Register64("rax") with GeneralPurposeA
   class EAX extends Register32("eax") with GeneralPurposeA
@@ -66,6 +70,7 @@ package Operands
   class RSP extends Register64("rsp") with StackPointer
   class ESP extends Register32("esp") with StackPointer
   class SP extends Register16("sp") with StackPointer
+  class SPL extends Register8("spl") with StackPointer with UniformByteRegister
   
   class RBP extends Register64("rbp") with BasePointer
   class EBP extends Register32("ebp") with BasePointer

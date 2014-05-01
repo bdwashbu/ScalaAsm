@@ -25,24 +25,24 @@ Heres an example of some PUSH instructions for 16-bit register, 8-bit immediate 
 
 ```scala
 implicit object push1 extends PUSH_1[r16] {
-  def operands = O()
+  def opEn = O()
   def opcode = OpcodePlusRd(0x50)
 }
   
 implicit object push2 extends PUSH_1[imm8] {
-  def operands = I()
+  def opEn = I()
   val opcode: Opcodes = 0x6A
 }
   
 implicit object push3 extends PUSH_1[imm16] {
-  def operands = I()
+  def opEn = I()
   val opcode: Opcodes = 0x68
 }
 ```
 
 [See more instructions](/x86/src/main/scala/com/scalaAsm/x86/Instructions "More instructions")
 
-Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with the opcode gives us enough information to completely implement the instruction!
+Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with the opcode gives us enough information to completely implement the instruction (at a high level)!
 
 ![Alt text](/example/push.png "PUSH examples")
 

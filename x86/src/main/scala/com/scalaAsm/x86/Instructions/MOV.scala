@@ -44,4 +44,9 @@ object MOV extends MOVLow {
       def opEn = OI()
       val opcode = OpcodePlusRd(0xB8)
   }
+  
+  implicit object mov11 extends MOV_2[rm64, r64] {
+      def opEn = MR()
+      val opcode = OneOpcode(0x89)
+  }
 }

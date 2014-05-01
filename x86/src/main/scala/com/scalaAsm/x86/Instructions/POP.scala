@@ -14,6 +14,11 @@ object POP {
       val opcode = OpcodePlusRd(0x58)
   }
   
+  implicit object pop3 extends POP_1[r64] {
+      def opEn = O()
+      val opcode = OpcodePlusRd(0x58)
+  }
+  
   implicit object pop2 extends POP_1[DS] {
       def opEn = new OneOperandFormat[DS]() {def getAddressingForm(op1: DS, opcode: OpcodeFormat) = null}
       val opcode = OneOpcode(0x1F)

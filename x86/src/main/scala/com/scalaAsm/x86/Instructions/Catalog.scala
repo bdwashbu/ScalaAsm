@@ -6,6 +6,8 @@ trait Catalog {
 
   def add[O1, O2](p1: O1, p2: O2)(implicit ev: ADD_2[O1, O2]) = ev(p1, p2)
 
+  def or[O1, O2](p1: O1, p2: O2)(implicit ev: OR_2[O1, O2]) = ev(p1, p2)
+  
   def sub[O1, O2](p1: O1, p2: O2)(implicit ev: SUB_2[O1, O2]) = ev(p1, p2)
 
   def mul[O1](p1: O1)(implicit ev: MUL_1[O1]) = ev(p1)

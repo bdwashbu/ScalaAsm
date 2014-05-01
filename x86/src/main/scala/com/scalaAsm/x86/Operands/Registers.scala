@@ -90,3 +90,13 @@ package Operands
   class DS extends SegmentRegister("ds") with Operand
   class FS extends SegmentRegister("fs") with Operand
   class GS extends SegmentRegister("gs") with Operand
+  
+  // Extra 64-bit registers
+  class R8 extends Register64("r8") with GeneralPurpose {self:Register => val ID = 8}
+  class R9 extends Register64("r9") with GeneralPurpose {self:Register => val ID = 9}
+  class R10 extends Register64("r10") with GeneralPurpose {self:Register => val ID = 10}
+  class R11 extends Register64("r11") with GeneralPurpose {self:Register => val ID = 11}
+  class R12 extends Register64("r12") with GeneralPurpose {self:Register => val ID = 12}
+  class R13 extends Register64("r13") with GeneralPurpose {self:Register => val ID = 13}
+  class R14 extends Register64("r14") with GeneralPurpose {self:Register => val ID = 14}
+  class R15 extends Register64("r15") with GeneralPurpose {self:Register => val ID = 15}

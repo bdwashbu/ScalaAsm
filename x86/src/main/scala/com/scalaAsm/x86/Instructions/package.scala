@@ -2,8 +2,7 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
 
-  
-  trait One
+trait One
 
 package object Instructions {
 
@@ -27,6 +26,7 @@ package object Instructions {
   type rel16 = Relative { type Size = WordOperand }
   type rel32 = Relative { type Size = DwordOperand }
   
+  type r = GPR
   type r8 = Register8 with GeneralPurpose
   type r16 = Register16 with GeneralPurpose
   type r32 = Register32 with GeneralPurpose

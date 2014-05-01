@@ -24,6 +24,16 @@ object HelloWorld2 extends AsmProgram {
       and(spl, imm8(0xF0)),
       mov(rcx, STD_OUTPUT_HANDLE),
       sub(rsp, imm8(0x20)),
+      call("GetStdHandle"),
+      lea(rsp, *(rsp+byte(0x28))),
+      pop(rsp),
+      mov(rbx,rax),
+      push(rsp),
+      push(*(rsp)),
+      or(spl, imm8(0x8)),
+      push(imm8(0x0)),
+     // lea(r9, *(ds)),
+      //mov(rcx, rax)
       
       mov(ebx, eax),
       push(imm8(0)),

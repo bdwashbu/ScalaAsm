@@ -17,6 +17,7 @@ trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
     def byte(x: Byte) = Displacement8(x)
     def word(x: Short) = Displacement16(x)
     def dword(x: Int) = Displacement32(x)
+    def qword(x: Long) = Displacement64(x)
 
     implicit def toToken(code: MachineCode) = InstructionToken(code)
 

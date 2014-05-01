@@ -1,6 +1,9 @@
 package com.scalaAsm.x86
 package Operands
 
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
 trait Operand extends Any
 
 sealed trait OperandSize {
@@ -51,6 +54,20 @@ case class Displacement32(val value: Int) extends AnyVal with Displacement {
   def size: Int = 4
 }
 
+case class Displacement64(val value: Long) extends AnyVal with Displacement {
+  type Size = QwordOperand
+  type Offset = Displacement64
+  def negate: Displacement64 = Displacement64(-value)
+  def getBytes: Array[Byte] = {
+     val buffer = ByteBuffer.allocate(8)
+      buffer.order(ByteOrder.LITTLE_ENDIAN)
+      buffer.putLong(value)
+      buffer.array()
+  }
+  def isNegative: Boolean = value < 0
+  def size: Int = 8
+}
+
 trait Memory extends RegisterOrMemory {
   def base: Option[GPR]
   def offset: Option[Displacement]
@@ -58,6 +75,10 @@ trait Memory extends RegisterOrMemory {
   
   def rel32: Relative32 = new Relative32 {
     def offset = Some(Displacement32(immediate.get.asInt))
+  }
+  
+  def rel64: Relative64 = new Relative64 {
+    def offset = Some(Displacement64(immediate.get.asLong))
   }
   
   override def toString = {
@@ -82,6 +103,10 @@ trait Relative extends RegisterOrMemory {
 
 trait Relative32 extends Relative {
   type Size = DwordOperand
+}
+
+trait Relative64 extends Relative {
+  type Size = QwordOperand
 }
 
 trait RegisterOrMemory extends Any with Operand {

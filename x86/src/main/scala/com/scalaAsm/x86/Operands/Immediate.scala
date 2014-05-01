@@ -9,6 +9,7 @@ trait Immediate extends Any with InstructionField with Operand {
   def value: Size#size
   def getBytes: Array[Byte]
   def asInt: Int
+  def asLong: Long
   def size: Int
   override def toString = value.toString
 }
@@ -18,6 +19,7 @@ case class Immediate8(value: Byte) extends AnyVal with Immediate {
   def getBytes: Array[Byte] = Array(value)
   def size: Int = 1
   def asInt = value.toInt
+  def asLong = value.toLong
 }
 
 case class Immediate16(value: Short) extends AnyVal with Immediate {
@@ -25,6 +27,7 @@ case class Immediate16(value: Short) extends AnyVal with Immediate {
   def getBytes: Array[Byte] = Array((value & 0x00FF).toByte, ((value & 0xFF00) >> 8).toByte)
   def size: Int = 2
   def asInt = value.toInt
+  def asLong = value.toLong
 }
 
 case class Immediate32(val value: Int) extends AnyVal with Immediate {
@@ -32,6 +35,7 @@ case class Immediate32(val value: Int) extends AnyVal with Immediate {
   def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
   def size: Int = 4
   def asInt = value.toInt
+  def asLong = value.toLong
 }
 
 case class Immediate64(val value: Long) extends AnyVal with Immediate {
@@ -44,4 +48,5 @@ case class Immediate64(val value: Long) extends AnyVal with Immediate {
   }
   def size: Int = 8
   def asInt = value.toInt
+  def asLong = value.toLong
 }

@@ -49,6 +49,7 @@ trait Registers {
     object rcx extends RCX with Addressable[RCX]
     object rbp extends RBP with Addressable[RBP]
     object rdx extends RDX with Addressable[RDX]
+    object rbx extends RBX with Addressable[RBX]
     object rsp extends RSP with Addressable[RSP]
   
     object edi extends EDI with Addressable[EDI]
@@ -74,5 +75,12 @@ trait Registers {
     object ss extends SS
     object ds extends DS
     
-   
+    object r8 extends R8
+    object r9 extends R9
+    object r10 extends R10
+    object r11 extends R11
+    object r12 extends R12
+    object r13 extends R13
+    object r14 extends R14
+    object r15 extends R15
 }

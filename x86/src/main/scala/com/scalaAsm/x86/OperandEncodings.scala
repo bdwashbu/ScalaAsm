@@ -104,7 +104,15 @@ trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
       }
     }
 
-    def getPrefixes(op1: R, op2: M): Option[Array[Byte]] = None
+    def getPrefixes(op1: R, op2: M): Option[Array[Byte]] = {
+      op1 match {
+        case reg: UniformByteRegister =>
+          Some(REX.W(false).get)
+        case reg: Register64 =>
+          Some(REX.W(true).get)
+        case _ => None
+      }
+    }
   }
 
   case class MR[M <: ModRM.rm, R <: ModRM.reg]() extends TwoOperandsFormat[M, R] {
@@ -113,7 +121,7 @@ trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
       RM().getAddressingForm(op2, op1, opcode)
     }
 
-    def getPrefixes(op1: M, op2: R): Option[Array[Byte]] = None
+    def getPrefixes(op1: M, op2: R): Option[Array[Byte]] = RM().getPrefixes(op2, op1)
   }
   
    case class OI[O <: ModRM.plusRd, I <: Immediate]() extends TwoOperandsFormat[O, I] {

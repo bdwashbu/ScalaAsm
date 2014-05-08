@@ -26,7 +26,7 @@ object MOV extends MOVLow {
   }
   
   implicit object mov7 extends MOV_2[r16, imm16] {
-      def opEn = OI() // should be OI
+      def opEn = OI()
       val opcode = OpcodePlusRd(0xB8)
   }
   

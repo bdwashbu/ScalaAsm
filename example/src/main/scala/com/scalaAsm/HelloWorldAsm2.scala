@@ -32,7 +32,7 @@ object HelloWorld2 extends AsmProgram {
       push(*(rsp)),
       or(spl, imm8(0x8)),
       push(imm8(0x0)),
-     // lea(r9, *(ds)),
+      //lea(r9, "helloWorld"),
       //mov(rcx, rax)
       
       mov(ebx, eax),

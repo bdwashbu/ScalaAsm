@@ -9,6 +9,6 @@ object LEA {
 
   implicit object lea1 extends LEA_2[r, rm] {
       def opEn = RM()
-      val opcode = 0x8D /+ 0
+      val opcode: OpcodeFormat = 0x8D
   }
 }

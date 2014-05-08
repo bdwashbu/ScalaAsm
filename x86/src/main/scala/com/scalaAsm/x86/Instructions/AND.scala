@@ -47,16 +47,16 @@ object AND extends ANDLow {
   
   implicit object and9 extends AND_2[rm16, r16] {
       def opEn = MR()
-      val opcode = OpcodePlusRd(0x21)
+      val opcode: OpcodeFormat = 0x21
   }
   
   implicit object and10 extends AND_2[rm32, r32] {
       def opEn = MR()
-      val opcode = OpcodePlusRd(0x21)
+      val opcode: OpcodeFormat = 0x21
   }
   
   implicit object and11 extends AND_2[r8, rm8] {
       def opEn = RM()
-      val opcode = OpcodePlusRd(0x22)
+      val opcode: OpcodeFormat = 0x22
   }
 }

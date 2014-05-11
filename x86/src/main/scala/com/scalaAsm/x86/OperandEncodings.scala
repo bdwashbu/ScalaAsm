@@ -40,7 +40,7 @@ trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
       (op2.base, op2.offset, op2.immediate) match {
         case (Some(base), offset @ Some(off: Displacement8), None) if base.ID == 4 =>
           val modRM = Some(ModRMReg(DisplacementByte, op1, base))
-          val sib = Some(SIB(One, new ESP, base))
+          val sib = Some(SIB(SIB.One, new ESP, base))
           (modRM, sib)
         case (Some(base), offset @ Some(off: Displacement32), None) =>
           val modRM = Some(ModRMReg(DisplacementDword, reg = op1, rm = base))
@@ -165,7 +165,7 @@ trait OneOperandInstructionFormat {
       (op1.base, op1.offset, op1.immediate) match {
         case (Some(base: Register64), _, _) =>
           val modRM = Some(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
-          val sib = Some(SIB(One, new ESP, base))
+          val sib = Some(SIB(SIB.One, new ESP, base))
           (modRM, sib)
         case (Some(base), offset @ Some(_: Displacement8), None) =>
           val modRM = Some(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))

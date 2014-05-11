@@ -10,6 +10,7 @@ abstract class x86Instruction(mnemonic: String) extends Instruction {
 
 trait InstructionField extends Any {
   def getBytes: Array[Byte]
+  def size: Int
 }
 
 trait Instruction {

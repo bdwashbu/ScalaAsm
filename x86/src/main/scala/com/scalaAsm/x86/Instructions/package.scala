@@ -13,7 +13,7 @@ package object Instructions {
   
   type Operand = com.scalaAsm.x86.Operands.Operand
   
-  type AddressingFormSpecifier = Operands.AddressingFormSpecifier
+  //type AddressingFormSpecifier = Operands.AddressingFormSpecifier
   
   type rm = RegisterOrMemory
   type rm8 = rm { type Size = ByteOperand }

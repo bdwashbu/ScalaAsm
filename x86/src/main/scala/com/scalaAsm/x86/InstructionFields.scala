@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
-package Operands
 
 import com.scalaAsm.utils.Endian
+import Operands._
 
 protected[x86] trait AddressingFormSpecifier {
   type Displacement32 = EBP
@@ -12,19 +12,16 @@ protected[x86] trait AddressingFormSpecifier {
   val sib: Option[SIB]
   val displacment: Option[Displacement]
   val immediate: Option[Immediate]
+  
+  def components: Seq[InstructionField] = Seq(modRM, sib, displacment, immediate).flatten
 
   lazy val getBytes: Array[Byte] = {
-    val components: List[Option[InstructionField]] = List(modRM, sib, displacment, immediate)
-    components.flatten flatMap (_.getBytes) toArray
+    components flatMap (_.getBytes) toArray
   }
 
   lazy val size: Int = {
-//    val components = List(sib, displacment, immediate)
-//    (modRM match {
-//      case (Some(modRM)) => 1
-//      case _ => 0
-//    }) + components.flatten.map(imm => imm.size).sum
-    getBytes.size
+    components flatMap (x => List(x.size)) sum
+    //getBytes.size
   }
 }
 
@@ -49,6 +46,7 @@ case object TwoRegisters      extends RegisterMode(3) // r/m is treated as a sec
 trait ModRM extends InstructionField {
   val mod: RegisterMode
   val rm: GPR
+  val size = 1;
 }
 
 case class ModRMReg(mod: RegisterMode, reg: GPR, rm: GPR) extends ModRM {
@@ -60,12 +58,15 @@ case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR) extends
 }
 
 sealed class SIBScale(val value: Byte)
-case object One   extends SIBScale(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacement
-case object Two   extends SIBScale(1) // Eight-bit displacement, sign-extended to 16 bits
-case object Four  extends SIBScale(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
-case object Eight extends SIBScale(3) // r/m is treated as a second "reg" field
 
-// SIB format
+object SIB {
+	case object One   extends SIBScale(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacement
+	case object Two   extends SIBScale(1) // Eight-bit displacement, sign-extended to 16 bits
+	case object Four  extends SIBScale(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
+	case object Eight extends SIBScale(3) // r/m is treated as a second "reg" field
+}
+
+// Scale-Index-Base (SIB) format
 //   7                           0
 // +---+---+---+---+---+---+---+---+
 // | scale |   index   |    base   |
@@ -73,4 +74,5 @@ case object Eight extends SIBScale(3) // r/m is treated as a second "reg" field
 
 case class SIB(scale: SIBScale, index: GPR, base: GPR) extends InstructionField {
   def getBytes = Array(((scale.value << 6) + (index.ID << 3) + base.ID).toByte)
+  val size = 1
 }

@@ -59,6 +59,7 @@ object AsmCompiler extends Catalog
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
+        case JmpRef(name) => Some(JmpRefResolved(name))
         case Reference(name) if procNames.contains(name) => Some(ProcRef(name))
         case Reference(name) if varNames.contains(name) => Some(VarRef(name))
         case Reference(name) => Some(ImportRef(name))
@@ -105,6 +106,7 @@ object AsmCompiler extends Catalog
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
 	        case ProcRef(name) => callNear(*(Immediate32(procs(name) - parserPosition - 5)).rel32).code
 	        case VarRef(name) => push(Immediate32(variables(name) + baseOffset)).code
+	        case JmpRefResolved(name) => jmp(*(Immediate32((imports(name) + baseOffset)))).code
 	        case ImportRef(name) => callNear(*(Immediate32((imports(name) + baseOffset)))).code
 	        case LabelRef(name, inst) => inst(Immediate8((labels(name) - parserPosition - 2).toByte)).code
 	        case _ => Array[Byte]()

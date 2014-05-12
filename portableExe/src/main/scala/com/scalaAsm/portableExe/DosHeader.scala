@@ -43,11 +43,11 @@ object DosStub {
     val dosStub = new CodeSection {
       builder += push(cs)
       builder += pop(ds)
-      builder += mov(dx, imm16(0xE.toByte))
-      builder += mov(ah, imm8(0x9))
-      builder += int(imm8(0x21))
-      builder += mov(ax, imm16(0x4C01))
-      builder += int(imm8(0x21))
+      builder += mov(dx, word(0xE.toByte))
+      builder += mov(ah, byte(0x9))
+      builder += int(byte(0x21))
+      builder += mov(ax, word(0x4C01))
+      builder += int(byte(0x21))
     }
 
     bbuf.put(dosStub.getRawBytes)

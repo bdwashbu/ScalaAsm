@@ -20,11 +20,11 @@ abstract class TwoOperandsFormat[-X, -Y] extends OperandFormat {
 }
 
 trait TwoOperandInstructionFormat extends OneOperandInstructionFormat {
-   trait DualOperandEncoding[-O1 <: ModRM.rm, -O2 <: Operand] {
+   trait DualOperandEncoding[-O1 <: ModRM.rm, -O2] {
     def encode(x: O1, y: O2, opcodeExtend: Option[Byte]): (Option[ModRM], Option[SIB])
   }
 
-  def getEncoding[O1 <: ModRM.rm, O2 <: Operand](op1: O1, op2: O2, opcodeExtend: Option[Byte])(implicit operands: DualOperandEncoding[O1, O2]) = {
+  def getEncoding[O1 <: ModRM.rm, O2](op1: O1, op2: O2, opcodeExtend: Option[Byte])(implicit operands: DualOperandEncoding[O1, O2]) = {
     operands.encode(op1, op2, opcodeExtend)
   }
   

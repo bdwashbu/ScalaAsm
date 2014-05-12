@@ -4,7 +4,42 @@ package Operands
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-trait Operand extends Any
+trait Operand
+
+trait ConstantOperand {
+  type Size <: OperandSize
+  def value: Size#size
+  def getBytes: Array[Byte]
+}
+
+trait ConstantOperand8 extends ConstantOperand {
+  type Size = ByteOperand
+  def getBytes: Array[Byte] = Array(value)
+  def size: Int = 1
+}
+
+trait ConstantOperand16 extends ConstantOperand {
+  type Size = WordOperand
+  def getBytes: Array[Byte] = Array((value & 0x00FF).toByte, ((value & 0xFF00) >> 8).toByte)
+  def size: Int = 2
+}
+
+trait ConstantOperand32 extends ConstantOperand {
+  type Size = DwordOperand
+ def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
+  def size: Int = 4
+}
+
+trait ConstantOperand64 extends ConstantOperand {
+  type Size = QwordOperand
+  def getBytes: Array[Byte] = {
+    val buffer = ByteBuffer.allocate(8)
+      buffer.order(ByteOrder.LITTLE_ENDIAN)
+      buffer.putLong(value)
+      buffer.array()
+  }
+  def size: Int = 8
+}
 
 sealed trait OperandSize {
   type size
@@ -16,56 +51,51 @@ class WordOperand extends OperandSize { type size = Short; val length = 2 }
 class DwordOperand extends OperandSize { type size = Int; val length = 4 }
 class QwordOperand extends OperandSize { type size = Long; val length = 8 }
 
-trait Displacement extends Any with InstructionField {
-  type Size <: OperandSize
+trait Displacement extends InstructionField with ConstantOperand {
   type Offset <: Displacement
-  def value: Size#size
   def negate: Offset
-  def getBytes: Array[Byte]
-  def size: Int
   override def toString = value.toString
   def isNegative: Boolean
 }
 
-case class Displacement8(value: Byte) extends AnyVal with Displacement {
-  type Size = ByteOperand
+trait Displacement8 extends Displacement with ConstantOperand8 {
+  self =>
   type Offset = Displacement8
-  def negate: Displacement8 = Displacement8((-value).toByte)
-  def getBytes: Array[Byte] = Array(value)
-  def isNegative: Boolean = value < 0
-  def size: Int = 1
-}
-
-case class Displacement16(value: Short) extends AnyVal with Displacement {
-  type Size = WordOperand
-  type Offset = Displacement16
-  def negate: Displacement16 = Displacement16((-value).toShort)
-  def getBytes: Array[Byte] = Array((value & 0x00FF).toByte, ((value & 0xFF00) >> 8).toByte)
-  def isNegative: Boolean = value < 0
-  def size: Int = 2
-}
-
-case class Displacement32(val value: Int) extends AnyVal with Displacement {
-  type Size = DwordOperand
-  type Offset = Displacement32
-  def negate: Displacement32 = Displacement32(-value)
-  def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
-  def isNegative: Boolean = value < 0
-  def size: Int = 4
-}
-
-case class Displacement64(val value: Long) extends AnyVal with Displacement {
-  type Size = QwordOperand
-  type Offset = Displacement64
-  def negate: Displacement64 = Displacement64(-value)
-  def getBytes: Array[Byte] = {
-     val buffer = ByteBuffer.allocate(8)
-      buffer.order(ByteOrder.LITTLE_ENDIAN)
-      buffer.putLong(value)
-      buffer.array()
+  def negate: Displacement8 = new Displacement8 {
+	  override def negate: Displacement8 = self
+	  val value = (-self.value).toByte
   }
   def isNegative: Boolean = value < 0
-  def size: Int = 8
+}
+
+trait Displacement16 extends Displacement with ConstantOperand16 {
+  self =>
+  type Offset = Displacement16
+  def negate: Displacement16 = new Displacement16 {
+	  override def negate: Displacement16 = self
+	  val value = (-self.value).toShort
+  }
+  def isNegative: Boolean = value < 0
+}
+
+trait Displacement32 extends Displacement with ConstantOperand32 {
+  self =>
+  type Offset = Displacement32
+  def negate: Displacement32 = new Displacement32{
+	  override def negate: Displacement32 = self
+	  val value = (-self.value).toInt
+  }
+  def isNegative: Boolean = value < 0
+}
+
+trait Displacement64 extends Displacement with ConstantOperand64 {
+  self =>
+  type Offset = Displacement64
+  def negate: Displacement64 = new Displacement64{
+	  override def negate: Displacement64 = self
+	  val value = (-self.value).toLong
+  }
+  def isNegative: Boolean = value < 0
 }
 
 trait Memory extends RegisterOrMemory {
@@ -74,11 +104,11 @@ trait Memory extends RegisterOrMemory {
   def immediate: Option[Immediate]
   
   def rel32: Relative32 = new Relative32 {
-    def offset = Some(Displacement32(immediate.get.asInt))
+    def offset = Some(new Displacement32{ val value = immediate.get.asInt})
   }
   
   def rel64: Relative64 = new Relative64 {
-    def offset = Some(Displacement64(immediate.get.asLong))
+    def offset = Some(new Displacement64{ val value = immediate.get.asLong})
   }
   
   override def toString = {
@@ -109,7 +139,7 @@ trait Relative64 extends Relative {
   type Size = QwordOperand
 }
 
-trait RegisterOrMemory extends Any with Operand {
+trait RegisterOrMemory extends Operand {
   type Size <: OperandSize
 }
 

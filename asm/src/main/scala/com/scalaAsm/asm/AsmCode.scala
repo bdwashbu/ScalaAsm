@@ -6,18 +6,14 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.One
 import com.scalaAsm.x86.MachineCode
+import com.scalaAsm.x86.Operands.Immediate8
 
 trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
 
-    def imm8(x: Byte) = Immediate8(x)
-    def imm16(x: Short) = Immediate16(x)
-    def imm32(x: Int) = Immediate32(x)
-    def imm64(x: Long) = Immediate64(x)
-    
-    def byte(x: Byte) = Displacement8(x)
-    def word(x: Short) = Displacement16(x)
-    def dword(x: Int) = Displacement32(x)
-    def qword(x: Long) = Displacement64(x)
+    case class byte(value: Byte) extends Immediate8 with Displacement8
+    case class word(value: Short) extends Immediate16 with Displacement16
+    case class dword(value: Int) extends Immediate32 with Displacement32
+    case class qword(value: Long) extends Immediate64 with Displacement64
 
     implicit def toToken(code: MachineCode) = InstructionToken(code)
 

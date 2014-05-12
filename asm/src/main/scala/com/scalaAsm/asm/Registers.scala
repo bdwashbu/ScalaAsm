@@ -13,8 +13,8 @@ object Addressing {
 
   trait Addressable[X <: GPR] {
     self: X =>
-    def -[Z <: Displacement {type Offset = Z }](offset: Z) = RegisterOffset[Z,X](offset.negate, this)
-    def +[Z <: Displacement {type Offset = Z }](offset: Z) = RegisterOffset[Z,X](offset, this)
+    def -[Z <: Displacement](offset: Z) = RegisterOffset[Z#Offset,X](offset.negate, this)
+    def +[Z <: Displacement](offset: Z) = RegisterOffset[Z,X](offset, this)
   }
 
   def *(gpr: GPR) = new Memory {

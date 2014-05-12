@@ -15,36 +15,36 @@ object HelloWorld2 extends AsmProgram {
 
   codeSections += new CodeSection {
     
-    val STD_OUTPUT_HANDLE = imm64(-11)
-    val STD_INPUT_HANDLE = imm8(-10)
+    val STD_OUTPUT_HANDLE = qword(-11)
+    val STD_INPUT_HANDLE = byte(-10)
 
     procedure(name = "start",
       push(rsp),
       push(*(rsp)),
-      and(spl, imm8(0xF0)),
+      and(spl, byte(0xF0)),
       mov(rcx, STD_OUTPUT_HANDLE),
-      sub(rsp, imm8(0x20)),
+      sub(rsp, byte(0x20)),
       call("GetStdHandle"),
-      lea(rsp, *(rsp+byte(0x28))),
+      lea(rsp, *(rsp + byte(0x28))),
       pop(rsp),
       mov(rbx,rax),
       push(rsp),
       push(*(rsp)),
-      or(spl, imm8(0x8)),
-      push(imm8(0x0)),
+      or(spl, byte(0x8)),
+      push(byte(0x0)),
       //lea(r9, "helloWorld"),
       //mov(rcx, rax)
       
       mov(ebx, eax),
-      push(imm8(0)),
-      push(imm8(0)),
-      push(imm8(0x0E)),
+      push(byte(0)),
+      push(byte(0)),
+      push(byte(0x0E)),
       push("helloWorld"),
       push(eax),
       call("WriteFile"),
-      push(imm8(0)),
-      push(imm8(0)),
-      push(imm8(0x1D)),
+      push(byte(0)),
+      push(byte(0)),
+      push(byte(0x1D)),
       push("pressAnyKey"),
       push(ebx),
       call("WriteFile"),
@@ -53,7 +53,7 @@ object HelloWorld2 extends AsmProgram {
       push(eax),
       call("FlushConsoleInputBuffer"),
       call("_getch"),
-      mov(eax, imm32(0)),
+      mov(eax, dword(0)),
       retn
     )
   }

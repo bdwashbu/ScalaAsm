@@ -3,7 +3,7 @@ package com.scalaAsm.x86
 import com.scalaAsm.utils.Endian
 import Operands._
 
-trait InstructionField extends Any {
+trait InstructionField {
   def getBytes: Array[Byte]
   def size: Int
 }

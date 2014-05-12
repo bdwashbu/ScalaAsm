@@ -8,11 +8,6 @@ abstract class x86Instruction(mnemonic: String) extends Instruction {
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
 }
 
-trait InstructionField extends Any {
-  def getBytes: Array[Byte]
-  def size: Int
-}
-
 trait Instruction {
   
   case class OpcodePlusRd(opcode1: Byte) extends OpcodeFormat {

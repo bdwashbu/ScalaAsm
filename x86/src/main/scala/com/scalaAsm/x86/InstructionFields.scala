@@ -3,6 +3,11 @@ package com.scalaAsm.x86
 import com.scalaAsm.utils.Endian
 import Operands._
 
+trait InstructionField extends Any {
+  def getBytes: Array[Byte]
+  def size: Int
+}
+
 protected[x86] trait AddressingFormSpecifier {
   type Displacement32 = EBP
   type AddressInSib = ESP
@@ -21,7 +26,6 @@ protected[x86] trait AddressingFormSpecifier {
 
   lazy val size: Int = {
     components flatMap (x => List(x.size)) sum
-    //getBytes.size
   }
 }
 
@@ -38,7 +42,6 @@ case object DisplacementDword extends RegisterMode(2) // 32-bit displacement (ex
 case object TwoRegisters      extends RegisterMode(3) // r/m is treated as a second "reg" field
 
 // Mod/RM format
-//   7                           0
 // +---+---+---+---+---+---+---+---+
 // |  mod  |    reg    |     rm    |
 // +---+---+---+---+---+---+---+---+
@@ -52,6 +55,11 @@ trait ModRM extends InstructionField {
 case class ModRMReg(mod: RegisterMode, reg: GPR, rm: GPR) extends ModRM {
   def getBytes = Array(((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte)
 }
+
+// Alternative Mod/RM format
+// +---+---+---+---+---+---+---+---+
+// |  mod  |Op Extended|     rm    |
+// +---+---+---+---+---+---+---+---+
 
 case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR) extends ModRM {
   def getBytes = Array(((mod.value << 6) + (opcodeExtended << 3) + rm.ID).toByte)

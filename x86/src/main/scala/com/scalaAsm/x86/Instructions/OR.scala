@@ -3,7 +3,7 @@ package Instructions
 
 abstract class OR extends x86Instruction("OR")
 
-trait OR_2[-O1,-O2] extends OR with TwoOperandInstruction[O1,O2]
+trait OR_2[-O1 <: Operand,-O2 <: Operand] extends OR with TwoOperandInstruction[O1,O2]
 
 object OR {
   

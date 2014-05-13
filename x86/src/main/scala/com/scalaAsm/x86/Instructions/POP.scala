@@ -5,7 +5,7 @@ import com.scalaAsm.x86.Operands._
 
 abstract class POP extends x86Instruction("POP")
 
-trait POP_1[-O1] extends POP with OneOperandInstruction[O1]
+trait POP_1[-O1 <: Operand] extends POP with OneOperandInstruction[O1]
 
 object POP {
   
@@ -20,7 +20,7 @@ object POP {
   }
   
   implicit object pop2 extends POP_1[DS] {
-      def opEn = new OneOperandFormat[DS]() {def getAddressingForm(op1: DS, opcode: OpcodeFormat) = null}
+      def opEn = new OneOperandFormat[DS]() {def getAddressingForm(op1: DS, opcode: OpcodeFormat) = NoAddressingForm}
       val opcode = OneOpcode(0x1F)
   }
 }

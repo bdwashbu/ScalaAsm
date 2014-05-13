@@ -2,7 +2,9 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
 
-trait One
+trait One extends Operand {
+  def size = 1
+}
 
 package object Instructions {
 

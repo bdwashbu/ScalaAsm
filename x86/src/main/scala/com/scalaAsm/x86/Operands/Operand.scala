@@ -4,10 +4,12 @@ package Operands
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-trait Operand
-
-trait ConstantOperand {
+trait Operand {
   type Size <: OperandSize
+  def size: Int
+}
+
+trait ConstantOperand extends Operand {
   def value: Size#size
   def getBytes: Array[Byte]
 }
@@ -105,10 +107,12 @@ trait Memory extends RegisterOrMemory {
   
   def rel32: Relative32 = new Relative32 {
     def offset = Some(new Displacement32{ val value = immediate.get.asInt})
+    def size = 4
   }
   
   def rel64: Relative64 = new Relative64 {
     def offset = Some(new Displacement64{ val value = immediate.get.asLong})
+    def size = 8
   }
   
   override def toString = {

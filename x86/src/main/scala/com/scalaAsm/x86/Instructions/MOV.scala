@@ -3,7 +3,7 @@ package Instructions
 
 abstract class MOV extends x86Instruction("MOV")
 
-trait MOV_2[-O1, -O2] extends MOV with TwoOperandInstruction[O1,O2]
+trait MOV_2[-O1 <: Operand, -O2 <: Operand] extends MOV with TwoOperandInstruction[O1,O2]
 
 trait MOVLow {
   

@@ -3,7 +3,7 @@ package Instructions
 
 abstract class AND extends x86Instruction("AND")
 
-trait AND_2[-O1, -O2] extends AND with TwoOperandInstruction[O1,O2]
+trait AND_2[-O1 <: Operand, -O2 <: Operand] extends AND with TwoOperandInstruction[O1,O2]
 
 trait ANDLow {
  

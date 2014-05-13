@@ -5,18 +5,22 @@ package Operands
 
   abstract class Register8(name: String) extends Register(name) {
     type Size = ByteOperand
+    def size = 1
   }
   
   abstract class Register16(name: String) extends Register(name) {
     type Size = WordOperand
+    def size = 2
   }
   
   abstract class Register32(name: String) extends Register(name) {
     type Size = DwordOperand
+    def size = 4
   }
   
   abstract class Register64(name: String) extends Register(name) {
     type Size = QwordOperand
+    def size = 8
   }
 
   trait GeneralPurpose extends RegisterOrMemory {

@@ -3,7 +3,7 @@ package Instructions
 
 abstract class LEA extends x86Instruction("LEA")
 
-trait LEA_2[-O1, -O2] extends LEA with TwoOperandInstruction[O1,O2]
+trait LEA_2[-O1 <: Operand, -O2 <: Operand] extends LEA with TwoOperandInstruction[O1,O2]
 
 object LEA {
 

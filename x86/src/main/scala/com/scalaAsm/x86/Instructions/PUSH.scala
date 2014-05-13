@@ -7,7 +7,7 @@ import scala.annotation.implicitNotFound
 abstract class PUSH extends x86Instruction("PUSH")
 
 @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
-trait PUSH_1[-O1] extends PUSH with OneOperandInstruction[O1]
+trait PUSH_1[-O1 <: Operand] extends PUSH with OneOperandInstruction[O1]
 
 trait POWLow {
     
@@ -50,7 +50,7 @@ object PUSH extends POWLow {
   }
   
   implicit object push7 extends PUSH_1[CS] {
-      def opEn = new OneOperandFormat[CS]() {def getAddressingForm(op1: CS, opcode: OpcodeFormat) = null}
+      def opEn = new OneOperandFormat[CS]() {def getAddressingForm(op1: CS, opcode: OpcodeFormat) = NoAddressingForm}
       val opcode: OpcodeFormat = 0x0E
   }
 }

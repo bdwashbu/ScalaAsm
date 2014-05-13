@@ -3,7 +3,7 @@ package Instructions
 
 abstract class TEST extends x86Instruction("TEST")
 
-trait TEST_2[-O1, -O2] extends TEST with TwoOperandInstruction[O1,O2]
+trait TEST_2[-O1 <: Operand, -O2 <: Operand] extends TEST with TwoOperandInstruction[O1,O2]
 
 object TEST {
   

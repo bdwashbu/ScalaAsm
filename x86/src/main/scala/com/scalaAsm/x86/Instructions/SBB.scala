@@ -3,7 +3,7 @@ package Instructions
 
 abstract class SBB extends x86Instruction("SBB")
 
-trait SBB_2[-O1, -O2] extends SBB with TwoOperandInstruction[O1,O2]
+trait SBB_2[-O1 <: Operand, -O2 <: Operand] extends SBB with TwoOperandInstruction[O1,O2]
 
 object SBB {
   

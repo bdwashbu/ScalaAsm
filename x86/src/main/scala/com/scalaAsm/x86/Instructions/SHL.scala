@@ -3,7 +3,7 @@ package Instructions
 
 abstract class SHL extends x86Instruction("SHL")
 
-trait SHL_2[-O1, -O2] extends SHL with TwoOperandInstruction[O1,O2]
+trait SHL_2[-O1 <: Operand, -O2 <: Operand] extends SHL with TwoOperandInstruction[O1,O2]
 
 object SHL {
   

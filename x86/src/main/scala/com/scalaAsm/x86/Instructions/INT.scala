@@ -3,7 +3,7 @@ package Instructions
 
 abstract class INT extends x86Instruction("INT")
 
-trait INT_1[-O1] extends INT with OneOperandInstruction[O1]
+trait INT_1[-O1 <: Operand] extends INT with OneOperandInstruction[O1]
 
 object INT {
 

@@ -3,7 +3,7 @@ package Instructions
 
 abstract class ADD extends x86Instruction("ADD")
 
-trait ADD_2[-O1, -O2] extends ADD with TwoOperandInstruction[O1,O2]
+trait ADD_2[-O1 <: Operand, -O2 <: Operand] extends ADD with TwoOperandInstruction[O1,O2]
 
 object ADD {
   

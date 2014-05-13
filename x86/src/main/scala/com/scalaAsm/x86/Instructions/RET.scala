@@ -6,7 +6,7 @@ abstract class RET extends x86Instruction("RET") with ZeroOperandInstruction
 object RET {
 
   implicit object NearReturn extends RET {
-      def operands = new NoOperand{}
+      def operands = NoOperand
       val opcode: OpcodeFormat = 0xC3
   }
 }

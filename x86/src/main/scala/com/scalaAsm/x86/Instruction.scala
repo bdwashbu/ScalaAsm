@@ -58,12 +58,12 @@ trait ZeroOperandInstruction extends Instruction {
   }
 }
 
-trait OneOperandInstruction[-O1] extends Instruction with OneOperandInstructionFormat {
+trait OneOperandInstruction[-O1 <: Operand] extends Instruction with OneOperandInstructionFormat {
   val opcode: OpcodeFormat
   def opEn: OneOperandFormat[O1]
   val mnemonic: String = ""
 
-  def apply(x: O1): MachineCode =
+  def apply(x: => O1): MachineCode =
     new MachineCode {
       val size = getSize(x)
       val code = getBytes(x)
@@ -71,21 +71,15 @@ trait OneOperandInstruction[-O1] extends Instruction with OneOperandInstructionF
     }
 
   def getSize(x: O1): Int = {
-    opcode.size + (opEn.getAddressingForm(x, opcode) match {
-      case Some(modRM) => modRM.size
-      case _ => 0
-    })
+    opcode.size + opEn.getAddressingForm(x, opcode).size 
   }
 
   def getBytes(x: O1): Array[Byte] = {
-    opcode.get(x) ++ (opEn.getAddressingForm(x, opcode) match {
-      case Some(modRM) => modRM.getBytes
-      case _ => Array.emptyByteArray
-    })
+    opcode.get(x) ++ opEn.getAddressingForm(x, opcode).getBytes
   }
 }
 
-trait TwoOperandInstruction[-O1, -O2] extends Instruction with TwoOperandInstructionFormat {
+trait TwoOperandInstruction[-O1 <: Operand, -O2 <: Operand] extends Instruction with TwoOperandInstructionFormat {
   val opcode: OpcodeFormat
   def opEn: TwoOperandsFormat[O1, O2]
   val mnemonic: String = ""
@@ -99,17 +93,11 @@ trait TwoOperandInstruction[-O1, -O2] extends Instruction with TwoOperandInstruc
 
   def getSize(x: O1, y: O2): Int = {
     val prefixes = opEn.getPrefixes(x, y) getOrElse Array()
-    prefixes.size + opcode.size + (opEn.getAddressingForm(x, y, opcode) match {
-      case Some(modRM) => modRM.size
-      case _ => 0
-    })
+    prefixes.size + opcode.size + opEn.getAddressingForm(x, y, opcode).size
   }
 
   def getBytes(x: O1, y: O2): Array[Byte] = {
     val prefixes = opEn.getPrefixes(x, y) getOrElse Array()
-    prefixes ++ opcode.get(x) ++ (opEn.getAddressingForm(x, y, opcode) match {
-      case Some(modRM) => modRM.getBytes
-      case _ => Array.emptyByteArray
-    })
+    prefixes ++ opcode.get(x) ++ opEn.getAddressingForm(x, y, opcode).getBytes
   }
 }

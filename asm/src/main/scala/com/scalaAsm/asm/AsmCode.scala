@@ -7,6 +7,7 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.One
 import com.scalaAsm.x86.MachineCode
 import com.scalaAsm.x86.Operands.Immediate8
+import com.scalaAsm.x86.{MachineCodeBuilder1, MachineCodeBuilder2}
 
 trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
 
@@ -16,6 +17,8 @@ trait CodeSection extends Registers with AsmSection[CodeToken] with Catalog {
     case class qword(value: Long) extends Immediate64 with Displacement64
 
     implicit def toToken(code: MachineCode) = InstructionToken(code)
+    implicit def toToken[O1](code: MachineCodeBuilder1[O1]) = InstructionToken(code.get)
+    implicit def toToken[O1,O2](code: MachineCodeBuilder2[O1, O2]) = InstructionToken(code.get)
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}

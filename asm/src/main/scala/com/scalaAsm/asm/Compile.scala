@@ -6,6 +6,7 @@ import com.scalaAsm.x86.Instructions.CALL
 import com.scalaAsm.x86.Operands.{Immediate16, Immediate32, Immediate8}
 import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.x86.Instructions.Catalog
+import com.scalaAsm.x86.MachineCodeBuilder
 
 
 object AsmCompiler extends Catalog
@@ -56,6 +57,7 @@ object AsmCompiler extends Catalog
     lazy val procNames   = asm.code.collect{ case BeginProc(name) => name }
     
     def onePass: Seq[Token] = asm.code flatMap {
+        case x: MachineCodeBuilder => Some(InstructionToken(x.get))
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)

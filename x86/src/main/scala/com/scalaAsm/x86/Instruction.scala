@@ -9,7 +9,7 @@ abstract class x86Instruction(mnemonic: String) extends Instruction {
 }
 
 trait Instruction {
-  
+
   case class OpcodePlusRd(opcode1: Byte) extends OpcodeFormat {
     def get(x: Any) = {
       if (x.isInstanceOf[ModRM.reg])
@@ -42,11 +42,13 @@ trait ZeroOperandInstruction extends Instruction {
   def opcode: OpcodeFormat
   val mnemonic: String = ""
 
-  def apply: MachineCode =
-    new MachineCode {
-      val size = getSize
-      val code = getBytes
-      val line = mnemonic
+  def apply: MachineCodeBuilder =
+    new MachineCodeBuilder {
+      def get = new MachineCode {
+          val size = getSize
+          val code = getBytes
+          val line = mnemonic
+      }
     }
 
   def getSize: Int = {
@@ -66,14 +68,14 @@ trait OneOperandInstruction[-O1 <: Operand] extends Instruction with OneOperandI
   def apply(x: O1) =
     new MachineCodeBuilder1[O1](x) {
       def get = new MachineCode {
-	      val size = getSize(x)
-	      val code = getBytes(x)
-	      val line = mnemonic + " " + opEn.toString
+        val size = getSize(x)
+        val code = getBytes(x)
+        val line = mnemonic + " " + opEn.toString
       }
     }
 
   def getSize(x: O1): Int = {
-    opcode.size + opEn.getAddressingForm(x, opcode).size 
+    opcode.size + opEn.getAddressingForm(x, opcode).size
   }
 
   def getBytes(x: O1): Array[Byte] = {
@@ -88,12 +90,12 @@ trait TwoOperandInstruction[-O1 <: Operand, -O2 <: Operand] extends Instruction 
 
   def apply(x: O1, y: O2) =
     new MachineCodeBuilder2[O1, O2](x, y) {
-	  def get = new MachineCode {
-	      val size = getSize(x, y)
-	      val code = getBytes(x, y)
-	      val line = mnemonic + " " + opEn.toString
-	    }
-  }
+      def get = new MachineCode {
+        val size = getSize(x, y)
+        val code = getBytes(x, y)
+        val line = mnemonic + " " + opEn.toString
+      }
+    }
 
   def getSize(x: O1, y: O2): Int = {
     val prefixes = opEn.getPrefixes(x, y) getOrElse Array()

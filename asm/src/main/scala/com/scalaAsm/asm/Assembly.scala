@@ -3,7 +3,7 @@ package com.scalaAsm.asm
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.Tokens.Token
 
-case class Assembled(val code: Seq[Token], val data: Seq[Token])
+case class Assembled(val code: Seq[Any], val data: Seq[Token])
 
 trait AsmProgram {
   
@@ -11,7 +11,7 @@ trait AsmProgram {
   val dataSections = new ListBuffer[DataSection]()
 
   def assemble: Assembled = {
-    val codeTokens: ListBuffer[Token] = codeSections.flatMap{seg => seg.build(seg.builder.toSeq)}
+    val codeTokens: ListBuffer[Any] = codeSections.flatMap{seg => seg.build(seg.builder.toSeq)}
     
     val dataTokens = dataSections flatMap {seg => seg.compile}
 

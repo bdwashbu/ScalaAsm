@@ -133,6 +133,9 @@ http://msdn.microsoft.com/en-us/library/ms809762.aspx
 X86 Opcode and Instruction Reference:
 http://ref.x86asm.net/index.html
 
+Encoding x86 instructions:
+http://www.c-jump.com/CIS77/CPU/x86/lecture.html#X77_0240_prefix
+
 How to run:
 ========
 

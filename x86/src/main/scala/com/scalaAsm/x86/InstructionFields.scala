@@ -15,10 +15,10 @@ protected[x86] trait AddressingFormSpecifier {
   
   val modRM: Option[ModRM]
   val sib: Option[SIB]
-  val displacment: Option[Displacement]
-  val immediate: Option[Immediate]
+  //val displacment: Option[Displacement]
+ // val immediate: Option[Immediate]
   
-  def components: Seq[InstructionField] = Seq(modRM, sib, displacment, immediate).flatten
+  def components: Seq[InstructionField] = Seq(modRM, sib).flatten
 
   lazy val getBytes: Array[Byte] = {
     components flatMap (_.getBytes) toArray
@@ -27,6 +27,49 @@ protected[x86] trait AddressingFormSpecifier {
   lazy val size: Int = {
     components flatMap (x => List(x.size)) sum
   }
+}
+
+protected[x86] trait AddressingFormSpecifierTemp {
+  type Displacement32 = EBP
+  type AddressInSib = ESP
+  type NoneSib = ESP
+  
+  val addressingForm: AddressingFormSpecifier
+  val displacment: Option[Displacement]
+  val immediate: Option[Immediate]
+  
+  def components: Seq[InstructionField] = Seq(displacment, immediate).flatten
+
+  lazy val getBytes: Array[Byte] = {
+    val extra: Array[Byte] = components flatMap (_.getBytes) toArray
+    val result = addressingForm.getBytes ++ extra
+    result
+  }
+
+  lazy val size: Int = {
+    addressingForm.size + (components flatMap (x => List(x.size)) sum)
+  }
+}
+
+case class NoModRM() extends AddressingFormSpecifier {
+  val sib = None
+  val displacment = None
+  val immediate = None
+  val modRM = None
+}
+
+case class NoSIB(mod: ModRM) extends AddressingFormSpecifier {
+  val sib = None
+  val displacment = None
+  val immediate = None
+  val modRM = Some(mod)
+}
+
+case class WithSIB(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier {
+  val sib = Some(theSIB)
+  val displacment = None
+  val immediate = None
+  val modRM = Some(mod)
 }
 
 object ModRM {

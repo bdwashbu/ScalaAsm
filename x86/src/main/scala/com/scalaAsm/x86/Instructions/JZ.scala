@@ -9,9 +9,8 @@ object JZ {
   
   implicit object jz1 extends JZ_1[imm8] {
       def opEn = new OneOperandFormat[imm8]() {
-        def getAddressingForm(op1: imm8, opcode: OpcodeFormat) = new AddressingFormSpecifier {
-	        val modRM = None
-		    val sib = None
+        def getAddressingForm(op1: imm8, opcode: OpcodeFormat) = new AddressingFormSpecifierTemp {
+	        val addressingForm = NoModRM()
 		    val displacment = None
 		    val immediate = Some(op1)
 	     }}

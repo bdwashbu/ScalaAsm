@@ -8,35 +8,7 @@ abstract class x86Instruction(mnemonic: String) extends Instruction {
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
 }
 
-trait Instruction {
-
-  case class OpcodePlusRd(opcode1: Byte) extends OpcodeFormat {
-    def get(x: Any) = {
-      if (x.isInstanceOf[ModRM.reg])
-        Array((opcode1 + x.asInstanceOf[ModRM.reg].ID).toByte)
-      else
-        Array()
-
-    }
-    val size = 1
-    val opcodeExtension: Option[Byte] = None
-    def /+(x: Byte) = new OneOpcode(opcode1) { override val opcodeExtension = Some(x) }
-  }
-
-  case class OneOpcode(operand1: Byte) extends OpcodeFormat {
-    def get(x: Any) = Array(operand1)
-    val size = 1
-    val opcodeExtension: Option[Byte] = None
-    def /+(x: Byte) = new OneOpcode(operand1) { override val opcodeExtension = Some(x) }
-  }
-
-  case class TwoOpcodes(opcode1: Byte, opcode2: Byte) extends OpcodeFormat {
-    def get(x: Any) = Array(opcode1, opcode2)
-    val size = 2
-    val opcodeExtension: Option[Byte] = None
-    def /+(x: Byte) = new TwoOpcodes(opcode1, opcode2) { override val opcodeExtension = Some(x) }
-  }
-}
+trait Instruction
 
 trait ZeroOperandInstruction extends Instruction {
   def opcode: OpcodeFormat
@@ -60,7 +32,7 @@ trait ZeroOperandInstruction extends Instruction {
   }
 }
 
-trait OneOperandInstruction[-O1 <: Operand] extends Instruction with OneOperandInstructionFormat {
+trait OneOperandInstruction[-O1 <: Operand] extends Instruction {
   val opcode: OpcodeFormat
   def opEn: OneOperandFormat[O1]
   val mnemonic: String = ""
@@ -83,11 +55,11 @@ trait OneOperandInstruction[-O1 <: Operand] extends Instruction with OneOperandI
   }
 }
 
-trait TwoOperandInstruction[-O1 <: Operand, -O2 <: Operand] extends Instruction with TwoOperandInstructionFormat {
+trait TwoOperandInstruction[-O1 <: Operand, -O2 <: Operand] extends Instruction {
   val opcode: OpcodeFormat
   def opEn: TwoOperandsFormat[O1, O2]
   val mnemonic: String = ""
-
+    
   def apply(x: O1, y: O2) =
     new MachineCodeBuilder2[O1, O2](x, y) {
       def get = new MachineCode {

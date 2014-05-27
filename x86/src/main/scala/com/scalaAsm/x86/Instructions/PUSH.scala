@@ -12,7 +12,7 @@ trait PUSH_1[-O1 <: Operand] extends PUSH with OneOperandInstruction[O1]
 trait POWLow {
     
   implicit object LowPush extends PUSH_1[rm] {
-      def opEn = M()
+      def opEn = M
       val opcode = 0xFF /+ 6
   }
 }
@@ -20,32 +20,32 @@ trait POWLow {
 object PUSH extends POWLow {
 
   implicit object push1 extends PUSH_1[r64] {
-      def opEn = O()
+      def opEn = O
       val opcode = OpcodePlusRd(0x50)
   }
   
   implicit object push2 extends PUSH_1[r32] {
-      def opEn = O()
+      def opEn = O
       val opcode = OpcodePlusRd(0x50)
   }
   
   implicit object push3 extends PUSH_1[r16] {
-      def opEn = O()
+      def opEn = O
       val opcode = OpcodePlusRd(0x50)
   }
   
   implicit object push4 extends PUSH_1[imm8] {
-      def opEn = I()
+      def opEn = I
       val opcode: OpcodeFormat = 0x6A
   }
   
   implicit object push5 extends PUSH_1[imm16] {
-      def opEn = I()
+      def opEn = I
       val opcode: OpcodeFormat = 0x68
   }
   
   implicit object push6 extends PUSH_1[imm32] {
-      def opEn = I()
+      def opEn = I
       val opcode: OpcodeFormat = 0x68
   }
   

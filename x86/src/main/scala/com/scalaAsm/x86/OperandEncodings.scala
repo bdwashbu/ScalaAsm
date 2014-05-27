@@ -19,9 +19,9 @@ abstract class TwoOperandsFormat[-X <: Operand, -Y <: Operand] extends OperandFo
   def getAddressingForm(x: X, y: Y, opcode: OpcodeFormat): AddressingFormSpecifierTemp
 }
 
-case class MI[M <: ModRM.rm, I <: Immediate]() extends TwoOperandsFormat[M, I] {
+object MI extends TwoOperandsFormat[ModRM.rm, Immediate] {
 
-  def getAddressingForm(op1: M, op2: I, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+  def getAddressingForm(op1: ModRM.rm, op2: Immediate, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
 
     op1 match {
       case reg: GPR =>
@@ -32,7 +32,7 @@ case class MI[M <: ModRM.rm, I <: Immediate]() extends TwoOperandsFormat[M, I] {
     }
   }
 
-  def getPrefixes(op1: M, op2: I): Option[Array[Byte]] = {
+  def getPrefixes(op1: ModRM.rm, op2: Immediate): Option[Array[Byte]] = {
     op1 match {
       case reg: UniformByteRegister =>
         Some(REX.W(false).get)
@@ -43,9 +43,9 @@ case class MI[M <: ModRM.rm, I <: Immediate]() extends TwoOperandsFormat[M, I] {
   }
 }
 
-case class RM[R <: ModRM.reg, M <: ModRM.rm]() extends TwoOperandsFormat[R, M] {
+object RM extends TwoOperandsFormat[ModRM.reg, ModRM.rm] {
 
-  def getAddressingForm(op1: R, op2: M, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+  def getAddressingForm(op1: ModRM.reg, op2: ModRM.rm, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
 
     op2 match {
       case mem: Memory =>
@@ -61,7 +61,7 @@ case class RM[R <: ModRM.reg, M <: ModRM.rm]() extends TwoOperandsFormat[R, M] {
     }
   }
 
-  def getPrefixes(op1: R, op2: M): Option[Array[Byte]] = {
+  def getPrefixes(op1: ModRM.reg, op2: ModRM.rm): Option[Array[Byte]] = {
     op1 match {
       case reg: UniformByteRegister =>
         Some(REX.W(false).get)
@@ -72,25 +72,25 @@ case class RM[R <: ModRM.reg, M <: ModRM.rm]() extends TwoOperandsFormat[R, M] {
   }
 }
 
-case class MR[M <: ModRM.rm, R <: ModRM.reg]() extends TwoOperandsFormat[M, R] {
+object MR extends TwoOperandsFormat[ModRM.rm, ModRM.reg] {
 
-  def getAddressingForm(op1: M, op2: R, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
-    RM().getAddressingForm(op2, op1, opcode)
+  def getAddressingForm(op1:  ModRM.rm, op2: ModRM.reg, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+    RM.getAddressingForm(op2, op1, opcode)
   }
 
-  def getPrefixes(op1: M, op2: R): Option[Array[Byte]] = RM().getPrefixes(op2, op1)
+  def getPrefixes(op1:  ModRM.rm, op2: ModRM.reg): Option[Array[Byte]] = RM.getPrefixes(op2, op1)
 }
 
-case class OI[O <: ModRM.plusRd, I <: Immediate]() extends TwoOperandsFormat[O, I] {
+object OI extends TwoOperandsFormat[ModRM.plusRd, Immediate] {
 
-  def getAddressingForm(op1: O, op2: I, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+  def getAddressingForm(op1: ModRM.plusRd, op2: Immediate, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
     new AddressingFormSpecifierTemp {
       val addressingForm = NoModRM()
       val (displacment, immediate) = (None, Some(op2))
     }
   }
 
-  def getPrefixes(op1: O, op2: I): Option[Array[Byte]] = {
+  def getPrefixes(op1: ModRM.plusRd, op2: Immediate): Option[Array[Byte]] = {
     op1 match {
       case reg: Register64 =>
         Some(REX.W(true).get)
@@ -99,13 +99,13 @@ case class OI[O <: ModRM.plusRd, I <: Immediate]() extends TwoOperandsFormat[O, 
   }
 }
 
-case class M1[M <: ModRM.rm]() extends TwoOperandsFormat[M, One] {
-  def getAddressingForm(op1: M, op2: One, opcode: OpcodeFormat): AddressingFormSpecifierTemp = M().getAddressingForm(op1, opcode)
-  def getPrefixes(op1: M, op2: One): Option[Array[Byte]] = None
+object M1 extends TwoOperandsFormat[ModRM.rm, One] {
+  def getAddressingForm(op1: ModRM.rm, op2: One, opcode: OpcodeFormat): AddressingFormSpecifierTemp = M.getAddressingForm(op1, opcode)
+  def getPrefixes(op1: ModRM.rm, op2: One): Option[Array[Byte]] = None
 }
 
-case class O[O <: ModRM.plusRd]() extends OneOperandFormat[O] {
-  def getAddressingForm(op1: O, opcode: OpcodeFormat) = {
+object O extends OneOperandFormat[ModRM.plusRd] {
+  def getAddressingForm(op1: ModRM.plusRd, opcode: OpcodeFormat) = {
     new AddressingFormSpecifierTemp {
       val addressingForm = NoModRM()
       val (displacment, immediate) = (None, None)
@@ -113,9 +113,9 @@ case class O[O <: ModRM.plusRd]() extends OneOperandFormat[O] {
   }
 }
 
-case class I[I <: Immediate]() extends OneOperandFormat[I] {
+object I extends OneOperandFormat[Immediate] {
 
-  def getAddressingForm(op1: I, opcode: OpcodeFormat) = {
+  def getAddressingForm(op1: Immediate, opcode: OpcodeFormat) = {
     new AddressingFormSpecifierTemp {
       val addressingForm = NoModRM()
       val (displacment, immediate) = (None, Some(op1))
@@ -124,9 +124,9 @@ case class I[I <: Immediate]() extends OneOperandFormat[I] {
 
 }
 
-case class Offset[O <: Memory]() extends OneOperandFormat[O] {
+object Offset extends OneOperandFormat[Memory] {
 
-  def getAddressingForm(op1: O, opcode: OpcodeFormat) = {
+  def getAddressingForm(op1: Memory, opcode: OpcodeFormat) = {
     new AddressingFormSpecifierTemp {
       val addressingForm = NoSIB(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP))
       val (displacment, immediate) = (op1.offset, None)
@@ -134,9 +134,9 @@ case class Offset[O <: Memory]() extends OneOperandFormat[O] {
   }
 }
 
-case class M[M <: ModRM.rm]() extends OneOperandFormat[M] {
+object M extends OneOperandFormat[ModRM.rm] {
 
-  def getAddressingForm(op1: M, opcode: OpcodeFormat) = {
+  def getAddressingForm(op1: ModRM.rm, opcode: OpcodeFormat) = {
 
     op1 match {
       case rel: Relative =>

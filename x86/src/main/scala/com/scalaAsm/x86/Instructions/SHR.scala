@@ -8,7 +8,7 @@ trait SHR_2[-O1 <: Operand, -O2 <: Operand] extends SHR with TwoOperandInstructi
 object SHR {
   
   implicit object shr1 extends SHR_2[rm32, imm8] {
-      def opEn = MI()
+      def opEn = MI
       val opcode = 0xC1 /+ 5
   }
 }

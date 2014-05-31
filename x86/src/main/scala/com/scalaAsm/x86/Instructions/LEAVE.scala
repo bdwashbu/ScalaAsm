@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class LEAVE extends x86Instruction("LEAVE") with ZeroOperandInstruction
+trait LEAVE extends x86Instruction with ZeroOperandInstruction {
+  val mnemonic = "LEAVE"
+}
 
 object LEAVE {
   

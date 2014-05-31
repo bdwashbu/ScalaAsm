@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class AND extends x86Instruction("AND")
+abstract class AND extends x86Instruction {
+  val mnemonic = "AND"
+}
 
 trait AND_2[-O1 <: Operand, -O2 <: Operand] extends AND with TwoOperandInstruction[O1,O2]
 

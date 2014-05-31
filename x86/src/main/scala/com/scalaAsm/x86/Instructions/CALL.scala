@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class CALL extends x86Instruction("CALL")
+abstract class CALL extends x86Instruction {
+  val mnemonic = "CALL"
+}
 
 trait CALL_1[-O1 <: Operand] extends CALL with OneOperandInstruction[O1]
 

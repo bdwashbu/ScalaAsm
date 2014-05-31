@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class SUB extends x86Instruction("SUB")
+abstract class SUB extends x86Instruction {
+  val mnemonic = "SUB"
+}
 
 trait SUB_2[-O1 <: Operand, -O2 <: Operand] extends SUB with TwoOperandInstruction[O1,O2]
 

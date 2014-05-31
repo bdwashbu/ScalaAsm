@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class RET extends x86Instruction("RET") with ZeroOperandInstruction
+abstract class RET extends x86Instruction with ZeroOperandInstruction {
+  val mnemonic = "RET"
+}
 
 object RET {
 

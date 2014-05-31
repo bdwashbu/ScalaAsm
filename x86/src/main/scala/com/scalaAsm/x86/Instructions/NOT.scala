@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class NOT extends x86Instruction("NOT")
+abstract class NOT extends x86Instruction {
+  val mnemonic = "NOT"
+}
 
 trait NOT_1[-O1 <: Operand] extends NOT with OneOperandInstruction[O1]
 

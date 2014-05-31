@@ -2,17 +2,17 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
 
-abstract class x86Instruction(mnemonic: String) extends Instruction {
+trait Instruction
+
+trait x86Instruction extends Instruction {
+  val mnemonic: String
   implicit def toByte(x: Int) = x.toByte
   implicit def toOneOpcode(x: Int): OneOpcode = OneOpcode(x.toByte)
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
 }
 
-trait Instruction
-
-trait ZeroOperandInstruction extends Instruction {
+trait ZeroOperandInstruction extends x86Instruction {
   def opcode: OpcodeFormat
-  val mnemonic: String = ""
 
   def apply: MachineCodeBuilder =
     new MachineCodeBuilder {
@@ -32,10 +32,9 @@ trait ZeroOperandInstruction extends Instruction {
   }
 }
 
-trait OneOperandInstruction[-O1 <: Operand] extends Instruction {
+trait OneOperandInstruction[-O1 <: Operand] extends x86Instruction {
   val opcode: OpcodeFormat
   def opEn: OneOperandFormat[O1]
-  val mnemonic: String = ""
 
   def apply(x: O1) =
     new MachineCodeBuilder1[O1](x) {
@@ -55,10 +54,9 @@ trait OneOperandInstruction[-O1 <: Operand] extends Instruction {
   }
 }
 
-trait TwoOperandInstruction[-O1 <: Operand, -O2 <: Operand] extends Instruction {
+trait TwoOperandInstruction[-O1 <: Operand, -O2 <: Operand] extends x86Instruction {
   val opcode: OpcodeFormat
   def opEn: TwoOperandsFormat[O1, O2]
-  val mnemonic: String = ""
     
   def apply(x: O1, y: O2) =
     new MachineCodeBuilder2[O1, O2](x, y) {

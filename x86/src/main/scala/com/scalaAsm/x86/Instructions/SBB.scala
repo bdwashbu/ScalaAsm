@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class SBB extends x86Instruction("SBB")
+abstract class SBB extends x86Instruction {
+  val mnemonic = "SBB"
+}
 
 trait SBB_2[-O1 <: Operand, -O2 <: Operand] extends SBB with TwoOperandInstruction[O1,O2]
 

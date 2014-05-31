@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class OR extends x86Instruction("OR")
+abstract class OR extends x86Instruction {
+  val mnemonic = "OR"
+}
 
 trait OR_2[-O1 <: Operand,-O2 <: Operand] extends OR with TwoOperandInstruction[O1,O2]
 

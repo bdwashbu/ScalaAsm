@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class JNZ extends x86Instruction("JNZ")
+trait JNZ extends x86Instruction {
+  val mnemonic = "JNZ"
+}
 
 trait JNZ_1[-O1 <: Operand] extends JNZ with OneOperandInstruction[O1]
 

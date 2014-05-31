@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class DEC extends x86Instruction("DEC")
+trait DEC extends x86Instruction {
+  val mnemonic = "DEC"
+}
 
 trait DEC_1[-O1 <: Operand] extends DEC with OneOperandInstruction[O1]
 

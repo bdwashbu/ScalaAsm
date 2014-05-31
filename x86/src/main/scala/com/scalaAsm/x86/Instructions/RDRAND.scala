@@ -4,7 +4,9 @@ package Instructions
 import com.scalaAsm.x86.Operands._
 import scala.annotation.implicitNotFound
 
-abstract class RDRAND extends x86Instruction("RDRAND")
+abstract class RDRAND extends x86Instruction {
+  val mnemonic = "RDRAND"
+}
 
 trait RDRAND_1[-O1 <: Operand] extends RDRAND with OneOperandInstruction[O1]
 

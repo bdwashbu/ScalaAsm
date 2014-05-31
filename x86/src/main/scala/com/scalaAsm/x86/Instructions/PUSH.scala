@@ -4,7 +4,9 @@ package Instructions
 import com.scalaAsm.x86.Operands._
 import scala.annotation.implicitNotFound
 
-abstract class PUSH extends x86Instruction("PUSH")
+abstract class PUSH extends x86Instruction {
+  val mnemonic = "PUSH"
+}
 
 @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
 trait PUSH_1[-O1 <: Operand] extends PUSH with OneOperandInstruction[O1]

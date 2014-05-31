@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class JMP extends x86Instruction("JMP")
+trait JMP extends x86Instruction {
+  val mnemonic = "JMP"
+}
 
 trait JMP_1[-O1 <: Operand] extends JMP with OneOperandInstruction[O1]
 

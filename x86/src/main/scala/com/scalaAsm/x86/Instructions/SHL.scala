@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class SHL extends x86Instruction("SHL")
+abstract class SHL extends x86Instruction {
+  val mnemonic = "SHL"
+}
 
 trait SHL_2[-O1 <: Operand, -O2 <: Operand] extends SHL with TwoOperandInstruction[O1,O2]
 

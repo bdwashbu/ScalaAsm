@@ -3,7 +3,9 @@ package Instructions
 
 import com.scalaAsm.x86.Operands._
 
-abstract class POP extends x86Instruction("POP")
+abstract class POP extends x86Instruction {
+  val mnemonic = "POP"
+}
 
 trait POP_1[-O1 <: Operand] extends POP with OneOperandInstruction[O1]
 

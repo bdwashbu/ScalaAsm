@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class INT extends x86Instruction("INT")
+trait INT extends x86Instruction {
+  val mnemonic = "INT"
+}
 
 trait INT_1[-O1 <: Operand] extends INT with OneOperandInstruction[O1]
 

@@ -1,7 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class MOV extends x86Instruction("MOV")
+abstract class MOV extends x86Instruction {
+  val mnemonic = "MOV"
+}
 
 trait MOV_2[-O1 <: Operand, -O2 <: Operand] extends MOV with TwoOperandInstruction[O1,O2]
 

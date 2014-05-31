@@ -52,9 +52,9 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 
     def push(param: String) = Reference(param)
 
-    def jnz(labelRef: String)(implicit ev: JNZ_1[Immediate8]) = LabelRef(labelRef, ev) 
+    def jnz(labelRef: String)(implicit ev: JNZ_1[_, Immediate8]) = LabelRef(labelRef, ev) 
 
-    def jz(labelRef: String)(implicit ev: JZ_1[Immediate8]) = LabelRef(labelRef, ev)
+    def jz(labelRef: String)(implicit ev: JZ_1[_, Immediate8]) = LabelRef(labelRef, ev)
 
     def call(refName: String) = Reference(refName)
 

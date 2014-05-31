@@ -15,7 +15,7 @@ object Tokens {
   case class CodeGroup(code: Seq[Any]) extends CodeToken
   case class ProcedureToken(name: String, innerCode: Seq[Any]) extends CodeToken
   case class Label(name: String) extends CodeToken
-  case class LabelRef(labelRef: String, inst:OneOperandInstruction[Immediate8]) extends CodeToken
+  case class LabelRef(labelRef: String, inst:OneOperandInstruction[_,Immediate8]) extends CodeToken
   case class InstructionToken(inst: MachineCode) extends SizedToken(inst.size) with CodeToken
   case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken
   

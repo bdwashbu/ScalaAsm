@@ -5,17 +5,11 @@ trait JNZ extends x86Instruction {
   val mnemonic = "JNZ"
 }
 
-trait JNZ_1[-O1 <: Operand] extends JNZ with OneOperandInstruction[O1]
+trait JNZ_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with JNZ
 
-object JNZ {
+object JNZ extends Formats {
   
-  implicit object jnz1 extends JNZ_1[imm8] {
-      def opEn = new OneOperandFormat[imm8]() {
-        def getAddressingForm(op1: imm8, opcode: OpcodeFormat) = new AddressingFormSpecifierTemp {
-	        val addressingForm = NoModRM()
-		    val displacment = None
-		    val immediate = Some(op1)
-	     }}
+  implicit object jnz1 extends JNZ_1[I, imm8] {
       val opcode = OneOpcode(0x75)
   }
 }

@@ -4,16 +4,15 @@ package Instructions
 import com.scalaAsm.x86.Operands._
 import scala.annotation.implicitNotFound
 
-abstract class RETN extends x86Instruction {
+trait RETN extends x86Instruction {
   val mnemonic = "RETN"
 }
 
-trait RETN_1[-O1 <: Operand] extends RETN with OneOperandInstruction[O1]
+trait RETN_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with RETN
 
-object RETN {
+object RETN extends Formats {
   
-  implicit object retn1 extends RETN_1[imm16] {
-      def opEn = I
+  implicit object retn1 extends RETN_1[I, imm16] {
       val opcode: OpcodeFormat = 0xC2
   }
 }

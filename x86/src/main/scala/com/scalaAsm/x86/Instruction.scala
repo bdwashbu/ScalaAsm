@@ -17,9 +17,9 @@ trait ZeroOperandInstruction extends x86Instruction {
   def apply: MachineCodeBuilder =
     new MachineCodeBuilder {
       def get = new MachineCode {
-          val size = getSize
-          val code = getBytes
-          val line = mnemonic
+        val size = getSize
+        val code = getBytes
+        val line = mnemonic
       }
     }
 
@@ -32,32 +32,103 @@ trait ZeroOperandInstruction extends x86Instruction {
   }
 }
 
-trait OneOperandInstruction[-O1 <: Operand] extends x86Instruction {
+trait M
+trait O
+trait I
+trait Offset
+
+trait Formats {
+  
+  implicit object MFormat extends OneOperandFormat2[M, ModRM.rm] {
+
+    def getAddressingForm(op1: ModRM.rm, opcode: OpcodeFormat) = {
+
+      op1 match {
+        case rel: Relative =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = NoModRM()
+            val (displacment, immediate) = (rel.offset, None)
+          }
+        case mem: Memory =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = OneOperandInstructionFormatter.encode(mem, opcode.opcodeExtension)
+            val (displacment, immediate) = (mem.offset, mem.immediate)
+          }
+        case reg: GPR =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = OneOperandInstructionFormatter.encode(reg, opcode.opcodeExtension)
+            val (displacment, immediate) = (None, None)
+          }
+      }
+    }
+  }
+  
+  implicit object DSFormat extends OneOperandFormat2[DS, DS] {
+    def getAddressingForm(op1: DS, opcode: OpcodeFormat) = NoAddressingForm
+  }
+  
+  implicit object CSFormat extends OneOperandFormat2[CS, CS] {
+    def getAddressingForm(op1: CS, opcode: OpcodeFormat) = NoAddressingForm
+  }
+  
+  implicit object OFormat extends OneOperandFormat2[O, ModRM.plusRd] {
+    def getAddressingForm(op1: ModRM.plusRd, opcode: OpcodeFormat) = {
+      new AddressingFormSpecifierTemp {
+        val addressingForm = NoModRM()
+        val (displacment, immediate) = (None, None)
+      }
+    }
+  }
+
+  implicit object IFormat extends OneOperandFormat2[I, Immediate] {
+
+    def getAddressingForm(op1: Immediate, opcode: OpcodeFormat) = {
+      new AddressingFormSpecifierTemp {
+        val addressingForm = NoModRM()
+        val (displacment, immediate) = (None, Some(op1))
+      }
+    }
+
+  }
+
+  implicit object OffsetFormat extends OneOperandFormat2[Offset, Memory] {
+
+    def getAddressingForm(op1: Memory, opcode: OpcodeFormat) = {
+      new AddressingFormSpecifierTemp {
+        val addressingForm = NoSIB(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP))
+        val (displacment, immediate) = (op1.offset, None)
+      }
+    }
+  }
+}
+
+abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OneOperandFormat2[OpEn, O1]) extends x86Instruction with Formats {
   val opcode: OpcodeFormat
-  def opEn: OneOperandFormat[O1]
 
   def apply(x: O1) =
     new MachineCodeBuilder1[O1](x) {
       def get = new MachineCode {
         val size = getSize(x)
         val code = getBytes(x)
-        val line = mnemonic + " " + opEn.toString
+        val line = mnemonic
       }
     }
 
   def getSize(x: O1): Int = {
-    opcode.size + opEn.getAddressingForm(x, opcode).size
+    opcode.size + format.getAddressingForm(x, opcode).size
   }
 
   def getBytes(x: O1): Array[Byte] = {
-    opcode.get(x) ++ opEn.getAddressingForm(x, opcode).getBytes
+    opcode.get(x) ++ format.getAddressingForm(x, opcode).getBytes
   }
+  
+  //def form[X <: O1](x:X)(implicit format: OneOperandFormat[O1]) = format.getAddressingForm(x, opcode)
 }
 
 trait TwoOperandInstruction[-O1 <: Operand, -O2 <: Operand] extends x86Instruction {
   val opcode: OpcodeFormat
   def opEn: TwoOperandsFormat[O1, O2]
-    
+
   def apply(x: O1, y: O2) =
     new MachineCodeBuilder2[O1, O2](x, y) {
       def get = new MachineCode {

@@ -5,12 +5,11 @@ trait LEA extends x86Instruction {
   val mnemonic = "LEA"
 }
 
-trait LEA_2[-O1 <: Operand, -O2 <: Operand] extends LEA with TwoOperandInstruction[O1,O2]
+trait LEA_2[OpEn, -O1 <: Operand, -O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with LEA
 
-object LEA {
+object LEA extends Formats2 {
 
-  implicit object lea1 extends LEA_2[r, rm] {
-      def opEn = RM
+  implicit object lea1 extends LEA_2[RM, r, rm] {
       val opcode: OpcodeFormat = 0x8D
   }
 }

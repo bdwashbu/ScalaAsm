@@ -1,16 +1,15 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class OR extends x86Instruction {
+trait OR extends x86Instruction {
   val mnemonic = "OR"
 }
 
-trait OR_2[-O1 <: Operand,-O2 <: Operand] extends OR with TwoOperandInstruction[O1,O2]
+trait OR_2[OpEn, -O1 <: Operand,-O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with OR
 
-object OR {
+object OR extends Formats2 {
   
-  implicit object or1 extends OR_2[rm8, imm8] {
-      def opEn = MI
+  implicit object or1 extends OR_2[MI, rm8, imm8] {
       val opcode = 0x80 /+ 1
   }
 }

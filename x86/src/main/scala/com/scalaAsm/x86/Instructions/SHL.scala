@@ -1,16 +1,15 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class SHL extends x86Instruction {
+trait SHL extends x86Instruction {
   val mnemonic = "SHL"
 }
 
-trait SHL_2[-O1 <: Operand, -O2 <: Operand] extends SHL with TwoOperandInstruction[O1,O2]
+trait SHL_2[OpEn, -O1 <: Operand, -O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with SHL
 
-object SHL {
+object SHL extends Formats2 {
   
-  implicit object shl1 extends SHL_2[rm8, One] {
-      def opEn = M1
+  implicit object shl1 extends SHL_2[M1, rm8, One] {
       val opcode = OneOpcode(0xD0) /+ 4
   }
 }

@@ -38,8 +38,8 @@ trait I
 trait Offset
 
 trait Formats {
-  
-  implicit object MFormat extends OneOperandFormat2[M, ModRM.rm] {
+
+  implicit object MFormat extends OneOperandFormat[M, ModRM.rm] {
 
     def getAddressingForm(op1: ModRM.rm, opcode: OpcodeFormat) = {
 
@@ -62,16 +62,16 @@ trait Formats {
       }
     }
   }
-  
-  implicit object DSFormat extends OneOperandFormat2[DS, DS] {
+
+  implicit object DSFormat extends OneOperandFormat[DS, DS] {
     def getAddressingForm(op1: DS, opcode: OpcodeFormat) = NoAddressingForm
   }
-  
-  implicit object CSFormat extends OneOperandFormat2[CS, CS] {
+
+  implicit object CSFormat extends OneOperandFormat[CS, CS] {
     def getAddressingForm(op1: CS, opcode: OpcodeFormat) = NoAddressingForm
   }
-  
-  implicit object OFormat extends OneOperandFormat2[O, ModRM.plusRd] {
+
+  implicit object OFormat extends OneOperandFormat[O, ModRM.plusRd] {
     def getAddressingForm(op1: ModRM.plusRd, opcode: OpcodeFormat) = {
       new AddressingFormSpecifierTemp {
         val addressingForm = NoModRM()
@@ -80,7 +80,7 @@ trait Formats {
     }
   }
 
-  implicit object IFormat extends OneOperandFormat2[I, Immediate] {
+  implicit object IFormat extends OneOperandFormat[I, Immediate] {
 
     def getAddressingForm(op1: Immediate, opcode: OpcodeFormat) = {
       new AddressingFormSpecifierTemp {
@@ -91,7 +91,7 @@ trait Formats {
 
   }
 
-  implicit object OffsetFormat extends OneOperandFormat2[Offset, Memory] {
+  implicit object OffsetFormat extends OneOperandFormat[Offset, Memory] {
 
     def getAddressingForm(op1: Memory, opcode: OpcodeFormat) = {
       new AddressingFormSpecifierTemp {
@@ -102,7 +102,101 @@ trait Formats {
   }
 }
 
-abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OneOperandFormat2[OpEn, O1]) extends x86Instruction with Formats {
+trait TwoOperandEncoding[X,Y]
+trait MR
+trait OI
+trait RM
+trait M1
+trait MI
+
+trait Formats2 {
+  implicit object MIFormat extends TwoOperandsFormat[MI, ModRM.rm, Immediate] {
+
+    def getAddressingForm(op1: ModRM.rm, op2: Immediate, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+
+      op1 match {
+        case reg: GPR =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = TwoOperandInstructionFormatter.encode(reg, op2, opcode.opcodeExtension)
+            val (displacment, immediate) = (None, Some(op2))
+          }
+      }
+    }
+
+    def getPrefixes(op1: ModRM.rm, op2: Immediate): Option[Array[Byte]] = {
+      op1 match {
+        case reg: UniformByteRegister =>
+          Some(REX.W(false).get)
+        case reg: Register64 =>
+          Some(REX.W(true).get)
+        case _ => None
+      }
+    }
+  }
+
+  implicit object RMFormat extends TwoOperandsFormat[RM, ModRM.reg, ModRM.rm] {
+
+    def getAddressingForm(op1: ModRM.reg, op2: ModRM.rm, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+
+      op2 match {
+        case mem: Memory =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = TwoOperandInstructionFormatter.encode(op1, mem, opcode.opcodeExtension)
+            val (displacment, immediate) = (mem.offset, mem.immediate)
+          }
+        case reg: GPR =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = TwoOperandInstructionFormatter.encode(op1, reg, opcode.opcodeExtension)
+            val (displacment, immediate) = (None, None)
+          }
+      }
+    }
+
+    def getPrefixes(op1: ModRM.reg, op2: ModRM.rm): Option[Array[Byte]] = {
+      op1 match {
+        case reg: UniformByteRegister =>
+          Some(REX.W(false).get)
+        case reg: Register64 =>
+          Some(REX.W(true).get)
+        case _ => None
+      }
+    }
+  }
+
+  implicit object MRFormat extends TwoOperandsFormat[MR, ModRM.rm, ModRM.reg] {
+
+    def getAddressingForm(op1: ModRM.rm, op2: ModRM.reg, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+      RMFormat.getAddressingForm(op2, op1, opcode)
+    }
+
+    def getPrefixes(op1: ModRM.rm, op2: ModRM.reg): Option[Array[Byte]] = RMFormat.getPrefixes(op2, op1)
+  }
+
+  implicit object OIFormat extends TwoOperandsFormat[OI, ModRM.plusRd, Immediate] {
+
+    def getAddressingForm(op1: ModRM.plusRd, op2: Immediate, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+      new AddressingFormSpecifierTemp {
+        val addressingForm = NoModRM()
+        val (displacment, immediate) = (None, Some(op2))
+      }
+    }
+
+    def getPrefixes(op1: ModRM.plusRd, op2: Immediate): Option[Array[Byte]] = {
+      op1 match {
+        case reg: Register64 =>
+          Some(REX.W(true).get)
+        case _ => None
+      }
+    }
+  }
+
+  implicit object M1Format extends TwoOperandsFormat[M1, ModRM.rm, One] with Formats {
+    def getAddressingForm(op1: ModRM.rm, op2: One, opcode: OpcodeFormat): AddressingFormSpecifierTemp = MFormat.getAddressingForm(op1, opcode)
+    def getPrefixes(op1: ModRM.rm, op2: One): Option[Array[Byte]] = None
+  }
+}
+
+abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OneOperandFormat[OpEn, O1]) extends x86Instruction with Formats {
   val opcode: OpcodeFormat
 
   def apply(x: O1) =
@@ -121,30 +215,27 @@ abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OneO
   def getBytes(x: O1): Array[Byte] = {
     opcode.get(x) ++ format.getAddressingForm(x, opcode).getBytes
   }
-  
-  //def form[X <: O1](x:X)(implicit format: OneOperandFormat[O1]) = format.getAddressingForm(x, opcode)
 }
 
-trait TwoOperandInstruction[-O1 <: Operand, -O2 <: Operand] extends x86Instruction {
+abstract class TwoOperandInstruction[OpEn, -O1 <: Operand, -O2 <: Operand](implicit format: TwoOperandsFormat[OpEn, O1, O2]) extends x86Instruction with Formats2{
   val opcode: OpcodeFormat
-  def opEn: TwoOperandsFormat[O1, O2]
 
   def apply(x: O1, y: O2) =
     new MachineCodeBuilder2[O1, O2](x, y) {
       def get = new MachineCode {
         val size = getSize(x, y)
         val code = getBytes(x, y)
-        val line = mnemonic + " " + opEn.toString
+        val line = mnemonic + " "
       }
     }
 
   def getSize(x: O1, y: O2): Int = {
-    val prefixes = opEn.getPrefixes(x, y) getOrElse Array()
-    prefixes.size + opcode.size + opEn.getAddressingForm(x, y, opcode).size
+    val prefixes = format.getPrefixes(x, y) getOrElse Array()
+    prefixes.size + opcode.size + format.getAddressingForm(x, y, opcode).size
   }
 
   def getBytes(x: O1, y: O2): Array[Byte] = {
-    val prefixes = opEn.getPrefixes(x, y) getOrElse Array()
-    prefixes ++ opcode.get(x) ++ opEn.getAddressingForm(x, y, opcode).getBytes
+    val prefixes = format.getPrefixes(x, y) getOrElse Array()
+    prefixes ++ opcode.get(x) ++ format.getAddressingForm(x, y, opcode).getBytes
   }
 }

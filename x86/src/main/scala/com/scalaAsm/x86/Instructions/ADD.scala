@@ -1,26 +1,23 @@
 package com.scalaAsm.x86
 package Instructions
 
-abstract class ADD extends x86Instruction {
+trait ADD extends x86Instruction {
   val mnemonic = "ADD"
 }
 
-trait ADD_2[-O1 <: Operand, -O2 <: Operand] extends ADD with TwoOperandInstruction[O1,O2]
+trait ADD_2[OpEn, -O1 <: Operand, -O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with ADD
 
-object ADD {
+object ADD extends Formats2 {
   
-  implicit object add1 extends ADD_2[rm32, imm8] {
+  implicit object add1 extends ADD_2[MI, rm32, imm8] {
       val opcode = 0x83 /+ 0
-      def opEn = MI
   }
   
-  implicit object add2 extends ADD_2[rm16, imm8] {
+  implicit object add2 extends ADD_2[MI, rm16, imm8] {
       val opcode = 0x83 /+ 0
-      def opEn = MI
   }
   
-  implicit object add3 extends ADD_2[r32, rm32] {
-      def opEn = RM
+  implicit object add3 extends ADD_2[RM, r32, rm32] {
       val opcode: OpcodeFormat = 0x03
   }
 }

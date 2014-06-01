@@ -7,7 +7,6 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.One
 import com.scalaAsm.x86.MachineCode
 import com.scalaAsm.x86.Operands.Immediate8
-import com.scalaAsm.x86.{MachineCodeBuilder1, MachineCodeBuilder2}
 import com.scalaAsm.x86.MachineCodeBuilder
 
 trait CodeSection extends Registers with AsmSection[Any] with Catalog {
@@ -16,10 +15,6 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
     case class word(value: Short) extends Immediate16 with Displacement16
     case class dword(value: Int) extends Immediate32 with Displacement32
     case class qword(value: Long) extends Immediate64 with Displacement64
-
-    //implicit def toToken(code: MachineCode) = InstructionToken(code)
-    //implicit def toToken[O1](code: MachineCodeBuilder1[O1]) = InstructionToken(code.get)
-   // implicit def toToken[O1,O2](code: MachineCodeBuilder2[O1, O2]) = InstructionToken(code.get)
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
@@ -36,11 +31,6 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 	  }
 
     def getRawBytes: Array[Byte] = {
-//       def getInstTokens(tokens: List[CodeToken]): List[InstructionToken] = tokens.flatMap { x => x match {
-//        case Procedure(name, code) => getInstTokens(code)
-//        case token: InstructionToken => List(token)
-//      }}
-//       
        build(builder.toSeq) collect { case x: MachineCodeBuilder => x} map {x => x.get.code} reduce (_ ++ _)
     }
     

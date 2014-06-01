@@ -8,7 +8,6 @@ import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.MachineCodeBuilder
 
-
 object AsmCompiler extends Catalog
 {
   def compileData(addressOfData: Int, dataTokens: Seq[Token]): (Array[Byte], Map[String, Int]) = {
@@ -110,7 +109,7 @@ object AsmCompiler extends Catalog
 	        case VarRef(name) => push(new Immediate32{val value = variables(name) + baseOffset}).get.code
 	        case JmpRefResolved(name) => jmp(*(new Immediate32{val value = imports(name) + baseOffset})).get.code
 	        case ImportRef(name) => callNear(*(new Immediate32{val value = imports(name) + baseOffset})).get.code
-	        case LabelRef(name, inst) => inst(new Immediate8{val value = (labels(name) - parserPosition - 2).toByte}).get.code
+	        case LabelRef(name, inst) => inst.get(new Immediate8{val value = (labels(name) - parserPosition - 2).toByte}).get.code
 	        case _ => Array[Byte]()
 	      }
          token match {

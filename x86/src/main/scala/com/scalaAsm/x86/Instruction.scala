@@ -102,7 +102,6 @@ trait Formats {
   }
 }
 
-trait TwoOperandEncoding[X,Y]
 trait MR
 trait OI
 trait RM
@@ -196,46 +195,50 @@ trait Formats2 {
   }
 }
 
+case class OneOperandMachineCodeBuilder[O1 <: Operand](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: OneOperandFormat[_, O1]) extends MachineCodeBuilder{
+  def get() =
+    new MachineCode {
+        val size = getSize
+        val code = getBytes
+        val line = mnemonic
+      }
+
+  def getSize: Int = {
+    opcode.size + format.getAddressingForm(operand, opcode).size
+  }
+
+  def getBytes: Array[Byte] = {
+    opcode.get(operand) ++ format.getAddressingForm(operand, opcode).getBytes
+  }
+}
+
+case class TwoOperandMachineCodeBuilder[O1 <: Operand, O2 <: Operand](operand: O1, operand2: O2, opcode: OpcodeFormat, mnemonic: String, format: TwoOperandsFormat[_, O1, O2]) extends MachineCodeBuilder {
+  def get() =
+    new MachineCode {
+        val size = getSize
+        val code = getBytes
+        val line = mnemonic
+      }
+
+  def getSize: Int = {
+    val prefixes = format.getPrefixes(operand, operand2) getOrElse Array()
+    prefixes.size + opcode.size + format.getAddressingForm(operand, operand2, opcode).size
+  }
+
+  def getBytes: Array[Byte] = {
+    val prefixes = format.getPrefixes(operand, operand2) getOrElse Array()
+    prefixes ++ opcode.get(operand) ++ format.getAddressingForm(operand, operand2, opcode).getBytes
+  }
+}
+
 abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OneOperandFormat[OpEn, O1]) extends x86Instruction with Formats {
   val opcode: OpcodeFormat
 
-  def apply(x: O1) =
-    new MachineCodeBuilder1[O1](x) {
-      def get = new MachineCode {
-        val size = getSize(x)
-        val code = getBytes(x)
-        val line = mnemonic
-      }
-    }
-
-  def getSize(x: O1): Int = {
-    opcode.size + format.getAddressingForm(x, opcode).size
-  }
-
-  def getBytes(x: O1): Array[Byte] = {
-    opcode.get(x) ++ format.getAddressingForm(x, opcode).getBytes
-  }
+  def get[X <: O1](x: X) = OneOperandMachineCodeBuilder(x, opcode, mnemonic, format)
 }
 
 abstract class TwoOperandInstruction[OpEn, -O1 <: Operand, -O2 <: Operand](implicit format: TwoOperandsFormat[OpEn, O1, O2]) extends x86Instruction with Formats2{
   val opcode: OpcodeFormat
 
-  def apply(x: O1, y: O2) =
-    new MachineCodeBuilder2[O1, O2](x, y) {
-      def get = new MachineCode {
-        val size = getSize(x, y)
-        val code = getBytes(x, y)
-        val line = mnemonic + " "
-      }
-    }
-
-  def getSize(x: O1, y: O2): Int = {
-    val prefixes = format.getPrefixes(x, y) getOrElse Array()
-    prefixes.size + opcode.size + format.getAddressingForm(x, y, opcode).size
-  }
-
-  def getBytes(x: O1, y: O2): Array[Byte] = {
-    val prefixes = format.getPrefixes(x, y) getOrElse Array()
-    prefixes ++ opcode.get(x) ++ format.getAddressingForm(x, y, opcode).getBytes
-  }
+  def get[X <: O1, Y <: O2](x: X, y:Y) = TwoOperandMachineCodeBuilder(x, y, opcode, mnemonic, format)
 }

@@ -51,12 +51,12 @@ trait Formats {
           }
         case mem: Memory =>
           new AddressingFormSpecifierTemp {
-            val addressingForm = OneOperandInstructionFormatter.encode(mem, opcode.opcodeExtension)
+            val addressingForm = mem.encode(opcode.opcodeExtension)
             val (displacment, immediate) = (mem.offset, mem.immediate)
           }
         case reg: GPR =>
           new AddressingFormSpecifierTemp {
-            val addressingForm = OneOperandInstructionFormatter.encode(reg, opcode.opcodeExtension)
+            val addressingForm = reg.encode(opcode.opcodeExtension)
             val (displacment, immediate) = (None, None)
           }
       }
@@ -116,7 +116,7 @@ trait Formats2 {
       op1 match {
         case reg: GPR =>
           new AddressingFormSpecifierTemp {
-            val addressingForm = TwoOperandInstructionFormatter.encode(reg, op2, opcode.opcodeExtension)
+            val addressingForm = reg.encode(opcode.opcodeExtension)
             val (displacment, immediate) = (None, Some(op2))
           }
       }
@@ -140,12 +140,12 @@ trait Formats2 {
       op2 match {
         case mem: Memory =>
           new AddressingFormSpecifierTemp {
-            val addressingForm = TwoOperandInstructionFormatter.encode(op1, mem, opcode.opcodeExtension)
+            val addressingForm = op1.encode(mem, opcode.opcodeExtension)
             val (displacment, immediate) = (mem.offset, mem.immediate)
           }
         case reg: GPR =>
           new AddressingFormSpecifierTemp {
-            val addressingForm = TwoOperandInstructionFormatter.encode(op1, reg, opcode.opcodeExtension)
+            val addressingForm = op1.encode(reg, opcode.opcodeExtension)
             val (displacment, immediate) = (None, None)
           }
       }

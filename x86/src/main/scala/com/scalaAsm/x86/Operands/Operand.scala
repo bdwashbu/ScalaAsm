@@ -115,6 +115,20 @@ trait Memory extends RegisterOrMemory {
     def size = 8
   }
   
+  def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+    (base, offset, immediate) match {
+      case (Some(base: Register64), _, _) =>
+        WithSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base), SIB(SIB.One, new ESP, base))
+      case (Some(base), Some(_: Displacement8), None) =>
+        NoSIB(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))
+      case (Some(base), None, None) =>
+        NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+      case (None, None, Some(_: Immediate)) =>
+        NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP))
+      case _ => NoModRM()
+    }
+  }
+  
   override def toString = {
     var result: String = ""
     

@@ -27,6 +27,27 @@ package Operands
     self:Register => 
       val ID: Int
       override def toString = name
+      
+     def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+	    NoSIB(ModRMOpcode(TwoRegisters, opcodeExtend.get, this))
+	 }
+      
+     def encode(op2: Memory, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+	    (op2.base, op2.offset, op2.immediate) match {
+	      case (Some(base), Some(off: Displacement8), None) if base.ID == 4 =>
+	        WithSIB(ModRMReg(DisplacementByte, this, base), SIB(SIB.One, new ESP, base))
+	      case (Some(base), Some(off: Displacement32), None) =>
+	        NoSIB(ModRMReg(DisplacementDword, reg = this, rm = base))
+	      case (Some(base), Some(_: Displacement), None) =>
+	        NoSIB(ModRMReg(DisplacementByte, reg = this, rm = base))
+	      case (Some(base), None, None) =>
+	        NoSIB(ModRMReg(NoDisplacement, reg = this, rm = base))
+	    }
+	  }
+     
+     def encode(op2: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+	    NoSIB(ModRMReg(TwoRegisters, this, op2))
+	 }
   }
   
   trait GeneralPurposeA extends GeneralPurpose {self:Register => val ID = 0}

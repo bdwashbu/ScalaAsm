@@ -33,14 +33,14 @@ package Operands
 	 }
       
      def encode(op2: Memory, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-	    (op2.base, op2.offset, op2.immediate) match {
-	      case (Some(base), Some(off: Displacement8), None) if base.ID == 4 =>
+	    (op2.base, op2.offset) match {
+	      case (Some(base), Some(off: Displacement8)) if base.ID == 4 =>
 	        WithSIB(ModRMReg(DisplacementByte, this, base), SIB(SIB.One, new ESP, base))
-	      case (Some(base), Some(off: Displacement32), None) =>
+	      case (Some(base), Some(off: Displacement32)) =>
 	        NoSIB(ModRMReg(DisplacementDword, reg = this, rm = base))
-	      case (Some(base), Some(_: Displacement), None) =>
+	      case (Some(base), Some(_: Displacement)) =>
 	        NoSIB(ModRMReg(DisplacementByte, reg = this, rm = base))
-	      case (Some(base), None, None) =>
+	      case (Some(base), None) =>
 	        NoSIB(ModRMReg(NoDisplacement, reg = this, rm = base))
 	    }
 	  }

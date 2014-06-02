@@ -31,15 +31,13 @@ object Addressing {
     def size = mem.size
      val base = mem.base
      val offset = mem.offset
-     val immediate = mem.immediate
+     val immediate = None
   }
   
-  def *(imm: Immediate) = new Memory {
+  def *(imm: Immediate) = new ImmediateMemory {
     type Size = imm.Size
     def size = imm.size
-     val base = None
-     val immediate = Some(imm)
-     val offset = None
+    def immediate = imm
   }
 
   type +[A <: Displacement, B <: GPR] = RegisterOffset[A, B]

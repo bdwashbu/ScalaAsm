@@ -47,12 +47,17 @@ trait Formats {
         case rel: Relative =>
           new AddressingFormSpecifierTemp {
             val addressingForm = NoModRM()
-            val (displacment, immediate) = (rel.offset, None)
+            val (displacment, immediate) = (Some(rel.offset), None)
+          }
+        case mem: ImmediateMemory =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = mem.encode(opcode.opcodeExtension)
+            val (displacment, immediate) = (None, Some(mem.immediate))
           }
         case mem: Memory =>
           new AddressingFormSpecifierTemp {
             val addressingForm = mem.encode(opcode.opcodeExtension)
-            val (displacment, immediate) = (mem.offset, mem.immediate)
+            val (displacment, immediate) = (mem.offset, None)
           }
         case reg: GPR =>
           new AddressingFormSpecifierTemp {
@@ -138,10 +143,15 @@ trait Formats2 {
     def getAddressingForm(op1: ModRM.reg, op2: ModRM.rm, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
 
       op2 match {
+        case mem: ImmediateMemory =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = mem.encode(opcode.opcodeExtension)
+            val (displacment, immediate) = (None, Some(mem.immediate))
+          }
         case mem: Memory =>
           new AddressingFormSpecifierTemp {
             val addressingForm = op1.encode(mem, opcode.opcodeExtension)
-            val (displacment, immediate) = (mem.offset, mem.immediate)
+            val (displacment, immediate) = (mem.offset, None)
           }
         case reg: GPR =>
           new AddressingFormSpecifierTemp {

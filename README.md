@@ -24,18 +24,15 @@ For the users, Scala x86 offers compile-time safety.  If bad operand types are p
 Heres an example of some PUSH instructions for 16-bit register, 8-bit immediate value, and 16-bit immediate value operands.
 
 ```scala
-implicit object push1 extends PUSH_1[r16] {
-  def opEn = O()
+implicit object push1 extends PUSH_1[O, r16] {
   def opcode = OpcodePlusRd(0x50)
 }
   
-implicit object push2 extends PUSH_1[imm8] {
-  def opEn = I()
+implicit object push2 extends PUSH_1[I, imm8] {
   val opcode: Opcodes = 0x6A
 }
   
-implicit object push3 extends PUSH_1[imm16] {
-  def opEn = I()
+implicit object push3 extends PUSH_1[I, imm16] {
   val opcode: Opcodes = 0x68
 }
 ```

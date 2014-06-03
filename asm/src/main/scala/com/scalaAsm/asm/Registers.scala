@@ -18,12 +18,10 @@ object Addressing {
     def +[Z <: Displacement](offset: Z) = RegisterOffset[Z,X](offset, this)
   }
 
-  def *(gpr: GPR) = new Memory {
+  def *(gpr: GPR) = new RegisterIndirect {
     type Size = gpr.Size
     def size = gpr.size
-     val base = Some(gpr)
-     val offset = None
-     val immediate = None
+     val base = gpr
   }
   
   def *(mem: Memory) = new Memory {

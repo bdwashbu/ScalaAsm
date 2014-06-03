@@ -129,6 +129,20 @@ trait ImmediateMemory extends RegisterOrMemory {
   }
 }
 
+trait RegisterIndirect extends RegisterOrMemory {
+  self =>
+  def base: GPR
+
+  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+    //NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+    NoSIB(ModRMReg(NoDisplacement, reg, rm = base))
+  }
+  
+  def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+    NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+  }
+}
+
 trait Memory extends RegisterOrMemory {
   self =>
   def base: Option[GPR]

@@ -54,6 +54,11 @@ trait Formats {
             val addressingForm = mem.encode(opcode.opcodeExtension)
             val (displacment, immediate) = (None, Some(mem.immediate))
           }
+        case mem: RegisterIndirect =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = mem.encode(opcode.opcodeExtension)
+            val (displacment, immediate) = (None, None)
+          }
         case mem: Memory =>
           new AddressingFormSpecifierTemp {
             val addressingForm = mem.encode(opcode.opcodeExtension)
@@ -147,6 +152,11 @@ trait Formats2 {
           new AddressingFormSpecifierTemp {
             val addressingForm = mem.encode(opcode.opcodeExtension)
             val (displacment, immediate) = (None, Some(mem.immediate))
+          }
+        case mem: RegisterIndirect =>
+          new AddressingFormSpecifierTemp {
+            val addressingForm = mem.encode(op1, opcode.opcodeExtension)
+            val (displacment, immediate) = (None, None)
           }
         case mem: Memory =>
           new AddressingFormSpecifierTemp {

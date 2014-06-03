@@ -13,7 +13,7 @@ Scala x86 is a collaboration of all these concepts.  Scala x86 can assemble x86 
 
 #### Implementing x86
 
-Many shareholders, but mainly Intel, have developed x86 since 1978 and it has grown into a very large instruction set.  There are hundreds of instructions and each one could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10+ thousand instructions needing to be implemented if you want to be thorough.  The Intel x86 spec is 3300 pages, after all.
+Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set.  There are hundreds of instructions and each one could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10+ thousand instructions needing to be implemented if you want to be thorough.  The Intel x86 spec is 3300 pages, after all.
 
 For the implementers, Scala x86 strives to make the process of defining instructions as easy and simple as possible.  It was designed for this.  It resembles the Intel specification at all times.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this, which is useful because there are still thousands of instructions that have yet to be implemented.
 

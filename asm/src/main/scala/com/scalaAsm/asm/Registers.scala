@@ -9,7 +9,6 @@ object Addressing {
      def size = reg.size
      val base = Some(reg)
      val offset = Some(offset2)
-     val immediate = None
   }
 
   trait Addressable[X <: GPR] {
@@ -24,13 +23,7 @@ object Addressing {
      val base = gpr
   }
   
-  def *(mem: Memory) = new Memory {
-    type Size = mem.Size
-    def size = mem.size
-     val base = mem.base
-     val offset = mem.offset
-     val immediate = None
-  }
+  def *[M <: Memory](mem: M): M = mem
   
   def *(imm: Immediate) = new ImmediateMemory {
     type Size = imm.Size

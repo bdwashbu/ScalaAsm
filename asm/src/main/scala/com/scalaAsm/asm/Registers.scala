@@ -4,11 +4,11 @@ import com.scalaAsm.x86.Operands._
 
 object Addressing {
 
-  case class RegisterOffset[S <: Displacement, +T <: GPR](offset2: S, reg: T) extends Memory {
+  case class RegisterOffset[S <: Displacement, +T <: GPR](offset2: S, reg: T) extends BaseIndex {
      type Size = DwordOperand
      def size = reg.size
-     val base = Some(reg)
-     val offset = Some(offset2)
+     val base = reg
+     val offset = offset2
   }
 
   trait Addressable[X <: GPR] {

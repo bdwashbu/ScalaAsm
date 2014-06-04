@@ -110,7 +110,7 @@ trait Displacement64 extends Displacement with ConstantOperand64 {
   def isNegative: Boolean = value < 0
 }
 
-trait ImmediateMemory extends RegisterOrMemory {
+trait ImmediateMemory extends Memory {
   self =>
   def immediate: Immediate { type Size = self.Size}
   
@@ -129,12 +129,11 @@ trait ImmediateMemory extends RegisterOrMemory {
   }
 }
 
-trait RegisterIndirect extends RegisterOrMemory {
+trait RegisterIndirect extends Memory {
   self =>
   def base: GPR
 
   def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    //NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
     NoSIB(ModRMReg(NoDisplacement, reg, rm = base))
   }
   
@@ -143,37 +142,39 @@ trait RegisterIndirect extends RegisterOrMemory {
   }
 }
 
-trait Memory extends RegisterOrMemory {
+trait Memory extends RegisterOrMemory
+
+trait BaseIndex extends Memory {
   self =>
-  def base: Option[GPR]
-  def offset: Option[Displacement]
+  def base: GPR
+  def offset: Displacement
 
   def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
     (base, offset) match {
-      case (Some(base: Register64), _) =>
+      case (base: Register64, _) =>
         WithSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base), SIB(SIB.One, new ESP, base))
-      case (Some(base), Some(_: Displacement8)) =>
+      case (base, _: Displacement8) =>
         NoSIB(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))
-      case (Some(base), None) =>
-        NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+      //case (base, None) =>
+       // NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
       case _ => NoModRM()
     }
   }
   
-  override def toString = {
-    var result: String = ""
-    
-    result = "[" + base.toString
-    if (offset.isDefined) {
-      if (!offset.get.isNegative)
-    	  result += " + " + offset.get.toString
-      else
-    	  result += " - " + offset.get.negate.toString
-    }
-    result += "]"
-    
-    result
-  }
+//  override def toString = {
+//    var result: String = ""
+//    
+//    result = "[" + base.toString
+//    if (offset.isDefined) {
+//      if (!offset.get.isNegative)
+//    	  result += " + " + offset.get.toString
+//      else
+//    	  result += " - " + offset.get.negate.toString
+//    }
+//    result += "]"
+//    
+//    result
+//  }
 }
 
 trait Relative extends RegisterOrMemory {

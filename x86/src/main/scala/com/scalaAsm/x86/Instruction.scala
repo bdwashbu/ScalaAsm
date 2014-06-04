@@ -59,10 +59,10 @@ trait Formats {
             val addressingForm = mem.encode(opcode.opcodeExtension)
             val (displacment, immediate) = (None, None)
           }
-        case mem: Memory =>
+        case mem: BaseIndex =>
           new AddressingFormSpecifierTemp {
             val addressingForm = mem.encode(opcode.opcodeExtension)
-            val (displacment, immediate) = (mem.offset, None)
+            val (displacment, immediate) = (Some(mem.offset), None)
           }
         case reg: GPR =>
           new AddressingFormSpecifierTemp {
@@ -101,12 +101,12 @@ trait Formats {
 
   }
 
-  implicit object OffsetFormat extends OneOperandFormat[Offset, Memory] {
+  implicit object OffsetFormat extends OneOperandFormat[Offset, BaseIndex] {
 
-    def getAddressingForm(op1: Memory, opcode: OpcodeFormat) = {
+    def getAddressingForm(op1: BaseIndex, opcode: OpcodeFormat) = {
       new AddressingFormSpecifierTemp {
         val addressingForm = NoSIB(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP))
-        val (displacment, immediate) = (op1.offset, None)
+        val (displacment, immediate) = (Some(op1.offset), None)
       }
     }
   }
@@ -158,10 +158,10 @@ trait Formats2 {
             val addressingForm = mem.encode(op1, opcode.opcodeExtension)
             val (displacment, immediate) = (None, None)
           }
-        case mem: Memory =>
+        case mem: BaseIndex =>
           new AddressingFormSpecifierTemp {
             val addressingForm = op1.encode(mem, opcode.opcodeExtension)
-            val (displacment, immediate) = (mem.offset, None)
+            val (displacment, immediate) = (Some(mem.offset), None)
           }
         case reg: GPR =>
           new AddressingFormSpecifierTemp {

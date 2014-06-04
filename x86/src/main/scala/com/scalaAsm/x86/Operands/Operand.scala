@@ -64,15 +64,13 @@ class DwordOperand extends OperandSize { type size = Int; val length = 4 }
 class QwordOperand extends OperandSize { type size = Long; val length = 8 }
 
 trait Displacement extends InstructionField with ConstantOperand {
-  type Offset <: Displacement
-  def negate: Offset
+  def negate: Displacement
   override def toString = value.toString
   def isNegative: Boolean
 }
 
 trait Displacement8 extends Displacement with ConstantOperand8 {
   self =>
-  type Offset = Displacement8
   def negate: Displacement8 = new Displacement8 {
 	  override def negate: Displacement8 = self
 	  val value = (-self.value).toByte
@@ -82,30 +80,27 @@ trait Displacement8 extends Displacement with ConstantOperand8 {
 
 trait Displacement16 extends Displacement with ConstantOperand16 {
   self =>
-  type Offset = Displacement16
   def negate: Displacement16 = new Displacement16 {
 	  override def negate: Displacement16 = self
-	  val value = (-self.value).toShort
+	  val value: Short = (-self.value).toShort
   }
   def isNegative: Boolean = value < 0
 }
 
 trait Displacement32 extends Displacement with ConstantOperand32 {
   self =>
-  type Offset = Displacement32
   def negate: Displacement32 = new Displacement32{
 	  override def negate: Displacement32 = self
-	  val value = (-self.value).toInt
+	  val value: Int = -self.value
   }
   def isNegative: Boolean = value < 0
 }
 
 trait Displacement64 extends Displacement with ConstantOperand64 {
   self =>
-  type Offset = Displacement64
   def negate: Displacement64 = new Displacement64{
 	  override def negate: Displacement64 = self
-	  val value = (-self.value).toLong
+	  val value: Long = -self.value
   }
   def isNegative: Boolean = value < 0
 }

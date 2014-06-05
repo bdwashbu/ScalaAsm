@@ -8,7 +8,7 @@ trait Operand {
   type Size <: OperandSize
 }
 
-trait Constant {
+trait Constant extends InstructionField {
   type Size <: OperandSize
   def value: Size#size
   def getBytes: Array[Byte]
@@ -19,7 +19,7 @@ trait Constant {
 trait Constant8 extends Constant {
   type Size = ByteOperand
   def getBytes: Array[Byte] = Array(value)
-  def size: Int = 1
+  def size = 1
   def asInt = value.toInt
   def asLong = value.toLong
 }
@@ -27,15 +27,15 @@ trait Constant8 extends Constant {
 trait Constant16 extends Constant {
   type Size = WordOperand
   def getBytes: Array[Byte] = Array((value & 0x00FF).toByte, ((value & 0xFF00) >> 8).toByte)
-  def size: Int = 2
+  def size = 2
   def asInt = value.toInt
   def asLong = value.toLong
 }
 
 trait Constant32 extends Constant {
   type Size = DwordOperand
- def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
-  def size: Int = 4
+  def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
+  def size = 4
   def asInt = value.toInt
   def asLong = value.toLong
 }
@@ -48,20 +48,19 @@ trait Constant64 extends Constant {
       buffer.putLong(value)
       buffer.array()
   }
-  def size: Int = 8
+  def size = 8
   def asInt = value.toInt
   def asLong = value.toLong
 }
 
 sealed trait OperandSize {
   type size
-  val length: Int
 }
 
-class ByteOperand extends OperandSize { type size = Byte; val length = 1 }
-class WordOperand extends OperandSize { type size = Short; val length = 2 }
-class DwordOperand extends OperandSize { type size = Int; val length = 4 }
-class QwordOperand extends OperandSize { type size = Long; val length = 8 }
+class ByteOperand extends OperandSize { type size = Byte }
+class WordOperand extends OperandSize { type size = Short }
+class DwordOperand extends OperandSize { type size = Int }
+class QwordOperand extends OperandSize { type size = Long }
 
 trait Displacement extends InstructionField with Constant {
   def negate: Displacement

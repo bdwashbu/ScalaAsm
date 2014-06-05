@@ -6,17 +6,17 @@ import java.nio.ByteOrder
 
 trait Operand {
   type Size <: OperandSize
-  def size: Int
 }
 
-trait ConstantOperand extends Operand {
+trait Constant {
+  type Size <: OperandSize
   def value: Size#size
   def getBytes: Array[Byte]
   def asInt: Int
   def asLong: Long
 }
 
-trait ConstantOperand8 extends ConstantOperand {
+trait Constant8 extends Constant {
   type Size = ByteOperand
   def getBytes: Array[Byte] = Array(value)
   def size: Int = 1
@@ -24,7 +24,7 @@ trait ConstantOperand8 extends ConstantOperand {
   def asLong = value.toLong
 }
 
-trait ConstantOperand16 extends ConstantOperand {
+trait Constant16 extends Constant {
   type Size = WordOperand
   def getBytes: Array[Byte] = Array((value & 0x00FF).toByte, ((value & 0xFF00) >> 8).toByte)
   def size: Int = 2
@@ -32,7 +32,7 @@ trait ConstantOperand16 extends ConstantOperand {
   def asLong = value.toLong
 }
 
-trait ConstantOperand32 extends ConstantOperand {
+trait Constant32 extends Constant {
   type Size = DwordOperand
  def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
   def size: Int = 4
@@ -40,7 +40,7 @@ trait ConstantOperand32 extends ConstantOperand {
   def asLong = value.toLong
 }
 
-trait ConstantOperand64 extends ConstantOperand {
+trait Constant64 extends Constant {
   type Size = QwordOperand
   def getBytes: Array[Byte] = {
     val buffer = ByteBuffer.allocate(8)
@@ -63,13 +63,13 @@ class WordOperand extends OperandSize { type size = Short; val length = 2 }
 class DwordOperand extends OperandSize { type size = Int; val length = 4 }
 class QwordOperand extends OperandSize { type size = Long; val length = 8 }
 
-trait Displacement extends InstructionField with ConstantOperand {
+trait Displacement extends InstructionField with Constant {
   def negate: Displacement
   override def toString = value.toString
   def isNegative: Boolean
 }
 
-trait Displacement8 extends Displacement with ConstantOperand8 {
+trait Displacement8 extends Displacement with Constant8 {
   self =>
   def negate: Displacement8 = new Displacement8 {
 	  override def negate: Displacement8 = self
@@ -78,7 +78,7 @@ trait Displacement8 extends Displacement with ConstantOperand8 {
   def isNegative: Boolean = value < 0
 }
 
-trait Displacement16 extends Displacement with ConstantOperand16 {
+trait Displacement16 extends Displacement with Constant16 {
   self =>
   def negate: Displacement16 = new Displacement16 {
 	  override def negate: Displacement16 = self
@@ -87,7 +87,7 @@ trait Displacement16 extends Displacement with ConstantOperand16 {
   def isNegative: Boolean = value < 0
 }
 
-trait Displacement32 extends Displacement with ConstantOperand32 {
+trait Displacement32 extends Displacement with Constant32 {
   self =>
   def negate: Displacement32 = new Displacement32{
 	  override def negate: Displacement32 = self
@@ -96,7 +96,7 @@ trait Displacement32 extends Displacement with ConstantOperand32 {
   def isNegative: Boolean = value < 0
 }
 
-trait Displacement64 extends Displacement with ConstantOperand64 {
+trait Displacement64 extends Displacement with Constant64 {
   self =>
   def negate: Displacement64 = new Displacement64{
 	  override def negate: Displacement64 = self

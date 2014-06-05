@@ -6,7 +6,6 @@ object Addressing {
 
   case class RegisterOffset[S <: Displacement, +T <: GPR](offset2: S, reg: T) extends BaseIndex {
      type Size = DwordOperand
-     def size = reg.size
      val base = reg
      val offset = offset2
   }
@@ -19,7 +18,6 @@ object Addressing {
 
   def *(gpr: GPR) = new RegisterIndirect {
     type Size = gpr.Size
-    def size = gpr.size
      val base = gpr
   }
   

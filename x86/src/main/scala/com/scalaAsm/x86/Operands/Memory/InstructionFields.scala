@@ -22,16 +22,13 @@ protected[x86] trait AddressingFormSpecifier {
   }
 }
 
-protected[x86] trait AddressingFormSpecifierTemp {
-  type Displacement32 = EBP
-  type AddressInSib = ESP
-  type NoneSib = ESP
+protected[x86] case class InstructionConstants (
   
-  val addressingForm: AddressingFormSpecifier
-  val displacment: Option[Displacement]
-  val immediate: Option[Immediate]
+  addressingForm: AddressingFormSpecifier,
+  displacement: Option[Displacement],
+  immediate: Option[Immediate]) {
   
-  def components: Seq[InstructionField] = Seq(displacment, immediate).flatten
+  def components: Seq[InstructionField] = Seq(displacement, immediate).flatten
 
   lazy val getBytes: Array[Byte] = {
     val extra: Array[Byte] = components flatMap (_.getBytes) toArray

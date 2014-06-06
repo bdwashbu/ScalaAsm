@@ -2,7 +2,7 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.ModRM
-import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifierTemp
+import com.scalaAsm.x86.Operands.Memory.InstructionConstants
 import com.scalaAsm.x86.Operands.Memory.NoModRM
 import com.scalaAsm.x86.Operands.Memory.NoSIB
 import com.scalaAsm.x86.Operands.Memory.NoDisplacement
@@ -52,34 +52,39 @@ trait Formats {
 
   implicit object MFormat extends OneOperandFormat[M, ModRM.rm] {
 
-    def getAddressingForm(op1: ModRM.rm, opcode: OpcodeFormat) = {
+    def getAddressingForm(op1: ModRM.rm, opcode: OpcodeFormat): InstructionConstants = {
 
       op1 match {
         case rel: Relative =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = NoModRM()
-            val (displacment, immediate) = (Some(rel.offset), None)
-          }
+          InstructionConstants (
+            addressingForm = NoModRM(),
+            displacement = Some(rel.offset),
+            immediate = None
+          )
         case mem: ImmediateMemory =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = mem.encode(opcode.opcodeExtension)
-            val (displacment, immediate) = (None, Some(mem.immediate))
-          }
+          InstructionConstants (
+            addressingForm = mem.encode(opcode.opcodeExtension),
+            displacement = None,
+            immediate = Some(mem.immediate)
+          )
         case mem: RegisterIndirect =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = mem.encode(opcode.opcodeExtension)
-            val (displacment, immediate) = (None, None)
-          }
+          InstructionConstants (
+            addressingForm = mem.encode(opcode.opcodeExtension),
+            displacement = None,
+            immediate = None
+          )
         case mem: BaseIndex =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = mem.encode(opcode.opcodeExtension)
-            val (displacment, immediate) = (Some(mem.offset), None)
-          }
+          InstructionConstants (
+            addressingForm = mem.encode(opcode.opcodeExtension),
+            displacement = Some(mem.offset),
+            immediate = None
+          )
         case reg: GPR =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = reg.encode(opcode.opcodeExtension)
-            val (displacment, immediate) = (None, None)
-          }
+          InstructionConstants (
+            addressingForm = reg.encode(opcode.opcodeExtension),
+            displacement = None,
+            immediate = None
+          )
       }
     }
   }
@@ -94,20 +99,22 @@ trait Formats {
 
   implicit object OFormat extends OneOperandFormat[O, ModRM.plusRd] {
     def getAddressingForm(op1: ModRM.plusRd, opcode: OpcodeFormat) = {
-      new AddressingFormSpecifierTemp {
-        val addressingForm = NoModRM()
-        val (displacment, immediate) = (None, None)
-      }
+      InstructionConstants (
+        addressingForm = NoModRM(),
+        displacement = None,
+        immediate = None
+      )
     }
   }
 
   implicit object IFormat extends OneOperandFormat[I, Immediate] {
 
     def getAddressingForm(op1: Immediate, opcode: OpcodeFormat) = {
-      new AddressingFormSpecifierTemp {
-        val addressingForm = NoModRM()
-        val (displacment, immediate) = (None, Some(op1))
-      }
+      InstructionConstants (
+        addressingForm = NoModRM(),
+        displacement = None,
+        immediate = Some(op1)
+      )
     }
 
   }
@@ -115,10 +122,11 @@ trait Formats {
   implicit object OffsetFormat extends OneOperandFormat[Offset, BaseIndex] {
 
     def getAddressingForm(op1: BaseIndex, opcode: OpcodeFormat) = {
-      new AddressingFormSpecifierTemp {
-        val addressingForm = NoSIB(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP))
-        val (displacment, immediate) = (Some(op1.offset), None)
-      }
+      InstructionConstants (
+        addressingForm = NoSIB(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP)),
+        displacement = Some(op1.offset),
+        immediate = None
+      )
     }
   }
 }
@@ -132,14 +140,15 @@ trait MI
 trait Formats2 {
   implicit object MIFormat extends TwoOperandsFormat[MI, ModRM.rm, Immediate] {
 
-    def getAddressingForm(op1: ModRM.rm, op2: Immediate, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+    def getAddressingForm(op1: ModRM.rm, op2: Immediate, opcode: OpcodeFormat): InstructionConstants = {
 
       op1 match {
         case reg: GPR =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = reg.encode(opcode.opcodeExtension)
-            val (displacment, immediate) = (None, Some(op2))
-          }
+          InstructionConstants (
+            addressingForm = reg.encode(opcode.opcodeExtension),
+            displacement = None,
+            immediate = Some(op2)
+          )
       }
     }
 
@@ -156,29 +165,33 @@ trait Formats2 {
 
   implicit object RMFormat extends TwoOperandsFormat[RM, ModRM.reg, ModRM.rm] {
 
-    def getAddressingForm(op1: ModRM.reg, op2: ModRM.rm, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+    def getAddressingForm(op1: ModRM.reg, op2: ModRM.rm, opcode: OpcodeFormat): InstructionConstants = {
 
       op2 match {
         case mem: ImmediateMemory =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = mem.encode(opcode.opcodeExtension)
-            val (displacment, immediate) = (None, Some(mem.immediate))
-          }
+          InstructionConstants (
+            addressingForm = mem.encode(opcode.opcodeExtension),
+            displacement = None,
+            immediate = Some(mem.immediate)
+          )
         case mem: RegisterIndirect =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = mem.encode(op1, opcode.opcodeExtension)
-            val (displacment, immediate) = (None, None)
-          }
+          InstructionConstants (
+            addressingForm = mem.encode(op1, opcode.opcodeExtension),
+            displacement = None,
+            immediate = None
+          )
         case mem: BaseIndex =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = op1.encode(mem, opcode.opcodeExtension)
-            val (displacment, immediate) = (Some(mem.offset), None)
-          }
+          InstructionConstants (
+            addressingForm = op1.encode(mem, opcode.opcodeExtension),
+            displacement = Some(mem.offset),
+            immediate = None
+          )
         case reg: GPR =>
-          new AddressingFormSpecifierTemp {
-            val addressingForm = op1.encode(reg, opcode.opcodeExtension)
-            val (displacment, immediate) = (None, None)
-          }
+          InstructionConstants (
+            addressingForm = op1.encode(reg, opcode.opcodeExtension),
+            displacement = None,
+            immediate = None
+          )
       }
     }
 
@@ -195,7 +208,7 @@ trait Formats2 {
 
   implicit object MRFormat extends TwoOperandsFormat[MR, ModRM.rm, ModRM.reg] {
 
-    def getAddressingForm(op1: ModRM.rm, op2: ModRM.reg, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
+    def getAddressingForm(op1: ModRM.rm, op2: ModRM.reg, opcode: OpcodeFormat): InstructionConstants = {
       RMFormat.getAddressingForm(op2, op1, opcode)
     }
 
@@ -204,11 +217,12 @@ trait Formats2 {
 
   implicit object OIFormat extends TwoOperandsFormat[OI, ModRM.plusRd, Immediate] {
 
-    def getAddressingForm(op1: ModRM.plusRd, op2: Immediate, opcode: OpcodeFormat): AddressingFormSpecifierTemp = {
-      new AddressingFormSpecifierTemp {
-        val addressingForm = NoModRM()
-        val (displacment, immediate) = (None, Some(op2))
-      }
+    def getAddressingForm(op1: ModRM.plusRd, op2: Immediate, opcode: OpcodeFormat): InstructionConstants = {
+      InstructionConstants (
+        addressingForm = NoModRM(),
+        displacement = None,
+        immediate = Some(op2)
+      )
     }
 
     def getPrefixes(op1: ModRM.plusRd, op2: Immediate): Option[Array[Byte]] = {
@@ -221,7 +235,7 @@ trait Formats2 {
   }
 
   implicit object M1Format extends TwoOperandsFormat[M1, ModRM.rm, One] with Formats {
-    def getAddressingForm(op1: ModRM.rm, op2: One, opcode: OpcodeFormat): AddressingFormSpecifierTemp = MFormat.getAddressingForm(op1, opcode)
+    def getAddressingForm(op1: ModRM.rm, op2: One, opcode: OpcodeFormat): InstructionConstants = MFormat.getAddressingForm(op1, opcode)
     def getPrefixes(op1: ModRM.rm, op2: One): Option[Array[Byte]] = None
   }
 }

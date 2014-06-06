@@ -1,6 +1,7 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory.Displacement
 
 trait InstructionFormat
 

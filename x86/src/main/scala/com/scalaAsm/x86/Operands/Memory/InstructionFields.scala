@@ -1,12 +1,7 @@
-package com.scalaAsm.x86
+package com.scalaAsm.x86.Operands
+package Memory
 
-import com.scalaAsm.utils.Endian
-import Operands._
-
-trait InstructionField {
-  def getBytes: Array[Byte]
-  def size: Int
-}
+import com.scalaAsm.x86.InstructionField
 
 protected[x86] trait AddressingFormSpecifier {
   type Displacement32 = EBP
@@ -15,8 +10,6 @@ protected[x86] trait AddressingFormSpecifier {
   
   val modRM: Option[ModRM]
   val sib: Option[SIB]
-  //val displacment: Option[Displacement]
- // val immediate: Option[Immediate]
   
   def components: Seq[InstructionField] = Seq(modRM, sib).flatten
 
@@ -111,10 +104,10 @@ case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR) extends
 sealed class SIBScale(val value: Byte)
 
 object SIB {
-	case object One   extends SIBScale(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacement
-	case object Two   extends SIBScale(1) // Eight-bit displacement, sign-extended to 16 bits
-	case object Four  extends SIBScale(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
-	case object Eight extends SIBScale(3) // r/m is treated as a second "reg" field
+	case object One   extends SIBScale(0)
+	case object Two   extends SIBScale(1)
+	case object Four  extends SIBScale(2)
+	case object Eight extends SIBScale(3)
 }
 
 // Scale-Index-Base (SIB) format

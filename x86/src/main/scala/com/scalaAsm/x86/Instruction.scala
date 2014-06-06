@@ -1,8 +1,19 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory.ModRM
+import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifierTemp
+import com.scalaAsm.x86.Operands.Memory.NoModRM
+import com.scalaAsm.x86.Operands.Memory.NoSIB
+import com.scalaAsm.x86.Operands.Memory.NoDisplacement
+import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
 
 trait Instruction
+
+trait InstructionField {
+  def getBytes: Array[Byte]
+  def size: Int
+}
 
 trait x86Instruction extends Instruction {
   val mnemonic: String

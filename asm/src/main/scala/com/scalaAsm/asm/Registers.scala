@@ -1,6 +1,7 @@
 package com.scalaAsm.asm
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory.Displacement
 
 object Addressing {
 
@@ -21,7 +22,7 @@ object Addressing {
      val base = gpr
   }
   
-  def *[M <: Memory](mem: M): M = mem
+  def *[M <: AddressingMode](mem: M): M = mem
   
   def *(imm: Immediate) = new ImmediateMemory {
     type Size = imm.Size

@@ -3,6 +3,16 @@ package Operands
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import com.scalaAsm.x86.Operands.Memory._
+import com.scalaAsm.x86.Operands.Memory.WithSIB
+import com.scalaAsm.x86.Operands.Memory.SIB
+import com.scalaAsm.x86.Operands.Memory.NoSIB
+import com.scalaAsm.x86.Operands.Memory.NoModRM
+import com.scalaAsm.x86.Operands.Memory.NoDisplacement
+import com.scalaAsm.x86.Operands.Memory.ModRMReg
+import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
+import com.scalaAsm.x86.Operands.Memory.DisplacementByte
+import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifier
 
 trait Operand {
   type Size <: OperandSize
@@ -62,49 +72,9 @@ class WordOperand extends OperandSize { type size = Short }
 class DwordOperand extends OperandSize { type size = Int }
 class QwordOperand extends OperandSize { type size = Long }
 
-trait Displacement extends InstructionField with Constant {
-  def negate: Displacement
-  override def toString = value.toString
-  def isNegative: Boolean
-}
+trait AddressingMode extends RegisterOrMemory
 
-trait Displacement8 extends Displacement with Constant8 {
-  self =>
-  def negate: Displacement8 = new Displacement8 {
-	  override def negate: Displacement8 = self
-	  val value = (-self.value).toByte
-  }
-  def isNegative: Boolean = value < 0
-}
-
-trait Displacement16 extends Displacement with Constant16 {
-  self =>
-  def negate: Displacement16 = new Displacement16 {
-	  override def negate: Displacement16 = self
-	  val value: Short = (-self.value).toShort
-  }
-  def isNegative: Boolean = value < 0
-}
-
-trait Displacement32 extends Displacement with Constant32 {
-  self =>
-  def negate: Displacement32 = new Displacement32{
-	  override def negate: Displacement32 = self
-	  val value: Int = -self.value
-  }
-  def isNegative: Boolean = value < 0
-}
-
-trait Displacement64 extends Displacement with Constant64 {
-  self =>
-  def negate: Displacement64 = new Displacement64{
-	  override def negate: Displacement64 = self
-	  val value: Long = -self.value
-  }
-  def isNegative: Boolean = value < 0
-}
-
-trait ImmediateMemory extends Memory {
+trait ImmediateMemory extends AddressingMode {
   self =>
   def immediate: Immediate { type Size = self.Size}
   
@@ -123,7 +93,7 @@ trait ImmediateMemory extends Memory {
   }
 }
 
-trait RegisterIndirect extends Memory {
+trait RegisterIndirect extends AddressingMode {
   self =>
   def base: GPR
 
@@ -136,9 +106,8 @@ trait RegisterIndirect extends Memory {
   }
 }
 
-trait Memory extends RegisterOrMemory
 
-trait BaseIndex extends Memory {
+trait BaseIndex extends AddressingMode {
   self =>
   def base: GPR
   def offset: Displacement

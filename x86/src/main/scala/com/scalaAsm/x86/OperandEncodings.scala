@@ -1,6 +1,8 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory.NoModRM
+import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifierTemp
 
 trait OperandFormat
 

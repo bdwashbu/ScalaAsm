@@ -1,6 +1,17 @@
 package com.scalaAsm.x86
 package Operands
 
+import com.scalaAsm.x86.Operands.Memory._
+import com.scalaAsm.x86.Operands.Memory.WithSIB
+import com.scalaAsm.x86.Operands.Memory.TwoRegisters
+import com.scalaAsm.x86.Operands.Memory.SIB
+import com.scalaAsm.x86.Operands.Memory.NoSIB
+import com.scalaAsm.x86.Operands.Memory.ModRMReg
+import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
+import com.scalaAsm.x86.Operands.Memory.DisplacementDword
+import com.scalaAsm.x86.Operands.Memory.DisplacementByte
+import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifier
+
   abstract class Register(val name: String)
 
   abstract class Register8(name: String) extends Register(name) {

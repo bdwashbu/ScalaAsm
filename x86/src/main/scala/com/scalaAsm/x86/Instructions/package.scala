@@ -23,7 +23,7 @@ package object Instructions {
   type rm32 = rm { type Size = DwordOperand }
   type rm64 = rm { type Size = QwordOperand }
   
-  type m16 = Memory { type Size = WordOperand }
+  type m16 = AddressingMode { type Size = WordOperand }
   
   type rel16 = Relative { type Size = WordOperand }
   type rel32 = Relative { type Size = DwordOperand }

@@ -10,7 +10,7 @@ trait ImmediateMemory extends AddressingMode {
   def immediate: Immediate { type Size = self.Size}
   
   def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP))
+    NoSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP))
   }
   
   def rel32: Relative32 = new Relative32 {
@@ -29,11 +29,11 @@ trait RegisterIndirect extends AddressingMode {
   def base: GPR
 
   def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    NoSIB(ModRMReg(NoDisplacement, reg, rm = base))
+    NoSIBNoDisplacement(ModRMReg(NoDisplacement, reg, rm = base))
   }
   
   def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+    NoSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
   }
 }
 
@@ -46,9 +46,9 @@ trait BaseIndex extends AddressingMode {
   def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
     (base, offset) match {
       case (base: Register64, _) =>
-        WithSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base), SIB(SIB.One, new ESP, base))
+        WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, base), SIB(SIB.One, new ESP, base))
       case (base, _: Displacement8) =>
-        NoSIB(ModRMOpcode(DisplacementByte, opcodeExtend.get, base))
+        NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtend.get, base), offset)
       //case (base, None) =>
        // NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
       case _ => NoModRM()

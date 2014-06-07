@@ -4,9 +4,10 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.ModRM
 import com.scalaAsm.x86.Operands.Memory.InstructionConstants
 import com.scalaAsm.x86.Operands.Memory.NoModRM
-import com.scalaAsm.x86.Operands.Memory.NoSIB
+import com.scalaAsm.x86.Operands.Memory.NoSIBWithDisplacement
 import com.scalaAsm.x86.Operands.Memory.NoDisplacement
 import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
+import com.scalaAsm.x86.Operands.Memory.OnlyDisplacement
 
 trait Instruction
 
@@ -57,32 +58,27 @@ trait Formats {
       op1 match {
         case rel: Relative =>
           InstructionConstants (
-            addressingForm = NoModRM(),
-            displacement = Some(rel.offset),
+            addressingForm = OnlyDisplacement(rel.offset),
             immediate = None
           )
         case mem: ImmediateMemory =>
           InstructionConstants (
             addressingForm = mem.encode(opcode.opcodeExtension),
-            displacement = None,
             immediate = Some(mem.immediate)
           )
         case mem: RegisterIndirect =>
           InstructionConstants (
             addressingForm = mem.encode(opcode.opcodeExtension),
-            displacement = None,
             immediate = None
           )
         case mem: BaseIndex =>
           InstructionConstants (
             addressingForm = mem.encode(opcode.opcodeExtension),
-            displacement = Some(mem.offset),
             immediate = None
           )
         case reg: GPR =>
           InstructionConstants (
             addressingForm = reg.encode(opcode.opcodeExtension),
-            displacement = None,
             immediate = None
           )
       }
@@ -101,7 +97,6 @@ trait Formats {
     def getAddressingForm(op1: ModRM.plusRd, opcode: OpcodeFormat) = {
       InstructionConstants (
         addressingForm = NoModRM(),
-        displacement = None,
         immediate = None
       )
     }
@@ -112,7 +107,6 @@ trait Formats {
     def getAddressingForm(op1: Immediate, opcode: OpcodeFormat) = {
       InstructionConstants (
         addressingForm = NoModRM(),
-        displacement = None,
         immediate = Some(op1)
       )
     }
@@ -123,8 +117,7 @@ trait Formats {
 
     def getAddressingForm(op1: BaseIndex, opcode: OpcodeFormat) = {
       InstructionConstants (
-        addressingForm = NoSIB(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP)),
-        displacement = Some(op1.offset),
+        addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), op1.offset),
         immediate = None
       )
     }
@@ -146,7 +139,6 @@ trait Formats2 {
         case reg: GPR =>
           InstructionConstants (
             addressingForm = reg.encode(opcode.opcodeExtension),
-            displacement = None,
             immediate = Some(op2)
           )
       }
@@ -171,25 +163,21 @@ trait Formats2 {
         case mem: ImmediateMemory =>
           InstructionConstants (
             addressingForm = mem.encode(opcode.opcodeExtension),
-            displacement = None,
             immediate = Some(mem.immediate)
           )
         case mem: RegisterIndirect =>
           InstructionConstants (
             addressingForm = mem.encode(op1, opcode.opcodeExtension),
-            displacement = None,
             immediate = None
           )
         case mem: BaseIndex =>
           InstructionConstants (
             addressingForm = op1.encode(mem, opcode.opcodeExtension),
-            displacement = Some(mem.offset),
             immediate = None
           )
         case reg: GPR =>
           InstructionConstants (
             addressingForm = op1.encode(reg, opcode.opcodeExtension),
-            displacement = None,
             immediate = None
           )
       }
@@ -220,7 +208,6 @@ trait Formats2 {
     def getAddressingForm(op1: ModRM.plusRd, op2: Immediate, opcode: OpcodeFormat): InstructionConstants = {
       InstructionConstants (
         addressingForm = NoModRM(),
-        displacement = None,
         immediate = Some(op2)
       )
     }

@@ -2,10 +2,10 @@ package com.scalaAsm.x86
 package Operands
 
 import com.scalaAsm.x86.Operands.Memory._
-import com.scalaAsm.x86.Operands.Memory.WithSIB
+import com.scalaAsm.x86.Operands.Memory.WithSIBWithDisplacement
 import com.scalaAsm.x86.Operands.Memory.TwoRegisters
 import com.scalaAsm.x86.Operands.Memory.SIB
-import com.scalaAsm.x86.Operands.Memory.NoSIB
+import com.scalaAsm.x86.Operands.Memory.NoSIBWithDisplacement
 import com.scalaAsm.x86.Operands.Memory.ModRMReg
 import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
 import com.scalaAsm.x86.Operands.Memory.DisplacementDword
@@ -40,24 +40,24 @@ import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifier
       override def toString = name
       
      def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-	    NoSIB(ModRMOpcode(TwoRegisters, opcodeExtend.get, this))
+	    NoSIBNoDisplacement(ModRMOpcode(TwoRegisters, opcodeExtend.get, this))
 	 }
       
      def encode(op2: BaseIndex, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
 	    (op2.base, op2.offset) match {
 	      case (base, off: Displacement8) if base.ID == 4 =>
-	        WithSIB(ModRMReg(DisplacementByte, this, base), SIB(SIB.One, new ESP, base))
+	        WithSIBWithDisplacement(ModRMReg(DisplacementByte, this, base), SIB(SIB.One, new ESP, base), op2.offset)
 	      case (base, off: Displacement32) =>
-	        NoSIB(ModRMReg(DisplacementDword, reg = this, rm = base))
+	        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = this, rm = base), op2.offset)
 	      case (base, _: Displacement) =>
-	        NoSIB(ModRMReg(DisplacementByte, reg = this, rm = base))
+	        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = this, rm = base), op2.offset)
 	      //case (base, None) =>
 	       // NoSIB(ModRMReg(NoDisplacement, reg = this, rm = base))
 	    }
 	  }
      
      def encode(op2: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-	    NoSIB(ModRMReg(TwoRegisters, this, op2))
+	    NoSIBNoDisplacement(ModRMReg(TwoRegisters, this, op2))
 	 }
   }
   

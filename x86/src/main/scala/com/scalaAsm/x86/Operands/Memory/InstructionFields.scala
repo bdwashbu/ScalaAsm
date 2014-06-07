@@ -10,8 +10,9 @@ protected[x86] trait AddressingFormSpecifier {
   
   val modRM: Option[ModRM]
   val sib: Option[SIB]
+  val displacement: Option[Displacement]
   
-  def components: Seq[InstructionField] = Seq(modRM, sib).flatten
+  def components: Seq[InstructionField] = Seq(modRM, sib, displacement).flatten
 
   lazy val getBytes: Array[Byte] = {
     components flatMap (_.getBytes) toArray
@@ -25,10 +26,9 @@ protected[x86] trait AddressingFormSpecifier {
 protected[x86] case class InstructionConstants (
   
   addressingForm: AddressingFormSpecifier,
-  displacement: Option[Displacement],
   immediate: Option[Immediate]) {
   
-  def components: Seq[InstructionField] = Seq(displacement, immediate).flatten
+  def components: Seq[InstructionField] = Seq(immediate).flatten
 
   lazy val getBytes: Array[Byte] = {
     val extra: Array[Byte] = components flatMap (_.getBytes) toArray
@@ -43,22 +43,37 @@ protected[x86] case class InstructionConstants (
 
 case class NoModRM() extends AddressingFormSpecifier {
   val sib = None
-  val displacment = None
-  val immediate = None
+  val displacement = None
   val modRM = None
 }
 
-case class NoSIB(mod: ModRM) extends AddressingFormSpecifier {
+case class OnlyDisplacement(offset: Displacement) extends AddressingFormSpecifier {
   val sib = None
-  val displacment = None
-  val immediate = None
+  val displacement = Some(offset)
+  val modRM = None
+}
+
+case class NoSIBNoDisplacement(mod: ModRM) extends AddressingFormSpecifier {
+  val sib = None
+  val displacement = None
   val modRM = Some(mod)
 }
 
-case class WithSIB(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier {
+case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier {
   val sib = Some(theSIB)
-  val displacment = None
-  val immediate = None
+  val displacement = None
+  val modRM = Some(mod)
+}
+
+case class NoSIBWithDisplacement(mod: ModRM, offset: Displacement) extends AddressingFormSpecifier {
+  val sib = None
+  val displacement = Some(offset)
+  val modRM = Some(mod)
+}
+
+case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Displacement) extends AddressingFormSpecifier {
+  val sib = Some(theSIB)
+  val displacement = Some(offset)
   val modRM = Some(mod)
 }
 

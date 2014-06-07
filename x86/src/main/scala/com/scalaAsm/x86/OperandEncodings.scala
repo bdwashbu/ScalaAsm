@@ -8,7 +8,7 @@ trait OperandFormat
 
 object NoOperand extends OperandFormat
 
-object NoAddressingForm extends InstructionConstants(addressingForm = NoModRM(), displacement = None, immediate = None)
+object NoAddressingForm extends InstructionConstants(addressingForm = NoModRM(), immediate = None)
 
 abstract class OneOperandFormat[OpEn, -X <: Operand] extends OperandFormat {
   def getAddressingForm(x: X, opcode: OpcodeFormat): InstructionConstants

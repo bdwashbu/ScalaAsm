@@ -24,16 +24,18 @@ protected[x86] case class InstructionFormat (
   addressingForm: AddressingFormSpecifier,
   immediate: Option[Immediate]) {
   
-  def components: Seq[InstructionField] = Seq(immediate).flatten
-
   lazy val getBytes: Array[Byte] = {
-    val extra: Array[Byte] = components flatMap (_.getBytes) toArray
-    val result = addressingForm.getBytes ++ extra
-    result
+    addressingForm.getBytes ++ (immediate match {
+      case Some(imm) => imm.getBytes
+      case None => Array[Byte]()
+    })
   }
 
   lazy val size: Int = {
-    addressingForm.size + (components flatMap (x => List(x.size)) sum)
+    addressingForm.size + (immediate match {
+      case Some(imm) => imm.size
+      case None => 0
+    })
   }
 }
 

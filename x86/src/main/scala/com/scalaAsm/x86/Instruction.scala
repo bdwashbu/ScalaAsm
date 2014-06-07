@@ -54,6 +54,8 @@ trait I
 trait Offset
 
 trait Formats {
+  
+  type Immediate = Constant
 
   implicit object MFormat extends OneOperandFormat[M, ModRM.rm] {
 
@@ -135,6 +137,8 @@ trait M1
 trait MI
 
 trait Formats2 {
+  type Immediate = Constant
+  
   implicit object MIFormat extends TwoOperandsFormat[MI, ModRM.rm, Immediate] {
 
     def getAddressingForm(op1: ModRM.rm, op2: Immediate, opcode: OpcodeFormat): InstructionFormat = {

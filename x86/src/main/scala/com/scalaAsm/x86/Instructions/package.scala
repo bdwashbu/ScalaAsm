@@ -10,10 +10,10 @@ trait One extends Operand {
 
 package object Instructions {
 
-  type imm8 = Immediate8
-  type imm16 = Immediate16
-  type imm32 = Immediate32
-  type imm64 = Immediate64
+  type imm8 = Constant8
+  type imm16 = Constant16
+  type imm32 = Constant32
+  type imm64 = Constant64
   
   type Operand = com.scalaAsm.x86.Operands.Operand
   

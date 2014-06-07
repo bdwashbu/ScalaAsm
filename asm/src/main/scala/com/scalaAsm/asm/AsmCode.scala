@@ -6,16 +6,15 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.One
 import com.scalaAsm.x86.MachineCode
-import com.scalaAsm.x86.Operands.Immediate8
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Memory._
 
 trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 
-    case class byte(value: Byte) extends Immediate8 with Displacement8
-    case class word(value: Short) extends Immediate16 with Displacement16
-    case class dword(value: Int) extends Immediate32 with Displacement32
-    case class qword(value: Long) extends Immediate64 with Displacement64
+    case class byte(value: Byte) extends Constant8
+    case class word(value: Short) extends Constant16
+    case class dword(value: Int) extends Constant32
+    case class qword(value: Long) extends Constant64
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
@@ -43,9 +42,9 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 
     def push(param: String) = Reference(param)
 
-    def jnz(labelRef: String)(implicit ev: JNZ_1[_, Immediate8]) = LabelRef(labelRef, ev) 
+    def jnz(labelRef: String)(implicit ev: JNZ_1[_, Constant8]) = LabelRef(labelRef, ev) 
 
-    def jz(labelRef: String)(implicit ev: JZ_1[_, Immediate8]) = LabelRef(labelRef, ev)
+    def jz(labelRef: String)(implicit ev: JZ_1[_, Constant8]) = LabelRef(labelRef, ev)
 
     def call(refName: String) = Reference(refName)
 

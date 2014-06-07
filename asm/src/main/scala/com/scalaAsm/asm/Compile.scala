@@ -3,12 +3,11 @@ package com.scalaAsm.asm
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.x86.Instructions.CALL
-import com.scalaAsm.x86.Operands.{Immediate16, Immediate32, Immediate8}
 import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Constant32
-import com.scalaAsm.x86.Operands.Memory.Displacement32
+import com.scalaAsm.x86.Operands.Constant8
 
 object AsmCompiler extends Catalog
 {
@@ -107,11 +106,11 @@ object AsmCompiler extends Catalog
 	        case InstructionToken(inst) => inst.code
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-	        case ProcRef(name) => callNear(*(new Displacement32{val value = procs(name) - parserPosition - 5}).rel32).get.code
-	        case VarRef(name) => push(new Immediate32{val value = variables(name) + baseOffset}).get.code
-	        case JmpRefResolved(name) => jmp(*(new Displacement32{val value = imports(name) + baseOffset})).get.code
-	        case ImportRef(name) => callNear(*(new Displacement32{val value = imports(name) + baseOffset})).get.code
-	        case LabelRef(name, inst) => inst.get(new Immediate8{val value = (labels(name) - parserPosition - 2).toByte}).get.code
+	        case ProcRef(name) => callNear(*(new Constant32{val value = procs(name) - parserPosition - 5}).rel32).get.code
+	        case VarRef(name) => push(new Constant32{val value = variables(name) + baseOffset}).get.code
+	        case JmpRefResolved(name) => jmp(*(new Constant32{val value = imports(name) + baseOffset})).get.code
+	        case ImportRef(name) => callNear(*(new Constant32{val value = imports(name) + baseOffset})).get.code
+	        case LabelRef(name, inst) => inst.get(new Constant8{val value = (labels(name) - parserPosition - 2).toByte}).get.code
 	        case _ => Array[Byte]()
 	      }
          token match {

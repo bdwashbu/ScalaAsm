@@ -1,7 +1,6 @@
 package com.scalaAsm.asm
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.Operands.Memory.Displacement
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
@@ -9,16 +8,16 @@ import com.scalaAsm.x86.Operands.Memory.BaseIndex
 
 object Addressing {
 
-  case class RegisterOffset[S <: Displacement, +T <: GPR](offset2: S, reg: T) extends BaseIndex {
+  case class RegisterOffset[S <: Constant, +T <: GPR](offset2: S, reg: T) extends BaseIndex {
      type Size = DwordOperand
      val base = reg
-     val offset = offset2
+     val displacement = offset2
   }
 
   trait Addressable[X <: GPR] {
     self: X =>
-    def -[Z <: Displacement](offset: Z) = RegisterOffset(offset.negate, this)
-    def +[Z <: Displacement](offset: Z) = RegisterOffset(offset, this)
+    def -[Z <: Constant](offset: Z) = RegisterOffset(offset.negate, this)
+    def +[Z <: Constant](offset: Z) = RegisterOffset(offset, this)
   }
 
   def *(gpr: GPR) = new RegisterIndirect {
@@ -28,13 +27,13 @@ object Addressing {
   
   def *[M <: AddressingMode](mem: M): M = mem
   
-  def *(offset: Displacement) = new AbsoluteAddress {
+  def *(offset: Constant) = new AbsoluteAddress {
     type Size = offset.Size
     def size = offset.size
     def displacement = offset
   }
 
-  type +[A <: Displacement, B <: GPR] = RegisterOffset[A, B]
+  type +[A <: Constant, B <: GPR] = RegisterOffset[A, B]
 }
 
 trait Registers {

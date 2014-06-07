@@ -11,6 +11,7 @@ import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
 import com.scalaAsm.x86.Operands.Memory.DisplacementDword
 import com.scalaAsm.x86.Operands.Memory.DisplacementByte
 import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifier
+import com.scalaAsm.x86.Operands.Memory.OnlyModRM
 
   abstract class Register(val name: String)
 
@@ -38,26 +39,26 @@ import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifier
     self:Register => 
       val ID: Int
       override def toString = name
-      
+//      
      def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-	    NoSIBNoDisplacement(ModRMOpcode(TwoRegisters, opcodeExtend.get, this))
+	    OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtend.get, this))
 	 }
-      
-     def encode(op2: BaseIndex, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-	    (op2.base, op2.offset) match {
-	      case (base, off: Displacement8) if base.ID == 4 =>
-	        WithSIBWithDisplacement(ModRMReg(DisplacementByte, this, base), SIB(SIB.One, new ESP, base), op2.offset)
-	      case (base, off: Displacement32) =>
-	        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = this, rm = base), op2.offset)
-	      case (base, _: Displacement) =>
-	        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = this, rm = base), op2.offset)
-	      //case (base, None) =>
-	       // NoSIB(ModRMReg(NoDisplacement, reg = this, rm = base))
-	    }
-	  }
-     
+//      
+//     def encode(op2: BaseIndex, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+//	    (op2.base, op2.offset) match {
+//	      case (base, off: Displacement8) if base.ID == 4 =>
+//	        WithSIBWithDisplacement(ModRMReg(DisplacementByte, this, base), SIB(SIB.One, new ESP, base), op2.offset)
+//	      case (base, off: Displacement32) =>
+//	        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = this, rm = base), op2.offset)
+//	      case (base, _: Displacement) =>
+//	        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = this, rm = base), op2.offset)
+//	      //case (base, None) =>
+//	       // NoSIB(ModRMReg(NoDisplacement, reg = this, rm = base))
+//	    }
+//	  }
+//     
      def encode(op2: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-	    NoSIBNoDisplacement(ModRMReg(TwoRegisters, this, op2))
+	    OnlyModRM(ModRMReg(TwoRegisters, this, op2))
 	 }
   }
   

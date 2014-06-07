@@ -2,6 +2,10 @@ package com.scalaAsm.asm
 
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.Displacement
+import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
+import com.scalaAsm.x86.Operands.Memory.AddressingMode
+import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
+import com.scalaAsm.x86.Operands.Memory.BaseIndex
 
 object Addressing {
 
@@ -24,10 +28,10 @@ object Addressing {
   
   def *[M <: AddressingMode](mem: M): M = mem
   
-  def *(imm: Immediate) = new ImmediateMemory {
-    type Size = imm.Size
-    def size = imm.size
-    def immediate = imm
+  def *(offset: Displacement) = new AbsoluteAddress {
+    type Size = offset.Size
+    def size = offset.size
+    def displacement = offset
   }
 
   type +[A <: Displacement, B <: GPR] = RegisterOffset[A, B]

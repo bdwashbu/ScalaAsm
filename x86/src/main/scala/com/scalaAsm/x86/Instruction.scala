@@ -8,6 +8,10 @@ import com.scalaAsm.x86.Operands.Memory.NoSIBWithDisplacement
 import com.scalaAsm.x86.Operands.Memory.NoDisplacement
 import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
 import com.scalaAsm.x86.Operands.Memory.OnlyDisplacement
+import com.scalaAsm.x86.Operands.Memory.Relative
+import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
+import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
+import com.scalaAsm.x86.Operands.Memory.BaseIndex
 
 trait Instruction
 
@@ -58,13 +62,13 @@ trait Formats {
       op1 match {
         case rel: Relative =>
           InstructionFormat (
-            addressingForm = OnlyDisplacement(rel.offset),
+            addressingForm = rel.encode(opcode.opcodeExtension),
             immediate = None
           )
-        case mem: ImmediateMemory =>
+        case mem: AbsoluteAddress =>
           InstructionFormat (
             addressingForm = mem.encode(opcode.opcodeExtension),
-            immediate = Some(mem.immediate)
+            immediate = None
           )
         case mem: RegisterIndirect =>
           InstructionFormat (
@@ -117,7 +121,7 @@ trait Formats {
 
     def getAddressingForm(op1: BaseIndex, opcode: OpcodeFormat) = {
       InstructionFormat (
-        addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), op1.offset),
+        addressingForm = op1.encode(opcode.opcodeExtension),//NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), op1.offset),
         immediate = None
       )
     }
@@ -160,10 +164,10 @@ trait Formats2 {
     def getAddressingForm(op1: ModRM.reg, op2: ModRM.rm, opcode: OpcodeFormat): InstructionFormat = {
 
       op2 match {
-        case mem: ImmediateMemory =>
+        case mem: AbsoluteAddress =>
           InstructionFormat (
             addressingForm = mem.encode(opcode.opcodeExtension),
-            immediate = Some(mem.immediate)
+            immediate = None
           )
         case mem: RegisterIndirect =>
           InstructionFormat (
@@ -172,7 +176,7 @@ trait Formats2 {
           )
         case mem: BaseIndex =>
           InstructionFormat (
-            addressingForm = op1.encode(mem, opcode.opcodeExtension),
+            addressingForm = mem.encode(op1, opcode.opcodeExtension),
             immediate = None
           )
         case reg: GPR =>

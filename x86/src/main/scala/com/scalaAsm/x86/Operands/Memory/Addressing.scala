@@ -5,21 +5,21 @@ import com.scalaAsm.x86._
 
 trait AddressingMode extends RegisterOrMemory
 
-trait ImmediateMemory extends AddressingMode {
+trait AbsoluteAddress extends AddressingMode {
   self =>
-  def immediate: Immediate { type Size = self.Size}
+  def displacement: Displacement { type Size = self.Size}
   
   def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    NoSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP))
+    NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP), displacement)
   }
   
   def rel32: Relative32 = new Relative32 {
-    def offset = new Displacement32{ val value = self.immediate.asInt}
+    def offset = new Displacement32{ val value = self.displacement.asInt}
     def size = 4
   }
   
   def rel64: Relative64 = new Relative64 {
-    def offset = new Displacement64{ val value = self.immediate.asLong}
+    def offset = new Displacement64{ val value = self.displacement.asLong}
     def size = 8
   }
 }
@@ -29,11 +29,11 @@ trait RegisterIndirect extends AddressingMode {
   def base: GPR
 
   def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    NoSIBNoDisplacement(ModRMReg(NoDisplacement, reg, rm = base))
+    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
   }
   
   def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    NoSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+    OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
   }
 }
 
@@ -49,11 +49,25 @@ trait BaseIndex extends AddressingMode {
         WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, base), SIB(SIB.One, new ESP, base))
       case (base, _: Displacement8) =>
         NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtend.get, base), offset)
+        
       //case (base, None) =>
        // NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
       case _ => NoModRM()
     }
   }
+  
+  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+	    (base, offset) match {
+	      case (base, off: Displacement8) if base.ID == 4 =>
+	        WithSIBWithDisplacement(ModRMReg(DisplacementByte, reg, base), SIB(SIB.One, new ESP, base), offset)
+	      case (base, off: Displacement32) =>
+	        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = reg, rm = base), offset)
+	      case (base, _: Displacement) =>
+	        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = reg, rm = base), offset)
+	      //case (base, None) =>
+	       // NoSIB(ModRMReg(NoDisplacement, reg = this, rm = base))
+	    }
+	  }
   
 //  override def toString = {
 //    var result: String = ""
@@ -69,4 +83,19 @@ trait BaseIndex extends AddressingMode {
 //    
 //    result
 //  }
+}
+
+trait Relative extends RegisterOrMemory {
+  self =>
+    def offset: Displacement {type Size = self.Size}
+    
+    def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = OnlyDisplacement(offset)
+}
+
+trait Relative32 extends Relative {
+  type Size = DwordOperand
+}
+
+trait Relative64 extends Relative {
+  type Size = QwordOperand
 }

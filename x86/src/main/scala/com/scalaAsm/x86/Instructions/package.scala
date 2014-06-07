@@ -1,6 +1,8 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory.Relative
+import com.scalaAsm.x86.Operands.Memory.AddressingMode
 
 trait One extends Operand {
   def size = 1

@@ -45,31 +45,31 @@ case class NoModRM() extends AddressingFormSpecifier {
   val modRM = None
 }
 
-case class OnlyDisplacement(offset: Displacement) extends AddressingFormSpecifier {
+private[Memory] case class OnlyDisplacement(offset: Displacement) extends AddressingFormSpecifier {
   val sib = None
   val displacement = Some(offset)
   val modRM = None
 }
 
-case class NoSIBNoDisplacement(mod: ModRM) extends AddressingFormSpecifier {
+case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier {
   val sib = None
   val displacement = None
   val modRM = Some(mod)
 }
 
-case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier {
+private[Memory] case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier {
   val sib = Some(theSIB)
   val displacement = None
   val modRM = Some(mod)
 }
 
-case class NoSIBWithDisplacement(mod: ModRM, offset: Displacement) extends AddressingFormSpecifier {
+private[Memory] case class NoSIBWithDisplacement(mod: ModRM, offset: Displacement) extends AddressingFormSpecifier {
   val sib = None
   val displacement = Some(offset)
   val modRM = Some(mod)
 }
 
-case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Displacement) extends AddressingFormSpecifier {
+private[Memory] case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Displacement) extends AddressingFormSpecifier {
   val sib = Some(theSIB)
   val displacement = Some(offset)
   val modRM = Some(mod)
@@ -82,9 +82,9 @@ object ModRM {
 }
 
 sealed class RegisterMode(val value: Byte)
-case object NoDisplacement    extends RegisterMode(0) // If r/m is 110, Displacement (16 bits) is address; otherwise, no displacemen
-case object DisplacementByte  extends RegisterMode(1) // Eight-bit displacement, sign-extended to 16 bits
-case object DisplacementDword extends RegisterMode(2) // 32-bit displacement (example: MOV [BX + SI]+ displacement,al)
+case object NoDisplacement    extends RegisterMode(0) // [reg32 + eax*n]
+case object DisplacementByte  extends RegisterMode(1) // [disp + reg8 + eax*n]
+case object DisplacementDword extends RegisterMode(2) // [disp + reg32 + eax*n]
 case object TwoRegisters      extends RegisterMode(3) // r/m is treated as a second "reg" field
 
 // Mod/RM format

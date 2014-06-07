@@ -4,10 +4,6 @@ package Memory
 import com.scalaAsm.x86.InstructionField
 
 protected[x86] trait AddressingFormSpecifier {
-  type Displacement32 = EBP
-  type AddressInSib = ESP
-  type NoneSib = ESP
-  
   val modRM: Option[ModRM]
   val sib: Option[SIB]
   val displacement: Option[Displacement]
@@ -23,7 +19,7 @@ protected[x86] trait AddressingFormSpecifier {
   }
 }
 
-protected[x86] case class InstructionConstants (
+protected[x86] case class InstructionFormat (
   
   addressingForm: AddressingFormSpecifier,
   immediate: Option[Immediate]) {

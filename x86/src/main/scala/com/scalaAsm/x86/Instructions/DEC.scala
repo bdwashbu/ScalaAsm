@@ -10,10 +10,10 @@ trait DEC_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with D
 object DEC {
   
   implicit object dec1 extends DEC_1[O, r32] {
-     val opcode = OpcodePlusRd(0x48)
+     val opcode = OneOpcode(0x48) + rd
   }
   
   implicit object dec2 extends DEC_1[O, r16] {
-	 val opcode = OpcodePlusRd(0x48)
+	 val opcode = OneOpcode(0x48) + rw
   }
 }

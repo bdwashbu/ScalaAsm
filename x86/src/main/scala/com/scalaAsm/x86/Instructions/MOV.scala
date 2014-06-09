@@ -25,19 +25,19 @@ object MOV extends MOVLow {
   }
   
   implicit object mov7 extends MOV_2[OI, r16, imm16] {
-      val opcode = OpcodePlusRd(0xB8)
+      val opcode = OneOpcode(0xB8) + rw
   }
   
   implicit object mov8 extends MOV_2[OI, r8, imm8] {
-      val opcode = OpcodePlusRd(0xB0)
+      val opcode = OneOpcode(0xB0) + rb
   }
   
   implicit object mov6 extends MOV_2[OI, r32, imm32] {
-      val opcode = OpcodePlusRd(0xB8)
+      val opcode = OneOpcode(0xB8) + rd
   }
    
   implicit object mov10 extends MOV_2[OI, r64, imm64] {
-      val opcode = OpcodePlusRd(0xB8)
+      val opcode = OneOpcode(0xB8) + rd
   }
   
   implicit object mov11 extends MOV_2[MR, rm64, r64] {

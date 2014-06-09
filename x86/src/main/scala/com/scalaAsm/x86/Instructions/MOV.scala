@@ -7,7 +7,7 @@ trait MOV extends x86Instruction {
 
 trait MOV_2[OpEn, -O1 <: Operand, -O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with MOV
 
-trait MOVLow extends Formats2 {
+trait MOVLow {
   
  implicit object mov1 extends MOV_2[MR, rm32, r32] {
       val opcode = OneOpcode(0x89)

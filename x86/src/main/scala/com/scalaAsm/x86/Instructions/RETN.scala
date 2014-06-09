@@ -10,7 +10,7 @@ trait RETN extends x86Instruction {
 
 trait RETN_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with RETN
 
-object RETN extends Formats {
+object RETN {
   
   implicit object retn1 extends RETN_1[I, imm16] {
       val opcode: OpcodeFormat = 0xC2

@@ -7,7 +7,7 @@ trait SUB extends x86Instruction {
 
 trait SUB_2[OpEn, -O1 <: Operand, -O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with SUB
 
-object SUB extends Formats2 {
+object SUB {
   
   implicit object sub1 extends SUB_2[MI, rm32, imm8] {
       val opcode = 0x83 /+ 5

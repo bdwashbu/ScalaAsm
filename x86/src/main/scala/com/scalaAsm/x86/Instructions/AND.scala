@@ -7,7 +7,7 @@ trait AND extends x86Instruction {
 
 trait AND_2[OpEn, -O1 <: Operand, -O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with AND
 
-trait ANDLow extends Formats2 {
+trait ANDLow {
  
   implicit object and1 extends AND_2[RM, r32, rm32] {
       val opcode: OpcodeFormat = 0x23

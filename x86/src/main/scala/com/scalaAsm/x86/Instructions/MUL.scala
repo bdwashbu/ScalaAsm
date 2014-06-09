@@ -7,7 +7,7 @@ trait MUL extends x86Instruction {
 
 trait MUL_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with MUL
 
-object MUL extends Formats {
+object MUL {
   
   implicit object mul1 extends MUL_1[M, rm32] {
       val opcode = 0xF7 /+ 4

@@ -7,7 +7,7 @@ trait INT extends x86Instruction {
 
 trait INT_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with INT
 
-object INT extends Formats {
+object INT {
 
   implicit object int1 extends INT_1[I, imm8] {
     val opcode = OneOpcode(0xCD)

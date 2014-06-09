@@ -9,7 +9,7 @@ trait POP extends x86Instruction {
 
 trait POP_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with POP
 
-object POP extends Formats {
+object POP {
   
   implicit object pop1 extends POP_1[O, r32] {
       val opcode = OpcodePlusRd(0x58)

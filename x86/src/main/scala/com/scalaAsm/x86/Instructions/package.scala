@@ -8,7 +8,7 @@ trait One extends Operand {
   def size = 1
 }
 
-package object Instructions {
+package object Instructions extends Formats with Formats2 {
 
   type imm8 = Constant8
   type imm16 = Constant16

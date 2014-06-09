@@ -7,7 +7,7 @@ trait DEC extends x86Instruction {
 
 trait DEC_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with DEC
 
-object DEC extends Formats {
+object DEC {
   
   implicit object dec1 extends DEC_1[O, r32] {
      val opcode = OpcodePlusRd(0x48)

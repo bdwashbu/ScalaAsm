@@ -27,46 +27,37 @@ trait Constant extends InstructionField with Operand {
   def negate: Constant
 }
 
-trait Constant8 extends Constant {
+case class Constant8(value: Byte) extends Constant {
   self =>
   type Size = ByteOperand
   def getBytes: Array[Byte] = Array(value)
   def size = 1
   def asInt = value.toInt
   def asLong = value.toLong
-  def negate: Constant8 = new Constant8 {
-	  override def negate: Constant8 = self
-	  val value = (-self.value).toByte
-  }
+  def negate = this.copy(value = (-this.value).toByte)
 }
 
-trait Constant16 extends Constant {
+case class Constant16(value: Short) extends Constant {
   self =>
   type Size = WordOperand
   def getBytes: Array[Byte] = Array((value & 0x00FF).toByte, ((value & 0xFF00) >> 8).toByte)
   def size = 2
   def asInt = value.toInt
   def asLong = value.toLong
-  def negate: Constant16 = new Constant16 {
-	  override def negate: Constant16 = self
-	  val value: Short = (-self.value).toShort
-  }
+  def negate = this.copy(value = (-this.value).toShort)
 }
 
-trait Constant32 extends Constant {
+case class Constant32(value: Int) extends Constant {
   self =>
   type Size = DwordOperand
   def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
   def size = 4
   def asInt = value.toInt
   def asLong = value.toLong
-  def negate: Constant32 = new Constant32{
-	  override def negate: Constant32 = self
-	  val value: Int = -self.value
-  }
+  def negate = this.copy(value = -this.value)
 }
 
-trait Constant64 extends Constant {
+case class Constant64(value: Long) extends Constant {
   self =>
   type Size = QwordOperand
   def getBytes: Array[Byte] = {
@@ -78,10 +69,7 @@ trait Constant64 extends Constant {
   def size = 8
   def asInt = value.toInt
   def asLong = value.toLong
-  def negate: Constant64 = new Constant64{
-	  override def negate: Constant64 = self
-	  val value: Long = -self.value
-  }
+  def negate: Constant64 = this.copy(value = -this.value)
 }
 
 sealed trait OperandSize {
@@ -93,9 +81,7 @@ class WordOperand extends OperandSize { type size = Short }
 class DwordOperand extends OperandSize { type size = Int }
 class QwordOperand extends OperandSize { type size = Long }
 
-trait RegisterOrMemory extends Operand {
-  type Size <: OperandSize
-}
+trait RegisterOrMemory extends Operand
 
 
 

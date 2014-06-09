@@ -11,10 +11,10 @@ import com.scalaAsm.x86.Operands.Memory._
 
 trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 
-    case class byte(value: Byte) extends Constant8
-    case class word(value: Short) extends Constant16
-    case class dword(value: Int) extends Constant32
-    case class qword(value: Long) extends Constant64
+    def byte(value: Byte) = Constant8(value)
+    def word(value: Short) = Constant16(value)
+    def dword(value: Int) = Constant32(value)
+    def qword(value: Long) = Constant64(value)
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}

@@ -14,12 +14,12 @@ trait AbsoluteAddress extends AddressingMode {
   }
   
   def rel32: Relative32 = new Relative32 {
-    def displacement = new Constant32{ val value = self.displacement.asInt}
+    def displacement = Constant32(self.displacement.asInt)
     def size = 4
   }
   
   def rel64: Relative64 = new Relative64 {
-    def displacement = new Constant64{ val value = self.displacement.asLong}
+    def displacement = Constant64(self.displacement.asLong)
     def size = 8
   }
 }

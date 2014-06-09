@@ -106,11 +106,11 @@ object AsmCompiler extends Catalog
 	        case InstructionToken(inst) => inst.code
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-	        case ProcRef(name) => callNear(*(new Constant32{val value = procs(name) - parserPosition - 5}).rel32).get.code
-	        case VarRef(name) => push(new Constant32{val value = variables(name) + baseOffset}).get.code
-	        case JmpRefResolved(name) => jmp(*(new Constant32{val value = imports(name) + baseOffset})).get.code
-	        case ImportRef(name) => callNear(*(new Constant32{val value = imports(name) + baseOffset})).get.code
-	        case LabelRef(name, inst) => inst.get(new Constant8{val value = (labels(name) - parserPosition - 2).toByte}).get.code
+	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).rel32).get.code
+	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).get.code
+	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).get.code
+	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).get.code
+	        case LabelRef(name, inst) => inst.get(new Constant8((labels(name) - parserPosition - 2).toByte)).get.code
 	        case _ => Array[Byte]()
 	      }
          token match {

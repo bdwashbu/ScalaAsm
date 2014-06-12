@@ -8,7 +8,8 @@ case class PortableExecutable(dosHeader: DosHeader,
                  		      sections: Seq[SectionHeader],
                  		      code: Array[Byte],
                  		      rawData: Array[Byte],
-                 		      compiledImports: CompiledImports)
+                 		      compiledImports: CompiledImports,
+                 		      resources: Array[Byte])
  {
   	def get(): Array[Byte] = {
   	  val result = ExeGenerator.align(ExeGenerator.align(dosHeader(),16,0) ++
@@ -17,8 +18,9 @@ case class PortableExecutable(dosHeader: DosHeader,
   	                                  sections.map(_.write).reduce(_ ++ _), 
   	                                  peHeader.optionalHeader.sizeOfCode, 0x00) ++
   	               ExeGenerator.align(code, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00) ++
-  	               rawData ++
-  	               compiledImports.rawData
+  	               ExeGenerator.align(rawData ++ compiledImports.rawData, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00) ++
+  	               resources
+  	               
   	  ExeGenerator.align(result, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00)
   	}
   	

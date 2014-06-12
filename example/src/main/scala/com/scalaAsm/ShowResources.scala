@@ -13,7 +13,7 @@ object ShowResources {
   def main(args: Array[String]): Unit = {
     try {
 
-      val file = new File("testResources.exe");
+      val file = new File("test.exe");
 	 
 	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
 	      

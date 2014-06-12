@@ -76,8 +76,46 @@ object ExeGenerator {
 
     test.generateImports(is64Bit)
   }
+  
+  def compileResources(beginningOfSection: Int): Array[Byte] = { 
+    
+    val buffer = ByteBuffer.allocate(80)
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.putInt(0) // characteristics
+    buffer.putInt(0) // time
+    buffer.putShort(0) // major version
+    buffer.putShort(0) // minor version
+    buffer.putShort(0) // num named
+    buffer.putShort(1) // num id
+    
+    buffer.putInt(1) // name
+    buffer.putInt(0x80000000 + 16 + 8) // offsetToData
+    
+    buffer.putInt(0) // characteristics
+    buffer.putInt(0) // time
+    buffer.putShort(0) // major version
+    buffer.putShort(0) // minor version
+    buffer.putShort(1) // num named
+    buffer.putShort(0) // num id
+    
+    buffer.putInt(0x80000000 | 16 + 8 + 16 + 8 + 16) // name
+    buffer.putInt(16 + 8 + 16 + 8) // offsetToData
+    
+    buffer.putInt(16 + 8 + 8 + 8) // data RVA
+    buffer.putInt(1) // size
+    buffer.putInt(0) // codepage
+    buffer.putInt(0) // reserved
+    
+    buffer.putShort(4)
+    buffer.putChar('I')
+    buffer.putChar('c')
+    buffer.putChar('o')
+    buffer.putChar('n')
+    
+    buffer.array()
+  }
 
-  def link(asm: Assembled, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
+  def link(asm: Assembled, addressOfData: Int, is64Bit: Boolean, hasIcon: Boolean, dlls: String*): PortableExecutable = {
 
     val (rawData, variables) = AsmCompiler.compileData(addressOfData, asm.data)
     
@@ -114,7 +152,7 @@ object ExeGenerator {
 	  majorLinkerVersion = 2,
 	  minorLinkerVersion = 50,
 	  sizeOfCode = 512,
-	  sizeOfInitializedData = 512,
+	  sizeOfInitializedData = 546,
 	  sizeOfUninitData = 0,
 	  addressOfEntryPoint = 0x1000,
 	  baseOfCode = 0x1000,
@@ -131,7 +169,7 @@ object ExeGenerator {
 		  majorSubsystemVersion = if (is64Bit) 5 else 4,
 		  minorSubsystemVersion = 0,
 		  win32Version = 0,
-		  sizeOfImage = 0x3000,
+		  sizeOfImage = 0x4000,
 		  sizeOfHeaders = 0x200,
 		  checksum = 0,
 		  subsystem = 3,
@@ -147,12 +185,13 @@ object ExeGenerator {
     
     val directories = DataDirectories(
       importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
-      importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size)
+      importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size),
+      resource = ImageDataDirectory(0x3000, 50)
     )
     
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.additionalFields.imageBase)
     
-    val sections = List(
+    val standardSections = List(
     SectionHeader(
       name = ".text",
       virtualSize = code.size,
@@ -182,6 +221,24 @@ object ExeGenerator {
         Characteristic.WRITE.id)
     )
     
+    val resourceSection: List[SectionHeader] = List(if (hasIcon) {
+        Some(SectionHeader(
+        name = ".rsrc",
+        virtualSize = 0x34,
+        virtualAddress = 0x3000,
+        sizeOfRawData = 0x200,
+        pointerToRawData = 0x600,
+        relocPtr = 0,
+        linenumPtr = 0,
+        relocations = 0,
+        lineNumbers = 0,
+        characteristics = Characteristic.INITIALIZED.id |
+          Characteristic.READ.id)
+      )
+    } else None).flatten
+    
+    val sections = standardSections ++ resourceSection
+    
     val fileHeader = FileHeader(
 		machine = if (is64Bit) 0x8664.toShort else 0x14C,
 	    numberOfSections = sections.size.toShort,
@@ -193,8 +250,8 @@ object ExeGenerator {
 	)
 	
 	val peHeader = new NtHeader(fileHeader, optionalHeader)
-    
-    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports)
+    compileResources(resourceSection(0).pointerToRawData)
+    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports, compileResources(resourceSection(0).pointerToRawData))
   }
   
   

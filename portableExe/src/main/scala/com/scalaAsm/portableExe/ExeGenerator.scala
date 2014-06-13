@@ -77,9 +77,78 @@ object ExeGenerator {
     test.generateImports(is64Bit)
   }
   
-  def compileResources(beginningOfSection: Int): Array[Byte] = { 
+  //works
+//  def compileResources(beginningOfSection: Int): Array[Byte] = { 
+//    
+//    val file = new File("testicon.ico");
+//	 
+//    
+//    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
+//    
+//    val buffer = ByteBuffer.allocate(21300)
+//    buffer.order(ByteOrder.LITTLE_ENDIAN)
+//    
+//    // ROOT
+//    buffer.putInt(0) // characteristics
+//    buffer.putInt(0) // time
+//    buffer.putShort(0) // major version
+//    buffer.putShort(0) // minor version
+//    buffer.putShort(0) // num named
+//    buffer.putShort(1) // num id
+//    
+//    buffer.putInt(DirectoryTypeID.groupIcon.id) // name
+//    buffer.putInt(0x80000000 + 16 + 8) // offsetToData
+//    
+//    buffer.putInt(0) // characteristics
+//    buffer.putInt(0) // time
+//    buffer.putShort(0) // major version
+//    buffer.putShort(0) // minor version
+//    buffer.putShort(0) // num named
+//    buffer.putShort(1) // num id
+//    
+//    buffer.putInt(3)
+//    buffer.putInt(0x80000000 + 16 + 8 + 16 + 8)
+//    
+//    buffer.putInt(0) // characteristics
+//    buffer.putInt(0) // time
+//    buffer.putShort(0) // major version
+//    buffer.putShort(0) // minor version
+//    buffer.putShort(0) // num named
+//    buffer.putShort(1) // num id
+//    
+//    buffer.putInt(0x409) // name
+//    buffer.putInt(16 + 8 + 16 + 8 + 16 + 8) // offsetToData
+//
+//    buffer.putInt(0x3000 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 18) // data RVA
+//    buffer.putInt(file.length().toInt) // size
+//    buffer.putInt(0) // codepage
+//    buffer.putInt(0) // reserved
+//
+//    buffer.putShort(8)
+//    buffer.putChar('M')
+//    buffer.putChar('A')
+//    buffer.putChar('I')
+//    buffer.putChar('N')
+//    buffer.putChar('I')
+//    buffer.putChar('C')
+//    buffer.putChar('O')
+//    buffer.putChar('N')
+//      
+//    //convert file into array of bytes
+//    val fileInputStream = new FileInputStream(file);
+//    fileInputStream.read(bFile);
+//    fileInputStream.close();
+//    
+//    val bbuf = ByteBuffer.wrap(bFile)
+//    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+//    buffer.put(bbuf.array())
+//    
+//    buffer.array()
+//  }
+  
+   def compileResources(beginningOfSection: Int): Array[Byte] = { 
     
-    val file = new File("testicon.ico");
+    val file = new File("testicon2.ico");
 	 
     
     val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
@@ -95,25 +164,11 @@ object ExeGenerator {
     buffer.putShort(0) // num named
     buffer.putShort(2) // num id
     
-    //top level resources dir
     buffer.putInt(DirectoryTypeID.icon.id) // name
-    buffer.putInt(0x80000000 + 32) // offsetToData
+    buffer.putInt(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16) // offsetToData
     
     buffer.putInt(DirectoryTypeID.groupIcon.id) // name
-    buffer.putInt(0x80000000 + 0x40) // offsetToData
-    
-    buffer.putInt(0) // characteristics
-    buffer.putInt(0) // time
-    buffer.putShort(0) // major version
-    buffer.putShort(0) // minor version
-    buffer.putShort(0) // num named
-    buffer.putShort(2) // num id
-    
-    buffer.putInt(1)
-    buffer.putInt(0x80000000 + 0x58)
-    
-    buffer.putInt(0x32)
-    buffer.putInt(0x80000000 + 0x70)
+    buffer.putInt(0x80000000 + 16 + 8 + 8) // offsetToData
     
     buffer.putInt(0) // characteristics
     buffer.putInt(0) // time
@@ -122,8 +177,8 @@ object ExeGenerator {
     buffer.putShort(1) // num named
     buffer.putShort(0) // num id
     
-    buffer.putInt(0x80000000 + 0xD0) // name
-    buffer.putInt(0x80000000 + 0x88) // offsetToData
+    buffer.putInt(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 16)
+    buffer.putInt(0x80000000 + 16 + 8 + 8 + 16 + 8)
     
     buffer.putInt(0) // characteristics
     buffer.putInt(0) // time
@@ -132,8 +187,13 @@ object ExeGenerator {
     buffer.putShort(0) // num named
     buffer.putShort(1) // num id
     
-    buffer.putInt(0) // name
-    buffer.putInt(0xA0) // offsetToData
+    buffer.putInt(0x409) // name
+    buffer.putInt(16 + 8 + 8 + 16 + 8 + 16 + 8) // offsetToData
+
+    buffer.putInt(0x3000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 18 + 8 + 16 + 8 + 16 + 16) // data RVA
+    buffer.putInt(20) // size
+    buffer.putInt(0) // codepage
+    buffer.putInt(0) // reserved
     
     buffer.putInt(0) // characteristics
     buffer.putInt(0) // time
@@ -142,8 +202,8 @@ object ExeGenerator {
     buffer.putShort(0) // num named
     buffer.putShort(1) // num id
     
-    buffer.putInt(0) // name
-    buffer.putInt(0xB0) // offsetToData
+    buffer.putInt(1)
+    buffer.putInt(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16)
     
     buffer.putInt(0) // characteristics
     buffer.putInt(0) // time
@@ -152,23 +212,14 @@ object ExeGenerator {
     buffer.putShort(0) // num named
     buffer.putShort(1) // num id
     
-    buffer.putInt(0) // name
-    buffer.putInt(0xC0) // offsetToData
-    
-    buffer.putInt(0x30E4) // data RVA
-    buffer.putInt(0x1CA8) // size
+    buffer.putInt(0x409) // name
+    buffer.putInt(16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16) // offsetToData
+
+    buffer.putInt(0x3000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 18 + 8 + 16 + 8 + 16 + 16 + 22) // data RVA
+    buffer.putInt(file.length().toInt - 22) // size
     buffer.putInt(0) // codepage
     buffer.putInt(0) // reserved
     
-    buffer.putInt(0x4D8C) // data RVA
-    buffer.putInt(0x1CA8) // size
-    buffer.putInt(0) // codepage
-    buffer.putInt(0) // reserved
-    
-    buffer.putInt(0x6A34) // data RVA
-    buffer.putInt(0x14) // size
-    buffer.putInt(0) // codepage
-    buffer.putInt(0) // reserved
     
     buffer.putShort(8)
     buffer.putChar('M')
@@ -179,8 +230,6 @@ object ExeGenerator {
     buffer.putChar('C')
     buffer.putChar('O')
     buffer.putChar('N')
-    
-    
       
     //convert file into array of bytes
     val fileInputStream = new FileInputStream(file);
@@ -189,17 +238,10 @@ object ExeGenerator {
     
     val bbuf = ByteBuffer.wrap(bFile)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    buffer.put(bbuf.array().drop(20))
-    
-    buffer.putShort(0x28) 
-    buffer.putShort(0) // time
-    buffer.putInt(0x30) // major version
-    buffer.putInt(0x60) // minor version
-    buffer.putShort(0x1) // num named
-    buffer.putShort(0x18) // num id
-    
+    buffer.put(bbuf.array())
     buffer.array()
   }
+
 
   def link(asm: Assembled, addressOfData: Int, is64Bit: Boolean, hasIcon: Boolean, dlls: String*): PortableExecutable = {
 

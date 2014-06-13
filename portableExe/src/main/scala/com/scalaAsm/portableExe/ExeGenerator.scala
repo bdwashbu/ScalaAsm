@@ -79,17 +79,41 @@ object ExeGenerator {
   
   def compileResources(beginningOfSection: Int): Array[Byte] = { 
     
-    val buffer = ByteBuffer.allocate(80)
+    val file = new File("testicon.ico");
+	 
+    
+    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
+    
+    val buffer = ByteBuffer.allocate(21300)
     buffer.order(ByteOrder.LITTLE_ENDIAN)
+    
+    // ROOT
     buffer.putInt(0) // characteristics
     buffer.putInt(0) // time
     buffer.putShort(0) // major version
     buffer.putShort(0) // minor version
     buffer.putShort(0) // num named
-    buffer.putShort(1) // num id
+    buffer.putShort(2) // num id
     
-    buffer.putInt(1) // name
-    buffer.putInt(0x80000000 + 16 + 8) // offsetToData
+    //top level resources dir
+    buffer.putInt(DirectoryTypeID.icon.id) // name
+    buffer.putInt(0x80000000 + 32) // offsetToData
+    
+    buffer.putInt(DirectoryTypeID.groupIcon.id) // name
+    buffer.putInt(0x80000000 + 0x40) // offsetToData
+    
+    buffer.putInt(0) // characteristics
+    buffer.putInt(0) // time
+    buffer.putShort(0) // major version
+    buffer.putShort(0) // minor version
+    buffer.putShort(0) // num named
+    buffer.putShort(2) // num id
+    
+    buffer.putInt(1)
+    buffer.putInt(0x80000000 + 0x58)
+    
+    buffer.putInt(0x32)
+    buffer.putInt(0x80000000 + 0x70)
     
     buffer.putInt(0) // characteristics
     buffer.putInt(0) // time
@@ -98,19 +122,81 @@ object ExeGenerator {
     buffer.putShort(1) // num named
     buffer.putShort(0) // num id
     
-    buffer.putInt(0x80000000 | 16 + 8 + 16 + 8 + 16) // name
-    buffer.putInt(16 + 8 + 16 + 8) // offsetToData
+    buffer.putInt(0x80000000 + 0xD0) // name
+    buffer.putInt(0x80000000 + 0x88) // offsetToData
     
-    buffer.putInt(16 + 8 + 8 + 8) // data RVA
-    buffer.putInt(1) // size
+    buffer.putInt(0) // characteristics
+    buffer.putInt(0) // time
+    buffer.putShort(0) // major version
+    buffer.putShort(0) // minor version
+    buffer.putShort(0) // num named
+    buffer.putShort(1) // num id
+    
+    buffer.putInt(0) // name
+    buffer.putInt(0xA0) // offsetToData
+    
+    buffer.putInt(0) // characteristics
+    buffer.putInt(0) // time
+    buffer.putShort(0) // major version
+    buffer.putShort(0) // minor version
+    buffer.putShort(0) // num named
+    buffer.putShort(1) // num id
+    
+    buffer.putInt(0) // name
+    buffer.putInt(0xB0) // offsetToData
+    
+    buffer.putInt(0) // characteristics
+    buffer.putInt(0) // time
+    buffer.putShort(0) // major version
+    buffer.putShort(0) // minor version
+    buffer.putShort(0) // num named
+    buffer.putShort(1) // num id
+    
+    buffer.putInt(0) // name
+    buffer.putInt(0xC0) // offsetToData
+    
+    buffer.putInt(0x30E4) // data RVA
+    buffer.putInt(0x1CA8) // size
     buffer.putInt(0) // codepage
     buffer.putInt(0) // reserved
     
-    buffer.putShort(4)
+    buffer.putInt(0x4D8C) // data RVA
+    buffer.putInt(0x1CA8) // size
+    buffer.putInt(0) // codepage
+    buffer.putInt(0) // reserved
+    
+    buffer.putInt(0x6A34) // data RVA
+    buffer.putInt(0x14) // size
+    buffer.putInt(0) // codepage
+    buffer.putInt(0) // reserved
+    
+    buffer.putShort(8)
+    buffer.putChar('M')
+    buffer.putChar('A')
     buffer.putChar('I')
-    buffer.putChar('c')
-    buffer.putChar('o')
-    buffer.putChar('n')
+    buffer.putChar('N')
+    buffer.putChar('I')
+    buffer.putChar('C')
+    buffer.putChar('O')
+    buffer.putChar('N')
+    
+    
+      
+    //convert file into array of bytes
+    val fileInputStream = new FileInputStream(file);
+    fileInputStream.read(bFile);
+    fileInputStream.close();
+    
+    val bbuf = ByteBuffer.wrap(bFile)
+    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.put(bbuf.array().drop(20))
+    
+    buffer.putShort(0x28) 
+    buffer.putShort(0) // time
+    buffer.putInt(0x30) // major version
+    buffer.putInt(0x60) // minor version
+    buffer.putShort(0x1) // num named
+    buffer.putShort(0x18) // num id
     
     buffer.array()
   }
@@ -147,6 +233,56 @@ object ExeGenerator {
 	    e_lfanew = 128
     )
     
+    val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, baseOffset = 0x400000 /*imagebase*/)
+    
+    val standardSections = List(
+      SectionHeader(
+        name = ".text",
+        virtualSize = code.size,
+        virtualAddress = 0x1000,
+        sizeOfRawData = 0x200,
+        pointerToRawData = 0x200,
+        relocPtr = 0,
+        linenumPtr = 0,
+        relocations = 0,
+        lineNumbers = 0,
+        characteristics = Characteristic.CODE.id |
+          Characteristic.EXECUTE.id |
+          Characteristic.READ.id),
+  
+      SectionHeader(
+        name = ".data",
+        virtualSize = rawData.size + compiledImports.rawData.size,
+        virtualAddress = 0x2000,
+        sizeOfRawData = 0x200,
+        pointerToRawData = 0x400,
+        relocPtr = 0,
+        linenumPtr = 0,
+        relocations = 0,
+        lineNumbers = 0,
+        characteristics = Characteristic.INITIALIZED.id |
+          Characteristic.READ.id |
+          Characteristic.WRITE.id)
+    )
+    
+    val resourceSection: List[SectionHeader] = List(if (hasIcon) {
+        Some(SectionHeader(
+        name = ".rsrc",
+        virtualSize = 0x34,
+        virtualAddress = 0x3000,
+        sizeOfRawData = 0x2F00,
+        pointerToRawData = 0x600,
+        relocPtr = 0,
+        linenumPtr = 0,
+        relocations = 0,
+        lineNumbers = 0,
+        characteristics = Characteristic.INITIALIZED.id |
+          Characteristic.READ.id)
+      )
+    } else None).flatten
+    
+    val sections: List[SectionHeader] = standardSections ++ resourceSection
+    
     val optionalHeader = OptionalHeader(
       magic = if (is64Bit) 0x20b else 0x10b,
 	  majorLinkerVersion = 2,
@@ -169,7 +305,7 @@ object ExeGenerator {
 		  majorSubsystemVersion = if (is64Bit) 5 else 4,
 		  minorSubsystemVersion = 0,
 		  win32Version = 0,
-		  sizeOfImage = 0x4000,
+		  sizeOfImage = sections.last.virtualAddress + sections.last.virtualSize,
 		  sizeOfHeaders = 0x200,
 		  checksum = 0,
 		  subsystem = 3,
@@ -183,61 +319,19 @@ object ExeGenerator {
 	  )
     )
     
-    val directories = DataDirectories(
+    val directories = if (hasIcon) DataDirectories(
       importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
       importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size),
-      resource = ImageDataDirectory(0x3000, 50)
+      resource = ImageDataDirectory(0x3000, 11300)
+    ) else
+      DataDirectories(
+      importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
+      importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size)
     )
     
-    val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, optionalHeader.additionalFields.imageBase)
     
-    val standardSections = List(
-    SectionHeader(
-      name = ".text",
-      virtualSize = code.size,
-      virtualAddress = 0x1000,
-      sizeOfRawData = 0x200,
-      pointerToRawData = 0x200,
-      relocPtr = 0,
-      linenumPtr = 0,
-      relocations = 0,
-      lineNumbers = 0,
-      characteristics = Characteristic.CODE.id |
-        Characteristic.EXECUTE.id |
-        Characteristic.READ.id),
-
-    SectionHeader(
-      name = ".data",
-      virtualSize = rawData.size + compiledImports.rawData.size,
-      virtualAddress = 0x2000,
-      sizeOfRawData = 0x200,
-      pointerToRawData = 0x400,
-      relocPtr = 0,
-      linenumPtr = 0,
-      relocations = 0,
-      lineNumbers = 0,
-      characteristics = Characteristic.INITIALIZED.id |
-        Characteristic.READ.id |
-        Characteristic.WRITE.id)
-    )
     
-    val resourceSection: List[SectionHeader] = List(if (hasIcon) {
-        Some(SectionHeader(
-        name = ".rsrc",
-        virtualSize = 0x34,
-        virtualAddress = 0x3000,
-        sizeOfRawData = 0x200,
-        pointerToRawData = 0x600,
-        relocPtr = 0,
-        linenumPtr = 0,
-        relocations = 0,
-        lineNumbers = 0,
-        characteristics = Characteristic.INITIALIZED.id |
-          Characteristic.READ.id)
-      )
-    } else None).flatten
     
-    val sections = standardSections ++ resourceSection
     
     val fileHeader = FileHeader(
 		machine = if (is64Bit) 0x8664.toShort else 0x14C,
@@ -250,8 +344,8 @@ object ExeGenerator {
 	)
 	
 	val peHeader = new NtHeader(fileHeader, optionalHeader)
-    compileResources(resourceSection(0).pointerToRawData)
-    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports, compileResources(resourceSection(0).pointerToRawData))
+    val res: Array[Byte] = if (hasIcon) compileResources(resourceSection(0).pointerToRawData) else Array()
+    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports, res)
   }
   
   

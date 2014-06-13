@@ -4,6 +4,31 @@ package sections
 import java.nio.ByteBuffer
 import com.scalaAsm.portableExe.ImageDataDirectory
 
+object DirectoryTypeID extends Enumeration {
+    type DirType = Value
+    val cursor = Value(1)
+    val bitmap = Value(2)
+    val icon = Value(3)
+    val menu = Value(4)
+    val dialogBox = Value(5)
+    val stringTableEntry = Value(6)
+    val fontDirectory = Value(7)
+    val font = Value(8)
+    val acceleratorTable = Value(9)
+    val applicationDefinedResource = Value(10)
+    val messageTableEntry = Value(11)
+    val groupCursor = Value(12)
+    val groupIcon = Value(14)
+    val versionInformation = Value(16)
+    val dlginclude = Value(17)
+    val plugAndPlay = Value(19)
+    val VXD = Value(20)
+    val animatedCursor = Value(21)
+    val animatedIcon = Value(22)
+    val html = Value(23)
+    val assemblyManifest = Value(24)
+}
+
 object ImageResourceDirectory {
 
   def getResourceDir(input: ByteBuffer, beginningFileLocation: Int, level: Int, beginningOfSection: Int): ImageResourceDirectory = {
@@ -119,7 +144,7 @@ object ImageResourceDirectoryEntry {
 
     if (id == 0x409 || id == 0x415) {
       input.position((offsetToData & 0x7FFFFFFF) + beginningFileLocation)
-      result = ImageResourceDataEntry.getDataEntry(input, beginningOfSection)
+      result = ImageResourceDataEntry.getDataEntry(input, beginningFileLocation)
     } else {
       val savedPos = input.position
       input.position((offsetToData & 0x7FFFFFFF) + beginningFileLocation)
@@ -141,8 +166,13 @@ object ImageResourceDataEntry {
     val size = input.getInt
     val codePage = input.getInt
     val reserved = input.getInt
+    
+    println("data " + (beginningOfSection))
 
+    input.position(offset + beginningOfSection)
+    
     val data = Array.fill(size)(0.toByte)
+    input.get(data)
     ImageResourceDataEntry(
       offset,
       data,
@@ -156,18 +186,3 @@ case class ImageResourceDataEntry(
   data: Array[Byte],
   codePage: Int,
   reserved: Int) extends ImageResourceEntry
-
-object ResourceType extends Enumeration {
-  type ResourceType = Value
-  val cursor = Value(1)
-  val bitmap = Value(2)
-  val icon = Value(3)
-  val menu = Value(4)
-  val dialog = Value(5)
-  val string = Value(6)
-  val fontdir = Value(7)
-  val font = Value(8)
-  val accelerator = Value(9)
-  val rcData = Value(10)
-  val messageTable = Value(11)
-}

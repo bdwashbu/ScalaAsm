@@ -148,7 +148,7 @@ object ExeGenerator {
   
    def compileResources(beginningOfSection: Int): Array[Byte] = { 
     
-    val file = new File("testicon2.ico");
+    val file = new File("testicon.ico");
 	 
     
     val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
@@ -310,9 +310,9 @@ object ExeGenerator {
     val resourceSection: List[SectionHeader] = List(if (hasIcon) {
         Some(SectionHeader(
         name = ".rsrc",
-        virtualSize = 0x34,
+        virtualSize = compileResources(0x3000).length,
         virtualAddress = 0x3000,
-        sizeOfRawData = 0x2F00,
+        sizeOfRawData = compileResources(0x3000).length,
         pointerToRawData = 0x600,
         relocPtr = 0,
         linenumPtr = 0,

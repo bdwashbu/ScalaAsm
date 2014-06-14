@@ -20,29 +20,22 @@ object ResourceGen {
     
     // ROOT
 
-    buffer.put(ImageResourceDirectory(0,0,0,0,0,2).apply)
+    buffer.put(ResourceDirectory(List(),List(
+        ImageResourceDirectoryEntry(DirectoryTypeID.icon.id, 0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16),
+        ImageResourceDirectoryEntry(DirectoryTypeID.groupIcon.id, 0x80000000 + 16 + 8 + 8)
+    )).apply)
     
-    buffer.put(ImageResourceDirectoryEntry(DirectoryTypeID.icon.id, 0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16).apply)
-    buffer.put(ImageResourceDirectoryEntry(DirectoryTypeID.groupIcon.id, 0x80000000 + 16 + 8 + 8).apply)
+    buffer.put(ResourceDirectory(List(ImageResourceDirectoryEntry(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 16,
+                                           0x80000000 + 16 + 8 + 8 + 16 + 8)),List()).apply)
+
+    buffer.put(ResourceDirectory(List(),List(ImageResourceDirectoryEntry(0x409, 16 + 8 + 8 + 16 + 8 + 16 + 8))).apply)                                       
     
-    buffer.put(ImageResourceDirectory(0,0,0,0,1,0).apply)
-    
-    buffer.put(ImageResourceDirectoryEntry(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 16,
-                                           0x80000000 + 16 + 8 + 8 + 16 + 8).apply)
-    
-    buffer.put(ImageResourceDirectory(0,0,0,0,0,1).apply)
-    
-    buffer.put(ImageResourceDirectoryEntry(0x409, 16 + 8 + 8 + 16 + 8 + 16 + 8).apply)
 
     buffer.put(ImageResourceDataEntry(0x3000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 18 + 8 + 16 + 8 + 16 + 16, 20).apply)
     
-    buffer.put(ImageResourceDirectory(0,0,0,0,0,1).apply)
+    buffer.put(ResourceDirectory(List(),List(ImageResourceDirectoryEntry(1, 0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16))).apply)
     
-    buffer.put(ImageResourceDirectoryEntry(1, 0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16).apply)
-    
-    buffer.put(ImageResourceDirectory(0,0,0,0,0,1).apply)
-    
-    buffer.put(ImageResourceDirectoryEntry(1, 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16).apply)
+    buffer.put(ResourceDirectory(List(),List(ImageResourceDirectoryEntry(0x409, 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16))).apply)          
 
     buffer.put(ImageResourceDataEntry(0x3000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 18 + 8 + 16 + 8 + 16 + 16 + 22, file.length().toInt - 22).apply)
     
@@ -158,6 +151,25 @@ case class ImageResourceDirString(
     
     name.toCharArray().foreach{x => buffer.putChar(x)}
     buffer.array
+  }
+}
+
+case class ResourceDirectory(
+  namedEntries: List[ImageResourceDirectoryEntry],
+  idEntries: List[ImageResourceDirectoryEntry]) {
+  
+  def apply(): Array[Byte] = {
+    val buffer = ByteBuffer.allocate(16 + namedEntries.size*8 + idEntries.size*8);
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.putInt(0) // characteristics
+    buffer.putInt(0) // time
+    buffer.putShort(0) // major version
+    buffer.putShort(0) // minor version
+    buffer.putShort(namedEntries.size.toShort) // num named
+    buffer.putShort(idEntries.size.toShort) // num id
+    namedEntries.foreach{entry => buffer.put(entry.apply)}
+    idEntries.foreach{entry => buffer.put(entry.apply)}
+    buffer.array()
   }
 }
 

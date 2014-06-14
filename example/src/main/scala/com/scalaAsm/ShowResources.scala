@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import com.scalaAsm.portableExe._
 import com.scalaAsm.portableExe.sections.Sections
-import com.scalaAsm.portableExe.sections.ImageResourceDirectory
+import com.scalaAsm.portableExe.sections.ParsedImageResourceDirectory
 
 
 object ShowResources {
@@ -30,11 +30,11 @@ object ShowResources {
 	    val dirs = DataDirectories.getDirectories(bbuf)
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
       
-      val resourceRoot = ImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
+      val resourceRoot = ParsedImageResourceDirectory.getResources(bbuf, sections, dirs.resource)
 
       println("TOP LEVEL: ")
-      println(ImageResourceDirectory.getAllNamedEntries(resourceRoot).size)
-      ImageResourceDirectory.getAllNamedEntries(resourceRoot).foreach(x => println(x.name))
+      println(ParsedImageResourceDirectory.getAllNamedEntries(resourceRoot).size)
+      ParsedImageResourceDirectory.getAllNamedEntries(resourceRoot).foreach(x => println(x.name))
     } catch {
       case e: Exception => e.printStackTrace()
     }

@@ -77,102 +77,7 @@ object ExeGenerator {
     test.generateImports(is64Bit)
   }
     
-   def compileResources(beginningOfSection: Int): Array[Byte] = { 
-    
-    val file = new File("testicon2.ico");
-	 
-    
-    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
-    
-    val buffer = ByteBuffer.allocate(21300)
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
-    
-    // ROOT
-    buffer.putInt(0) // characteristics
-    buffer.putInt(0) // time
-    buffer.putShort(0) // major version
-    buffer.putShort(0) // minor version
-    buffer.putShort(0) // num named
-    buffer.putShort(2) // num id
-    
-    buffer.putInt(DirectoryTypeID.icon.id) // name
-    buffer.putInt(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16) // offsetToData
-    
-    buffer.putInt(DirectoryTypeID.groupIcon.id) // name
-    buffer.putInt(0x80000000 + 16 + 8 + 8) // offsetToData
-    
-    buffer.putInt(0) // characteristics
-    buffer.putInt(0) // time
-    buffer.putShort(0) // major version
-    buffer.putShort(0) // minor version
-    buffer.putShort(1) // num named
-    buffer.putShort(0) // num id
-    
-    buffer.putInt(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 16)
-    buffer.putInt(0x80000000 + 16 + 8 + 8 + 16 + 8)
-    
-    buffer.putInt(0) // characteristics
-    buffer.putInt(0) // time
-    buffer.putShort(0) // major version
-    buffer.putShort(0) // minor version
-    buffer.putShort(0) // num named
-    buffer.putShort(1) // num id
-    
-    buffer.putInt(0x409) // name
-    buffer.putInt(16 + 8 + 8 + 16 + 8 + 16 + 8) // offsetToData
-
-    buffer.putInt(0x3000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 18 + 8 + 16 + 8 + 16 + 16) // data RVA
-    buffer.putInt(20) // size
-    buffer.putInt(0) // codepage
-    buffer.putInt(0) // reserved
-    
-    buffer.putInt(0) // characteristics
-    buffer.putInt(0) // time
-    buffer.putShort(0) // major version
-    buffer.putShort(0) // minor version
-    buffer.putShort(0) // num named
-    buffer.putShort(1) // num id
-    
-    buffer.putInt(1)
-    buffer.putInt(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16)
-    
-    buffer.putInt(0) // characteristics
-    buffer.putInt(0) // time
-    buffer.putShort(0) // major version
-    buffer.putShort(0) // minor version
-    buffer.putShort(0) // num named
-    buffer.putShort(1) // num id
-    
-    buffer.putInt(0x409) // name
-    buffer.putInt(16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16) // offsetToData
-
-    buffer.putInt(0x3000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 18 + 8 + 16 + 8 + 16 + 16 + 22) // data RVA
-    buffer.putInt(file.length().toInt - 22) // size
-    buffer.putInt(0) // codepage
-    buffer.putInt(0) // reserved
-    
-    buffer.putShort(8)
-    buffer.putChar('M')
-    buffer.putChar('A')
-    buffer.putChar('I')
-    buffer.putChar('N')
-    buffer.putChar('I')
-    buffer.putChar('C')
-    buffer.putChar('O')
-    buffer.putChar('N')
-      
-    //convert file into array of bytes
-    val fileInputStream = new FileInputStream(file);
-    fileInputStream.read(bFile);
-    fileInputStream.close();
-    
-    val bbuf = ByteBuffer.wrap(bFile)
-    bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    val icon = bbuf.array()
-    icon(18) = 1 // the ordinal name has to be 1?
-    buffer.put(icon)
-    buffer.array()
-  }
+   
 
 
   def link(asm: Assembled, addressOfData: Int, is64Bit: Boolean, hasIcon: Boolean, dlls: String*): PortableExecutable = {
@@ -242,9 +147,9 @@ object ExeGenerator {
     val resourceSection: List[SectionHeader] = List(if (hasIcon) {
         Some(SectionHeader(
         name = ".rsrc",
-        virtualSize = compileResources(0x3000).length,
+        virtualSize = ResourceGen.compileResources(0x3000).length,
         virtualAddress = 0x3000,
-        sizeOfRawData = compileResources(0x3000).length,
+        sizeOfRawData = ResourceGen.compileResources(0x3000).length,
         pointerToRawData = 0x600,
         relocPtr = 0,
         linenumPtr = 0,
@@ -318,7 +223,7 @@ object ExeGenerator {
 	)
 	
 	val peHeader = new NtHeader(fileHeader, optionalHeader)
-    val res: Array[Byte] = if (hasIcon) compileResources(resourceSection(0).pointerToRawData) else Array()
+    val res: Array[Byte] = if (hasIcon) ResourceGen.compileResources(resourceSection(0).pointerToRawData) else Array()
     PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports, res)
   }
   

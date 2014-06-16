@@ -144,12 +144,14 @@ object ExeGenerator {
           Characteristic.WRITE.id)
     )
     
+    val resources = ResourceGen.compileResources(0x3000)
+    
     val resourceSection: List[SectionHeader] = List(if (hasIcon) {
         Some(SectionHeader(
         name = ".rsrc",
-        virtualSize = ResourceGen.compileResources(0x3000).length,
+        virtualSize = resources.length,
         virtualAddress = 0x3000,
-        sizeOfRawData = ResourceGen.compileResources(0x3000).length,
+        sizeOfRawData = resources.length,
         pointerToRawData = 0x600,
         relocPtr = 0,
         linenumPtr = 0,
@@ -223,7 +225,7 @@ object ExeGenerator {
 	)
 	
 	val peHeader = new NtHeader(fileHeader, optionalHeader)
-    val res: Array[Byte] = if (hasIcon) ResourceGen.compileResources(resourceSection(0).pointerToRawData) else Array()
+    val res: Array[Byte] = if (hasIcon) resources else Array()
     PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports, res)
   }
   

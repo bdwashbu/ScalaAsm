@@ -30,15 +30,22 @@ object ResourceGen {
     
     // ROOT
 
+    val first = NonLeafResourceDirectoryEntry(DirectoryTypeID.icon.id, 
+            ResourceDirectory(List(NonLeafResourceDirectoryEntry(
+                1, ResourceDirectory(List(),List(LeafResourceDirectoryEntry(
+                    0x409, ImageResourceDataEntry(icon.drop(22))))))),List()))
+                    
+    val second = NonLeafResourceDirectoryEntry(DirectoryTypeID.groupIcon.id,
+            ResourceDirectory(List(),List(NamedResourceDirectoryEntry(
+                ImageResourceDirString("MAINICON"), ResourceDirectory(List(),List(LeafResourceDirectoryEntry(
+                    0x409, ImageResourceDataEntry(icon.take(20)))))))))
+    
     val res = RootDir(List(),List(
-        NonLeafResourceDirectoryEntry(DirectoryTypeID.icon.id, 
-            ResourceDirectory(List(NamedResourceDirectoryEntry(ImageResourceDirString(8,"MAINICON"),
-                ResourceDirectory(List(),List(LeafResourceDirectoryEntry(0x409, 
-                    ImageResourceDataEntry(icon)))))),List())),
-        NonLeafResourceDirectoryEntry(DirectoryTypeID.groupIcon.id,
-            ResourceDirectory(List(),List(NonLeafResourceDirectoryEntry(1,
-                ResourceDirectory(List(),List(LeafResourceDirectoryEntry(0x409, ImageResourceDataEntry(icon.take(20)))))))))
+        first,
+        second
     ))
+    
+    
     
 //    val res = RootDir(List(),List(
 //        NonLeafResourceDirectoryEntry(DirectoryTypeID.icon.id, 
@@ -57,14 +64,14 @@ object ResourceGen {
     
 //     val res = RootDir(List(),List(
 //        NonLeafResourceDirectoryEntry(DirectoryTypeID.icon.id, 
-//            ResourceDirectory(List(NamedResourceDirectoryEntry(ImageResourceDirString(8,"MAINICON"),
+//            ResourceDirectory(List(NamedResourceDirectoryEntry(ImageResourceDirString("MAINICON"),
 //                ResourceDirectory(List(),List()))),List())),
 //        NonLeafResourceDirectoryEntry(DirectoryTypeID.groupIcon.id,
 //            ResourceDirectory(List(),List(NonLeafResourceDirectoryEntry(1,
 //                ResourceDirectory(List(),List(LeafResourceDirectoryEntry(0x409, ImageResourceDataEntry(icon))))))))
 //    ))
     
-    buffer.put(res.apply(0))
+    buffer.put(res.output(res))
     
 //    buffer.put(ResourceDirectory(List(ImageResourceDirectoryEntry(0x80000000 + 16 + 8 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 8 + 16 + 16,
 //                                           0x80000000 + 16 + 8 + 8 + 16 + 8)),List()).apply)
@@ -160,11 +167,9 @@ object DirectoryTypeID extends Enumeration {
 //  }
 //}
 
-case class ImageResourceDataEntry(data: Array[Byte]) extends ImageResourceEntry{
-  
-  def artifactSize: Int = 16 + data.size
-  
-  def apply(position: Int): Array[Byte] = {
+case class ImageResourceDataEntry(data: Array[Byte]) extends ResourceField {
+
+  def apply: Array[Byte] = {
     val buffer = ByteBuffer.allocate(16 + data.size);
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     buffer.putInt(0x3000 + position + 16)
@@ -174,13 +179,17 @@ case class ImageResourceDataEntry(data: Array[Byte]) extends ImageResourceEntry{
     buffer.put(data)
     buffer.array
   }
+  
+  def size = 16 + data.size
+  def getChildren = Nil
 }
 
 case class ImageResourceDirString(
-  length: Short,
-  name: String) {
+  name: String) extends ResourceField {
   
-  def apply(position: Int): Array[Byte] = {
+  val length = name.size
+  
+  def apply: Array[Byte] = {
     val buffer = ByteBuffer.allocate(name.length*2 + 2);
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     buffer.putShort(length.toShort) // characteristics
@@ -188,101 +197,74 @@ case class ImageResourceDirString(
     name.toCharArray().foreach{x => buffer.putChar(x)}
     buffer.array
   }
+  
+  def size = name.length*2 + 2
+  def getChildren = Nil
 }
 
-trait ResourceDirectoryEntry {
-  def apply(position: Int): Array[Byte]
-  def artifactSize: Int
-  def outputChild(position: Int): Array[Byte]
+trait ResourceField {
+  var position = 0
+  def apply: Array[Byte]
+  def getChildren: List[ResourceField]
+  def size: Int
+  def getTotalSize: Int = size + getChildren.map(_.getTotalSize).sum
 }
+
+trait DirectoryEntry extends ResourceField {
+  def size = 8
+}
+
 case class NonLeafResourceDirectoryEntry (
   val name: Int,
-  val childDir: ResourceDirectory) extends ResourceDirectoryEntry {
+  val childDir: ResourceDirectory) extends DirectoryEntry {
   
-  def apply(position: Int): Array[Byte] = {
+  def apply: Array[Byte] = {
     val buffer = ByteBuffer.allocate(8);
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     buffer.putInt(name)
-    buffer.putInt(0x80000000 + position)
+    buffer.putInt(0x80000000 + childDir.position)
     buffer.array
   }
   
-  def artifactSize = childDir.size
-  def outputChild(position: Int) = childDir.apply(position)
+  def getChildren = List(childDir)
 }
 
 case class LeafResourceDirectoryEntry (
   val name: Int,
-  val data: ImageResourceDataEntry) extends ResourceDirectoryEntry {
+  val data: ImageResourceDataEntry) extends DirectoryEntry {
   
-  def apply(position: Int): Array[Byte] = {
+  def apply: Array[Byte] = {
     val buffer = ByteBuffer.allocate(8);
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     buffer.putInt(name)
-    buffer.putInt(position)
+    buffer.putInt(data.position)
     buffer.array
   }
   
-  def artifactSize = data.artifactSize
-  def outputChild(position: Int) = data.apply(position)
+  def getChildren = List(data)
 }
 
 case class NamedResourceDirectoryEntry (
   val name: ImageResourceDirString,
-  val childDir: ResourceDirectory) extends ResourceDirectoryEntry {
+  val childDir: ResourceDirectory) extends DirectoryEntry {
   
-  def apply(position: Int): Array[Byte] = {
+  def apply: Array[Byte] = {
     val buffer = ByteBuffer.allocate(8);
     buffer.order(ByteOrder.LITTLE_ENDIAN)
-    buffer.putInt(0x80000000 + position)
-    buffer.putInt(0x80000000 + position + name.length * 2 + 2)
+    buffer.putInt(0x80000000 + name.position)
+    buffer.putInt(0x80000000 + childDir.position)
     buffer.array
-    // do not output any more than this, requires a certain order
   }
   
-  def artifactSize = name.length * 2 + 2 + childDir.size
-  def outputChild(position: Int) = name.apply(position) ++ childDir.apply(position + name.length * 2 + 2)
-}
-
-case class RootDir(
-  namedEntries: List[ResourceDirectoryEntry],
-  idEntries: List[ResourceDirectoryEntry]) {
-  
-  def apply(position: Int): Array[Byte] = {
-    val buffer = ByteBuffer.allocate(16 + namedEntries.size*8 + idEntries.size*8);
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
-    buffer.putInt(0) // characteristics
-    buffer.putInt(0) // time
-    buffer.putShort(0) // major version
-    buffer.putShort(0) // minor version
-    buffer.putShort(namedEntries.size.toShort) // num named
-    buffer.putShort(idEntries.size.toShort) // num id
-    
-    var newPosition = position + 16
-    
-    val entrySize = namedEntries.size*8 + idEntries.size*8
-    
-    var result = Array[Byte]()
-    
-    namedEntries.foreach{entry => buffer.put(entry.apply(newPosition + entrySize)); 
-                         result ++= entry.outputChild(newPosition + entrySize); newPosition += entry.artifactSize}
-    
-    idEntries.foreach{entry => buffer.put(entry.apply(newPosition + entrySize)); 
-                      result ++= entry.outputChild(newPosition + entrySize); newPosition += entry.artifactSize}
-    
-    buffer.array ++ result
-  }
+  override def size = 8
+  def getChildren = List(name, childDir)
 }
 
 case class ResourceDirectory(
-  namedEntries: List[ResourceDirectoryEntry],
-  idEntries: List[ResourceDirectoryEntry]) {
+  namedEntries: List[DirectoryEntry],
+  idEntries: List[DirectoryEntry]) extends ResourceField {
   
-  def size: Int = {
-    16 + namedEntries.size*8 + idEntries.size*8 + namedEntries.map(_.artifactSize).sum + idEntries.map(_.artifactSize).sum
-  }
-  
-  def apply(position: Int): Array[Byte] = {
+  def apply: Array[Byte] = {
     val buffer = ByteBuffer.allocate(16 + namedEntries.size*8 + idEntries.size*8);
     buffer.order(ByteOrder.LITTLE_ENDIAN)
     buffer.putInt(0) // characteristics
@@ -290,22 +272,64 @@ case class ResourceDirectory(
     buffer.putShort(0) // major version
     buffer.putShort(0) // minor version
     buffer.putShort(namedEntries.size.toShort) // num named
-    buffer.putShort(idEntries.size.toShort) // num id
-
-    var newPosition = position + 16
-    
-    val entrySize = namedEntries.size*8 + idEntries.size*8
-    
-    var result = Array[Byte]()
-    
-    namedEntries.foreach{entry => buffer.put(entry.apply(newPosition + entrySize));
-                         result ++= entry.outputChild(newPosition + entrySize); newPosition += entry.artifactSize}
-    
-    idEntries.foreach{entry => buffer.put(entry.apply(newPosition + entrySize));
-                      result ++= entry.outputChild(newPosition + entrySize); newPosition += entry.artifactSize}
-    
-    buffer.array ++ result
+    buffer.putShort(idEntries.size.toShort) // num id    
+    namedEntries.foreach{entry => buffer.put(entry.apply)}  
+    idEntries.foreach{entry => buffer.put(entry.apply)}
+    buffer.array
   }
+  
+  def output(resourceField: ResourceField): Array[Byte] = {
+    resourceField.apply ++ (if (resourceField.getChildren.size == 0) Array[Byte]() else resourceField.getChildren.map{child => output(child)}.reduce(_++_))
+  }
+  
+  def size = 16 + (namedEntries ++ idEntries).map(_.size).sum
+             
+  def getChildren = (namedEntries ++ idEntries).flatMap(_.getChildren)
+}
+
+case class RootDir(
+  namedEntries: List[DirectoryEntry],
+  idEntries: List[DirectoryEntry]) extends ResourceField {
+  
+  def apply: Array[Byte] = {
+    
+    var position = 16;
+    
+    namedEntries.foreach{entry => entry.position = position; position += entry.size}
+    idEntries.foreach{entry => entry.position = position; position += entry.size}
+    
+    getChildren.foreach{child => place(child, position); position += child.getTotalSize; println("z: " + child.getTotalSize)}
+    
+    val buffer = ByteBuffer.allocate(16 + namedEntries.size*8 + idEntries.size*8);
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.putInt(0) // characteristics
+    buffer.putInt(0) // time
+    buffer.putShort(0) // major version
+    buffer.putShort(0) // minor version
+    buffer.putShort(namedEntries.size.toShort) // num named
+    buffer.putShort(idEntries.size.toShort) // num id    
+    namedEntries.foreach{entry => buffer.put(entry.apply)}  
+    idEntries.foreach{entry => buffer.put(entry.apply)}
+    
+    buffer.array
+  }
+  
+  def place(resourceField: ResourceField, position: Int): Unit = {
+    println(resourceField.getClass().getName() + ": " + position)
+    var newPos = position + resourceField.size
+    resourceField.position = position;
+    //val childSize = resourceField.getChildren.map(_.size).sum
+    resourceField.getChildren.foreach{child => place(child, newPos); newPos += child.getTotalSize}
+    //println("result: " + childSize)
+  }
+  
+  def output(resourceField: ResourceField): Array[Byte] = {
+    resourceField.apply ++ (if (resourceField.getChildren.size == 0) Array[Byte]() else resourceField.getChildren.map{child => output(child)}.reduce(_++_))
+  }
+  
+  def size = 16 + (namedEntries ++ idEntries).map(_.size).sum
+  
+  def getChildren = (namedEntries ++ idEntries).flatMap(_.getChildren)
 }
 
 case class ImageResourceDirectory(
@@ -314,7 +338,7 @@ case class ImageResourceDirectory(
   majorVersion: Short,
   minorVersion: Short,
   namedEntries: Short,
-  idEntries: Short) {
+  idEntries: Short){
   
   def apply(): Array[Byte] = {
     val buffer = ByteBuffer.allocate(16);
@@ -350,8 +374,6 @@ case class ImageResourceDirectoryEntry(
     buffer.array
   }
 }
-
-trait ImageResourceEntry
 
 //trait ParsedImageResourceDirectoryEntry extends ImageResourceEntry {
 //  val offsetToData: Int

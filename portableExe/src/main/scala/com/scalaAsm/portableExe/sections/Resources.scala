@@ -33,12 +33,12 @@ object ResourceGen {
     val first = NonLeafResourceDirectoryEntry(DirectoryTypeID.icon.id, 
             ResourceDirectory(List(NonLeafResourceDirectoryEntry(
                 1, ResourceDirectory(List(),List(LeafResourceDirectoryEntry(
-                    0x409, ImageResourceDataEntry(icon.drop(22))))))),List()))
+                    0x409, ImageResourceDataEntry(ResourceData(icon.drop(22)))))))),List()))
                     
     val second = NonLeafResourceDirectoryEntry(DirectoryTypeID.groupIcon.id,
             ResourceDirectory(List(),List(NamedResourceDirectoryEntry(
                 ImageResourceDirString("MAINICON"), ResourceDirectory(List(),List(LeafResourceDirectoryEntry(
-                    0x409, ImageResourceDataEntry(icon.take(20)))))))))
+                    0x409, ImageResourceDataEntry(ResourceData(icon.take(20))))))))))
     
     val res = RootDir(List(),List(
         first,
@@ -167,21 +167,32 @@ object DirectoryTypeID extends Enumeration {
 //  }
 //}
 
-case class ImageResourceDataEntry(data: Array[Byte]) extends ResourceField {
-
+case class ResourceData(data: Array[Byte]) extends ResourceField {
+  
   def apply: Array[Byte] = {
-    val buffer = ByteBuffer.allocate(16 + data.size);
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
-    buffer.putInt(0x3000 + position + 16)
-    buffer.putInt(data.size)
-    buffer.putInt(0)
-    buffer.putInt(0)
+    val buffer = ByteBuffer.allocate(data.size);
     buffer.put(data)
     buffer.array
   }
   
-  def size = 16 + data.size
+  def size = data.size
   def getChildren = Nil
+}
+
+case class ImageResourceDataEntry(data: ResourceData) extends ResourceField {
+
+  def apply: Array[Byte] = {
+    val buffer = ByteBuffer.allocate(16);
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.putInt(0x3000 + data.position)
+    buffer.putInt(data.size)
+    buffer.putInt(0)
+    buffer.putInt(0)
+    buffer.array
+  }
+  
+  def size = 16
+  def getChildren = List(data)
 }
 
 case class ImageResourceDirString(
@@ -318,9 +329,7 @@ case class RootDir(
     println(resourceField.getClass().getName() + ": " + position)
     var newPos = position + resourceField.size
     resourceField.position = position;
-    //val childSize = resourceField.getChildren.map(_.size).sum
     resourceField.getChildren.foreach{child => place(child, newPos); newPos += child.getTotalSize}
-    //println("result: " + childSize)
   }
   
   def output(resourceField: ResourceField): Array[Byte] = {
@@ -458,6 +467,6 @@ object ImageResourceDataEntry {
     
     val data = Array.fill(size)(0.toByte)
     input.get(data)
-    ImageResourceDataEntry(data)
+    ImageResourceDataEntry(ResourceData(data))
   }
 }

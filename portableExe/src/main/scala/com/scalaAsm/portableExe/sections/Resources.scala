@@ -6,6 +6,7 @@ import com.scalaAsm.portableExe.ImageDataDirectory
 import java.io.File
 import java.nio.ByteOrder
 import java.io.FileInputStream
+import scala.collection.mutable.ListBuffer
 
 object ResourceGen {
   def compileResources(beginningOfSection: Int): Array[Byte] = { 
@@ -31,19 +32,16 @@ object ResourceGen {
     // ROOT
 
     val first = IdResourceDirectoryEntry(DirectoryTypeID.icon.id, 
-            ResourceDirectory(List(), List(IdResourceDirectoryEntry(
-                1, ResourceDirectory(List(),List(LeafResourceDirectoryEntry(
-                    0x409, ImageResourceDataEntry(ResourceData(icon.drop(22))))))))))
+            ResourceDirectory(IdResourceDirectoryEntry(
+                1, ResourceDirectory(LeafResourceDirectoryEntry(
+                    0x409, ImageResourceDataEntry(ResourceData(icon.drop(22))))))))
                     
     val second = IdResourceDirectoryEntry(DirectoryTypeID.groupIcon.id,
-            ResourceDirectory(List(NamedResourceDirectoryEntry(
-                ImageResourceDirString("MAINICON"), ResourceDirectory(List(),List(LeafResourceDirectoryEntry(
-                    0x409, ImageResourceDataEntry(ResourceData(icon.take(20)))))))),List()))
+            ResourceDirectory(NamedResourceDirectoryEntry(
+                ImageResourceDirString("MAINICON"), ResourceDirectory(LeafResourceDirectoryEntry(
+                    0x409, ImageResourceDataEntry(ResourceData(icon.take(20))))))))
     
-    val res = RootDir(ResourceDirectory(List(),List(
-        first,
-        second
-    )))
+    val res = RootDir(ResourceDirectory(first, second))
     
     res.place
     buffer.put(res.output)
@@ -229,8 +227,11 @@ case class NamedResourceDirectoryEntry (
 }
 
 case class ResourceDirectory(
-  namedEntries: List[DirectoryEntry],
-  idEntries: List[DirectoryEntry]) extends ResourceField {
+  entries: DirectoryEntry*) extends ResourceField {
+  
+  val namedEntries = entries collect { case dir @ NamedResourceDirectoryEntry(_,_) => dir}
+  val idEntries = entries collect { case dir @ IdResourceDirectoryEntry(_,_) => dir
+                                    case dir @ LeafResourceDirectoryEntry(_,_) => dir}
   
   def apply: Array[Byte] = {
     val buffer = ByteBuffer.allocate(16 + namedEntries.size*8 + idEntries.size*8);
@@ -248,7 +249,7 @@ case class ResourceDirectory(
 
   def size = 16 + (namedEntries ++ idEntries).map(_.size).sum
              
-  def getChildren = (namedEntries ++ idEntries).flatMap(_.getChildren)
+  def getChildren = (namedEntries ++ idEntries).toList.flatMap(_.getChildren)
 }
 
 case class RootDir(dir: ResourceDirectory) {

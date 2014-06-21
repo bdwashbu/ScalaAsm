@@ -8,6 +8,7 @@ import com.scalaAsm.x86.One
 import com.scalaAsm.x86.MachineCode
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Memory._
+import scala.language.implicitConversions
 
 trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 

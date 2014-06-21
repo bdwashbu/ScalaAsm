@@ -4,6 +4,7 @@ package Memory
 import com.scalaAsm.x86.InstructionField
 
 protected[x86] trait AddressingFormSpecifier {
+  import scala.language.postfixOps
   val modRM: Option[ModRM]
   val sib: Option[SIB]
   val displacement: Option[Constant]

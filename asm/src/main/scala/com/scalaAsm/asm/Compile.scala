@@ -11,6 +11,8 @@ import com.scalaAsm.x86.Operands.Constant8
 
 object AsmCompiler extends Catalog
 {
+  import scala.language.postfixOps
+  
   def compileData(addressOfData: Int, dataTokens: Seq[Token]): (Array[Byte], Map[String, Int]) = {
 
     val dataSection: Seq[PostToken] = {
@@ -65,7 +67,6 @@ object AsmCompiler extends Catalog
         case Reference(name) if procNames.contains(name) => Some(ProcRef(name))
         case Reference(name) if varNames.contains(name) => Some(VarRef(name))
         case Reference(name) => Some(ImportRef(name))
-        case Reference(_) => throw new Exception("no reference found!")
         case label @ Label(name) => Some(label)
         case labelref @ LabelRef(name,opcode) => Some(labelref)
         case _ => None

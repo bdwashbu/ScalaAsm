@@ -29,7 +29,7 @@ object ImageExportDirectory {
 	      input.position(addressOfNames - exportFileOffset + i*4)
 	      val RVA = input.getInt
 	      input.position(RVA - exportFileOffset)
-	      while (input.get != '\0') {}
+	      while (input.get != '\u0000') {}
 	      val name = Array.fill(input.position() - (RVA - exportFileOffset) - 1)(0.toByte)
 	      input.position(RVA - exportFileOffset)
 	      input.get(name)

@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: linker
+Bundle-SymbolicName: linker
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: linker.jar
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.scalaAsm.asm
+Export-Package: com.scalaAsm.linker

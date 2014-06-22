@@ -4,6 +4,6 @@ Bundle-Name: example
 Bundle-SymbolicName: example
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: example.jar
-Export-Package: com.scalaAsm
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.scalaAsm.asm
+Import-Package: com.scalaAsm.asm,
+ com.scalaAsm.linker

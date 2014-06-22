@@ -1,6 +1,7 @@
 package com.scalaAsm
 
 import java.io._
+import com.scalaAsm.linker.ExeGenerator
 
 object ScalaBasic {
 

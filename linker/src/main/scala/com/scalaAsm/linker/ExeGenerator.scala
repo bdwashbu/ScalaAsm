@@ -1,4 +1,4 @@
-package com.scalaAsm
+package com.scalaAsm.linker
 
 import com.scalaAsm.portableExe.CompiledImports
 import java.io.File

@@ -16,7 +16,6 @@ import com.scalaAsm.asm.Assembled
 import com.scalaAsm.portableExe.PortableExecutable
 import com.scalaAsm.asm.AsmCompiler
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.asm.DosStub
 import com.scalaAsm.portableExe.sections.SectionHeader
 import com.scalaAsm.portableExe.sections.Characteristic
 import com.scalaAsm.portableExe.OptionalHeader
@@ -101,8 +100,7 @@ object ExeGenerator {
 	    e_oemid = 0,
 	    e_oeminfo = 0,
 	    e_res2 = Array.fill(10)(0.toShort),
-	    e_lfanew = 128,
-	    dosStub = DosStub.putStub
+	    e_lfanew = 128
     )
     
     val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, baseOffset = 0x400000 /*imagebase*/)

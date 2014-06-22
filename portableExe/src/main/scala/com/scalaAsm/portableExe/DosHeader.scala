@@ -2,8 +2,33 @@ package com.scalaAsm.portableExe
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import com.scalaAsm.asm.CodeSection
+
+// Standard real-mode dos program that prints an error if it cannot be run
+
+object DosStub {
+  val dosWarning = "This program cannot be run in DOS mode.\r\r\n$"
+  def putStub: Array[Byte] = {
+    
+    val dosStub = new CodeSection {
+      builder += push(cs)
+      builder += pop(ds)
+      builder += mov(dx, word(0xE.toByte))
+      builder += mov(ah, byte(0x9))
+      builder += int(byte(0x21))
+      builder += mov(ax, word(0x4C01))
+      builder += int(byte(0x21))
+    }
+
+    val bbuf = ByteBuffer.allocate(dosStub.getRawBytes.length + dosWarning.length);
+    bbuf.put(dosStub.getRawBytes)
+    bbuf.put(dosWarning.toCharArray() map (_.toByte))
+    bbuf.array()
+  }
+}
 
 object DosHeader {
+    
   def getDosHeader(input: ByteBuffer): DosHeader = {
 
     input.order(ByteOrder.LITTLE_ENDIAN)
@@ -26,8 +51,7 @@ object DosHeader {
       e_oemid = input.getShort(),
       e_oeminfo = input.getShort(),
       e_res2 = (for (i <- 0 until 10) yield input.getShort()).toArray,
-      e_lfanew = input.getInt(),
-      dosStub = Array()
+      e_lfanew = input.getInt()
     )
     input.position(header.e_lfanew) // skip dos stub
     header
@@ -53,8 +77,7 @@ case class DosHeader(
   e_oemid: Short, // OEM identifier (for e_oeminfo)
   e_oeminfo: Short, // OEM information; e_oemid specific
   e_res2: Array[Short], // Reserved words
-  e_lfanew: Int,
-  dosStub: Array[Byte]) { // File address of new exe header
+  e_lfanew: Int) { // File address of new exe header
 
   def apply() = {
     val bbuf = ByteBuffer.allocate(256);
@@ -79,7 +102,7 @@ case class DosHeader(
     e_res2.foreach(field => bbuf.putShort(field))
     bbuf.putInt(e_lfanew)
 
-    bbuf.put(dosStub)
+    bbuf.put(DosStub.putStub)
     bbuf.array().take(bbuf.position())
   }
 }

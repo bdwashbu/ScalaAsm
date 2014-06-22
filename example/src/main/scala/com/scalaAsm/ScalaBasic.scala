@@ -1,8 +1,6 @@
 package com.scalaAsm
 
 import java.io._
-import com.scalaAsm.portableExe.ExeGenerator
-import com.scalaAsm.portableExe.OptionalHeader
 
 object ScalaBasic {
 

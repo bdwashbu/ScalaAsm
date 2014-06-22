@@ -26,9 +26,9 @@ private[portableExe] abstract class PeHeader(val signature: String) {
   }
 }
 
-private[portableExe] class NtHeader(val fileHeader: FileHeader,
+class NtHeader(val fileHeader: FileHeader,
                val optionalHeader: OptionalHeader)
-               extends PeHeader("PE\0\0")
+               extends PeHeader("PE\u0000\u0000")
 
 private[portableExe] class DosFileHeader(val fileHeader: FileHeader,
                     val optionalHeader: OptionalHeader)

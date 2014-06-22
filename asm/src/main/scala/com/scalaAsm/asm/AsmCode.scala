@@ -9,6 +9,30 @@ import com.scalaAsm.x86.MachineCode
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Memory._
 import scala.language.implicitConversions
+import java.nio.ByteBuffer
+
+// Standard real-mode dos program that prints an error if it cannot be run
+
+object DosStub {
+  val dosWarning = "This program cannot be run in DOS mode.\r\r\n$"
+  def putStub: Array[Byte] = {
+    
+    val dosStub = new CodeSection {
+      builder += push(cs)
+      builder += pop(ds)
+      builder += mov(dx, word(0xE.toByte))
+      builder += mov(ah, byte(0x9))
+      builder += int(byte(0x21))
+      builder += mov(ax, word(0x4C01))
+      builder += int(byte(0x21))
+    }
+
+    val bbuf = ByteBuffer.allocate(dosStub.getRawBytes.length + dosWarning.length);
+    bbuf.put(dosStub.getRawBytes)
+    bbuf.put(dosWarning.toCharArray() map (_.toByte))
+    bbuf.array()
+  }
+}
 
 trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 

@@ -8,7 +8,7 @@ import scala.collection.mutable.LinkedHashMap
 import scala.collection.immutable.TreeMap
 import java.io.ByteArrayOutputStream
 
-private trait ExeWriter {
+trait ExeWriter {
 
     def write(stream: DataOutputStream)
   

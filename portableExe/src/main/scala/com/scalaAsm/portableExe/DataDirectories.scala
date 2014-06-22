@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 import java.io.FileOutputStream
 import sections._
 
-private[portableExe] case class ImageDataDirectory(virtualAddress: Int, size: Int) extends ExeWriter {
+case class ImageDataDirectory(virtualAddress: Int, size: Int) extends ExeWriter {
   def write(stream: DataOutputStream) {
     write(stream, virtualAddress)
     write(stream, size)

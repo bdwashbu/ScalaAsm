@@ -11,11 +11,11 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private[portableExe] case class Extern(dllName: String, functionNames: Seq[String])
+case class Extern(dllName: String, functionNames: Seq[String])
 
 private[portableExe] case class ImageThunkDataRVA(offset: Int) extends AnyVal
 
-private[portableExe] case class Imports(val imports: Seq[Extern], val offset: Int) {
+case class Imports(val imports: Seq[Extern], val offset: Int) {
 
   private def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0" else name
 

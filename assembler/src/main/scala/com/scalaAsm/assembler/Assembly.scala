@@ -2,8 +2,7 @@ package com.scalaAsm.asm
 
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.Tokens.Token
-
-case class Assembled(val code: Seq[Any], val data: Seq[Token])
+import com.scalaAsm.assembler.Assembled
 
 trait AsmProgram {
   

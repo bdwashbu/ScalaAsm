@@ -12,9 +12,9 @@ import com.scalaAsm.portableExe.sections.Sections
 import com.scalaAsm.portableExe.sections.ImageExportDirectory
 import com.scalaAsm.portableExe.sections.Extern
 import com.scalaAsm.portableExe.sections.Imports
-import com.scalaAsm.asm.Assembled
+import com.scalaAsm.assembler.Assembled
 import com.scalaAsm.portableExe.PortableExecutable
-import com.scalaAsm.asm.AsmCompiler
+import com.scalaAsm.assembler.AsmCompiler
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.portableExe.sections.SectionHeader
 import com.scalaAsm.portableExe.sections.Characteristic

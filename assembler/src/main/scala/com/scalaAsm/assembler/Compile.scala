@@ -1,4 +1,4 @@
-package com.scalaAsm.asm
+package com.scalaAsm.assembler
 
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
@@ -8,6 +8,8 @@ import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
+
+case class Assembled(val code: Seq[Any], val data: Seq[Token])
 
 object AsmCompiler extends Catalog
 {

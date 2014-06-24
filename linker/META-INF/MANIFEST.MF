@@ -5,5 +5,5 @@ Bundle-SymbolicName: linker
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: linker.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.scalaAsm.asm
+Import-Package: com.scalaAsm.assembler
 Export-Package: com.scalaAsm.linker

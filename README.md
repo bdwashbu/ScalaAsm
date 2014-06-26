@@ -109,7 +109,7 @@ Heres code to output the executable:
 
 ```scala
 val asm = HelloWorld.assemble
-val exe = ExeGenerator.link(asm, 0x2000, "kernel32.dll", "msvcrt.dll")
+val exe = asm.link(0x2000, "kernel32.dll", "msvcrt.dll")
 
 val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 outputStream.write(exe.get)

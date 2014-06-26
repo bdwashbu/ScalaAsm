@@ -1,7 +1,6 @@
 package com.scalaAsm
 
 import java.io._
-import com.scalaAsm.linker.ExeGenerator
 
 object ScalaBasic {
 
@@ -12,7 +11,7 @@ object ScalaBasic {
 
       val beginTime = System.nanoTime()
       val assembled = HelloWorld3.assemble
-      val exe = ExeGenerator.link(assembled, 0x2000, is64Bit = false, true, "kernel32.dll", "msvcrt.dll")
+      val exe = assembled.link(0x2000, is64Bit = false, true, "kernel32.dll", "msvcrt.dll")
       println(exe)
       outputStream.write(exe.get)
 

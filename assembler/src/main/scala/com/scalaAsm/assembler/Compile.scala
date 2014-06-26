@@ -8,10 +8,10 @@ import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
+import com.scalaAsm.linker.Assembled
 
-case class Assembled(val code: Seq[Any], val data: Seq[Token])
 
-object AsmCompiler extends Catalog
+class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Catalog
 {
   import scala.language.postfixOps
   
@@ -52,7 +52,7 @@ object AsmCompiler extends Catalog
     (data, createDefMap)
   }
   
-  case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
+  
   
   def compileAssembly(asm: Assembled,
                       variables: Map[String, Int]): CompiledAssembly = {

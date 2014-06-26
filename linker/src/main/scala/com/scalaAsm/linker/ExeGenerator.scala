@@ -12,9 +12,7 @@ import com.scalaAsm.portableExe.sections.Sections
 import com.scalaAsm.portableExe.sections.ImageExportDirectory
 import com.scalaAsm.portableExe.sections.Extern
 import com.scalaAsm.portableExe.sections.Imports
-import com.scalaAsm.assembler.Assembled
 import com.scalaAsm.portableExe.PortableExecutable
-import com.scalaAsm.assembler.AsmCompiler
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.portableExe.sections.SectionHeader
 import com.scalaAsm.portableExe.sections.Characteristic
@@ -25,7 +23,13 @@ import com.scalaAsm.portableExe.FileHeader
 import com.scalaAsm.portableExe.NtHeader
 import com.scalaAsm.portableExe.sections.ResourceGen
 
-object ExeGenerator {
+abstract class Assembled(val code: Seq[Any], val data: Seq[Token]) {
+  
+  case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
+  
+  def compileData(addressOfData: Int, dataTokens: Seq[Token]): (Array[Byte], Map[String, Int])
+  def compileAssembly(asm: Assembled, variables: Map[String, Int]): CompiledAssembly
+  def finalizeAssembly(asm: CompiledAssembly, variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte]
   
   def align(array: Array[Byte], to: Int, filler: Byte = 0xCC.toByte) = {
     val currentSize = array.size
@@ -71,11 +75,11 @@ object ExeGenerator {
    
 
 
-  def link(asm: Assembled, addressOfData: Int, is64Bit: Boolean, hasIcon: Boolean, dlls: String*): PortableExecutable = {
+  def link(addressOfData: Int, is64Bit: Boolean, hasIcon: Boolean, dlls: String*): PortableExecutable = {
 
-    val (rawData, variables) = AsmCompiler.compileData(addressOfData, asm.data)
+    val (rawData, variables) = compileData(addressOfData, data)
     
-    val compiledAsm = AsmCompiler.compileAssembly(asm, variables)
+    val compiledAsm = compileAssembly(this, variables)
     
     val unboundSymbols = compiledAsm.onePass.collect { case ImportRef(name) => name}
     
@@ -103,7 +107,7 @@ object ExeGenerator {
 	    e_lfanew = 128
     )
     
-    val code = AsmCompiler.finalizeAssembly(compiledAsm, variables, compiledImports.imports, baseOffset = 0x400000 /*imagebase*/)
+    val code = finalizeAssembly(compiledAsm, variables, compiledImports.imports, baseOffset = 0x400000 /*imagebase*/)
     
     val standardSections = List(
       SectionHeader(

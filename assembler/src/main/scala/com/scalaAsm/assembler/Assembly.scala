@@ -1,8 +1,10 @@
-package com.scalaAsm.asm
+package com.scalaAsm.assembler
 
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.Tokens.Token
-import com.scalaAsm.assembler.Assembled
+import com.scalaAsm.linker.Assembled
+import com.scalaAsm.asm.CodeSection
+import com.scalaAsm.asm.DataSection
 
 trait AsmProgram {
   
@@ -14,7 +16,7 @@ trait AsmProgram {
     
     val dataTokens = dataSections flatMap {seg => seg.compile}
 
-    Assembled(codeTokens, dataTokens)
+    new AsmCompiler(codeTokens, dataTokens)
   }
 
 //  def getAssembledPermutations: Iterator[Assembled] = {

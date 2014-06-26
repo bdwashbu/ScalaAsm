@@ -15,7 +15,15 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 {
   import scala.language.postfixOps
   
-  def compileData(addressOfData: Int, dataTokens: Seq[Token]): (Array[Byte], Map[String, Int]) = {
+  val (rawData, variables) = compileData(data)
+    
+  val compiledAsm = compileAssembly(this, variables)
+  
+  val unboundSymbols = compiledAsm.onePass.collect { case ImportRef(name) => name}
+    
+  val compiledImports = compileImports(rawData.size, unboundSymbols)   
+  
+  def compileData(dataTokens: Seq[Token]): (Array[Byte], (Int) => Map[String, Int]) = {
 
     val dataSection: Seq[PostToken] = {
       var parserPosition = 0
@@ -42,25 +50,23 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     val data = Array.fill[Byte](8)(0x00) ++ dataBytes.reduce(_++_)
 
     // a map of variable to its RVA
-    def createDefMap: Map[String, Int] = {
-    	dataSection flatMap {
-	      case PostVar(name, value, pos) => Some((name, pos + addressOfData + 8))
+    def createDefMap(dataSection: Seq[PostToken]): (Int) => Map[String, Int] = {
+    	(dataAddress: Int) => (dataSection flatMap {
+	      case PostVar(name, value, pos) => Some((name, pos + dataAddress + 8))
 	      case _ => None
-	    } toMap
+	    } toMap)
     }
     
-    (data, createDefMap)
+    (data, createDefMap(dataSection))
   }
   
-  
-  
   def compileAssembly(asm: Assembled,
-                      variables: Map[String, Int]): CompiledAssembly = {
+                      variables: (Int) => Map[String, Int]): CompiledAssembly = {
 
-    lazy val varNames    = variables.keys.toList
-    lazy val procNames   = asm.code.collect{ case BeginProc(name) => name }
+    lazy val varNames    = variables(0).keys.toList
+    lazy val procNames   = asm.codeTokens.collect{ case BeginProc(name) => name }
     
-    def onePass: Seq[Token] = asm.code flatMap {
+    def onePass: Seq[Token] = asm.codeTokens flatMap {
         case x: MachineCodeBuilder => Some(InstructionToken(x.get))
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
@@ -95,16 +101,16 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     CompiledAssembly(onePass, positionPass)
   }
   
-  def finalizeAssembly(asm: CompiledAssembly, variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte] = {
+  def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte] = {
     
     lazy val varNames = variables.keys.toList
     // Build procedure map
-    val procs = asm.positionPass collect {case Proc(offset, name) => (name, offset)} toMap
-    val labels = asm.positionPass collect {case LabelResolved(offset, name) => (name, offset)} toMap    
+    val procs = compiledAsm.positionPass collect {case Proc(offset, name) => (name, offset)} toMap
+    val labels = compiledAsm.positionPass collect {case LabelResolved(offset, name) => (name, offset)} toMap    
     
     val code: Array[Byte] = {
       var parserPosition = 0
-      for (token <- asm.onePass) yield {
+      for (token <- compiledAsm.onePass) yield {
         val result = token match {
 	        case InstructionToken(inst) => inst.code
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)

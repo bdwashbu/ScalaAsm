@@ -23,22 +23,19 @@ import com.scalaAsm.portableExe.FileHeader
 import com.scalaAsm.portableExe.NtHeader
 import com.scalaAsm.portableExe.sections.ResourceGen
 
-abstract class Assembled(val code: Seq[Any], val data: Seq[Token]) {
+abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token]) {
+  
+  val rawData: Array[Byte]
+  val variables: (Int) => Map[String, Int]
+  val compiledImports: (Int, Seq[String], Boolean) => CompiledImports
   
   case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
   
-  def compileData(addressOfData: Int, dataTokens: Seq[Token]): (Array[Byte], Map[String, Int])
-  def compileAssembly(asm: Assembled, variables: Map[String, Int]): CompiledAssembly
-  def finalizeAssembly(asm: CompiledAssembly, variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte]
-  
-  def align(array: Array[Byte], to: Int, filler: Byte = 0xCC.toByte) = {
-    val currentSize = array.size
-    val numPadding = (to - (currentSize % to)) % to
-    array ++ Array.fill(numPadding)(filler)
-  }
-  
-  private def compileImports(addressOfData: Int, dataSize: Int, dlls: Seq[String], possibleFunctions: Seq[String], is64Bit: Boolean): CompiledImports = { 
+  def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte]
+
+  def compileImports(dataSize: Int, possibleFunctions: Seq[String]): (Int, Seq[String], Boolean) => CompiledImports = { 
     
+    (addressOfData: Int, dlls: Seq[String], is64Bit: Boolean) => {
     val dllImports = dlls flatMap { dll =>
 	    val file = new File("C:/Windows/System32/" + dll);
 	 
@@ -69,22 +66,15 @@ abstract class Assembled(val code: Seq[Any], val data: Seq[Token]) {
     val test = Imports(imports = dllImports,
                        offset = addressOfData + dataSize)
 
-    test.generateImports(is64Bit)
+    test.generateImports(is64Bit) 
+    }
   }
-    
-   
-
 
   def link(addressOfData: Int, is64Bit: Boolean, hasIcon: Boolean, dlls: String*): PortableExecutable = {
 
-    val (rawData, variables) = compileData(addressOfData, data)
+    val executableImports = compiledImports(addressOfData, dlls, is64Bit)
+    val code = finalizeAssembly(variables(addressOfData), executableImports.imports, baseOffset = 0x400000 /*imagebase*/)
     
-    val compiledAsm = compileAssembly(this, variables)
-    
-    val unboundSymbols = compiledAsm.onePass.collect { case ImportRef(name) => name}
-    
-    val compiledImports = compileImports(addressOfData, rawData.size, dlls, unboundSymbols, is64Bit)
-
     val dosHeader = DosHeader(
 	    e_magic = "MZ", 
 	    e_cblp = 144,
@@ -106,9 +96,7 @@ abstract class Assembled(val code: Seq[Any], val data: Seq[Token]) {
 	    e_res2 = Array.fill(10)(0.toShort),
 	    e_lfanew = 128
     )
-    
-    val code = finalizeAssembly(compiledAsm, variables, compiledImports.imports, baseOffset = 0x400000 /*imagebase*/)
-    
+
     val standardSections = List(
       SectionHeader(
         name = ".text",
@@ -126,7 +114,7 @@ abstract class Assembled(val code: Seq[Any], val data: Seq[Token]) {
   
       SectionHeader(
         name = ".data",
-        virtualSize = rawData.size + compiledImports.rawData.size,
+        virtualSize = rawData.size + executableImports.rawData.size,
         virtualAddress = 0x2000,
         sizeOfRawData = 0x200,
         pointerToRawData = 0x400,
@@ -196,13 +184,13 @@ abstract class Assembled(val code: Seq[Any], val data: Seq[Token]) {
     )
     
     val directories = if (hasIcon) DataDirectories(
-      importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
-      importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size),
+      importSymbols = executableImports.getImportsDirectory(addressOfData, rawData.size),
+      importAddressTable = executableImports.getIATDirectory(addressOfData, rawData.size),
       resource = ImageDataDirectory(0x3000, 11300)
     ) else
       DataDirectories(
-      importSymbols = compiledImports.getImportsDirectory(addressOfData, rawData.size),
-      importAddressTable = compiledImports.getIATDirectory(addressOfData, rawData.size)
+      importSymbols = executableImports.getImportsDirectory(addressOfData, rawData.size),
+      importAddressTable = executableImports.getIATDirectory(addressOfData, rawData.size)
     )
     
     
@@ -221,7 +209,7 @@ abstract class Assembled(val code: Seq[Any], val data: Seq[Token]) {
 	
 	val peHeader = new NtHeader(fileHeader, optionalHeader)
     val res: Array[Byte] = if (hasIcon) resources else Array()
-    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, compiledImports, res)
+    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, executableImports, res)
   }
   
   

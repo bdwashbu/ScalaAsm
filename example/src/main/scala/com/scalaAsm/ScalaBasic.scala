@@ -10,8 +10,7 @@ object ScalaBasic {
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 
       val beginTime = System.nanoTime()
-      val helloWorld = HelloWorld3.assemble
-      helloWorld.addIcon("testicon.ico")
+      val helloWorld = HelloWorld3.assemble.addIcon("scala.ico")
       val exe = helloWorld.link(0x2000, is64Bit = false, "kernel32.dll", "msvcrt.dll")
 
       outputStream.write(exe.get)

@@ -16,8 +16,7 @@ object ResourceGen {
     
     val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
     
-    val buffer = ByteBuffer.allocate(21300)
-    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    
     
     //convert file into array of bytes
     val fileInputStream = new FileInputStream(file);
@@ -44,6 +43,9 @@ object ResourceGen {
     val res = RootDir(ResourceDirectory(first, second))
     
     res.place
+    
+    val buffer = ByteBuffer.allocate(bFile.length + res.output.length)
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
     buffer.put(res.output)
   
     buffer.array()

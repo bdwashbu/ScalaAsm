@@ -18,7 +18,8 @@ import com.scalaAsm.portableExe.FileHeader
 import com.scalaAsm.portableExe.NtHeader
 import com.scalaAsm.portableExe.sections.ResourceGen
 
-case class Linker(executableImports: CompiledImports, code: Array[Byte], is64Bit: Boolean, hasIcon: Boolean, addressOfData: Int, rawData: Array[Byte]) {
+case class Linker(executableImports: CompiledImports, code: Array[Byte], is64Bit: Boolean,
+    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]]) {
 
   def link: PortableExecutable = {
 
@@ -74,14 +75,12 @@ case class Linker(executableImports: CompiledImports, code: Array[Byte], is64Bit
           Characteristic.READ.id |
           Characteristic.WRITE.id))
 
-    val resources = ResourceGen.compileResources(0x3000)
-
-    val resourceSection: List[SectionHeader] = List(if (hasIcon) {
-      Some(SectionHeader(
+    val resourceSection: Option[SectionHeader] = resources map {res =>
+      Option(SectionHeader(
         name = ".rsrc",
-        virtualSize = resources.length,
+        virtualSize = res.length,
         virtualAddress = 0x3000,
-        sizeOfRawData = resources.length,
+        sizeOfRawData = res.length,
         pointerToRawData = 0x600,
         relocPtr = 0,
         linenumPtr = 0,
@@ -89,7 +88,7 @@ case class Linker(executableImports: CompiledImports, code: Array[Byte], is64Bit
         lineNumbers = 0,
         characteristics = Characteristic.INITIALIZED.id |
           Characteristic.READ.id))
-    } else None).flatten
+    } getOrElse None
 
     val sections: List[SectionHeader] = standardSections ++ resourceSection
 
@@ -127,11 +126,11 @@ case class Linker(executableImports: CompiledImports, code: Array[Byte], is64Bit
         loaderFlags = 0,
         numberOfRvaAndSizes = 16))
 
-    val directories = if (hasIcon) DataDirectories(
+    val directories = resources map {res => DataDirectories(
       importSymbols = executableImports.getImportsDirectory(addressOfData, rawDataSize),
       importAddressTable = executableImports.getIATDirectory(addressOfData, rawDataSize),
-      resource = ImageDataDirectory(0x3000, 11300))
-    else
+      resource = ImageDataDirectory(0x3000, 11300)) 
+    } getOrElse
       DataDirectories(
         importSymbols = executableImports.getImportsDirectory(addressOfData, rawDataSize),
         importAddressTable = executableImports.getIATDirectory(addressOfData, rawDataSize))
@@ -146,7 +145,7 @@ case class Linker(executableImports: CompiledImports, code: Array[Byte], is64Bit
       characteristics = if (is64Bit) 47 else 271)
 
     val peHeader = new NtHeader(fileHeader, optionalHeader)
-    val res: Array[Byte] = if (hasIcon) resources else Array()
+    val res: Array[Byte] = resources getOrElse Array()
     PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, executableImports, res)
   }
 }

@@ -9,9 +9,9 @@ import java.io.FileInputStream
 import scala.collection.mutable.ListBuffer
 
 object ResourceGen {
-  def compileResources(beginningOfSection: Int): Array[Byte] = { 
+  def compileResources(beginningOfSection: Int, iconName: String): Array[Byte] = { 
     
-    val file = new File("testicon.ico");
+    val file = new File(iconName);
 	 
     
     val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);

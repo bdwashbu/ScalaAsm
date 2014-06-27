@@ -14,6 +14,7 @@ import com.scalaAsm.portableExe.sections.Extern
 import com.scalaAsm.portableExe.sections.Imports
 import com.scalaAsm.portableExe.PortableExecutable
 import com.scalaAsm.asm.Tokens._
+import com.scalaAsm.portableExe.sections.ResourceGen
 
 
 abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token]) {
@@ -22,10 +23,16 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token]) {
   val variables: (Int) => Map[String, Int]
   val compiledImports: (Int, Seq[String], Boolean) => CompiledImports
   
+  var iconPath: Option[String] = None
+  
   case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
   
   def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte]
 
+  def addIcon(path: String) = {
+    iconPath = Some(path)
+  }
+  
   def compileImports(dataSize: Int, possibleFunctions: Seq[String]): (Int, Seq[String], Boolean) => CompiledImports = { 
     
     (addressOfData: Int, dlls: Seq[String], is64Bit: Boolean) => {
@@ -63,11 +70,13 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token]) {
     }
   }
 
-  def link(addressOfData: Int, is64Bit: Boolean, hasIcon: Boolean, dlls: String*): PortableExecutable = {
+  def link(addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
     val executableImports = compiledImports(addressOfData, dlls, is64Bit)
     val code = finalizeAssembly(variables(addressOfData), executableImports.imports, baseOffset = 0x400000 /*imagebase*/)
 
-    val linker = Linker(executableImports, code, is64Bit, hasIcon, addressOfData, rawData)
+    val resources = iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
+    
+    val linker = Linker(executableImports, code, is64Bit, addressOfData, rawData, resources)
     linker.link
   }
 }

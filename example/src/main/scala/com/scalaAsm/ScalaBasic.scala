@@ -10,9 +10,10 @@ object ScalaBasic {
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 
       val beginTime = System.nanoTime()
-      val assembled = HelloWorld3.assemble
-      val exe = assembled.link(0x2000, is64Bit = false, true, "kernel32.dll", "msvcrt.dll")
-      println(exe)
+      val helloWorld = HelloWorld3.assemble
+      helloWorld.addIcon("testicon.ico")
+      val exe = helloWorld.link(0x2000, is64Bit = false, "kernel32.dll", "msvcrt.dll")
+
       outputStream.write(exe.get)
 
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

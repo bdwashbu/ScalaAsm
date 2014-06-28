@@ -22,7 +22,7 @@ private[portableExe] abstract class PeHeader(val signature: String) {
   def optionalHeader: OptionalHeader
   
   def apply(): Array[Byte] = {
-	  signature.toCharArray().map(_.toByte) ++ fileHeader() ++ optionalHeader()
+	  signature.toCharArray().map(_.toByte) ++: fileHeader() ++: optionalHeader()
   }
 }
 

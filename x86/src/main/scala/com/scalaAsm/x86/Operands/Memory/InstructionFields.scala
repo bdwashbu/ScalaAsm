@@ -26,7 +26,7 @@ protected[x86] case class InstructionFormat (
   immediate: Option[Constant]) {
   
   lazy val getBytes: Array[Byte] = {
-    addressingForm.getBytes ++ (immediate match {
+    addressingForm.getBytes ++: (immediate match {
       case Some(imm) => imm.getBytes
       case None => Array[Byte]()
     })

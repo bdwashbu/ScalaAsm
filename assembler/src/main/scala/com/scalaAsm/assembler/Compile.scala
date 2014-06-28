@@ -47,7 +47,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
         case _ => None
     })
       
-    val data = Array.fill[Byte](8)(0x00) ++ dataBytes.reduce(_++_)
+    val data = Array.fill[Byte](8)(0x00) ++: dataBytes.reduce(_ ++: _)
 
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): (Int) => Map[String, Int] = {

@@ -250,7 +250,7 @@ case class OneOperandMachineCodeBuilder[O1 <: Operand, X](operand: O1, opcode: O
   }
 
   def getBytes: Array[Byte] = {
-    opcode.get(operand) ++ format.getAddressingForm(operand, opcode).getBytes
+    opcode.get(operand) ++: format.getAddressingForm(operand, opcode).getBytes
   }
 }
 
@@ -269,7 +269,7 @@ case class TwoOperandMachineCodeBuilder[O1 <: Operand, O2 <: Operand, X](operand
 
   def getBytes: Array[Byte] = {
     val prefixes = format.getPrefixes(operand, operand2) getOrElse Array()
-    prefixes ++ opcode.get(operand) ++ format.getAddressingForm(operand, operand2, opcode).getBytes
+    prefixes ++: opcode.get(operand) ++: format.getAddressingForm(operand, operand2, opcode).getBytes
   }
 }
 

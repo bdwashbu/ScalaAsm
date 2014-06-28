@@ -273,10 +273,10 @@ case class RootDir(dir: ResourceDirectory) {
   
   def output: Array[Byte] = {
     def outputRecursive(resourceField: ResourceField): Array[Byte] = {
-      resourceField.apply ++ (if (resourceField.getChildren.size == 0) Array[Byte]() else resourceField.getChildren.map{child => outputRecursive(child)}.reduce(_++_))
+      resourceField.apply ++: (if (resourceField.getChildren.isEmpty) Array[Byte]() else resourceField.getChildren.map{child => outputRecursive(child)}.reduce(_++:_))
     }
     
-    dir.apply ++ (if (dir.getChildren.size == 0) Array[Byte]() else dir.getChildren.map{child => outputRecursive(child)}.reduce(_++_)) 
+    dir.apply ++: (if (dir.getChildren.isEmpty) Array[Byte]() else dir.getChildren.map{child => outputRecursive(child)}.reduce(_++:_)) 
   }
 }
 

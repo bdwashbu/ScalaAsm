@@ -4,20 +4,15 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.NoModRM
 import com.scalaAsm.x86.Operands.Memory.InstructionFormat
 
-trait OperandFormat
-
-object NoOperand extends OperandFormat
+object NoOperand
 
 object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = None)
 
-abstract class OneOperandFormat[OpEn, -X <: Operand] extends OperandFormat {
-  def getAddressingForm(x: X, opcode: OpcodeFormat): InstructionFormat
+abstract class OperandFormat[OpEn, -X <: Product] {
+  def getAddressingForm(operands: X, opcode: OpcodeFormat): InstructionFormat
+  def getPrefixes(operands: X): Option[Array[Byte]]
 }
 
-abstract class TwoOperandsFormat[OpEn, -X <: Operand, -Y <: Operand] extends OperandFormat {
-  def getPrefixes(x: X, y: Y): Option[Array[Byte]]
-  def getAddressingForm(x: X, y: Y, opcode: OpcodeFormat): InstructionFormat
-}
 
 
 

@@ -4,7 +4,7 @@ import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.One
+import com.scalaAsm.x86.Operands.One
 import com.scalaAsm.x86.MachineCode
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Memory._

@@ -1,6 +1,8 @@
 package com.scalaAsm.x86
 package Instructions
 
+import com.scalaAsm.x86.Operands.One
+
 trait SHL extends x86Instruction {
   val mnemonic = "SHL"
 }

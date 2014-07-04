@@ -18,6 +18,10 @@ trait Operand {
   type Size <: OperandSize
 }
 
+trait One extends Operand {
+  def size = 1
+}
+
 trait Constant extends InstructionField with Operand {
   type Size <: OperandSize
   def value: Size#size

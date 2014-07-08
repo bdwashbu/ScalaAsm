@@ -29,26 +29,7 @@ trait x86Instruction extends Instruction {
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
 }
 
-trait ZeroOperandInstruction extends x86Instruction {
-  def opcode: OpcodeFormat
-
-  def apply: MachineCodeBuilder =
-    new MachineCodeBuilder {
-      def get = new MachineCode {
-        val size = getSize
-        val code = getBytes
-        val line = mnemonic
-      }
-    }
-
-  def getSize: Int = {
-    opcode.size
-  }
-
-  def getBytes: Array[Byte] = {
-    opcode.get(null)
-  }
-}
+trait NP
 
 trait M
 trait O
@@ -97,15 +78,9 @@ trait Formats extends OperandEncoding {
      def getPrefixes(operand: OneOperand[ModRM.rm]): Option[Array[Byte]] = None
   }
 
-  implicit object DSFormat extends OperandFormat[DS, OneOperand[DS]] {
-    def getAddressingForm(operand: OneOperand[DS], opcode: OpcodeFormat) = NoAddressingForm
-    def getPrefixes(operand: OneOperand[DS]): Option[Array[Byte]] = None
-  }
+  implicit object DSFormat extends NoOperandFormat[DS, OneOperand[DS]]
 
-  implicit object CSFormat extends OperandFormat[CS, OneOperand[CS]] {
-    def getAddressingForm(operand: OneOperand[CS], opcode: OpcodeFormat) = NoAddressingForm
-    def getPrefixes(operand: OneOperand[CS]): Option[Array[Byte]] = None
-  }
+  implicit object CSFormat extends NoOperandFormat[CS, OneOperand[CS]]
 
   implicit object OFormat extends OperandFormat[O, OneOperand[ModRM.plusRd]] {
     def getAddressingForm(operand: OneOperand[ModRM.plusRd], opcode: OpcodeFormat) = {
@@ -264,6 +239,12 @@ case class OneOperandMachineCodeBuilder[O1 <: Product, X](operand: O1, opcode: O
     val prefixes = format.getPrefixes(operand) getOrElse Array()
     prefixes ++: opcode.get(operand) ++: format.getAddressingForm(operand, opcode).getBytes
   }
+}
+
+abstract class ZeroOperandInstruction extends x86Instruction with Formats {
+  val opcode: OpcodeFormat
+
+  def get = OneOperandMachineCodeBuilder(Tuple1(null), opcode, mnemonic, new NoOperandFormat[NP, Tuple1[_]])
 }
 
 abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OperandFormat[OpEn, OneOperand[O1]]) extends x86Instruction with Formats {

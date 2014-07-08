@@ -42,9 +42,9 @@ trait Catalog {
 
   def retn[O1 <: Operand](p1: O1)(implicit ev: RETN_1[_,O1]) = ev.get(p1)
 
-  def retn(implicit ev: RET) = ev.apply
+  def retn(implicit ev: RET) = ev.get
   
-  def leave(implicit ev: LEAVE) =  ev.apply
+  def leave(implicit ev: LEAVE) =  ev.get
 
   def test[O1 <: Operand, O2 <: Operand](p1: O1, p2: O2)(implicit ev: TEST_2[_, O1, O2]) = ev.get(p1, p2)
 

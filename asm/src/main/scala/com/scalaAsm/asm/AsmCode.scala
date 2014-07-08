@@ -33,7 +33,7 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 	  }
 
     def getRawBytes: Array[Byte] = {
-       build(builder.toSeq) collect { case x: MachineCodeBuilder => x} map {x => x.get.code} reduce (_ ++ _)
+       build(builder.toSeq) collect { case x: MachineCodeBuilder[_,_] => x} map {x => x.get.code} reduce (_ ++ _)
     }
     
     private def procRef(procName: String) = ProcRef(procName)

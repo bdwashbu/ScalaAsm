@@ -6,7 +6,3 @@ trait MachineCode {
   val line: String
   override def toString = line
 }
-
-trait MachineCodeBuilder {
-  def get: MachineCode
-}

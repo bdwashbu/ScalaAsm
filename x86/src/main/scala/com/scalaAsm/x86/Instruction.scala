@@ -222,7 +222,7 @@ trait Formats2 extends OperandEncoding {
   }
 }
 
-case class OneOperandMachineCodeBuilder[O1 <: Product, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: OperandFormat[X, O1]) extends MachineCodeBuilder {
+case class MachineCodeBuilder[O1 <: Product, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: OperandFormat[X, O1]) {
   def get() =
     new MachineCode {
         val size = getSize
@@ -230,12 +230,12 @@ case class OneOperandMachineCodeBuilder[O1 <: Product, X](operand: O1, opcode: O
         val line = mnemonic
       }
 
-  def getSize: Int = {
+  private def getSize: Int = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
     prefixes.size + opcode.size + format.getAddressingForm(operand, opcode).size
   }
 
-  def getBytes: Array[Byte] = {
+  private def getBytes: Array[Byte] = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
     prefixes ++: opcode.get(operand) ++: format.getAddressingForm(operand, opcode).getBytes
   }
@@ -244,17 +244,17 @@ case class OneOperandMachineCodeBuilder[O1 <: Product, X](operand: O1, opcode: O
 abstract class ZeroOperandInstruction extends x86Instruction with Formats {
   val opcode: OpcodeFormat
 
-  def get = OneOperandMachineCodeBuilder(Tuple1(null), opcode, mnemonic, new NoOperandFormat[NP, Tuple1[_]])
+  def get = MachineCodeBuilder(Tuple1(null), opcode, mnemonic, new NoOperandFormat[NP, Tuple1[_]])
 }
 
 abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OperandFormat[OpEn, OneOperand[O1]]) extends x86Instruction with Formats {
   val opcode: OpcodeFormat
 
-  def get[X <: O1](x: X) = OneOperandMachineCodeBuilder(Tuple1(x), opcode, mnemonic, format)
+  def get[X <: O1](x: X) = MachineCodeBuilder(Tuple1(x), opcode, mnemonic, format)
 }
 
 abstract class TwoOperandInstruction[OpEn, -O1 <: Operand, -O2 <: Operand](implicit format: OperandFormat[OpEn, TwoOperands[O1, O2]]) extends x86Instruction with Formats2{
   val opcode: OpcodeFormat
 
-  def get[X <: O1, Y <: O2](x: X, y:Y) = OneOperandMachineCodeBuilder(Tuple2(x, y), opcode, mnemonic, format)
+  def get[X <: O1, Y <: O2](x: X, y:Y) = MachineCodeBuilder(Tuple2(x, y), opcode, mnemonic, format)
 }

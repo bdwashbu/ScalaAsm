@@ -67,7 +67,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     lazy val procNames   = asm.codeTokens.collect{ case BeginProc(name) => name }
     
     def onePass: Seq[Token] = asm.codeTokens flatMap {
-        case x: MachineCodeBuilder => Some(InstructionToken(x.get))
+        case x: MachineCodeBuilder[_,_] => Some(InstructionToken(x.get))
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)

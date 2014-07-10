@@ -1,12 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="target/scala-2.11/classes" path="src/main/scala"/>
-	<classpathentry kind="src" output="target/scala-2.11/test-classes" path="src/test/scala"/>
-	<classpathentry kind="src" output="target/scala-2.11/test-classes" path="src/test/java"/>
-	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Scala/play-2.2.2/repository/cache/commons-lang/commons-lang/jars/commons-lang-2.6.jar"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/asm"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/x86"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="output" path="bin"/>
+  <classpathentry kind="src" path="src\main\scala" output="target\scala-2.11\classes"/>
+  <classpathentry kind="src" path="src\main\java" output="target\scala-2.11\classes"/>
+  <classpathentry kind="src" path="src\test\scala" output="target\scala-2.11\test-classes"/>
+  <classpathentry kind="src" path="src\test\java" output="target\scala-2.11\test-classes"/>
+  <classpathentry kind="lib" path="C:\Users\Antares\.ivy2\cache\commons-lang\commons-lang\jars\commons-lang-2.6.jar"/>
+  <classpathentry kind="lib" path="C:\Users\Antares\.ivy2\cache\com.github.scala-blitz\scala-blitz_2.11\jars\scala-blitz_2.11-1.1.jar"/>
+  <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
+  <classpathentry kind="src" path="/asm" exported="true" combineaccessrules="false"/>
+  <classpathentry kind="src" path="/x86" exported="true" combineaccessrules="false"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="output" path="bin"/>
 </classpath>

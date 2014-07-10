@@ -155,28 +155,21 @@ trait Formats2 extends OperandEncoding {
 
     def getAddressingForm(operands: TwoOperands[ModRM.reg, ModRM.rm], opcode: OpcodeFormat): InstructionFormat = {
 
-      operands._2 match {
+      InstructionFormat (
+        addressingForm = operands._2 match {
         case mem: AbsoluteAddress =>
-          InstructionFormat (
-            addressingForm = mem.encode(opcode.opcodeExtension),
-            immediate = None
-          )
+          mem.encode(opcode.opcodeExtension)
         case mem: RegisterIndirect =>
-          InstructionFormat (
-            addressingForm = mem.encode(operands._1, opcode.opcodeExtension),
-            immediate = None
-          )
+          mem.encode(operands._1, opcode.opcodeExtension)
         case mem: BaseIndex =>
-          InstructionFormat (
-            addressingForm = mem.encode(operands._1, opcode.opcodeExtension),
-            immediate = None
-          )
+          mem.encode(operands._1, opcode.opcodeExtension)
         case reg: GPR =>
-          InstructionFormat (
-            addressingForm = operands._1.encode(reg, opcode.opcodeExtension),
-            immediate = None
-          )
-      }
+          operands._1.encode(reg, opcode.opcodeExtension)
+      },
+        immediate = None
+      )
+      
+      
     }
 
     def getPrefixes(operands: TwoOperands[ModRM.reg, ModRM.rm]): Option[Array[Byte]] = {

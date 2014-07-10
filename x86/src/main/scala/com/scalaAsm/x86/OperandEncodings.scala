@@ -8,12 +8,12 @@ object NoOperand
 
 object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = None)
 
-class NoOperandFormat[OpEn, -X <: Product] extends OperandFormat[OpEn, X]{
+class NoOperandFormat[OpEn, -X <: Operands] extends OperandFormat[OpEn, X]{
   def getAddressingForm(operands: X, opcode: OpcodeFormat) = NoAddressingForm
   def getPrefixes(operands: X) = None
 }
 
-abstract class OperandFormat[OpEn, -X <: Product] {
+abstract class OperandFormat[OpEn, -X <: Operands] {
   def getAddressingForm(operands: X, opcode: OpcodeFormat): InstructionFormat
   def getPrefixes(operands: X): Option[Array[Byte]]
 }

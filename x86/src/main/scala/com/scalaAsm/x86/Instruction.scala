@@ -192,10 +192,10 @@ trait Formats2 extends OperandEncoding {
   implicit object MRFormat extends OperandFormat[MR, TwoOperands[ModRM.rm, ModRM.reg]] {
 
     def getAddressingForm(operands: TwoOperands[ModRM.rm, ModRM.reg], opcode: OpcodeFormat): InstructionFormat = {
-      RMFormat.getAddressingForm(operands.swap, opcode)
+      RMFormat.getAddressingForm(TwoOperands(operands._2, operands._1), opcode)
     }
 
-    def getPrefixes(operands: TwoOperands[ModRM.rm, ModRM.reg]): Option[Array[Byte]] = RMFormat.getPrefixes(operands.swap)
+    def getPrefixes(operands: TwoOperands[ModRM.rm, ModRM.reg]): Option[Array[Byte]] = RMFormat.getPrefixes(TwoOperands(operands._2, operands._1))
   }
 
   implicit object OIFormat extends OperandFormat[OI, TwoOperands[ModRM.plusRd, Immediate]] {
@@ -217,12 +217,12 @@ trait Formats2 extends OperandEncoding {
   }
 
   implicit object M1Format extends OperandFormat[M1, TwoOperands[ModRM.rm, One]] with Formats {
-    def getAddressingForm(op1: TwoOperands[ModRM.rm,  One], opcode: OpcodeFormat): InstructionFormat = MFormat.getAddressingForm(Tuple1(op1._1), opcode)
-    def getPrefixes(op1: TwoOperands[ModRM.rm, One]): Option[Array[Byte]] = MFormat.getPrefixes(Tuple1(op1._1))
+    def getAddressingForm(op1: TwoOperands[ModRM.rm,  One], opcode: OpcodeFormat): InstructionFormat = MFormat.getAddressingForm(OneOperand(op1._1), opcode)
+    def getPrefixes(op1: TwoOperands[ModRM.rm, One]): Option[Array[Byte]] = MFormat.getPrefixes(OneOperand(op1._1))
   }
 }
 
-case class MachineCodeBuilder[O1 <: Product, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: OperandFormat[X, O1]) {
+case class MachineCodeBuilder[O1 <: Operands, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: OperandFormat[X, O1]) {
   def get() =
     new MachineCode {
         val size = getSize
@@ -244,17 +244,17 @@ case class MachineCodeBuilder[O1 <: Product, X](operand: O1, opcode: OpcodeForma
 abstract class ZeroOperandInstruction extends x86Instruction with Formats {
   val opcode: OpcodeFormat
 
-  def get = MachineCodeBuilder(Tuple1(null), opcode, mnemonic, new NoOperandFormat[NP, Tuple1[_]])
+  def get = MachineCodeBuilder(OneOperand(null), opcode, mnemonic, new NoOperandFormat[NP, OneOperand[_]])
 }
 
 abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OperandFormat[OpEn, OneOperand[O1]]) extends x86Instruction with Formats {
   val opcode: OpcodeFormat
 
-  def get[X <: O1](x: X) = MachineCodeBuilder(Tuple1(x), opcode, mnemonic, format)
+  def get[X <: O1](x: X) = MachineCodeBuilder(OneOperand(x), opcode, mnemonic, format)
 }
 
 abstract class TwoOperandInstruction[OpEn, -O1 <: Operand, -O2 <: Operand](implicit format: OperandFormat[OpEn, TwoOperands[O1, O2]]) extends x86Instruction with Formats2{
   val opcode: OpcodeFormat
 
-  def get[X <: O1, Y <: O2](x: X, y:Y) = MachineCodeBuilder(Tuple2(x, y), opcode, mnemonic, format)
+  def get[X <: O1, Y <: O2](x: X, y:Y) = MachineCodeBuilder(TwoOperands(x, y), opcode, mnemonic, format)
 }

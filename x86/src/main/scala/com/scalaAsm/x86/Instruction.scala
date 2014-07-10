@@ -23,6 +23,7 @@ trait InstructionField {
 
 trait x86Instruction extends Instruction {
   import scala.language.implicitConversions
+  val opcode: OpcodeFormat
   val mnemonic: String
   implicit def toByte(x: Int) = x.toByte
   implicit def toOneOpcode(x: Int): OneOpcode = OneOpcode(x.toByte)
@@ -242,19 +243,13 @@ case class MachineCodeBuilder[O1 <: Operands, X](operand: O1, opcode: OpcodeForm
 }
 
 abstract class ZeroOperandInstruction extends x86Instruction with Formats {
-  val opcode: OpcodeFormat
-
   def get = MachineCodeBuilder(OneOperand(null), opcode, mnemonic, new NoOperandFormat[NP, OneOperand[_]])
 }
 
 abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OperandFormat[OpEn, OneOperand[O1]]) extends x86Instruction with Formats {
-  val opcode: OpcodeFormat
-
   def get[X <: O1](x: X) = MachineCodeBuilder(OneOperand(x), opcode, mnemonic, format)
 }
 
 abstract class TwoOperandInstruction[OpEn, -O1 <: Operand, -O2 <: Operand](implicit format: OperandFormat[OpEn, TwoOperands[O1, O2]]) extends x86Instruction with Formats2{
-  val opcode: OpcodeFormat
-
   def get[X <: O1, Y <: O2](x: X, y:Y) = MachineCodeBuilder(TwoOperands(x, y), opcode, mnemonic, format)
 }

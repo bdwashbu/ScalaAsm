@@ -1,10 +1,13 @@
-package com.scalaAsm.x86.Instructions
+package com.scalaAsm.x86
+package Instructions
+
+import com.scalaAsm.x86.InstructionSize
 
 trait Catalog {
 
   def callNear[O1 <: Operand](p1: O1)(implicit ev: CALL_1[_,O1]) = ev.get(p1)
 
-  def add[O1 <: Operand, O2 <: Operand](p1: O1, p2: O2)(implicit ev: ADD_2[_, O1, O2]) = ev.get(p1, p2)
+  def add[O1 <: Operand, O2 <: Operand](p1: O1, p2: O2)(implicit ev: ADD_2[_, O1, O2], size: InstructionSize[O1,O2]) = ev.get(p1, p2, size)
 
   def or[O1 <: Operand, O2 <: Operand](p1: O1, p2: O2)(implicit ev: OR_2[_, O1, O2]) = ev.get(p1, p2)
   
@@ -18,7 +21,7 @@ trait Catalog {
 
   def dec[O1 <: Operand](p1: O1)(implicit ev: DEC_1[_,O1]) = ev.get(p1)
 
-  def and[O1 <: Operand, O2 <: Operand](p1: O1, p2: O2)(implicit ev: AND_2[_, O1, O2]) = ev.get(p1,p2)
+  def and[O1 <: Operand, O2 <: Operand](p1: O1, p2: O2)(implicit ev: AND_2[_, O1, O2], size: InstructionSize[O1,O2]) = ev.get(p1,p2, size)
 
   def not[O1 <: Operand](p1: O1)(implicit ev: NOT_1[_,O1]) = ev.get(p1)
 

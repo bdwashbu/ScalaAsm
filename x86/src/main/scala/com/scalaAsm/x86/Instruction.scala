@@ -15,10 +15,12 @@ import com.scalaAsm.x86.Operands.Memory.BaseIndex
 import com.scalaAsm.x86.Operands.One
 
 trait Instruction
-
-trait InstructionField {
-  def getBytes: Array[Byte]
+trait SizedInstructionField {
   def size: Int
+}
+
+trait InstructionField extends SizedInstructionField {
+  def getBytes: Array[Byte]
 }
 
 trait x86Instruction extends Instruction {
@@ -216,7 +218,7 @@ trait Formats2 extends OperandEncoding {
   }
 }
 
-case class MachineCodeBuilder[O1 <: Operands, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: OperandFormat[X, O1]) {
+class MachineCodeBuilder[O1 <: Operands, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: OperandFormat[X, O1]) {
   def get() =
     new MachineCode {
         val size = getSize
@@ -224,7 +226,7 @@ case class MachineCodeBuilder[O1 <: Operands, X](operand: O1, opcode: OpcodeForm
         val line = mnemonic
       }
 
-  private def getSize: Int = {
+  def getSize: Int = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
     prefixes.size + opcode.size + format.getAddressingForm(operand, opcode).size
   }
@@ -236,13 +238,19 @@ case class MachineCodeBuilder[O1 <: Operands, X](operand: O1, opcode: OpcodeForm
 }
 
 abstract class ZeroOperandInstruction extends x86Instruction with Formats {
-  def get = MachineCodeBuilder(OneOperand(null), opcode, mnemonic, new NoOperandFormat[NP, OneOperand[_]])
+  def get = new MachineCodeBuilder(OneOperand(null), opcode, mnemonic, new NoOperandFormat[NP, OneOperand[_]]) {}
 }
 
 abstract class OneOperandInstruction[OpEn, -O1 <: Operand](implicit format: OperandFormat[OpEn, OneOperand[O1]]) extends x86Instruction with Formats {
-  def get[X <: O1](x: X) = MachineCodeBuilder(OneOperand(x), opcode, mnemonic, format)
+  def get[X <: O1](x: X) = new MachineCodeBuilder(OneOperand(x), opcode, mnemonic, format) {}
 }
 
 abstract class TwoOperandInstruction[OpEn, -O1 <: Operand, -O2 <: Operand](implicit format: OperandFormat[OpEn, TwoOperands[O1, O2]]) extends x86Instruction with Formats2{
-  def get[X <: O1, Y <: O2](x: X, y:Y) = MachineCodeBuilder(TwoOperands(x, y), opcode, mnemonic, format)
+  def get[X <: O1, Y <: O2](x: X, y:Y) = new MachineCodeBuilder(TwoOperands(x, y), opcode, mnemonic, format) {}
+}
+
+abstract class TwoOperandSizedInstruction[OpEn, -O1 <: Operand, -O2 <: Operand](implicit format: OperandFormat[OpEn, TwoOperands[O1, O2]]) extends x86Instruction with Formats2{
+  def get[X <: O1, Y <: O2](x: X, y:Y, size: InstructionSize[X,Y]) = new MachineCodeBuilder(TwoOperands(x, y), opcode, mnemonic, format) {
+    override def getSize: Int = size.getSize
+  }
 }

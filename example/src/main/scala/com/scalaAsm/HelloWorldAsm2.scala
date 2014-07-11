@@ -5,8 +5,9 @@ import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.CodeSection
+import com.scalaAsm.x86.Sizes
 
-object HelloWorld2 extends AsmProgram {
+object HelloWorld2 extends AsmProgram with Sizes {
   
   dataSections += new DataSection {
     builder += Variable("helloWorld", "Hello World!\r\n\0")

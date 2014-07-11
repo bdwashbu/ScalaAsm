@@ -5,8 +5,9 @@ import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.CodeSection
+import com.scalaAsm.x86.Sizes
 
-object HelloWorld3 extends AsmProgram {
+object HelloWorld3 extends AsmProgram with Sizes {
 
   dataSections += new DataSection {
     builder += Variable("pressAnyKey", "Press any key to continue ...\0")

@@ -23,8 +23,7 @@ trait One extends Operand {
 }
 
 trait Constant extends InstructionField with Operand {
-  type Size <: OperandSize
-  def value: Size#size
+  def value: Size#primitiveType
   def getBytes: Array[Byte]
   def asInt: Int
   def asLong: Long
@@ -77,13 +76,13 @@ case class Constant64(value: Long) extends Constant {
 }
 
 sealed trait OperandSize {
-  type size
+  type primitiveType
 }
 
-class ByteOperand extends OperandSize { type size = Byte }
-class WordOperand extends OperandSize { type size = Short }
-class DwordOperand extends OperandSize { type size = Int }
-class QwordOperand extends OperandSize { type size = Long }
+class ByteOperand extends OperandSize { type primitiveType = Byte }
+class WordOperand extends OperandSize { type primitiveType = Short }
+class DwordOperand extends OperandSize { type primitiveType = Int }
+class QwordOperand extends OperandSize { type primitiveType = Long }
 
 trait RegisterOrMemory extends Operand
 

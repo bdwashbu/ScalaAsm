@@ -18,6 +18,8 @@ import com.scalaAsm.x86.Operands.Memory.NoSIBWithDisplacement
 import com.scalaAsm.x86.Operands.Memory.OnlyModRM
 import com.scalaAsm.x86.Operands.Memory.TwoRegisters
 import com.scalaAsm.x86.Operands.Memory.ModRMReg
+import com.scalaAsm.x86.Operands.Memory.Relative32
+import com.scalaAsm.x86.Operands.Memory.Relative64
 
 trait Instruction
 trait SizedInstructionField {
@@ -60,7 +62,7 @@ trait Formats extends OperandEncoding {
             addressingForm = OnlyDisplacement(rel.displacement),
             immediate = None
           )
-        case mem: AbsoluteAddress =>
+        case mem: AbsoluteAddress[_] =>
           InstructionFormat (
             addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), mem.displacement), //mem.encode(opcode.opcodeExtension),
             immediate = None
@@ -134,6 +136,28 @@ trait MI
 
 trait Formats2 extends OperandEncoding {
 
+    implicit object AbsoluteAddress32 extends AbsoluteAddress[Constant32] {
+      selff =>
+        var offset = 0
+      def displacement = Constant32(offset)
+        
+      def getRelative = new Relative32 {
+        def displacement = Constant32(offset)
+        def size = 4
+      }
+    }
+  
+  implicit object AbsoluteAddress64 extends AbsoluteAddress[Constant64] {
+    selff =>
+      var offset:Long = 0
+      def displacement = Constant64(offset)
+        
+      def getRelative = new Relative64 {
+        def displacement = Constant64(offset)
+        def size = 4
+      }
+  }
+  
   implicit object MIFormat extends OperandFormat[MI, TwoOperands[ModRM.rm, Immediate]] {
 
     def getAddressingForm(operands: TwoOperands[ModRM.rm, Immediate], opcode: OpcodeFormat): InstructionFormat = {
@@ -164,7 +188,7 @@ trait Formats2 extends OperandEncoding {
 
       InstructionFormat (
         addressingForm = operands._2 match {
-        case mem: AbsoluteAddress =>
+        case mem: AbsoluteAddress[_] =>
           NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), mem.displacement)
         case mem: RegisterIndirect =>
           OnlyModRM(ModRMReg(NoDisplacement, operands._1, rm = mem.base))//mem.encode(operands._1, opcode.opcodeExtension)

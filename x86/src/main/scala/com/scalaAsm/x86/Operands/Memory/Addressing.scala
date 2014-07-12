@@ -5,29 +5,32 @@ import com.scalaAsm.x86._
 
 trait AddressingMode extends RegisterOrMemory
 
-trait AbsoluteAddress extends AddressingMode {
-  def getRelative: Relative
-  def displacement: Constant
-}
-trait AbsoluteAddress32 extends AbsoluteAddress {
+abstract class AbsoluteAddress[C <: Constant] extends AddressingMode {
   self =>
-  def displacement: Constant { type Size = self.Size}
-    
-  def getRelative = new Relative32 {
-    def displacement = Constant32(self.displacement.asInt)
-    def size = 4
-  }
+  type Size = C#Size
+  var offset: Size#primitiveType
+  def getRelative: Relative { type Size = self.Size }
+  def displacement: C
 }
-
-trait AbsoluteAddress64 extends AbsoluteAddress {
-  self =>
-  def displacement: Constant { type Size = self.Size}
-
-  def getRelative = new Relative64 {
-    def displacement = Constant64(self.displacement.asLong)
-    def size = 8
-  }
-}
+//trait AbsoluteAddress32 extends AbsoluteAddress {
+//  self =>
+//  def displacement: Constant { type Size = self.Size}
+//    
+//  def getRelative = new Relative32 {
+//    def displacement = Constant32(self.displacement.asInt)
+//    def size = 4
+//  }
+//}
+//
+//trait AbsoluteAddress64 extends AbsoluteAddress {
+//  self =>
+//  def displacement: Constant { type Size = self.Size}
+//
+//  def getRelative = new Relative64 {
+//    def displacement = Constant64(self.displacement.asLong)
+//    def size = 8
+//  }
+//}
 
 trait RegisterIndirect extends AddressingMode {
   self =>
@@ -92,7 +95,7 @@ trait BaseIndex extends AddressingMode {
 
 trait Relative extends RegisterOrMemory {
   self =>
-    def displacement: Constant {type Size = self.Size}
+    def displacement: Constant {type Size = self.type#Size}
 }
 
 trait Relative32 extends Relative {

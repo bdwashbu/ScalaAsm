@@ -5,8 +5,7 @@ import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
 import com.scalaAsm.x86.Operands.Memory.BaseIndex
-import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress32
-import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress64
+import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 
 object Addressing {
 
@@ -29,17 +28,20 @@ object Addressing {
   
   def *[M <: AddressingMode](mem: M): M = mem
   
-  def *(offset: Constant32) = new AbsoluteAddress32 {
-    type Size = offset.Size
-    def size = offset.size
-    def displacement = offset
-  }
+  def *[C <: Constant](offset: C)(implicit abs: AbsoluteAddress[C]): AbsoluteAddress[C] = {abs.offset = offset.value; abs}
+    
+    
+//    new AbsoluteAddress[C] {
+//    type Size = offset.Size
+//    def size = offset.size
+//    def displacement = offset
+//  }
   
-  def *(offset: Constant64) = new AbsoluteAddress64 {
-    type Size = offset.Size
-    def size = offset.size
-    def displacement = offset
-  }
+//  def *(offset: Constant64): AbsoluteAddress = new AbsoluteAddress64 {
+//    type Size = offset.Size
+//    def size = offset.size
+//    def displacement = offset
+//  }
 
   type +[A <: Constant, B <: GPR] = RegisterOffset[A, B]
 }

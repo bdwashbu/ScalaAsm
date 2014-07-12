@@ -115,7 +115,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case InstructionToken(inst) => inst.code
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).rel32).get.code
+	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).getRelative).get.code
 	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).get.code
 	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).get.code
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).get.code

@@ -6,15 +6,24 @@ import com.scalaAsm.x86._
 trait AddressingMode extends RegisterOrMemory
 
 trait AbsoluteAddress extends AddressingMode {
+  def getRelative: Relative
+  def displacement: Constant
+}
+trait AbsoluteAddress32 extends AbsoluteAddress {
   self =>
   def displacement: Constant { type Size = self.Size}
     
-  def rel32: Relative32 = new Relative32 {
+  def getRelative = new Relative32 {
     def displacement = Constant32(self.displacement.asInt)
     def size = 4
   }
-  
-  def rel64: Relative64 = new Relative64 {
+}
+
+trait AbsoluteAddress64 extends AbsoluteAddress {
+  self =>
+  def displacement: Constant { type Size = self.Size}
+
+  def getRelative = new Relative64 {
     def displacement = Constant64(self.displacement.asLong)
     def size = 8
   }

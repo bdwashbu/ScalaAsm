@@ -13,6 +13,11 @@ import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
 import com.scalaAsm.x86.Operands.Memory.BaseIndex
 import com.scalaAsm.x86.Operands.One
+import com.scalaAsm.x86.Operands.Memory.OnlyDisplacement
+import com.scalaAsm.x86.Operands.Memory.NoSIBWithDisplacement
+import com.scalaAsm.x86.Operands.Memory.OnlyModRM
+import com.scalaAsm.x86.Operands.Memory.TwoRegisters
+import com.scalaAsm.x86.Operands.Memory.ModRMReg
 
 trait Instruction
 trait SizedInstructionField {
@@ -52,17 +57,17 @@ trait Formats extends OperandEncoding {
       operand._1 match {
         case rel: Relative =>
           InstructionFormat (
-            addressingForm = rel.encode(opcode.opcodeExtension),
+            addressingForm = OnlyDisplacement(rel.displacement),
             immediate = None
           )
         case mem: AbsoluteAddress =>
           InstructionFormat (
-            addressingForm = mem.encode(opcode.opcodeExtension),
+            addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), mem.displacement), //mem.encode(opcode.opcodeExtension),
             immediate = None
           )
         case mem: RegisterIndirect =>
           InstructionFormat (
-            addressingForm = mem.encode(opcode.opcodeExtension),
+            addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, mem.base)), //mem.encode(opcode.opcodeExtension),
             immediate = None
           )
         case mem: BaseIndex =>
@@ -72,7 +77,7 @@ trait Formats extends OperandEncoding {
           )
         case reg: GPR =>
           InstructionFormat (
-            addressingForm = reg.encode(opcode.opcodeExtension),
+            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, reg)),///reg.encode(opcode.opcodeExtension),
             immediate = None
           )
       }
@@ -112,7 +117,7 @@ trait Formats extends OperandEncoding {
 
     def getAddressingForm(operand: OneOperand[BaseIndex], opcode: OpcodeFormat) = {
       InstructionFormat (
-        addressingForm = operand._1.encode(opcode.opcodeExtension),//NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), op1.offset),
+        addressingForm = operand._1.encode(opcode.opcodeExtension),
         immediate = None
       )
     }
@@ -136,7 +141,7 @@ trait Formats2 extends OperandEncoding {
       operands._1 match {
         case reg: GPR =>
           InstructionFormat (
-            addressingForm = reg.encode(opcode.opcodeExtension),
+            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, reg)),//reg.encode(opcode.opcodeExtension),
             immediate = Some(operands._2)
           )
       }
@@ -160,9 +165,9 @@ trait Formats2 extends OperandEncoding {
       InstructionFormat (
         addressingForm = operands._2 match {
         case mem: AbsoluteAddress =>
-          mem.encode(opcode.opcodeExtension)
+          NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), mem.displacement)
         case mem: RegisterIndirect =>
-          mem.encode(operands._1, opcode.opcodeExtension)
+          OnlyModRM(ModRMReg(NoDisplacement, operands._1, rm = mem.base))//mem.encode(operands._1, opcode.opcodeExtension)
         case mem: BaseIndex =>
           mem.encode(operands._1, opcode.opcodeExtension)
         case reg: GPR =>

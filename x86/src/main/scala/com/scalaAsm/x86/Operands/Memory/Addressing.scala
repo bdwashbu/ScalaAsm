@@ -8,11 +8,7 @@ trait AddressingMode extends RegisterOrMemory
 trait AbsoluteAddress extends AddressingMode {
   self =>
   def displacement: Constant { type Size = self.Size}
-  
-  def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, new EBP), displacement)
-  }
-  
+    
   def rel32: Relative32 = new Relative32 {
     def displacement = Constant32(self.displacement.asInt)
     def size = 4
@@ -28,13 +24,13 @@ trait RegisterIndirect extends AddressingMode {
   self =>
   def base: GPR
 
-  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
-  }
+//  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+//    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
+//  }
   
-  def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
-  }
+//  def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+//    OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
+//  }
 }
 
 
@@ -88,8 +84,6 @@ trait BaseIndex extends AddressingMode {
 trait Relative extends RegisterOrMemory {
   self =>
     def displacement: Constant {type Size = self.Size}
-    
-    def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = OnlyDisplacement(displacement)
 }
 
 trait Relative32 extends Relative {

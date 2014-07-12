@@ -40,9 +40,9 @@ import com.scalaAsm.x86.Operands.Memory.OnlyModRM
       val ID: Int
       override def toString = name
 //      
-     def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-	    OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtend.get, this))
-	 }
+//     def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
+//	    OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtend.get, this))
+//	 }
 //      
 //     def encode(op2: BaseIndex, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
 //	    (op2.base, op2.offset) match {

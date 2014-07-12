@@ -46,7 +46,7 @@ case class NoModRM() extends AddressingFormSpecifier {
   val modRM = None
 }
 
-private[Memory] case class OnlyDisplacement(offset: Constant) extends AddressingFormSpecifier {
+case class OnlyDisplacement(offset: Constant) extends AddressingFormSpecifier {
   val sib = None
   val displacement = Some(offset)
   val modRM = None
@@ -58,19 +58,19 @@ case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier {
   val modRM = Some(mod)
 }
 
-private[Memory] case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier {
+case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier {
   val sib = Some(theSIB)
   val displacement = None
   val modRM = Some(mod)
 }
 
-private[Memory] case class NoSIBWithDisplacement(mod: ModRM, offset: Constant) extends AddressingFormSpecifier {
+case class NoSIBWithDisplacement(mod: ModRM, offset: Constant) extends AddressingFormSpecifier {
   val sib = None
   val displacement = Some(offset)
   val modRM = Some(mod)
 }
 
-private[Memory] case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Constant) extends AddressingFormSpecifier {
+case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Constant) extends AddressingFormSpecifier {
   val sib = Some(theSIB)
   val displacement = Some(offset)
   val modRM = Some(mod)

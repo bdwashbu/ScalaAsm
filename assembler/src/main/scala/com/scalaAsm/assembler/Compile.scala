@@ -67,7 +67,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     lazy val procNames   = asm.codeTokens.collect{ case BeginProc(name) => name }
     
     def onePass: Seq[Token] = asm.codeTokens flatMap {
-        case x: MachineCodeBuilder[_,_] => Some(InstructionToken(x.get))
+        case x: MachineCodeBuilder => Some(InstructionToken(x.get))
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
@@ -76,7 +76,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
         case Reference(name) if varNames.contains(name) => Some(VarRef(name))
         case Reference(name) => Some(ImportRef(name))
         case label @ Label(name) => Some(label)
-        case labelref @ LabelRef(name,opcode) => Some(labelref)
+        case labelref @ LabelRef(name,opcode,format) => Some(labelref)
         case _ => None
     }
 
@@ -91,7 +91,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
          token match {
           case sizedToken: SizedToken => parserPosition += sizedToken.size
           case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-          case x:LabelRef => parserPosition += 2
+          case x:LabelRef[_] => parserPosition += 2
           case _ => 
          }
          result
@@ -119,13 +119,13 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).get.code
 	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).get.code
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).get.code
-	        case LabelRef(name, inst) => inst.get(new Constant8((labels(name) - parserPosition - 2).toByte)).get.code
+	        case LabelRef(name, inst, format) => inst.get(new Constant8((labels(name) - parserPosition - 2).toByte), format).get.code
 	        case _ => Array[Byte]()
 	      }
          token match {
           case sizedToken: SizedToken => parserPosition += sizedToken.size
           case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-          case x:LabelRef => parserPosition += 2
+          case x:LabelRef[_] => parserPosition += 2
           case _ => 
          }
          result

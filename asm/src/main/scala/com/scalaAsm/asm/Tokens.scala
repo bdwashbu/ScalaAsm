@@ -5,6 +5,7 @@ import com.scalaAsm.x86.Instruction
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.x86.OneOperandInstruction
 import com.scalaAsm.x86.MachineCodeBuilder
+import com.scalaAsm.x86.OneOperandFormat
 
 object Tokens {
   trait Token
@@ -15,7 +16,7 @@ object Tokens {
   case class CodeGroup(code: Seq[Any]) extends CodeToken
   case class ProcedureToken(name: String, innerCode: Seq[Any]) extends CodeToken
   case class Label(name: String) extends CodeToken
-  case class LabelRef(labelRef: String, inst:OneOperandInstruction[_, Constant8]) extends CodeToken
+  case class LabelRef[OpEn](labelRef: String, inst:OneOperandInstruction[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) extends CodeToken
   case class InstructionToken(inst: MachineCode) extends SizedToken(inst.size) with CodeToken
   case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken
   

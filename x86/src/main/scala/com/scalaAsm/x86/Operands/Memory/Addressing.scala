@@ -5,7 +5,7 @@ import com.scalaAsm.x86._
 
 trait AddressingMode extends RegisterOrMemory
 
-abstract class AbsoluteAddress[C <: Constant] extends AddressingMode {
+trait AbsoluteAddress[C <: Constant] extends AddressingMode {
   self =>
   type Size = C#Size
   var offset: Size#primitiveType

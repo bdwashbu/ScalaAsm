@@ -6,10 +6,11 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.One
 import com.scalaAsm.x86.MachineCode
-import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Memory._
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
+import com.scalaAsm.x86.MachineCodeBuilder
+import com.scalaAsm.x86.OneOperandFormat
 
 trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 
@@ -33,7 +34,7 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 	  }
 
     def getRawBytes: Array[Byte] = {
-       build(builder.toSeq) collect { case x: MachineCodeBuilder[_,_] => x} map {x => x.get.code} reduce (_ ++ _)
+       build(builder.toSeq) collect { case x: MachineCodeBuilder => x} map {x => x.get.code} reduce (_ ++ _)
     }
     
     private def procRef(procName: String) = ProcRef(procName)
@@ -44,9 +45,9 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 
     def push(param: String) = Reference(param)
 
-    def jnz(labelRef: String)(implicit ev: JNZ_1[_, Constant8]) = LabelRef(labelRef, ev) 
+    def jnz[OpEn](labelRef: String)(implicit ev: JNZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format) 
 
-    def jz(labelRef: String)(implicit ev: JZ_1[_, Constant8]) = LabelRef(labelRef, ev)
+    def jz[OpEn](labelRef: String)(implicit ev: JZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format)
 
     def call(refName: String) = Reference(refName)
 

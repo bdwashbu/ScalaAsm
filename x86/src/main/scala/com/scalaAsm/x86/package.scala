@@ -5,7 +5,7 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.Relative
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 
-package object x86 extends Formats with Formats2 {
+package object x86 extends Formats {
   
   trait Operands
   case class TwoOperands[+X <: Operand, +Y <: Operand](_1: X, _2: Y) extends Operands

@@ -17,8 +17,8 @@ object Addressing {
 
   trait Addressable[X <: GPR] {
     self: X =>
-    def -[Z <: Constant](offset: Z) = RegisterOffset(offset.negate, this)
-    def +[Z <: Constant](offset: Z) = RegisterOffset(offset, this)
+    def -[Z <: Constant](offset: Z): RegisterOffset[Constant,X] = RegisterOffset(offset.negate, this)
+    def +[Z <: Constant](offset: Z): RegisterOffset[Z,X] = RegisterOffset(offset, this)
   }
 
   def *(gpr: GPR) = new RegisterIndirect {

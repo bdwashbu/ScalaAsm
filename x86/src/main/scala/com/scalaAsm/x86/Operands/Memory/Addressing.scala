@@ -32,10 +32,9 @@ trait AbsoluteAddress[C <: Constant] extends AddressingMode {
 //  }
 //}
 
-trait RegisterIndirect extends AddressingMode {
+abstract class RegisterIndirect[-Reg <: GPR](reg: Reg) extends AddressingMode {
   self =>
-  def base: GPR
-
+  def base: GPR = reg
 //  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
 //    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
 //  }

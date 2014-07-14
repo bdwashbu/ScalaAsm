@@ -21,9 +21,8 @@ object Addressing {
     def +[Z <: Constant](offset: Z): RegisterOffset[Z,X] = RegisterOffset(offset, this)
   }
 
-  def *(gpr: GPR) = new RegisterIndirect {
+  def *(gpr: GPR) = new RegisterIndirect(gpr) {
     type Size = gpr.Size
-     val base = gpr
   }
   
   def *[M <: AddressingMode](mem: M): M = mem

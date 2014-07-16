@@ -20,6 +20,11 @@ import com.scalaAsm.x86.Operands.Memory.TwoRegisters
 import com.scalaAsm.x86.Operands.Memory.ModRMReg
 import com.scalaAsm.x86.Operands.Memory.Relative32
 import com.scalaAsm.x86.Operands.Memory.Relative64
+import com.scalaAsm.x86.Operands.Memory.WithSIBWithDisplacement
+import com.scalaAsm.x86.Operands.Memory.DisplacementByte
+import com.scalaAsm.x86.Operands.Memory.DisplacementDword
+import com.scalaAsm.x86.Operands.Memory.SIB
+import com.scalaAsm.x86.Operands.Memory.WithSIBNoDisplacement
 
 trait Instruction
 trait SizedInstructionField {
@@ -82,7 +87,13 @@ trait LowPriorityFormats extends OperandEncoding {
 
     def getAddressingForm(operand: BaseIndex, opcode: OpcodeFormat): InstructionFormat = {
           InstructionFormat (
-            addressingForm = operand.encode(opcode.opcodeExtension),
+            (operand.base, operand.displacement) match {
+              case (base: Register64, _) =>
+                WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, base), SIB(SIB.One, new ESP, base))
+              case (base, _: Constant8) =>
+                NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcode.opcodeExtension.get, base), operand.displacement)
+              case _ => NoModRM()
+            },
             immediate = None
           )
     }
@@ -139,7 +150,13 @@ trait LowPriorityFormats extends OperandEncoding {
 
     def getAddressingForm(operand: BaseIndex, opcode: OpcodeFormat) = {
       InstructionFormat (
-        addressingForm = operand.encode(opcode.opcodeExtension),
+          (operand.base, operand.displacement) match {
+          case (base: Register64, _) =>
+            WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, base), SIB(SIB.One, new ESP, base))
+          case (base, _: Constant8) =>
+            NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcode.opcodeExtension.get, base), operand.displacement)
+          case _ => NoModRM()
+        },
         immediate = None
       )
     }
@@ -160,7 +177,14 @@ trait LowPriorityFormats extends OperandEncoding {
 
     def getAddressingForm(op1: ModRM.reg, op2: BaseIndex, opcode: OpcodeFormat): InstructionFormat = {
       InstructionFormat (
-          op2.encode(op1, opcode.opcodeExtension),
+          (op2.base, op2.displacement) match {
+    	      case (base, off: Constant8) if base.ID == 4 =>
+    	        WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, base), SIB(SIB.One, new ESP, base), op2.displacement)
+    	      case (base, off: Constant32) =>
+    	        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = base), op2.displacement)
+    	      case (base, _: Constant) =>
+    	        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = base), op2.displacement)
+    	    },
           immediate = None
       )
     }

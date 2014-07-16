@@ -49,32 +49,6 @@ trait BaseIndex extends AddressingMode {
   self =>
   def base: GPR
   def displacement: Constant
-
-  def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-    (base, displacement) match {
-      case (base: Register64, _) =>
-        WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtend.get, base), SIB(SIB.One, new ESP, base))
-      case (base, _: Constant8) =>
-        NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtend.get, base), displacement)
-        
-      //case (base, None) =>
-       // NoSIB(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
-      case _ => NoModRM()
-    }
-  }
-  
-  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-	    (base, displacement) match {
-	      case (base, off: Constant8) if base.ID == 4 =>
-	        WithSIBWithDisplacement(ModRMReg(DisplacementByte, reg, base), SIB(SIB.One, new ESP, base), displacement)
-	      case (base, off: Constant32) =>
-	        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = reg, rm = base), displacement)
-	      case (base, _: Constant) =>
-	        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = reg, rm = base), displacement)
-	      //case (base, None) =>
-	       // NoSIB(ModRMReg(NoDisplacement, reg = this, rm = base))
-	    }
-	  }
   
 //  override def toString = {
 //    var result: String = ""

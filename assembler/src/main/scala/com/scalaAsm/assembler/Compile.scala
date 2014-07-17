@@ -3,15 +3,15 @@ package com.scalaAsm.assembler
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.x86.Instructions.CALL
-import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.linker.Assembled
+import com.scalaAsm.asm.Registers
 
 
-class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Catalog
+class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Catalog with Registers
 {
   import scala.language.postfixOps
   

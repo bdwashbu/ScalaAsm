@@ -1,7 +1,6 @@
 package com.scalaAsm
 
 import com.scalaAsm.assembler.AsmProgram
-import com.scalaAsm.asm.Addressing._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.CodeSection

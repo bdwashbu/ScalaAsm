@@ -13,7 +13,7 @@ import com.scalaAsm.x86.Operands.Memory.DisplacementByte
 import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifier
 import com.scalaAsm.x86.Operands.Memory.OnlyModRM
 
-   case class RegisterOffset[S <: Constant, +T <: GPR](offset2: S, reg: T) extends BaseIndex {
+   case class RegisterOffset[S <: Constant[S], +T <: GPR](offset2: S, reg: T) extends BaseIndex {
      type Size = DwordOperand
      val base = reg
      val displacement = offset2
@@ -44,8 +44,8 @@ import com.scalaAsm.x86.Operands.Memory.OnlyModRM
   trait GeneralPurpose extends RegisterOrMemory {
     self:Register => 
       val ID: Int
-      def -[Z <: Constant](offset: Z): RegisterOffset[Constant,self.type] = RegisterOffset(offset.negate, this)
-      def +[Z <: Constant](offset: Z): RegisterOffset[Z,self.type] = RegisterOffset(offset, this)
+      def -[Z <: Constant[Z]](offset: Z): RegisterOffset[Z,self.type] = RegisterOffset(offset.negate, this)
+      def +[Z <: Constant[Z]](offset: Z): RegisterOffset[Z,self.type] = RegisterOffset(offset, this)
       override def toString = name
 //      
 //     def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {

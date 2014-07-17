@@ -15,7 +15,7 @@ trait Registers {
 
   def *[M <: AddressingMode](mem: M): M = mem
 
-  def *[C <: Constant](offset: C)(implicit abs: AbsoluteAddress[C]): AbsoluteAddress[C] = { abs.offset = offset.value; abs }
+  def *[C <: Constant[C]](offset: C)(implicit abs: AbsoluteAddress[C]): AbsoluteAddress[C] = { abs.offset = offset.value; abs }
 
   object rdi extends RDI
   object rax extends RAX

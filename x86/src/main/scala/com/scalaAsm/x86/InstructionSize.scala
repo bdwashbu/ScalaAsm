@@ -34,6 +34,6 @@ trait Sizes {
   
 }
 
-trait InstructionSizeFormat[ModRM <: ModRMState, SIB <: SIBState, C <: Constant] {
+trait InstructionSizeFormat[ModRM <: ModRMState, SIB <: SIBState, C <: Constant[C]] {
   def size(implicit mod: Sized[ModRM], sib: Sized[SIB], constant: Sized[C]): Int = mod.size + sib.size + constant.size
 }

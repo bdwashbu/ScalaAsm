@@ -52,7 +52,7 @@ trait I
 trait Offset
 
 trait OperandEncoding {
-  type Immediate = Constant
+  type Immediate = Constant[_]
 }
 
 trait LowPriorityFormats extends OperandEncoding {
@@ -182,7 +182,7 @@ trait LowPriorityFormats extends OperandEncoding {
     	        WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, base), SIB(SIB.One, new ESP, base), op2.displacement)
     	      case (base, off: Constant32) =>
     	        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = base), op2.displacement)
-    	      case (base, _: Constant) =>
+    	      case (base, _: Constant[_]) =>
     	        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = base), op2.displacement)
     	    },
           immediate = None

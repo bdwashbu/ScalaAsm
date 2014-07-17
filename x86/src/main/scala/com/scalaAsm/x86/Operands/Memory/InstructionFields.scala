@@ -7,7 +7,7 @@ protected[x86] trait AddressingFormSpecifier {
   import scala.language.postfixOps
   val modRM: Option[ModRM]
   val sib: Option[SIB]
-  val displacement: Option[Constant]
+  val displacement: Option[Constant[_]]
   
   def components: Seq[InstructionField] = Seq(modRM, sib, displacement).flatten
 
@@ -23,7 +23,7 @@ protected[x86] trait AddressingFormSpecifier {
 protected[x86] case class InstructionFormat (
   
   addressingForm: AddressingFormSpecifier,
-  immediate: Option[Constant]) {
+  immediate: Option[Constant[_]]) {
   
   lazy val getBytes: Array[Byte] = {
     addressingForm.getBytes ++: (immediate match {
@@ -46,7 +46,7 @@ case class NoModRM() extends AddressingFormSpecifier {
   val modRM = None
 }
 
-case class OnlyDisplacement(offset: Constant) extends AddressingFormSpecifier {
+case class OnlyDisplacement(offset: Constant[_]) extends AddressingFormSpecifier {
   val sib = None
   val displacement = Some(offset)
   val modRM = None
@@ -64,13 +64,13 @@ case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingForm
   val modRM = Some(mod)
 }
 
-case class NoSIBWithDisplacement(mod: ModRM, offset: Constant) extends AddressingFormSpecifier {
+case class NoSIBWithDisplacement(mod: ModRM, offset: Constant[_]) extends AddressingFormSpecifier {
   val sib = None
   val displacement = Some(offset)
   val modRM = Some(mod)
 }
 
-case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Constant) extends AddressingFormSpecifier {
+case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Constant[_]) extends AddressingFormSpecifier {
   val sib = Some(theSIB)
   val displacement = Some(offset)
   val modRM = Some(mod)

@@ -22,15 +22,15 @@ trait One extends Operand {
   def size = 1
 }
 
-trait Constant extends InstructionField with Operand {
+trait Constant[Self] extends InstructionField with Operand {
   def value: Size#primitiveType
   def getBytes: Array[Byte]
   def asInt: Int
   def asLong: Long
-  def negate: Constant
+  def negate: Self
 }
 
-case class Constant8(value: Byte) extends Constant {
+case class Constant8(value: Byte) extends Constant[Constant8] {
   self =>
   type Size = ByteOperand
   def getBytes: Array[Byte] = Array(value)
@@ -40,7 +40,7 @@ case class Constant8(value: Byte) extends Constant {
   def negate = this.copy(value = (-this.value).toByte)
 }
 
-case class Constant16(value: Short) extends Constant {
+case class Constant16(value: Short) extends Constant[Constant16] {
   self =>
   type Size = WordOperand
   def getBytes: Array[Byte] = Array((value & 0x00FF).toByte, ((value & 0xFF00) >> 8).toByte)
@@ -50,7 +50,7 @@ case class Constant16(value: Short) extends Constant {
   def negate = this.copy(value = (-this.value).toShort)
 }
 
-case class Constant32(value: Int) extends Constant {
+case class Constant32(value: Int) extends Constant[Constant32] {
   self =>
   type Size = DwordOperand
   def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
@@ -60,7 +60,7 @@ case class Constant32(value: Int) extends Constant {
   def negate = this.copy(value = -this.value)
 }
 
-case class Constant64(value: Long) extends Constant {
+case class Constant64(value: Long) extends Constant[Constant64] {
   self =>
   type Size = QwordOperand
   def getBytes: Array[Byte] = {

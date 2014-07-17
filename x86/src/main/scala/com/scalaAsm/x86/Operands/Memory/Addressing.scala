@@ -5,7 +5,7 @@ import com.scalaAsm.x86._
 
 trait AddressingMode extends RegisterOrMemory
 
-trait AbsoluteAddress[C <: Constant] extends AddressingMode {
+trait AbsoluteAddress[C <: Constant[_]] extends AddressingMode {
   self =>
   type Size = C#Size
   var offset: Size#primitiveType
@@ -48,7 +48,7 @@ abstract class RegisterIndirect[-Reg <: GPR](reg: Reg) extends AddressingMode {
 trait BaseIndex extends AddressingMode {
   self =>
   def base: GPR
-  def displacement: Constant
+  def displacement: Constant[_]
   
 //  override def toString = {
 //    var result: String = ""
@@ -68,7 +68,7 @@ trait BaseIndex extends AddressingMode {
 
 trait Relative extends RegisterOrMemory {
   self =>
-    def displacement: Constant {type Size = self.type#Size}
+    def displacement: Constant[_] {type Size = self.type#Size}
 }
 
 trait Relative32 extends Relative {

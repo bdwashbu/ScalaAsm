@@ -27,7 +27,7 @@ trait Sizes {
     def getSize = 2//new InstructionSizeFormat[HasModRM, NoSIB, imm8]{}
   }
   
-  implicit object size3 extends InstructionSize[UniformByteRegister, imm8] {
+  implicit object size3 extends InstructionSize[UniformByteRegister[_], imm8] {
     def getSize = 3//new InstructionSizeFormat[HasModRM, NoSIB, imm8]{}
   }
   

@@ -78,7 +78,7 @@ case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Constant[_])
 
 object ModRM {
   type rm = RegisterOrMemory
-  type reg = GPR
+  type reg = GPR[_]
   type plusRd = rm
 }
 
@@ -95,11 +95,11 @@ case object TwoRegisters      extends RegisterMode(3) // r/m is treated as a sec
 
 trait ModRM extends InstructionField {
   val mod: RegisterMode
-  val rm: GPR
+  val rm: GPR[_]
   val size = 1;
 }
 
-case class ModRMReg(mod: RegisterMode, reg: GPR, rm: GPR) extends ModRM {
+case class ModRMReg(mod: RegisterMode, reg: GPR[_], rm: GPR[_]) extends ModRM {
   def getBytes = Array(((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte)
 }
 
@@ -108,7 +108,7 @@ case class ModRMReg(mod: RegisterMode, reg: GPR, rm: GPR) extends ModRM {
 // |  mod  |Op Extended|     rm    |
 // +---+---+---+---+---+---+---+---+
 
-case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR) extends ModRM {
+case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR[_]) extends ModRM {
   def getBytes = Array(((mod.value << 6) + (opcodeExtended << 3) + rm.ID).toByte)
 }
 
@@ -127,7 +127,7 @@ object SIB {
 // | scale |   index   |    base   |
 // +---+---+---+---+---+---+---+---+
 
-case class SIB(scale: SIBScale, index: GPR, base: GPR) extends InstructionField {
+case class SIB(scale: SIBScale, index: GPR[_], base: GPR[_]) extends InstructionField {
   def getBytes = Array(((scale.value << 6) + (index.ID << 3) + base.ID).toByte)
   val size = 1
 }

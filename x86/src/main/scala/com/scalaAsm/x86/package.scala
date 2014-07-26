@@ -31,9 +31,9 @@ package object x86 extends Formats {
   type rel16 = Relative { type Size = WordOperand }
   type rel32 = Relative { type Size = DwordOperand }
   
-  type r = GPR
-  type r8 = Register8 with GeneralPurpose
-  type r16 = Register16 with GeneralPurpose
-  type r32 = Register32 with GeneralPurpose
-  type r64 = Register64 with GeneralPurpose
+  type r = GPR[_]
+  type r8 = Register8 with GeneralPurpose[_]
+  type r16 = Register16 with GeneralPurpose[_]
+  type r32 = Register32 with GeneralPurpose[_]
+  type r64 = Register64 with GeneralPurpose[_]
 }

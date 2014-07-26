@@ -101,16 +101,16 @@ trait LowPriorityFormats extends OperandEncoding {
      def getPrefixes(operand: BaseIndex[_,_]): Option[Array[Byte]] = None
   }
   
-  implicit object MFormat4 extends OneOperandFormat[M, GPR] {
+  implicit object MFormat4 extends OneOperandFormat[M, GPR[_]] {
 
-    def getAddressingForm(operand: GPR, opcode: OpcodeFormat): InstructionFormat = {
+    def getAddressingForm(operand: GPR[_], opcode: OpcodeFormat): InstructionFormat = {
           InstructionFormat (
             addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, operand)),///reg.encode(opcode.opcodeExtension),
             immediate = None
           )
     }
     
-     def getPrefixes(operand: GPR): Option[Array[Byte]] = None
+     def getPrefixes(operand: GPR[_]): Option[Array[Byte]] = None
   }
 
   implicit object DSFormat extends OneOperandFormat[DS, DS] {
@@ -191,7 +191,7 @@ trait LowPriorityFormats extends OperandEncoding {
 
     def getPrefixes(op1: ModRM.reg, op2: BaseIndex[_,_]): Option[Array[Byte]] = {
       op1 match {
-        case reg: UniformByteRegister =>
+        case reg: UniformByteRegister[_] =>
           Some(REX.W(false).get)
         case reg: Register64 =>
           Some(REX.W(true).get)
@@ -223,7 +223,7 @@ trait Formats extends LowPriorityFormats {
 
     def getPrefixes(op1: ModRM.reg, op2: ModRM.reg): Option[Array[Byte]] = {
       op1 match {
-        case reg: UniformByteRegister =>
+        case reg: UniformByteRegister[_] =>
           Some(REX.W(false).get)
         case reg: Register64 =>
           Some(REX.W(true).get)
@@ -273,7 +273,7 @@ trait Formats extends LowPriorityFormats {
     def getAddressingForm(op1: ModRM.rm, op2: Immediate, opcode: OpcodeFormat): InstructionFormat = {
 
       op1 match {
-        case reg: GPR =>
+        case reg: GPR[_] =>
           InstructionFormat (
             addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, reg)),//reg.encode(opcode.opcodeExtension),
             immediate = Some(op2)
@@ -283,7 +283,7 @@ trait Formats extends LowPriorityFormats {
 
     def getPrefixes(op1: ModRM.rm, op2: Immediate): Option[Array[Byte]] = {
       op1 match {
-        case reg: UniformByteRegister =>
+        case reg: UniformByteRegister[_] =>
           Some(REX.W(false).get)
         case reg: Register64 =>
           Some(REX.W(true).get)
@@ -303,7 +303,7 @@ trait Formats extends LowPriorityFormats {
 
     def getPrefixes(op1: ModRM.reg, op2: AbsoluteAddress[Constant32]): Option[Array[Byte]] = {
       op1 match {
-        case reg: UniformByteRegister =>
+        case reg: UniformByteRegister[_] =>
           Some(REX.W(false).get)
         case reg: Register64 =>
           Some(REX.W(true).get)
@@ -323,7 +323,7 @@ trait Formats extends LowPriorityFormats {
 
     def getPrefixes(op1: ModRM.reg, op2: RegisterIndirect[r32]): Option[Array[Byte]] = {
       op1 match {
-        case reg: UniformByteRegister =>
+        case reg: UniformByteRegister[_] =>
           Some(REX.W(false).get)
         case reg: Register64 =>
           Some(REX.W(true).get)
@@ -376,9 +376,9 @@ trait Formats extends LowPriorityFormats {
     def getPrefixes(op1: BaseIndex[_,_], op2: One): Option[Array[Byte]] = MFormat3.getPrefixes(op1)
   }
   
-  implicit object M1Format4 extends TwoOperandFormat[M1, GPR, One] with Formats {
-    def getAddressingForm(op1: GPR,  op2: One, opcode: OpcodeFormat): InstructionFormat = MFormat4.getAddressingForm(op1, opcode)
-    def getPrefixes(op1: GPR, op2: One): Option[Array[Byte]] = MFormat4.getPrefixes(op1)
+  implicit object M1Format4 extends TwoOperandFormat[M1, GPR[_], One] with Formats {
+    def getAddressingForm(op1: GPR[_],  op2: One, opcode: OpcodeFormat): InstructionFormat = MFormat4.getAddressingForm(op1, opcode)
+    def getPrefixes(op1: GPR[_], op2: One): Option[Array[Byte]] = MFormat4.getPrefixes(op1)
   }
 }
 

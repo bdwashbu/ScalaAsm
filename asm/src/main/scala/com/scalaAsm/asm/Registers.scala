@@ -9,7 +9,7 @@ import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 
 trait Registers {
 
-  def *(gpr: GPR) = new RegisterIndirect(gpr) {
+  def *(gpr: GPR[_]) = new RegisterIndirect[GPR[_]](gpr) {
     type Size = gpr.Size
   }
 

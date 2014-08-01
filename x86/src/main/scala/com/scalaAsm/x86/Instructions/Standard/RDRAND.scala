@@ -1,5 +1,6 @@
 package com.scalaAsm.x86
 package Instructions
+package Standard
 
 import scala.annotation.implicitNotFound
 

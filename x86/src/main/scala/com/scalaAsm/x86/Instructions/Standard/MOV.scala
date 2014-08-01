@@ -1,5 +1,6 @@
 package com.scalaAsm.x86
 package Instructions
+package Standard
 
 trait MOV extends x86Instruction {
   val mnemonic = "MOV"

@@ -1,5 +1,6 @@
 package com.scalaAsm.x86
 package Instructions
+package Standard
 
 trait LEAVE extends ZeroOperandInstruction with x86Instruction {
   val mnemonic = "LEAVE"

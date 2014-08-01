@@ -2,6 +2,7 @@ package com.scalaAsm.x86
 package Instructions
 
 import com.scalaAsm.x86.InstructionSize
+import Standard._
 
 trait Catalog extends Formats {
 

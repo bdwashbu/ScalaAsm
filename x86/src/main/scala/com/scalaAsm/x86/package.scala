@@ -1,10 +1,10 @@
 package com.scalaAsm
 
-import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.Operands.Memory.Relative
-import com.scalaAsm.x86.Operands.Memory.AddressingMode
-
 package object x86 {
+  
+  import Operands._
+  import Operands.Memory.Relative
+  import Operands.Memory.AddressingMode
   
   trait Operands
   case class TwoOperands[+X <: Operand, +Y <: Operand](_1: X, _2: Y) extends Operands

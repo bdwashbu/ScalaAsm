@@ -1,19 +1,6 @@
 package com.scalaAsm.x86
 package Operands
 
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import com.scalaAsm.x86.Operands.Memory._
-import com.scalaAsm.x86.Operands.Memory.WithSIBWithDisplacement
-import com.scalaAsm.x86.Operands.Memory.SIB
-import com.scalaAsm.x86.Operands.Memory.NoSIBWithDisplacement
-import com.scalaAsm.x86.Operands.Memory.NoModRM
-import com.scalaAsm.x86.Operands.Memory.NoDisplacement
-import com.scalaAsm.x86.Operands.Memory.ModRMReg
-import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
-import com.scalaAsm.x86.Operands.Memory.DisplacementByte
-import com.scalaAsm.x86.Operands.Memory.AddressingFormSpecifier
-
 trait Operand {
   type Size <: OperandSize
 }
@@ -64,8 +51,9 @@ case class Constant64(value: Long) extends Constant[Constant64] {
   self =>
   type Size = QwordOperand
   def getBytes: Array[Byte] = {
+    import java.nio.{ByteBuffer, ByteOrder}
     val buffer = ByteBuffer.allocate(8)
-      buffer.order(ByteOrder.LITTLE_ENDIAN)
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
       buffer.putLong(value)
       buffer.array()
   }

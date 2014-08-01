@@ -1,8 +1,8 @@
 package com.scalaAsm.x86
 
-import com.scalaAsm.x86.Operands.Constant
-import com.scalaAsm.x86.Operands.Register32
-import com.scalaAsm.x86.Operands.UniformByteRegister
+import Operands.Constant
+import Operands.Register32
+import Operands.UniformByteRegister
 
 trait ModRMState
 trait HasModRM extends ModRMState

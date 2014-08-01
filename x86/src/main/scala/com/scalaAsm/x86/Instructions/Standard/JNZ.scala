@@ -1,5 +1,6 @@
 package com.scalaAsm.x86
 package Instructions
+package Standard
 
 trait JNZ extends x86Instruction {
   val mnemonic = "JNZ"

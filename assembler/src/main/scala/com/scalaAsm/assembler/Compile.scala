@@ -3,7 +3,7 @@ package assembler
 
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
-import com.scalaAsm.x86.Instructions.CALL
+import com.scalaAsm.x86.Instructions.Standard.CALL
 import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Constant32

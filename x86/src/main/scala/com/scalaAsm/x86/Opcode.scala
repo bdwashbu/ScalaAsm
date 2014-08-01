@@ -1,6 +1,6 @@
 package com.scalaAsm.x86
 
-import com.scalaAsm.x86.Operands.Memory.ModRM
+import Operands.Memory.ModRM
 
 trait OpcodeFormat {
   def size: Int

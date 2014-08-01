@@ -1,4 +1,5 @@
-package com.scalaAsm.assembler
+package com.scalaAsm
+package assembler
 
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian

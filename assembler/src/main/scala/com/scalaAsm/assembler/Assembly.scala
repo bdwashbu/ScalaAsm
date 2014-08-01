@@ -1,4 +1,5 @@
-package com.scalaAsm.assembler
+package com.scalaAsm
+package assembler
 
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.Tokens.Token

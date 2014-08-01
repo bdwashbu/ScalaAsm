@@ -1,32 +1,10 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.Operands.Memory.ModRM
-import com.scalaAsm.x86.Operands.Memory.InstructionFormat
-import com.scalaAsm.x86.Operands.Memory.NoModRM
-import com.scalaAsm.x86.Operands.Memory.NoSIBWithDisplacement
-import com.scalaAsm.x86.Operands.Memory.NoDisplacement
-import com.scalaAsm.x86.Operands.Memory.ModRMOpcode
-import com.scalaAsm.x86.Operands.Memory.OnlyDisplacement
-import com.scalaAsm.x86.Operands.Memory.Relative
-import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
-import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
-import com.scalaAsm.x86.Operands.Memory.BaseIndex
-import com.scalaAsm.x86.Operands.One
-import com.scalaAsm.x86.Operands.Memory.OnlyDisplacement
-import com.scalaAsm.x86.Operands.Memory.NoSIBWithDisplacement
-import com.scalaAsm.x86.Operands.Memory.OnlyModRM
-import com.scalaAsm.x86.Operands.Memory.TwoRegisters
-import com.scalaAsm.x86.Operands.Memory.ModRMReg
-import com.scalaAsm.x86.Operands.Memory.Relative32
-import com.scalaAsm.x86.Operands.Memory.Relative64
-import com.scalaAsm.x86.Operands.Memory.WithSIBWithDisplacement
-import com.scalaAsm.x86.Operands.Memory.DisplacementByte
-import com.scalaAsm.x86.Operands.Memory.DisplacementDword
-import com.scalaAsm.x86.Operands.Memory.SIB
-import com.scalaAsm.x86.Operands.Memory.WithSIBNoDisplacement
+import com.scalaAsm.x86.Operands.Memory._
 
 trait Instruction
+
 trait SizedInstructionField {
   def size: Int
 }

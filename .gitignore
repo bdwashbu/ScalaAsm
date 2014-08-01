@@ -1,7 +1,5 @@
 target/
 .*.marks
-.classpath
-.project
 .settings
 .history
 tags

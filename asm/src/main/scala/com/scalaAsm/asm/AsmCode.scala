@@ -4,13 +4,10 @@ import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86.Instructions.Standard._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.Operands.One
 import com.scalaAsm.x86.MachineCode
-import com.scalaAsm.x86.Operands.Memory._
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
-import com.scalaAsm.x86.MachineCodeBuilder
-import com.scalaAsm.x86.OneOperandFormat
+import com.scalaAsm.x86.Instructions.MachineCodeBuilder
 import com.scalaAsm.x86.Instructions.Catalog
 
 trait CodeSection extends Registers with AsmSection[Any] with Catalog {

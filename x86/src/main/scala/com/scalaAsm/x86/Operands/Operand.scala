@@ -1,6 +1,8 @@
 package com.scalaAsm.x86
 package Operands
 
+import com.scalaAsm.x86.Instructions.InstructionField
+
 trait Operand {
   type Size <: OperandSize
 }

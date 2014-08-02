@@ -5,11 +5,11 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.utils.Endian
 import com.scalaAsm.x86.Instructions.Standard.CALL
 import com.scalaAsm.x86.Instructions.Catalog
-import com.scalaAsm.x86.MachineCodeBuilder
 import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.linker.Assembled
 import com.scalaAsm.asm.Registers
+import com.scalaAsm.x86.Instructions.MachineCodeBuilder
 
 
 class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Catalog with Registers

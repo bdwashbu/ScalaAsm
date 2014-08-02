@@ -1,4 +1,5 @@
 package com.scalaAsm.x86
+package Instructions
 
 import Operands.Constant
 import Operands.Register32

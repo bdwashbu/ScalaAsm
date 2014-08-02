@@ -1,11 +1,9 @@
 package com.scalaAsm.asm
 
 import com.scalaAsm.x86.MachineCode
-import com.scalaAsm.x86.Instruction
+import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.x86.Operands.Constant8
-import com.scalaAsm.x86.OneOperandInstruction
-import com.scalaAsm.x86.MachineCodeBuilder
-import com.scalaAsm.x86.OneOperandFormat
+import com.scalaAsm.x86.Operands.OneOperandFormat
 
 object Tokens {
   trait Token

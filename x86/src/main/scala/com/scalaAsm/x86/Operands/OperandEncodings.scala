@@ -1,8 +1,8 @@
 package com.scalaAsm.x86
+package Operands
 
-import Operands._
-import Operands.Memory.NoModRM
-import Operands.Memory.InstructionFormat
+import Memory._
+import com.scalaAsm.x86.OpcodeFormat
 
 object NoOperand
 

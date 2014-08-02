@@ -1,7 +1,15 @@
 package com.scalaAsm.x86
+package Instructions
 
-import Operands._
-import Operands.Memory._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory._
+import com.scalaAsm.x86.MachineCode
+import com.scalaAsm.x86.OneOpcode
+import com.scalaAsm.x86.OpcodeFormat
+import com.scalaAsm.x86.REX
+import com.scalaAsm.x86.TwoOpcodes
+import scala.language.implicitConversions
+import com.scalaAsm.x86.Operands._
 
 trait Instruction
 
@@ -22,12 +30,7 @@ trait x86Instruction extends Instruction {
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
 }
 
-trait NP
 
-trait M
-trait O
-trait I
-trait Offset
 
 trait OperandEncoding {
   type Immediate = Constant[_]
@@ -184,11 +187,7 @@ trait LowPriorityFormats extends OperandEncoding {
   }
 }
 
-trait MR
-trait OI
-trait RM
-trait M1
-trait MI
+
 
 trait Formats extends LowPriorityFormats {
 

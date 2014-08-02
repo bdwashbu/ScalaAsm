@@ -1,7 +1,7 @@
 package com.scalaAsm.x86.Operands
 package Memory
 
-import com.scalaAsm.x86.InstructionField
+import com.scalaAsm.x86.Instructions.InstructionField
 
 protected[x86] trait AddressingFormSpecifier {
   import scala.language.postfixOps

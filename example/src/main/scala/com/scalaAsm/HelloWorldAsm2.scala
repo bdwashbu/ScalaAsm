@@ -4,7 +4,7 @@ import com.scalaAsm.assembler.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.CodeSection
-import com.scalaAsm.x86.Sizes
+import com.scalaAsm.x86.Instructions.Sizes
 
 object HelloWorld2 extends AsmProgram with Sizes {
   

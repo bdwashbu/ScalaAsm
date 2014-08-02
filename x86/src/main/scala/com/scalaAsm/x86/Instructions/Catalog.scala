@@ -1,8 +1,9 @@
 package com.scalaAsm.x86
 package Instructions
 
-import com.scalaAsm.x86.InstructionSize
 import Standard._
+import com.scalaAsm.x86.Operands.TwoOperandFormat
+import com.scalaAsm.x86.Operands.OneOperandFormat
 
 trait Catalog extends Formats {
 

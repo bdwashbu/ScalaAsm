@@ -166,16 +166,16 @@ trait LowPriorityFormats extends OperandEncoding {
 
 trait Formats extends LowPriorityFormats {
 
-  implicit object RMFormatB1 extends TwoOperandFormat[RM, ModRM.reg, BaseIndex[ESP,Constant8]] {
+  implicit object RMFormatB1 extends TwoOperandFormat[RM, ModRM.reg, BaseIndex[StackPointer,Constant8]] {
 
-    def getAddressingForm(op1: ModRM.reg, op2: BaseIndex[ESP,Constant8], opcode: OpcodeFormat) = {
+    def getAddressingForm(op1: ModRM.reg, op2: BaseIndex[StackPointer,Constant8], opcode: OpcodeFormat) = {
       InstructionFormat (
     	    WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), SIB(SIB.One, new ESP, op2.base), op2.displacement),
           immediate = None
       )
     }
 
-    def getPrefixes(op1: ModRM.reg, op2: BaseIndex[ESP,Constant8]): Option[Array[Byte]] = {
+    def getPrefixes(op1: ModRM.reg, op2: BaseIndex[StackPointer,Constant8]): Option[Array[Byte]] = {
       op1 match {
         case reg: UniformByteRegister =>
           Some(REX.W(false).get)

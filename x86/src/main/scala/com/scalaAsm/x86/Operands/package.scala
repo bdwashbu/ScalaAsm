@@ -2,7 +2,7 @@ package com.scalaAsm.x86
 
 package object Operands {
 
-  type GPR[Self] = GeneralPurpose[Self]
+  type GPR = GeneralPurpose
   type SegmentRegister = Register16
 
 }

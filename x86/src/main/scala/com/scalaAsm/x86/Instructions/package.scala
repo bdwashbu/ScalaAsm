@@ -1,5 +1,7 @@
 package com.scalaAsm.x86
 
+import com.scalaAsm.x86.Operands.GeneralPurpose
+import com.scalaAsm.x86.Operands.Constant
 package object Instructions {
 
   private[Instructions] trait NP
@@ -14,4 +16,6 @@ package object Instructions {
   private[Instructions] trait RM
   private[Instructions] trait M1
   private[Instructions] trait MI
+  
+  type BaseIndex[X <: GeneralPurpose,Y <: Constant[_]] = X#BaseIndex[Y]
 }

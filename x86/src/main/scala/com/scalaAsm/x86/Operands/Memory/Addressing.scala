@@ -32,9 +32,9 @@ trait AbsoluteAddress[C <: Constant[C]] extends AddressingMode {
 //  }
 //}
 
-abstract class RegisterIndirect[-Reg <: GPR[_]](reg: Reg) extends AddressingMode {
+abstract class RegisterIndirect[-Reg <: GPR](reg: Reg) extends AddressingMode {
   self =>
-  def base: GPR[_] = reg
+  def base: GPR = reg
 //  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
 //    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
 //  }
@@ -45,26 +45,7 @@ abstract class RegisterIndirect[-Reg <: GPR[_]](reg: Reg) extends AddressingMode
 }
 
 
-abstract class BaseIndex[-Reg <: GPR[_], -Disp <: Constant[_]](reg: Reg, disp: Disp) extends AddressingMode {
-  self =>
-  def base: GPR[_] = reg
-  def displacement: Constant[_] = disp
-  
-//  override def toString = {
-//    var result: String = ""
-//    
-//    result = "[" + base.toString
-//    if (offset.isDefined) {
-//      if (!offset.get.isNegative)
-//    	  result += " + " + offset.get.toString
-//      else
-//    	  result += " - " + offset.get.negate.toString
-//    }
-//    result += "]"
-//    
-//    result
-//  }
-}
+
 
 trait Relative extends RegisterOrMemory {
   self =>

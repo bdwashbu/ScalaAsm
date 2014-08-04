@@ -44,12 +44,12 @@ class OneMachineCodeBuilder[O1 <: Operand, X](operand: O1, opcode: OpcodeFormat,
 
   def getSize: Int = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
-    prefixes.size + opcode.size + format.getAddressingForm(operand, opcode).size
+    prefixes.size + opcode.size + format.getAddressingForm(opcode)(operand).size
   }
 
   private def getBytes: Array[Byte] = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
-    prefixes ++: opcode.get(OneOperand(operand)) ++: format.getAddressingForm(operand, opcode).getBytes
+    prefixes ++: opcode.get(OneOperand(operand)) ++: format.getAddressingForm(opcode)(operand).getBytes
   }
 }
 

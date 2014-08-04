@@ -6,12 +6,14 @@ import com.scalaAsm.x86.OpcodeFormat
 
 object NoOperand
 
-object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = None)
+abstract class NoAddressingFormFormat extends InstructionFormat(addressingForm = NoModRM(), immediate = None)
+object NoAddressingForm extends NoAddressingFormFormat
 
 trait OperandFormat
 
 class NoOperandFormat[OpEn, -X <: Operand] extends OneOperandFormat[OpEn, X] {
-  def getAddressingForm(op1: X, opcode: OpcodeFormat) = NoAddressingForm
+  type AddressInputs = Unit
+  def getAddressingForm(opcode: OpcodeFormat) = {(Unit) => new NoAddressingFormFormat{}}
   def getPrefixes(op1: X) = None
 }
 
@@ -21,7 +23,7 @@ abstract class TwoOperandFormat[OpEn, -X <: Operand, -Y <: Operand] {
 }
 
 abstract class OneOperandFormat[OpEn, -X <: Operand] {
-  def getAddressingForm(op1: X, opcode: OpcodeFormat): InstructionFormat
+  def getAddressingForm(opcode: OpcodeFormat): X => InstructionFormat
   def getPrefixes(op1: X): Option[Array[Byte]]
 }
 

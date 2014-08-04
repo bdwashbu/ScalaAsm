@@ -14,10 +14,9 @@ import com.scalaAsm.x86.Operands._
 trait LowPriorityFormats extends OperandEncoding {
 
   implicit object MFormat extends OneOperandFormat[M, Relative] {
+    def getAddressingForm(opcode: OpcodeFormat) = {
 
-    def getAddressingForm(operand: Relative, opcode: OpcodeFormat) = {
-
-          InstructionFormat (
+          (operand: Relative) => InstructionFormat (
             addressingForm = OnlyDisplacement(operand.displacement),
             immediate = None
           )
@@ -28,9 +27,8 @@ trait LowPriorityFormats extends OperandEncoding {
   }
   
   implicit object MFormat2 extends OneOperandFormat[M, RegisterIndirect[r32]] {
-
-    def getAddressingForm(operand: RegisterIndirect[r32], opcode: OpcodeFormat) = {
-          InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+          (operand: RegisterIndirect[r32]) => InstructionFormat (
             addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, operand.base)), //mem.encode(opcode.opcodeExtension),
             immediate = None
           )
@@ -40,9 +38,8 @@ trait LowPriorityFormats extends OperandEncoding {
   }
   
   implicit object MFormatB1 extends OneOperandFormat[M, BaseIndex[r64, _]] {
-
-    def getAddressingForm(operand: BaseIndex[r64, _], opcode: OpcodeFormat) = {
-          InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+          (operand: BaseIndex[r64, _]) => InstructionFormat (
             WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, operand.base), SIB(SIB.One, new ESP, operand.base)),
             immediate = None
           )
@@ -53,8 +50,8 @@ trait LowPriorityFormats extends OperandEncoding {
   
   implicit object MFormatB2 extends OneOperandFormat[M, BaseIndex[_,Constant8]] {
 
-    def getAddressingForm(operand: BaseIndex[_,Constant8], opcode: OpcodeFormat) = {
-          InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+          (operand: BaseIndex[_,Constant8]) => InstructionFormat (
             NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcode.opcodeExtension.get, operand.base), operand.displacement),
             immediate = None
           )
@@ -65,8 +62,8 @@ trait LowPriorityFormats extends OperandEncoding {
   
   implicit object MFormat4 extends OneOperandFormat[M, GPR] {
 
-    def getAddressingForm(operand: GPR, opcode: OpcodeFormat) = {
-          InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+          (operand: GPR) => InstructionFormat (
             addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, operand)),///reg.encode(opcode.opcodeExtension),
             immediate = None
           )
@@ -76,18 +73,18 @@ trait LowPriorityFormats extends OperandEncoding {
   }
 
   implicit object DSFormat extends OneOperandFormat[DS, DS] {
-    def getAddressingForm(op1: DS, opcode: OpcodeFormat) = NoAddressingForm
+    def getAddressingForm(opcode: OpcodeFormat) = (op1: DS) => NoAddressingForm
     def getPrefixes(op1: DS) = None
   }
 
   implicit object CSFormat extends OneOperandFormat[CS, CS] {
-    def getAddressingForm(op1: CS, opcode: OpcodeFormat) = NoAddressingForm
+    def getAddressingForm(opcode: OpcodeFormat) = (op1: CS) => NoAddressingForm
     def getPrefixes(op1: CS) = None
   }
 
   implicit object OFormat extends OneOperandFormat[O, ModRM.plusRd] {
-    def getAddressingForm(operand: ModRM.plusRd, opcode: OpcodeFormat) = {
-      InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+      (operand: ModRM.plusRd) => InstructionFormat (
         addressingForm = NoModRM(),
         immediate = None
       )
@@ -98,8 +95,8 @@ trait LowPriorityFormats extends OperandEncoding {
 
   implicit object IFormat extends OneOperandFormat[I, Immediate] {
 
-    def getAddressingForm(operand: Immediate, opcode: OpcodeFormat) = {
-      InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+      (operand: Immediate) => InstructionFormat (
         addressingForm = NoModRM(),
         immediate = Some(operand)
       )
@@ -110,8 +107,8 @@ trait LowPriorityFormats extends OperandEncoding {
 
   implicit object OffsetFormat extends OneOperandFormat[Offset, BaseIndex[r64,_]] {
 
-    def getAddressingForm(operand: BaseIndex[r64,_], opcode: OpcodeFormat) = {
-      InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+      (operand: BaseIndex[r64,_]) => InstructionFormat (
         WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, operand.base), SIB(SIB.One, new ESP, operand.base)),
         immediate = None
       )
@@ -122,8 +119,8 @@ trait LowPriorityFormats extends OperandEncoding {
   
   implicit object OffsetFormat2 extends OneOperandFormat[Offset, BaseIndex[_,Constant8]] {
 
-    def getAddressingForm(operand: BaseIndex[_,Constant8], opcode: OpcodeFormat) = {
-      InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+      (operand: BaseIndex[_,Constant8]) => InstructionFormat (
         NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcode.opcodeExtension.get, operand.base), operand.displacement),
         immediate = None
       )
@@ -229,8 +226,8 @@ trait Formats extends LowPriorityFormats {
   
   implicit object MFormat5 extends OneOperandFormat[M, AbsoluteAddress[Constant32]] {
 
-    def getAddressingForm(operand: AbsoluteAddress[Constant32], opcode: OpcodeFormat) = {
-          InstructionFormat (
+    def getAddressingForm(opcode: OpcodeFormat) = {
+          (operand: AbsoluteAddress[Constant32]) => InstructionFormat (
             addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), operand.displacement), //mem.encode(opcode.opcodeExtension),
             immediate = None
           )
@@ -355,22 +352,22 @@ trait Formats extends LowPriorityFormats {
   }
 
   implicit object M1Format extends TwoOperandFormat[M1, Relative{type Size = DwordOperand}, One] with Formats {
-    def getAddressingForm(op1: Relative{type Size = DwordOperand},  op2: One, opcode: OpcodeFormat) = MFormat.getAddressingForm(op1, opcode)
+    def getAddressingForm(op1: Relative{type Size = DwordOperand},  op2: One, opcode: OpcodeFormat) = MFormat.getAddressingForm(opcode)(op1)
     def getPrefixes(op1: Relative{type Size = DwordOperand}, op2: One): Option[Array[Byte]] = MFormat.getPrefixes(op1)
   }
   
   implicit object M1Format2 extends TwoOperandFormat[M1, RegisterIndirect[r32], One] with Formats {
-    def getAddressingForm(op1: RegisterIndirect[r32],  op2: One, opcode: OpcodeFormat) = MFormat2.getAddressingForm(op1, opcode)
+    def getAddressingForm(op1: RegisterIndirect[r32],  op2: One, opcode: OpcodeFormat) = MFormat2.getAddressingForm(opcode)(op1)
     def getPrefixes(op1: RegisterIndirect[r32], op2: One): Option[Array[Byte]] = MFormat2.getPrefixes(op1)
   }
   
   implicit object M1Format3 extends TwoOperandFormat[M1, BaseIndex[r64,_], One] with Formats {
-    def getAddressingForm(op1: BaseIndex[r64,_],  op2: One, opcode: OpcodeFormat) = MFormatB1.getAddressingForm(op1, opcode)
+    def getAddressingForm(op1: BaseIndex[r64,_],  op2: One, opcode: OpcodeFormat) = MFormatB1.getAddressingForm(opcode)(op1)
     def getPrefixes(op1: BaseIndex[r64,_], op2: One): Option[Array[Byte]] = MFormatB1.getPrefixes(op1)
   }
   
   implicit object M1Format4 extends TwoOperandFormat[M1, GPR, One] with Formats {
-    def getAddressingForm(op1: GPR,  op2: One, opcode: OpcodeFormat) = MFormat4.getAddressingForm(op1, opcode)
+    def getAddressingForm(op1: GPR,  op2: One, opcode: OpcodeFormat) = MFormat4.getAddressingForm(opcode)(op1)
     def getPrefixes(op1: GPR, op2: One): Option[Array[Byte]] = MFormat4.getPrefixes(op1)
   }
 }

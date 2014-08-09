@@ -17,6 +17,7 @@ trait Constant[Self] extends InstructionField with Operand {
   def asInt: Int
   def asLong: Long
   def negate: Self
+  def size: Int
 }
 
 case class Constant8(value: Byte) extends Constant[Constant8] {

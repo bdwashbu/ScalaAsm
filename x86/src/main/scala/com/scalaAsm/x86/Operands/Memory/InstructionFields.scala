@@ -3,13 +3,10 @@ package Memory
 
 import com.scalaAsm.x86.Instructions.InstructionField
 
-protected[x86] trait AddressingFormSpecifier {
+protected[x86] abstract class AddressingFormSpecifier[Mod <: ModRM, Sib <: SIB, Disp <: Constant[_]](modRM: Mod, sib: Sib, displacement: Disp) {
   import scala.language.postfixOps
-  val modRM: Option[ModRM]
-  val sib: Option[SIB]
-  val displacement: Option[Constant[_]]
   
-  def components: Seq[InstructionField] = Seq(modRM, sib, displacement).flatten
+  def components: Seq[InstructionField] = Seq(modRM, sib, displacement)
 
   lazy val getBytes: Array[Byte] = {
     components flatMap (_.getBytes) toArray
@@ -22,7 +19,7 @@ protected[x86] trait AddressingFormSpecifier {
 
 protected[x86] case class InstructionFormat (
   
-  addressingForm: AddressingFormSpecifier,
+  addressingForm: AddressingFormSpecifier[_ <: ModRM,_ <: SIB,_ <: Constant[_]],
   immediate: Option[Constant[_]]) {
   
   lazy val getBytes: Array[Byte] = {
@@ -40,41 +37,17 @@ protected[x86] case class InstructionFormat (
   }
 }
 
-case class NoModRM() extends AddressingFormSpecifier {
-  val sib = None
-  val displacement = None
-  val modRM = None
-}
+case class NoModRM() extends AddressingFormSpecifier(NoModField, NoSibField, NoDispField)
 
-case class OnlyDisplacement(offset: Constant[_]) extends AddressingFormSpecifier {
-  val sib = None
-  val displacement = Some(offset)
-  val modRM = None
-}
+case class OnlyDisplacement[Disp <: Constant[_]](offset: Disp) extends AddressingFormSpecifier(NoModField, NoSibField, offset)
 
-case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier {
-  val sib = None
-  val displacement = None
-  val modRM = Some(mod)
-}
+case class OnlyModRM[Mod <: ModRM](mod: Mod) extends AddressingFormSpecifier(mod, NoSibField, NoDispField)
 
-case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier {
-  val sib = Some(theSIB)
-  val displacement = None
-  val modRM = Some(mod)
-}
+case class WithSIBNoDisplacement[Mod <: ModRM, Sib <: SIB](mod: Mod, theSIB: Sib) extends AddressingFormSpecifier(mod, theSIB, NoDispField)
 
-case class NoSIBWithDisplacement(mod: ModRM, offset: Constant[_]) extends AddressingFormSpecifier {
-  val sib = None
-  val displacement = Some(offset)
-  val modRM = Some(mod)
-}
+case class NoSIBWithDisplacement[Mod <: ModRM, Disp <: Constant[_]](mod: Mod, offset: Disp) extends AddressingFormSpecifier(mod, NoSibField, offset)
 
-case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Constant[_]) extends AddressingFormSpecifier {
-  val sib = Some(theSIB)
-  val displacement = Some(offset)
-  val modRM = Some(mod)
-}
+case class WithSIBWithDisplacement[Mod <: ModRM, Sib <: SIB, Disp <: Constant[_]](mod: Mod, theSIB: Sib, offset: Disp) extends AddressingFormSpecifier(mod, theSIB, offset)
 
 object ModRM {
   type rm = RegisterOrMemory
@@ -93,13 +66,43 @@ case object TwoRegisters      extends RegisterMode(3) // r/m is treated as a sec
 // |  mod  |    reg    |     rm    |
 // +---+---+---+---+---+---+---+---+
 
-trait ModRM extends InstructionField {
+trait ModRM extends InstructionField
+
+trait ModRegisterMemory extends ModRM {
   val mod: RegisterMode
   val rm: GPR
   val size = 1;
 }
 
-case class ModRMReg(mod: RegisterMode, reg: GPR, rm: GPR) extends ModRM {
+trait NoMod extends ModRM {
+  def getBytes = Array()
+}
+
+object NoModField extends NoMod {
+  val size = 0
+}
+
+trait NoSib extends SIB {
+  def getBytes = Array()
+}
+
+object NoSibField extends NoSib {
+  val size = 0
+}
+
+trait NoDisp extends Constant[NoDisp] {
+  type Size = ByteOperand
+  def value = 0
+  def getBytes: Array[Byte] = Array()
+  def asInt: Int = 0
+  def asLong: Long = 0
+  def negate = this
+  def size: Int = 0
+}
+
+object NoDispField extends NoDisp
+
+case class ModRMReg(mod: RegisterMode, reg: GPR, rm: GPR) extends ModRegisterMemory {
   def getBytes = Array(((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte)
 }
 
@@ -108,7 +111,7 @@ case class ModRMReg(mod: RegisterMode, reg: GPR, rm: GPR) extends ModRM {
 // |  mod  |Op Extended|     rm    |
 // +---+---+---+---+---+---+---+---+
 
-case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR) extends ModRM {
+case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: GPR) extends ModRegisterMemory {
   def getBytes = Array(((mod.value << 6) + (opcodeExtended << 3) + rm.ID).toByte)
 }
 
@@ -127,7 +130,9 @@ object SIB {
 // | scale |   index   |    base   |
 // +---+---+---+---+---+---+---+---+
 
-case class SIB(scale: SIBScale, index: GPR, base: GPR) extends InstructionField {
+trait SIB extends InstructionField
+
+case class ScaleIndexByte(scale: SIBScale, index: GPR, base: GPR) extends SIB {
   def getBytes = Array(((scale.value << 6) + (index.ID << 3) + base.ID).toByte)
   val size = 1
 }

@@ -93,9 +93,3 @@ abstract class OneOperandInstruction[OpEn, -O1 <: Operand] extends x86Instructio
 abstract class TwoOperandInstruction[OpEn, -O1 <: Operand, -O2 <: Operand] extends x86Instruction with Formats {
   def get[X <: O1, Y <: O2](x: X, y:Y, format: ResolvedTwoOperands[X, Y]) = new TwoMachineCodeBuilder(x, y, opcode, mnemonic, format) {}
 }
-
-abstract class TwoOperandSizedInstruction[OpEn, -O1 <: Operand, -O2 <: Operand] extends x86Instruction with Formats {
-  def get[X <: O1, Y <: O2](x: X, y:Y, size: InstructionSize[X,Y], format: ResolvedTwoOperands[X,Y]) = new TwoMachineCodeBuilder(x, y, opcode, mnemonic, format) {
-    override def getSize: Int = size.getSize
-  }
-}

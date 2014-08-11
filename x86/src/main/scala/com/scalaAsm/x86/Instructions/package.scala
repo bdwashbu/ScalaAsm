@@ -17,5 +17,5 @@ package object Instructions {
   private[Instructions] trait M1
   private[Instructions] trait MI
   
-  type BaseIndex[X <: GeneralPurpose,Y <: Constant[_]] = X#BaseIndex[Y]
+
 }

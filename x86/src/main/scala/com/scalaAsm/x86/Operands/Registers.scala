@@ -7,33 +7,29 @@ abstract class Register(val name: String)
 
 abstract class Register8(name: String) extends Register(name) {
   type Size = ByteOperand
-  def size = 1
 }
 
 abstract class Register16(name: String) extends Register(name) {
   type Size = WordOperand
-  def size = 2
 }
 
 abstract class Register32(name: String) extends Register(name) {
   type Size = DwordOperand
-  def size = 4
 }
 
 abstract class Register64(name: String) extends Register(name) {
   type Size = QwordOperand
-  def size = 8
 }
 
 trait GeneralPurpose extends RegisterOrMemory {
   self: Register =>
 
   val ID: Int
-  def -[Z <: Constant[Z]](offset: Z) = new BaseIndex[Z](offset.negate) { type Size = self.Size }
-  def +[Z <: Constant[Z]](offset: Z) = new BaseIndex[Z](offset) { type Size = self.Size }
+  def -[Z <: Constant[Z]](offset: Z) = new BI[Z](offset.negate) { type Size = self.Size }
+  def +[Z <: Constant[Z]](offset: Z) = new BI[Z](offset) { type Size = self.Size }
   override def toString = name
   
-  abstract class BaseIndex[-Disp <: Constant[_]](disp: Disp) extends AddressingMode {
+  abstract class BI[-Disp <: Constant[_]](disp: Disp) extends AddressingMode {
     def base: GPR = self
     def displacement: Constant[_] = disp
     

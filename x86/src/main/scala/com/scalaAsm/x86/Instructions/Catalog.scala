@@ -4,16 +4,41 @@ package Instructions
 import Standard._
 import com.scalaAsm.x86.Operands.TwoOperandFormat
 import com.scalaAsm.x86.Operands.OneOperandFormat
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
+import com.scalaAsm.x86.Operands.Memory.Relative
+import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
 
-trait Sized[X] {
+trait Sized[-X] {
   val size: Int
 }
 
 trait Catalog extends Formats {
+  
+//  implicit object size1 extends Sized[CS] {val size = 2}
+//  implicit object size2 extends Sized[DS] {val size = 2}
+//  implicit object size3 extends Sized[DX] {val size = 2}
+//  implicit object size4 extends Sized[DH] {val size = 2}
+//  implicit object size5 extends Sized[AX] {val size = 2}
+//  implicit object size6 extends Sized[AH] {val size = 2}
+  implicit object size7 extends Sized[Relative{type Size = DwordOperand}] {val size = 4}
+  implicit object size8 extends Sized[AbsoluteAddress[Constant32]] {val size = 4}
+  implicit object size9 extends Sized[Register32] {val size = 4}
+  implicit object size10 extends Sized[Constant8] {val size = 1}
+  implicit object size11 extends Sized[BaseIndex[EBP, Constant8]] {val size = 1}
+  implicit object size12 extends Sized[Register64] {val size = 8}
+  implicit object size13 extends Sized[RegisterIndirect[RSP]] {val size = 8}
+  implicit object size14 extends Sized[Register8] {val size = 1}
+  implicit object size15 extends Sized[SegmentRegister] {val size = 2}
+  implicit object size16 extends Sized[BaseIndex[RSP, Constant8]] {val size = 1}
+  implicit object size17 extends Sized[BaseIndex[ESP, Constant8]] {val size = 1}
+  implicit object size18 extends Sized[BaseIndex[EAX, Constant8]] {val size = 1}
+  implicit object size19 extends Sized[BaseIndex[EDI, Constant32]] {val size = 4}
+  implicit object size20 extends Sized[One] {val size = 1}
 
   def callNear[O1 <: Operand: Sized, OpEn](p1: O1)(implicit ev: CALL_1[OpEn,O1], format: OneOperandFormat[OpEn, O1]) = ev.get(p1, format(implicitly[Sized[O1]].size))
 
-  def add[O1 <: Operand: Sized, O2 <: Operand: Sized, OpEn](p1: O1, p2: O2)(implicit ev: ADD_2[OpEn, O1, O2], size: InstructionSize[O1,O2], format: TwoOperandFormat[OpEn, O1,O2]) = ev.get(p1, p2, size,format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size))
+  def add[O1 <: Operand: Sized, O2 <: Operand: Sized, OpEn](p1: O1, p2: O2)(implicit ev: ADD_2[OpEn, O1, O2], format: TwoOperandFormat[OpEn, O1,O2]) = ev.get(p1, p2, format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size))
 
   def or[O1 <: Operand: Sized, O2 <: Operand: Sized, OpEn](p1: O1, p2: O2)(implicit ev: OR_2[OpEn, O1, O2], format: TwoOperandFormat[OpEn, O1,O2]) = ev.get(p1, p2, format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size))
   
@@ -27,7 +52,7 @@ trait Catalog extends Formats {
 
   def dec[O1 <: Operand: Sized, OpEn](p1: O1)(implicit ev: DEC_1[OpEn,O1], format: OneOperandFormat[OpEn, O1]) = ev.get(p1, format(implicitly[Sized[O1]].size))
 
-  def and[O1 <: Operand: Sized, O2 <: Operand: Sized, OpEn](p1: O1, p2: O2)(implicit ev: AND_2[OpEn, O1, O2], size: InstructionSize[O1,O2], format: TwoOperandFormat[OpEn, O1,O2]) = ev.get(p1,p2, size, format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size))
+  def and[O1 <: Operand: Sized, O2 <: Operand: Sized, OpEn](p1: O1, p2: O2)(implicit ev: AND_2[OpEn, O1, O2], format: TwoOperandFormat[OpEn, O1,O2]) = ev.get(p1,p2, format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size))
 
   def not[O1 <: Operand: Sized, OpEn](p1: O1)(implicit ev: NOT_1[OpEn,O1], format: OneOperandFormat[OpEn, O1]) = ev.get(p1, format(implicitly[Sized[O1]].size))
 

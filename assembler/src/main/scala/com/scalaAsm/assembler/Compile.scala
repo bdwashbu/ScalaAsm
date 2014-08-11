@@ -120,7 +120,10 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).get.code
 	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).get.code
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).get.code
-	        case LabelRef(name, inst, format) => inst.get(new Constant8((labels(name) - parserPosition - 2).toByte), format).get.code
+	        case LabelRef(name, inst, format) => {
+	          val op = (labels(name) - parserPosition - 2).toByte
+	          inst.get(new Constant8(op), format(op)).get.code
+	        }
 	        case _ => Array[Byte]()
 	      }
          token match {

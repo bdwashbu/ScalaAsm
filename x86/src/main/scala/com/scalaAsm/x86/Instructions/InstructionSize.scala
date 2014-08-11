@@ -13,8 +13,6 @@ trait SIBState
 trait HasSIB extends SIBState
 trait NoSIB extends SIBState
 
-trait Sized[Field] extends SizedInstructionField
-
 trait InstructionSize[-X <: Operand, -Y <: Operand] {
   def getSize: Int //InstructionSizeFormat[_,_,_]
 }
@@ -33,8 +31,4 @@ trait Sizes {
   }
   
   
-}
-
-trait InstructionSizeFormat[ModRM <: ModRMState, SIB <: SIBState, C <: Constant[C]] {
-  def size(implicit mod: Sized[ModRM], sib: Sized[SIB], constant: Sized[C]): Int = mod.size + sib.size + constant.size
 }

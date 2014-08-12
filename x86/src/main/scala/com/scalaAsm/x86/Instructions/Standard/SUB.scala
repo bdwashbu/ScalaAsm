@@ -6,7 +6,7 @@ trait SUB extends x86Instruction {
   val mnemonic = "SUB"
 }
 
-trait SUB_2[OpEn, -O1 <: Operand, -O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with SUB
+trait SUB_2[OpEn, -O1, -O2] extends TwoOperandInstruction[OpEn, O1,O2] with SUB
 
 object SUB {
   

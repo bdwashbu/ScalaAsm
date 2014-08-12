@@ -28,7 +28,7 @@ trait x86Instruction extends Instruction {
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
 }
 
-trait OperandEncoding {
+trait OperandEncoding extends OperandSizes {
   type Immediate = Constant[_]
   
   implicit object blah1 extends Sized[Relative {type Size = ByteOperand}] { val size = 1 }
@@ -44,7 +44,7 @@ trait MachineCodeBuilder {
   def get: MachineCode
 }
 
-class OneMachineCodeBuilder[O1 <: Operand, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: ResolvedOneOperand[O1]) extends MachineCodeBuilder {
+class OneMachineCodeBuilder[O1, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: ResolvedOneOperand[O1]) extends MachineCodeBuilder with Catalog {
   def get() =
     new MachineCode {
         val size = getSize
@@ -63,7 +63,7 @@ class OneMachineCodeBuilder[O1 <: Operand, X](operand: O1, opcode: OpcodeFormat,
   }
 }
 
-class TwoMachineCodeBuilder[O1 <: Operand, O2 <: Operand, X](operand: O1, operand2: O2, opcode: OpcodeFormat, mnemonic: String, format: ResolvedTwoOperands[O1, O2]) extends MachineCodeBuilder {
+class TwoMachineCodeBuilder[O1, O2, X](operand: O1, operand2: O2, opcode: OpcodeFormat, mnemonic: String, format: ResolvedTwoOperands[O1, O2]) extends MachineCodeBuilder {
   def get() =
     new MachineCode {
         val size = getSize
@@ -86,10 +86,10 @@ abstract class ZeroOperandInstruction extends x86Instruction with Formats with O
   def get[X] = new OneMachineCodeBuilder(Constant8(0), opcode, mnemonic, new NoOperandFormat {}) {}
 }
 
-abstract class OneOperandInstruction[OpEn, -O1 <: Operand] extends x86Instruction with Formats {
+abstract class OneOperandInstruction[OpEn, -O1] extends x86Instruction with Formats with Catalog {
   def get[X <: O1](x: X, format: ResolvedOneOperand[X]) = new OneMachineCodeBuilder(x, opcode, mnemonic, format) {}
 }
 
-abstract class TwoOperandInstruction[OpEn, -O1 <: Operand, -O2 <: Operand] extends x86Instruction with Formats {
+abstract class TwoOperandInstruction[OpEn, -O1, -O2] extends x86Instruction with Formats {
   def get[X <: O1, Y <: O2](x: X, y:Y, format: ResolvedTwoOperands[X, Y]) = new TwoMachineCodeBuilder(x, y, opcode, mnemonic, format) {}
 }

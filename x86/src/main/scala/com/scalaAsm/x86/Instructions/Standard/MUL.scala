@@ -6,7 +6,7 @@ trait MUL extends x86Instruction {
   val mnemonic = "MUL"
 }
 
-trait MUL_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with MUL
+trait MUL_1[OpEn, -O1] extends OneOperandInstruction[OpEn, O1] with MUL
 
 object MUL {
   

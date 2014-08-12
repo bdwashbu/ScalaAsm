@@ -6,7 +6,7 @@ trait SHR extends x86Instruction {
   val mnemonic = "SHR"
 }
 
-trait SHR_2[OpEn, -O1 <: Operand, -O2 <: Operand] extends TwoOperandInstruction[OpEn, O1,O2] with SHR
+trait SHR_2[OpEn, -O1, -O2] extends TwoOperandInstruction[OpEn, O1,O2] with SHR
 
 object SHR {
   

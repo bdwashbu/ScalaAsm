@@ -9,7 +9,7 @@ trait RETN extends x86Instruction {
   val mnemonic = "RETN"
 }
 
-trait RETN_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with RETN
+trait RETN_1[OpEn, -O1] extends OneOperandInstruction[OpEn, O1] with RETN
 
 object RETN {
   

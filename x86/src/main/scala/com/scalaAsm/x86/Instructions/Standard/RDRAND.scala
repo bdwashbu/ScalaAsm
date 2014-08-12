@@ -8,7 +8,7 @@ trait RDRAND extends x86Instruction {
   val mnemonic = "RDRAND"
 }
 
-trait RDRAND_1[OpEn, -O1 <: Operand] extends OneOperandInstruction[OpEn, O1] with RDRAND
+trait RDRAND_1[OpEn, -O1] extends OneOperandInstruction[OpEn, O1] with RDRAND
 
 object RDRAND {
   

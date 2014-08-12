@@ -43,9 +43,9 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 
     def push(param: String) = Reference(param)
 
-    def jnz[OpEn](labelRef: String)(implicit ev: JNZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format) 
+    def jnz[OpEn](labelRef: String)(implicit ev: JNZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format, ev.opcode) 
 
-    def jz[OpEn](labelRef: String)(implicit ev: JZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format)
+    def jz[OpEn](labelRef: String)(implicit ev: JZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format, ev.opcode)
 
     def call(refName: String) = Reference(refName)
 

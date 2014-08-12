@@ -77,7 +77,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
         case Reference(name) if varNames.contains(name) => Some(VarRef(name))
         case Reference(name) => Some(ImportRef(name))
         case label @ Label(name) => Some(label)
-        case labelref @ LabelRef(name,opcode,format) => Some(labelref)
+        case labelref @ LabelRef(name,inst,format,opcode) => Some(labelref)
         case _ => None
     }
 
@@ -120,9 +120,9 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).get.code
 	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).get.code
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).get.code
-	        case LabelRef(name, inst, format) => {
+	        case LabelRef(name, inst, format, opcode) => {
 	          val op = (labels(name) - parserPosition - 2).toByte
-	          inst.get(new Constant8(op), format(op)).get.code
+	          inst.get(new Constant8(op), format(op, opcode)).get.code
 	        }
 	        case _ => Array[Byte]()
 	      }

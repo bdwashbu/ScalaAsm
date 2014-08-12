@@ -54,12 +54,12 @@ class OneMachineCodeBuilder[O1 <: Operand, X](operand: O1, opcode: OpcodeFormat,
 
   def getSize: Int = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
-    prefixes.size + opcode.size + format.getAddressingForm(operand, opcode).size
+    prefixes.size + opcode.size + format.getAddressingForm(operand).size
   }
 
   private def getBytes: Array[Byte] = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
-    prefixes ++: opcode.get(OneOperand(operand)) ++: format.getAddressingForm(operand, opcode).getBytes
+    prefixes ++: opcode.get(OneOperand(operand)) ++: format.getAddressingForm(operand).getBytes
   }
 }
 
@@ -73,12 +73,12 @@ class TwoMachineCodeBuilder[O1 <: Operand, O2 <: Operand, X](operand: O1, operan
 
   def getSize: Int = {
     val prefixes = format.getPrefixes(operand, operand2) getOrElse Array()
-    prefixes.size + opcode.size + format.getAddressingForm(operand, operand2, opcode).size
+    prefixes.size + opcode.size + format.getAddressingForm(operand, operand2).size
   }
 
   private def getBytes: Array[Byte] = {
     val prefixes = format.getPrefixes(operand, operand2) getOrElse Array()
-    prefixes ++: opcode.get(TwoOperands(operand, operand2)) ++: format.getAddressingForm(operand, operand2, opcode).getBytes
+    prefixes ++: opcode.get(TwoOperands(operand, operand2)) ++: format.getAddressingForm(operand, operand2).getBytes
   }
 }
 

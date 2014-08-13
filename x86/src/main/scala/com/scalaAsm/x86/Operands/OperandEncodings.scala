@@ -13,6 +13,7 @@ trait OperandFormat
 class NoOperandFormat extends ResolvedOneOperand[Constant8](0, null) {
   def getAddressingForm(op1: Constant8) = NoAddressingForm
   def getPrefixes(op1: Constant8) = None
+  val size = 1
 }
 
 abstract class TwoOperandFormat[OpEn, -X, -Y] {
@@ -26,6 +27,7 @@ abstract class OneOperandFormat[OpEn, -X] {
 abstract class ResolvedOneOperand[-X](operand1Size: Int, opcode: OpcodeFormat) {
   def getAddressingForm(op1: X): InstructionFormat
   def getPrefixes(op1: X): Option[Array[Byte]]
+  def size: Int
 }
 
 abstract class ResolvedTwoOperands[-X, -Y](operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) {

@@ -54,7 +54,7 @@ class OneMachineCodeBuilder[O1, X](operand: O1, opcode: OpcodeFormat, mnemonic: 
 
   def getSize: Int = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
-    prefixes.size + opcode.size + format.getAddressingForm(operand).size
+    prefixes.size + format.size
   }
 
   private def getBytes: Array[Byte] = {

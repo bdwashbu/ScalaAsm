@@ -26,6 +26,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
        def getPrefixes(operand: Relative): Option[Array[Byte]] = None
+       def size = opcode.size + operand1Size
     }
   }
   
@@ -40,6 +41,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
        def getPrefixes(operand: RegisterIndirect[r32]): Option[Array[Byte]] = None
+       def size = opcode.size + 1
     }
   }
   
@@ -54,6 +56,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
        def getPrefixes(operand: BaseIndex[r64, _]): Option[Array[Byte]] = None
+       def size = opcode.size + 2
     }
   }
   
@@ -68,6 +71,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
        def getPrefixes(operand: BaseIndex[_,Constant8]): Option[Array[Byte]] = None
+       def size = opcode.size + 1 + operand1Size
     }
   }
   
@@ -82,6 +86,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
        def getPrefixes(operand: GPR): Option[Array[Byte]] = None
+       def size = opcode.size + 1
     }
   }
 
@@ -89,6 +94,7 @@ trait LowPriorityFormats extends OperandEncoding {
     def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[DS](operand1Size, opcode) {
       def getAddressingForm(op1: DS) = NoAddressingForm
       def getPrefixes(op1: DS) = None
+      def size = opcode.size
     }
   }
 
@@ -96,6 +102,7 @@ trait LowPriorityFormats extends OperandEncoding {
     def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[CS](operand1Size, opcode) {
       def getAddressingForm(op1: CS) = NoAddressingForm
       def getPrefixes(op1: CS) = None
+      def size = opcode.size
     }
   }
 
@@ -109,6 +116,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
       def getPrefixes(operand: ModRM.plusRd): Option[Array[Byte]] = None
+      def size = opcode.size
     }
   }
 
@@ -123,6 +131,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
       def getPrefixes(operand: Immediate): Option[Array[Byte]] = None
+      def size = opcode.size + operand1Size
     }
   }
 
@@ -137,6 +146,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
       def getPrefixes(operand: BaseIndex[r64,_]): Option[Array[Byte]] = None
+      def size = opcode.size + 2
     }
   }
   
@@ -151,6 +161,7 @@ trait LowPriorityFormats extends OperandEncoding {
       }
       
       def getPrefixes(operand: BaseIndex[_,Constant8]): Option[Array[Byte]] = None
+      def size = opcode.size + 1 + operand1Size
     }
   }
   
@@ -270,6 +281,7 @@ trait Formats extends LowPriorityFormats {
       }
       
        def getPrefixes(operand: AbsoluteAddress[Constant32]): Option[Array[Byte]] = None
+       def size = opcode.size + 1 + operand1Size
     }
   }
   

@@ -73,7 +73,7 @@ class TwoMachineCodeBuilder[O1, O2, X](operand: O1, operand2: O2, opcode: Opcode
 
   def getSize: Int = {
     val prefixes = format.getPrefixes(operand, operand2) getOrElse Array()
-    prefixes.size + opcode.size + format.getAddressingForm(operand, operand2).size
+    prefixes.size + format.size
   }
 
   private def getBytes: Array[Byte] = {

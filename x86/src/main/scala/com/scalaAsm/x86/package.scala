@@ -52,8 +52,7 @@ package object x86 {
   
   type m16 = AddressingMode { type Size = WordOperand }
   
-  type rel16 = Relative { type Size = WordOperand }
-  type rel32 = Relative { type Size = DwordOperand }
+  
   
   type r = GPR
   type r8 = Register8 with GeneralPurpose

@@ -1,21 +1,25 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands.GeneralPurpose
+import com.scalaAsm.x86.Operands.Memory.Relative
 import com.scalaAsm.x86.Operands.Constant
+import com.scalaAsm.x86.Operands._
+
 package object Instructions {
 
-  private[Instructions] trait NP
+  trait NP
 
-  private[Instructions] trait M
-  private[Instructions] trait O
-  private[Instructions] trait I
-  private[Instructions] trait Offset
+  trait M
+  trait O
+  trait I
+  trait Offset
 
-  private[Instructions] trait MR
-  private[Instructions] trait OI
-  private[Instructions] trait RM
-  private[Instructions] trait M1
-  private[Instructions] trait MI
+  trait MR
+  trait OI
+  trait RM
+  trait M1
+  trait MI
   
-
+  type rel16 = Relative { type Size = WordOperand }
+  type rel32 = Relative { type Size = DwordOperand }
 }

@@ -28,13 +28,6 @@ protected[x86] case class InstructionFormat (
       case None => Array[Byte]()
     })
   }
-
-  lazy val size: Int = {
-    addressingForm.size + (immediate match {
-      case Some(imm) => imm.size
-      case None => 0
-    })
-  }
 }
 
 case class NoModRM() extends AddressingFormSpecifier(NoModField, NoSibField, NoDispField)

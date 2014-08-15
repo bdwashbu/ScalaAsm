@@ -172,6 +172,7 @@ trait LowPriorityFormats extends OperandEncoding {
         RMFormat(operand2Size, operand1Size, opcode).getAddressingForm(op2, op1)
       }
   
+      def size = RMFormat(operand2Size, operand1Size, opcode).size
       def getPrefixes(op1: BaseIndex[_,Constant8], op2: ModRM.reg): Option[Array[Byte]] = RMFormat(operand2Size, operand1Size, opcode).getPrefixes(op2, op1)
     }
   }
@@ -186,6 +187,7 @@ trait LowPriorityFormats extends OperandEncoding {
         )
       }
   
+      def size = opcode.size + 1 + operand2Size
       def getPrefixes(op1: ModRM.reg, op2: BaseIndex[_,Constant8]): Option[Array[Byte]] = {
         op1 match {
           case reg: UniformByteRegister =>
@@ -213,6 +215,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
+      def size = opcode.size + 2 + operand2Size
       def getPrefixes(op1: ModRM.reg, op2: BaseIndex[StackPointer,Constant8]): Option[Array[Byte]] = {
         op1 match {
           case reg: UniformByteRegister =>
@@ -235,6 +238,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
+      def size = opcode.size + 1 + operand2Size
       def getPrefixes(op1: ModRM.reg, op2: BaseIndex[_,Constant32]): Option[Array[Byte]] = {
         op1 match {
           case reg: UniformByteRegister =>
@@ -258,6 +262,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
+      def size = opcode.size + 1
       def getPrefixes(op1: ModRM.reg, op2: ModRM.reg): Option[Array[Byte]] = {
         op1 match {
           case reg: UniformByteRegister =>
@@ -321,6 +326,7 @@ trait Formats extends LowPriorityFormats {
         }
       }
   
+      def size = {println("operand2size: " + operand2Size + " op1Size:" + operand1Size + " result:" + opcode.size + 1 + operand2Size); opcode.size + 1 + operand2Size}
       def getPrefixes(op1: ModRM.rm, op2: Immediate): Option[Array[Byte]] = {
         op1 match {
           case reg: UniformByteRegister =>
@@ -343,6 +349,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
+      def size = opcode.size + 1 + operand2Size
       def getPrefixes(op1: ModRM.reg, op2: AbsoluteAddress[Constant32]): Option[Array[Byte]] = {
         op1 match {
           case reg: UniformByteRegister =>
@@ -365,6 +372,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
+      def size = opcode.size + 1
       def getPrefixes(op1: ModRM.reg, op2: RegisterIndirect[r32]): Option[Array[Byte]] = {
         op1 match {
           case reg: UniformByteRegister =>
@@ -386,6 +394,7 @@ trait Formats extends LowPriorityFormats {
         RMFormat6(operand2Size, operand1Size, opcode).getAddressingForm(op2, op1)
       }
   
+      def size = RMFormat6(operand2Size, operand1Size, opcode).size
       def getPrefixes(op1: ModRM.reg, op2: ModRM.reg): Option[Array[Byte]] = RMFormat6(operand2Size, operand1Size,opcode).getPrefixes(op2, op1)
     }
   }
@@ -400,6 +409,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
+      def size = opcode.size + operand2Size
       def getPrefixes(op1: ModRM.plusRd, op2: Immediate): Option[Array[Byte]] = {
         op1 match {
           case reg: Register64 =>
@@ -413,6 +423,7 @@ trait Formats extends LowPriorityFormats {
   implicit object M1Format extends TwoOperandFormat[M1, Relative{type Size = DwordOperand}, One] with Formats {
     def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[Relative{type Size = DwordOperand}, One](operand1Size, operand2Size, opcode) {
       def getAddressingForm(op1: Relative{type Size = DwordOperand},  op2: One) = MFormat(operand1Size, opcode).getAddressingForm(op1)
+      def size = MFormat(operand1Size, opcode).size
       def getPrefixes(op1: Relative{type Size = DwordOperand}, op2: One): Option[Array[Byte]] = MFormat(operand1Size, opcode).getPrefixes(op1)
     }
   }
@@ -420,6 +431,7 @@ trait Formats extends LowPriorityFormats {
   implicit object M1Format2 extends TwoOperandFormat[M1, RegisterIndirect[r32], One] with Formats {
     def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[RegisterIndirect[r32], One](operand1Size, operand2Size, opcode) {
       def getAddressingForm(op1: RegisterIndirect[r32],  op2: One) = MFormat2(operand1Size, opcode).getAddressingForm(op1)
+      def size = MFormat2(operand1Size, opcode).size
       def getPrefixes(op1: RegisterIndirect[r32], op2: One): Option[Array[Byte]] = MFormat2(operand1Size, opcode).getPrefixes(op1)
     }
   }
@@ -427,6 +439,7 @@ trait Formats extends LowPriorityFormats {
   implicit object M1Format3 extends TwoOperandFormat[M1, BaseIndex[r64,_], One] with Formats {
     def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[BaseIndex[r64,_], One](operand1Size, operand2Size, opcode) {
       def getAddressingForm(op1: BaseIndex[r64,_],  op2: One) = MFormatB1(operand1Size, opcode).getAddressingForm(op1)
+      def size = MFormatB1(operand1Size, opcode).size
       def getPrefixes(op1: BaseIndex[r64,_], op2: One): Option[Array[Byte]] = MFormatB1(operand1Size, opcode).getPrefixes(op1)
     }
   }
@@ -434,6 +447,7 @@ trait Formats extends LowPriorityFormats {
   implicit object M1Format4 extends TwoOperandFormat[M1, GPR, One] with Formats {
     def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[GPR, One](operand1Size, operand2Size, opcode) {
       def getAddressingForm(op1: GPR,  op2: One) = MFormat4(operand1Size, opcode).getAddressingForm(op1)
+      def size = MFormat4(operand1Size, opcode).size
       def getPrefixes(op1: GPR, op2: One): Option[Array[Byte]] = MFormat4(operand1Size, opcode).getPrefixes(op1)
     }
   }

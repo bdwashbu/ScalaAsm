@@ -7,7 +7,6 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.NoOperandFormat
 import com.scalaAsm.x86.Operands.Constant
 import com.scalaAsm.x86.Operands.Memory.Relative
-import com.scalaAsm.x86.Operands.ByteOperand
 
 trait Instruction
 

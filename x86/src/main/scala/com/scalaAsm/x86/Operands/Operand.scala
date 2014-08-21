@@ -66,14 +66,9 @@ case class Constant64(value: Long) extends Constant[Constant64] {
   def negate: Constant64 = this.copy(value = -this.value)
 }
 
-sealed trait OperandSize {
-  type primitiveType
-}
 
-class ByteOperand extends OperandSize { type primitiveType = Byte }
-class WordOperand extends OperandSize { type primitiveType = Short }
-class DwordOperand extends OperandSize { type primitiveType = Int }
-class QwordOperand extends OperandSize { type primitiveType = Long }
+
+
 
 trait RegisterOrMemory extends Operand
 

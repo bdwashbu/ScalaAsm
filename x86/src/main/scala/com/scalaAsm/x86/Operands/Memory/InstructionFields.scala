@@ -1,4 +1,5 @@
-package com.scalaAsm.x86.Operands
+package com.scalaAsm.x86
+package Operands
 package Memory
 
 import com.scalaAsm.x86.Instructions.InstructionField

@@ -14,12 +14,12 @@ package object x86 {
   trait OperandSizes {
     implicit object size7 extends Sized[Relative{type Size = DwordOperand}] {val size = 4}
     implicit object size8 extends Sized[AbsoluteAddress[Constant32]] {val size = 4}
-    implicit object size9 extends Sized[Register32] {val size = 4}
+    implicit object size9 extends Sized[Register[_32]] {val size = 4}
     implicit object size10 extends Sized[Constant8] {val size = 1}
     implicit object size11 extends Sized[BaseIndex[EBP, Constant8]] {val size = 1}
-    implicit object size12 extends Sized[Register64] {val size = 8}
+    implicit object size12 extends Sized[Register[_64]] {val size = 8}
     implicit object size13 extends Sized[RegisterIndirect[RSP]] {val size = 8}
-    implicit object size14 extends Sized[Register8] {val size = 1}
+    implicit object size14 extends Sized[Register[_8]] {val size = 1}
     implicit object size15 extends Sized[SegmentRegister] {val size = 2}
     implicit object size16 extends Sized[BaseIndex[RSP, Constant8]] {val size = 1}
     implicit object size17 extends Sized[BaseIndex[ESP, Constant8]] {val size = 1}
@@ -52,13 +52,25 @@ package object x86 {
   
   type m16 = AddressingMode { type Size = WordOperand }
   
+  sealed trait OperandSize {
+    type primitiveType
+  }
   
+  class ByteOperand extends OperandSize { type primitiveType = Byte }
+  class WordOperand extends OperandSize { type primitiveType = Short }
+  class DwordOperand extends OperandSize { type primitiveType = Int }
+  class QwordOperand extends OperandSize { type primitiveType = Long }
+  
+  type _8 = ByteOperand
+  type _16 = WordOperand
+  type _32 = DwordOperand
+  type _64 = QwordOperand
   
   type r = GPR
-  type r8 = Register8 with GeneralPurpose
-  type r16 = Register16 with GeneralPurpose
-  type r32 = Register32 with GeneralPurpose
-  type r64 = Register64 with GeneralPurpose
+  type r8 = GeneralPurpose[_8]
+  type r16 = GeneralPurpose[_16]
+  type r32 = GeneralPurpose[_32]
+  type r64 = GeneralPurpose[_64]
   
-    type BaseIndex[X <: GeneralPurpose,Y <: Constant[_]] = X#BI[Y]
+  type BaseIndex[X <: GeneralPurpose[_],Y <: Constant[_]] = X#BI[Y]
 }

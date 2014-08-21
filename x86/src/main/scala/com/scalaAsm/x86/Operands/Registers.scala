@@ -3,146 +3,91 @@ package Operands
 
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 
-abstract class Register(val name: String)
+abstract class Register[S <: OperandSize](val name: String) extends RegisterOrMemory { type Size = S }
 
-abstract class Register8(name: String) extends Register(name) {
-  type Size = ByteOperand
-}
-
-abstract class Register16(name: String) extends Register(name) {
-  type Size = WordOperand
-}
-
-abstract class Register32(name: String) extends Register(name) {
-  type Size = DwordOperand
-}
-
-abstract class Register64(name: String) extends Register(name) {
-  type Size = QwordOperand
-}
-
-trait GeneralPurpose extends RegisterOrMemory {
-  self: Register =>
-
+abstract class GeneralPurpose[S <: OperandSize](name: String) extends Register[S](name) {
+  self =>
+    
   val ID: Int
-  def -[Z <: Constant[Z]](offset: Z) = new BI[Z](offset.negate) { type Size = self.Size }
-  def +[Z <: Constant[Z]](offset: Z) = new BI[Z](offset) { type Size = self.Size }
-  override def toString = name
+  def -[Z <: Constant[Z]](offset: Z) = new BI[Z](offset.negate) { type Size = S }
+  def +[Z <: Constant[Z]](offset: Z) = new BI[Z](offset) { type Size = S }
   
   abstract class BI[-Disp <: Constant[_]](disp: Disp) extends AddressingMode {
     def base: GPR = self
     def displacement: Constant[_] = disp
-    
-  //  override def toString = {
-  //    var result: String = ""
-  //    
-  //    result = "[" + base.toString
-  //    if (offset.isDefined) {
-  //      if (!offset.get.isNegative)
-  //    	  result += " + " + offset.get.toString
-  //      else
-  //    	  result += " - " + offset.get.negate.toString
-  //    }
-  //    result += "]"
-  //    
-  //    result
-  //  }
   }
-  //      
-  //     def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-  //	    OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtend.get, this))
-  //	 }
-  //      
-  //     def encode(op2: BaseIndex, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-  //	    (op2.base, op2.offset) match {
-  //	      case (base, off: Displacement8) if base.ID == 4 =>
-  //	        WithSIBWithDisplacement(ModRMReg(DisplacementByte, this, base), SIB(SIB.One, new ESP, base), op2.offset)
-  //	      case (base, off: Displacement32) =>
-  //	        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = this, rm = base), op2.offset)
-  //	      case (base, _: Displacement) =>
-  //	        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = this, rm = base), op2.offset)
-  //	      //case (base, None) =>
-  //	       // NoSIB(ModRMReg(NoDisplacement, reg = this, rm = base))
-  //	    }
-  //	  }
-  //     
-  //     def encode(op2: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-  //	    OnlyModRM(ModRMReg(TwoRegisters, this, op2))
-  //	 }
 }
 
-trait GeneralPurposeA extends GeneralPurpose { self: Register => val ID = 0 }
-trait GeneralPurposeB extends GeneralPurpose { self: Register => val ID = 3 }
-trait GeneralPurposeC extends GeneralPurpose { self: Register => val ID = 1 }
-trait GeneralPurposeD extends GeneralPurpose { self: Register => val ID = 2 }
+abstract class GeneralPurposeA[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) { val ID = 0 }
+abstract class GeneralPurposeB[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) { val ID = 3 }
+abstract class GeneralPurposeC[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) { val ID = 1 }
+abstract class GeneralPurposeD[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) { val ID = 2 }
 
-trait SourceIndex extends GeneralPurpose { self: Register => val ID = 6 }
-trait DestinationIndex extends GeneralPurpose { self: Register => val ID = 7 }
-trait BasePointer extends GeneralPurpose { self: Register => val ID = 5 }
-trait StackPointer extends GeneralPurpose { self: Register => val ID = 4 }
+abstract class SourceIndex[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) { val ID = 6 }
+abstract class DestinationIndex[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) { val ID = 7 }
+abstract class BasePointer[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) { val ID = 5 }
+abstract class StackPointer[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) { val ID = 4 }
 
-trait UniformByteRegister extends GeneralPurpose {
-  self: Register =>
-}
+trait UniformByteRegister[Size <: OperandSize] extends GeneralPurpose[Size]
 
 // "A" family - Accumulator for operands and results
-class RAX extends Register64("rax") with GeneralPurposeA
-class EAX extends Register32("eax") with GeneralPurposeA
-class AX extends Register16("ax") with GeneralPurposeA
-class AL extends Register8("al") with GeneralPurposeA
-class AH extends Register8("ah") with GeneralPurposeA { override val ID = 4 }
+class RAX extends GeneralPurposeA[_64]("rax")
+class EAX extends GeneralPurposeA[_32]("eax")
+class AX extends GeneralPurposeA[_16]("ax")
+class AL extends GeneralPurposeA[_8]("al")
+class AH extends GeneralPurposeA[_8]("ah") { override val ID = 4 }
 
 // "B" family - Pointer to data in the DS segment
-class RBX extends Register64("rbx") with GeneralPurposeB
-class EBX extends Register32("ebx") with GeneralPurposeB
-class BX extends Register16("bx") with GeneralPurposeB
-class BL extends Register8("bl") with GeneralPurposeB
-class BH extends Register8("bh") with GeneralPurposeB { override val ID = 7 }
+class RBX extends GeneralPurposeB[_64]("rbx")
+class EBX extends GeneralPurposeB[_32]("ebx")
+class BX extends GeneralPurposeB[_16]("bx")
+class BL extends GeneralPurposeB[_8]("bl")
+class BH extends GeneralPurposeB[_8]("bh") { override val ID = 7 }
 
 // "C" family - Counter for string and loop operations
-class RCX extends Register64("rcx") with GeneralPurposeC
-class ECX extends Register32("ecx") with GeneralPurposeC
-class CX extends Register16("cx") with GeneralPurposeC
-class CL extends Register8("cl") with GeneralPurposeC
-class CH extends Register8("ch") with GeneralPurposeC { override val ID = 5 }
+class RCX extends GeneralPurposeC[_64]("rcx")
+class ECX extends GeneralPurposeC[_32]("ecx")
+class CX extends GeneralPurposeC[_16]("cx")
+class CL extends GeneralPurposeC[_8]("cl")
+class CH extends GeneralPurposeC[_8]("ch") { override val ID = 5 }
 
 // "D" family - I/O pointer
-class RDX extends Register64("rdx") with GeneralPurposeD
-class EDX extends Register32("edx") with GeneralPurposeD
-class DX extends Register16("dx") with GeneralPurposeD
-class DL extends Register8("dl") with GeneralPurposeD
-class DH extends Register8("dh") with GeneralPurposeD { override val ID = 6 }
+class RDX extends  GeneralPurposeD[_64]("rdx")
+class EDX extends GeneralPurposeD[_32]("edx")
+class DX extends GeneralPurposeD[_16]("dx")
+class DL extends GeneralPurposeD[_8]("dl")
+class DH extends GeneralPurposeD[_8]("dh") { override val ID = 6 }
 
-class RSP extends Register64("rsp") with StackPointer
-class ESP extends Register32("esp") with StackPointer
-class SP extends Register16("sp") with StackPointer
-class SPL extends Register8("spl") with StackPointer with UniformByteRegister
+class RSP extends StackPointer[_64]("rsp")
+class ESP extends StackPointer[_32]("esp")
+class SP extends StackPointer[_16]("sp")
+class SPL extends StackPointer[_8]("spl") with UniformByteRegister[_8]
 
-class RBP extends Register64("rbp") with BasePointer
-class EBP extends Register32("ebp") with BasePointer
-class BP extends Register16("bp") with BasePointer
+class RBP extends BasePointer[_64]("rbp")
+class EBP extends BasePointer[_32]("ebp")
+class BP extends BasePointer[_16]("bp")
 
-class RSI extends Register64("rsi") with SourceIndex
-class ESI extends Register32("esi") with SourceIndex
-class SI extends Register16("si") with SourceIndex
+class RSI extends SourceIndex[_64]("rsi")
+class ESI extends SourceIndex[_32]("esi")
+class SI extends SourceIndex[_16]("si")
 
-class RDI extends Register64("rdi") with DestinationIndex
-class EDI extends Register32("edi") with DestinationIndex
-class DI extends Register16("di") with DestinationIndex
+class RDI extends DestinationIndex[_64]("rdi")
+class EDI extends DestinationIndex[_32]("edi")
+class DI extends DestinationIndex("di")
 
-class ES extends SegmentRegister("es") with Operand
-class CS extends SegmentRegister("cs") with Operand
-class SS extends SegmentRegister("ss") with Operand
-class DS extends SegmentRegister("ds") with Operand
-class FS extends SegmentRegister("fs") with Operand
-class GS extends SegmentRegister("gs") with Operand
+class ES extends SegmentRegister("es") { val ID = 8 }
+class CS extends SegmentRegister("cs") { val ID = 8 }
+class SS extends SegmentRegister("ss") { val ID = 8 }
+class DS extends SegmentRegister("ds") { val ID = 8 }
+class FS extends SegmentRegister("fs") { val ID = 8 }
+class GS extends SegmentRegister("gs") { val ID = 8 }
 
 // Extra 64-bit registers
-class R8 extends Register64("r8") with GeneralPurpose { self: Register => val ID = 8 }
-class R9 extends Register64("r9") with GeneralPurpose { self: Register => val ID = 9 }
-class R10 extends Register64("r10") with GeneralPurpose { self: Register => val ID = 10 }
-class R11 extends Register64("r11") with GeneralPurpose { self: Register => val ID = 11 }
-class R12 extends Register64("r12") with GeneralPurpose { self: Register => val ID = 12 }
-class R13 extends Register64("r13") with GeneralPurpose { self: Register => val ID = 13 }
-class R14 extends Register64("r14") with GeneralPurpose { self: Register => val ID = 14 }
-class R15 extends Register64("r15") with GeneralPurpose { self: Register => val ID = 15 }
+class R8 extends GeneralPurpose[_64]("r8") { val ID = 8 }
+class R9 extends GeneralPurpose[_64]("r9") { val ID = 9 }
+class R10 extends GeneralPurpose[_64]("r10") { val ID = 10 }
+class R11 extends GeneralPurpose[_64]("r11") { val ID = 11 }
+class R12 extends GeneralPurpose[_64]("r12") { val ID = 12 }
+class R13 extends GeneralPurpose[_64]("r13") { val ID = 13 }
+class R14 extends GeneralPurpose[_64]("r14") { val ID = 14 }
+class R15 extends GeneralPurpose[_64]("r15") { val ID = 15 }

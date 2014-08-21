@@ -40,10 +40,6 @@ package object x86 {
   type imm32 = Constant32
   type imm64 = Constant64
   
-  type Operand = com.scalaAsm.x86.Operands.Operand
-  
-  //type AddressingFormSpecifier = Operands.AddressingFormSpecifier
-  
   type rm = RegisterOrMemory
   type rm8 = rm { type Size = ByteOperand }
   type rm16 = rm { type Size = WordOperand }

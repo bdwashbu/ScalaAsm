@@ -3,15 +3,12 @@ package Operands
 
 import com.scalaAsm.x86.Instructions.InstructionField
 
-trait Operand {
-  type Size <: OperandSize
-}
-
-trait One extends Operand {
+trait One {
   def size = 1
 }
 
-trait Constant[Self] extends InstructionField with Operand {
+trait Constant[Self] extends InstructionField {
+  type Size <: OperandSize
   def value: Size#primitiveType
   def getBytes: Array[Byte]
   def asInt: Int
@@ -70,7 +67,9 @@ case class Constant64(value: Long) extends Constant[Constant64] {
 
 
 
-trait RegisterOrMemory extends Operand
+trait RegisterOrMemory {
+  type Size <: OperandSize
+}
 
 
 

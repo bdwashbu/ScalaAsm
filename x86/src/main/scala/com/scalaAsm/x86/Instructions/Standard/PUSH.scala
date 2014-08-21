@@ -17,6 +17,10 @@ trait POWLow {
   implicit object LowPush extends PUSH_1[M, rm] {
       val opcode = 0xFF /+ 6
   }
+  
+  implicit object push3 extends PUSH_1[O, r16] {
+      val opcode = OneOpcode(0x50) + rw
+  }
 }
 
 object PUSH extends POWLow {
@@ -27,10 +31,6 @@ object PUSH extends POWLow {
   
   implicit object push2 extends PUSH_1[O, r32] {
       val opcode = OneOpcode(0x50) + rd
-  }
-  
-  implicit object push3 extends PUSH_1[O, r16] {
-      val opcode = OneOpcode(0x50) + rw
   }
   
   implicit object push4 extends PUSH_1[I, imm8] {

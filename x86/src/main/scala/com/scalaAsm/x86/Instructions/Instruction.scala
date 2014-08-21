@@ -28,11 +28,10 @@ trait x86Instruction extends Instruction {
 }
 
 trait OperandEncoding extends OperandSizes {
-  type Immediate = Constant[_]
-  
-  implicit object blah1 extends Sized[Relative {type Size = ByteOperand}] { val size = 1 }
-  
-  
+//  
+//  implicit object blah1 extends Sized[Relative[ByteOperand]] { val size = 1 }
+//  
+//  
   implicit object const1 extends Sized[Constant8] { val size = 1 }
   implicit object const2 extends Sized[Constant16] { val size = 2 }
   implicit object const3 extends Sized[Constant32] { val size = 4 }

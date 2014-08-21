@@ -12,7 +12,7 @@ package object x86 {
   }
   
   trait OperandSizes {
-    implicit object size7 extends Sized[Relative{type Size = DwordOperand}] {val size = 4}
+    implicit object size7 extends Sized[Relative[DwordOperand]] {val size = 4}
     implicit object size8 extends Sized[AbsoluteAddress[Constant32]] {val size = 4}
     implicit object size9 extends Sized[Register[_32]] {val size = 4}
     implicit object size10 extends Sized[Constant8] {val size = 1}
@@ -35,6 +35,7 @@ package object x86 {
   case class TwoOperands[+X, +Y](_1: X, _2: Y) extends Operands
   case class OneOperand[+X](_1: X) extends Operands
   
+  type imm = Constant[_]
   type imm8 = Constant8
   type imm16 = Constant16
   type imm32 = Constant32

@@ -9,7 +9,7 @@ trait AbsoluteAddress[C <: Constant[C]] extends AddressingMode {
   self =>
   type Size = C#Size
   var offset: Size#primitiveType
-  def getRelative: Relative { type Size = self.Size }
+  def getRelative: Relative[C#Size]
   def displacement: C
 }
 //trait AbsoluteAddress32 extends AbsoluteAddress {
@@ -47,15 +47,10 @@ abstract class RegisterIndirect[-Reg <: GPR](reg: Reg) extends AddressingMode {
 
 
 
-trait Relative extends RegisterOrMemory {
+trait Relative[S <: OperandSize] extends RegisterOrMemory {
   self =>
-    def displacement: Constant[_] {type Size = self.type#Size}
+    def displacement: Constant[_] {type Size = S}
 }
 
-trait Relative32 extends Relative {
-  type Size = DwordOperand
-}
-
-trait Relative64 extends Relative {
-  type Size = QwordOperand
-}
+trait Relative32 extends Relative[_32]
+trait Relative64 extends Relative[_64]

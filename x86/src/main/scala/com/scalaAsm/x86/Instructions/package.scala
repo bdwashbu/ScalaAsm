@@ -20,6 +20,7 @@ package object Instructions {
   trait M1
   trait MI
   
-  type rel16 = Relative { type Size = WordOperand }
-  type rel32 = Relative { type Size = DwordOperand }
+  type rel = Relative[_ <: OperandSize]
+  type rel16 = Relative[WordOperand]
+  type rel32 = Relative[DwordOperand]
 }

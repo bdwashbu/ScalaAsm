@@ -13,10 +13,10 @@ import com.scalaAsm.x86.Operands._
 
 trait LowPriorityFormats extends OperandEncoding {
 
-  implicit object MFormat extends OneOperandFormat[M, Relative] {
+  implicit object MFormat extends OneOperandFormat[M, rel] {
 
-    def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[Relative](operand1Size, opcode) {
-      def getAddressingForm(operand: Relative) = {
+    def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[rel](operand1Size, opcode) {
+      def getAddressingForm(operand: rel) = {
   
             InstructionFormat (
               addressingForm = OnlyDisplacement(operand.displacement),
@@ -112,10 +112,10 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
 
-  implicit object IFormat extends OneOperandFormat[I, Immediate] {
+  implicit object IFormat extends OneOperandFormat[I, imm] {
 
-    def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[Immediate](operand1Size, opcode) {
-      def getAddressingForm(operand: Immediate) = {
+    def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[imm](operand1Size, opcode) {
+      def getAddressingForm(operand: imm) = {
         InstructionFormat (
           addressingForm = NoModRM(),
           immediate = Some(operand)
@@ -263,10 +263,10 @@ trait Formats extends LowPriorityFormats {
       }
   }
   
-  implicit object MIFormat extends TwoOperandFormat[MI, ModRM.rm, Immediate] {
+  implicit object MIFormat extends TwoOperandFormat[MI, ModRM.rm, imm] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.rm, Immediate](operand1Size,operand2Size, opcode) {
-      def getAddressingForm(op1: ModRM.rm, op2: Immediate) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.rm, imm](operand1Size,operand2Size, opcode) {
+      def getAddressingForm(op1: ModRM.rm, op2: imm) = {
   
         op1 match {
           case reg: GPR =>
@@ -322,10 +322,10 @@ trait Formats extends LowPriorityFormats {
     }
   }
 
-  implicit object OIFormat extends TwoOperandFormat[OI, ModRM.plusRd, Immediate] {
+  implicit object OIFormat extends TwoOperandFormat[OI, ModRM.plusRd, imm] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.plusRd, Immediate](operand1Size,operand2Size,opcode) {
-      def getAddressingForm(op1: ModRM.plusRd, op2: Immediate) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.plusRd, imm](operand1Size,operand2Size,opcode) {
+      def getAddressingForm(op1: ModRM.plusRd, op2: imm) = {
         InstructionFormat (
           addressingForm = NoModRM(),
           immediate = Some(op2)
@@ -336,9 +336,9 @@ trait Formats extends LowPriorityFormats {
     }
   }
 
-  implicit object M1Format extends TwoOperandFormat[M1, Relative{type Size = DwordOperand}, One] with Formats {
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[Relative{type Size = DwordOperand}, One](operand1Size, operand2Size, opcode) {
-      def getAddressingForm(op1: Relative{type Size = DwordOperand},  op2: One) = MFormat(operand1Size, opcode).getAddressingForm(op1)
+  implicit object M1Format extends TwoOperandFormat[M1, Relative[DwordOperand], One] with Formats {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[Relative[DwordOperand], One](operand1Size, operand2Size, opcode) {
+      def getAddressingForm(op1: Relative[DwordOperand],  op2: One) = MFormat(operand1Size, opcode).getAddressingForm(op1)
       def size = MFormat(operand1Size, opcode).size
     }
   }

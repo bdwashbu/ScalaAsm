@@ -7,6 +7,8 @@ import com.scalaAsm.asm.CodeSection
 
 object HelloWorld2 extends AsmProgram {
   
+  import com.scalaAsm.x86.Instructions.Standard._
+  
   dataSections += new DataSection {
     builder += Variable("helloWorld", "Hello World!\r\n\0")
     builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\0")

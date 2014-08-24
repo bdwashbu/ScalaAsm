@@ -85,9 +85,9 @@ abstract class ZeroOperandInstruction extends x86Instruction with Formats with O
 }
 
 abstract class OneOperandInstruction[OpEn, -O1] extends x86Instruction with Formats with Catalog {
-  def get[X <: O1](x: X, format: ResolvedOneOperand[X]) = new OneMachineCodeBuilder(x, opcode, mnemonic, format) {}
+  def get[X <: O1](x: X, format: ResolvedOneOperand[X]) = new OneMachineCodeBuilder[X,OpEn](x, opcode, mnemonic, format) {}
 }
 
 abstract class TwoOperandInstruction[OpEn, -O1, -O2] extends x86Instruction with Formats {
-  def get[X <: O1, Y <: O2](x: X, y:Y, format: ResolvedTwoOperands[X, Y]) = new TwoMachineCodeBuilder(x, y, opcode, mnemonic, format) {}
+  def get[X <: O1, Y <: O2](x: X, y:Y, format: ResolvedTwoOperands[X, Y]) = new TwoMachineCodeBuilder[X,Y,OpEn](x, y, opcode, mnemonic, format) {}
 }

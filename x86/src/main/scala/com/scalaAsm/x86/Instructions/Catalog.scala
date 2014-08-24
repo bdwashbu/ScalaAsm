@@ -45,7 +45,6 @@ trait Catalog extends Formats {
 
   def jmp[O1: Sized, OpEn](p1: O1)(implicit ev: JMP_1[OpEn,O1], format: OneOperandFormat[OpEn, O1]) = ev.get(p1, format(implicitly[Sized[O1]].size, ev.opcode))
   
-  def mov[O1: Sized, O2: Sized, OpEn](p1: O1, p2: O2)(implicit ev: MOV_2[OpEn, O1, O2], format: TwoOperandFormat[OpEn, O1,O2]) = ev.get(p1, p2, format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size, ev.opcode))
 
   def shr[O1: Sized, O2: Sized, OpEn](p1: O1, p2: O2)(implicit ev: SHR_2[OpEn, O1, O2], format: TwoOperandFormat[OpEn, O1,O2]) = ev.get(p1, p2, format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size, ev.opcode))
 

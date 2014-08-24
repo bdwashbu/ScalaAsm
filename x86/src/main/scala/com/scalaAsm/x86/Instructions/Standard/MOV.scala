@@ -2,11 +2,20 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-trait MOV extends x86Instruction {
+import com.scalaAsm.x86.Operands.TwoOperandFormat
+
+trait MOVInstruction extends x86Instruction {
   val mnemonic = "MOV"
 }
 
-trait MOV_2[OpEn, -O1, -O2] extends TwoOperandInstruction[OpEn, O1,O2] with MOV
+trait MOV_2[OpEn, -O1, -O2] extends TwoOperandInstruction[OpEn, O1,O2] with MOVInstruction
+
+case class mov[O1: Sized, O2: Sized, OpEn](p1: O1, p2: O2)(implicit ev: MOV_2[OpEn, O1, O2], format: TwoOperandFormat[OpEn, O1,O2]) {
+  def get = {
+    ev.get(p1, p2, format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size, ev.opcode))
+  }
+}
+
 
 trait MOVLow {
   
@@ -15,7 +24,7 @@ trait MOVLow {
   }
 }
 
-object MOV extends MOVLow {
+object MOVInstruction extends MOVLow {
  
   implicit object mov3 extends MOV_2[RM, r32, rm32] {
       val opcode = OneOpcode(0x8B)

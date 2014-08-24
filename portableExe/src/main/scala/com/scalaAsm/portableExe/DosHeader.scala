@@ -4,12 +4,13 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import com.scalaAsm.asm.CodeSection
 
+
 // Standard real-mode dos program that prints an error if it cannot be run
 
 object DosStub {
   val dosWarning = "This program cannot be run in DOS mode.\r\r\n$"
   def putStub: Array[Byte] = {
-    
+    import com.scalaAsm.x86.Instructions.Standard._
     val dosStub = new CodeSection {
       builder += push(cs)
       builder += pop(ds)

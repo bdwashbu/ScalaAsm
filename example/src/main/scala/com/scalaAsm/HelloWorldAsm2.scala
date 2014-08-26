@@ -55,7 +55,7 @@ object HelloWorld2 extends AsmProgram {
       call("FlushConsoleInputBuffer"),
       call("_getch"),
       mov(eax, dword(0)),
-      retn
+      retn(())
     )
   }
 }

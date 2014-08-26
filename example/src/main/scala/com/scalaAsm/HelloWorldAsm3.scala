@@ -31,7 +31,7 @@ object HelloWorld3 extends AsmProgram {
       push("helloWorld"),
       call("printf"),
       add(esp, byte(4)),
-      retn)
+      retn(()))
       
     val numberOfBytesToWrite = *(ebp + byte(-12))
     val numberOfBytesWritten = *(ebp + byte(-8))
@@ -57,7 +57,7 @@ object HelloWorld3 extends AsmProgram {
       push(hFile),
       call("WriteFile"),
       mov(eax, numberOfBytesWritten),
-      leave,
+      leave(()),
       retn(word(4)))
 
     builder += align(0x10)
@@ -74,7 +74,7 @@ object HelloWorld3 extends AsmProgram {
       test(eax, eax), // eax is 0 if a key has not been pressed
       jz(byte(-17)), // if a key has not been pressed, loop around again
       call("_getch"),
-      retn)
+      retn(()))
 
     builder += align(0x10)
 

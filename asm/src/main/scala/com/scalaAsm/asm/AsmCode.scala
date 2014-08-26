@@ -28,7 +28,6 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 	   code flatMap {
 	    case ProcedureToken(name, code) => BeginProc(name) +: build(code)
 	    case CodeGroup(code) => build(code)
-	    case foo: mov[_,_,_] => List(foo.get)
 	    case token => List(token)
 	  }
 

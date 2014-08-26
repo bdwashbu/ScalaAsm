@@ -91,3 +91,11 @@ abstract class OneOperandInstruction[OpEn, -O1] extends x86Instruction with Form
 abstract class TwoOperandInstruction[OpEn, -O1, -O2] extends x86Instruction with Formats {
   def get[X <: O1, Y <: O2](x: X, y:Y, format: ResolvedTwoOperands[X, Y]) = new TwoMachineCodeBuilder[X,Y,OpEn](x, y, opcode, mnemonic, format) {}
 }
+
+abstract class TwoOperandInstructionTest[OpEn, -O1, -O2] extends x86Instruction with Formats {
+  def apply[O1: Sized, O2: Sized, OpEn](p1: O1, p2: O2, format: TwoOperandFormat[OpEn, O1,O2]) = {
+    val resolved = format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size, opcode)
+    new TwoMachineCodeBuilder[O1,O2,OpEn](p1, p2, opcode, mnemonic, resolved) {}
+  }
+  //def get[X <: O1, Y <: O2](x: X, y:Y, format: ResolvedTwoOperands[X, Y]) = new TwoMachineCodeBuilder[X,Y,OpEn](x, y, opcode, mnemonic, format) {}
+}

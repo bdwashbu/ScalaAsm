@@ -1,6 +1,6 @@
 package com.scalaAsm.asm
 
-import com.scalaAsm.x86.MachineCode
+import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.x86.Operands.OneOperandFormat
@@ -16,7 +16,7 @@ object Tokens {
   case class ProcedureToken(name: String, innerCode: Seq[Any]) extends CodeToken
   case class Label(name: String) extends CodeToken
   case class LabelRef[OpEn](labelRef: String, inst:OneOperandInstruction[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) extends CodeToken
-  case class InstructionToken(inst: MachineCode) extends SizedToken(inst.size) with CodeToken
+  case class InstructionToken(inst: InstructionResult) extends SizedToken(inst.getSize) with CodeToken
   case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken
   
   abstract class SizedToken(val size: Int) extends Token

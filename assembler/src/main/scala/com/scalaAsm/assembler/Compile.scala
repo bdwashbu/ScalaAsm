@@ -9,7 +9,7 @@ import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.linker.Assembled
 import com.scalaAsm.asm.Registers
-import com.scalaAsm.x86.Instructions.MachineCodeBuilder
+import com.scalaAsm.x86.InstructionResult
 
 
 class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Catalog with Registers
@@ -68,7 +68,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     lazy val procNames   = asm.codeTokens.collect{ case BeginProc(name) => name }
     
     def onePass: Seq[Token] = asm.codeTokens flatMap {
-        case x: MachineCodeBuilder => Some(InstructionToken(x.get))
+        case x: InstructionResult => Some(InstructionToken(x))
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
@@ -113,16 +113,16 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
       var parserPosition = 0
       for (token <- compiledAsm.onePass) yield {
         val result = token match {
-	        case InstructionToken(inst) => inst.code
+	        case InstructionToken(inst) => inst.getBytes
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).getRelative).get.code
-	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).get.code
-	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).get.code
-	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).get.code
+	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).getRelative).getBytes
+	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).getBytes
+	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).getBytes
+	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).getBytes
 	        case LabelRef(name, inst, format) => {
 	          val op = (labels(name) - parserPosition - 2).toByte
-	          inst(new Constant8(op), format).get.code
+	          inst(new Constant8(op), format).getBytes
 	        }
 	        case _ => Array[Byte]()
 	      }

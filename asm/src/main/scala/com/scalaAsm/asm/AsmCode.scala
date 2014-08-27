@@ -4,10 +4,9 @@ import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86.Instructions.Standard._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.MachineCode
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
-import com.scalaAsm.x86.Instructions.MachineCodeBuilder
+import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Catalog
 
 trait CodeSection extends Registers with AsmSection[Any] with Catalog {
@@ -32,7 +31,7 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 	  }
 
     def getRawBytes: Array[Byte] = {
-       build(builder.toSeq) collect { case x: MachineCodeBuilder => x} map {x => x.get.code} reduce (_ ++ _)
+       build(builder.toSeq) collect { case x: InstructionResult => x} map {x => x.getBytes} reduce (_ ++ _)
     }
     
     private def procRef(procName: String) = ProcRef(procName)

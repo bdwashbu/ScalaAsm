@@ -3,7 +3,6 @@ package Instructions
 
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
-import com.scalaAsm.x86.MachineCode
 import com.scalaAsm.x86.OneOpcode
 import com.scalaAsm.x86.OpcodeFormat
 import com.scalaAsm.x86.REX

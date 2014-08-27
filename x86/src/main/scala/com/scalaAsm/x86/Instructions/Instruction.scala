@@ -38,43 +38,31 @@ trait OperandEncoding extends OperandSizes {
   implicit object const4 extends Sized[Constant64] { val size = 8 }
 }
 
-trait MachineCodeBuilder {
-  def get: MachineCode
-}
+class OneMachineCodeBuilder[O1, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: ResolvedOneOperand[O1]) extends InstructionResult with Catalog {
 
-class OneMachineCodeBuilder[O1, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: ResolvedOneOperand[O1]) extends MachineCodeBuilder with Catalog {
-  def get() =
-    new MachineCode {
-        val size = getSize
-        val code = getBytes
-        val line = mnemonic
-      }
+  def line = mnemonic
 
   def getSize: Int = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
     prefixes.size + format.size
   }
 
-  private def getBytes: Array[Byte] = {
+  def getBytes: Array[Byte] = {
     val prefixes = format.getPrefixes(operand) getOrElse Array()
     prefixes ++: opcode.get(OneOperand(operand)) ++: format.getAddressingForm(operand).getBytes
   }
 }
 
-class TwoMachineCodeBuilder[O1, O2, X](operand: O1, operand2: O2, opcode: OpcodeFormat, mnemonic: String, format: ResolvedTwoOperands[O1, O2]) extends MachineCodeBuilder {
-  def get() =
-    new MachineCode {
-        val size = getSize
-        val code = getBytes
-        val line = mnemonic
-      }
+class TwoMachineCodeBuilder[O1, O2, X](operand: O1, operand2: O2, opcode: OpcodeFormat, mnemonic: String, format: ResolvedTwoOperands[O1, O2]) extends InstructionResult {
+
+  def line = mnemonic
 
   def getSize: Int = {
     val prefixes = format.getPrefixes(operand, operand2) getOrElse Array()
     prefixes.size + format.size
   }
 
-  private def getBytes: Array[Byte] = {
+  def getBytes: Array[Byte] = {
     val prefixes = format.getPrefixes(operand, operand2) getOrElse Array()
     prefixes ++: opcode.get(TwoOperands(operand, operand2)) ++: format.getAddressingForm(operand, operand2).getBytes
   }

@@ -9,7 +9,7 @@ import java.nio.ByteBuffer
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Catalog
 
-trait CodeSection extends Registers with AsmSection[Any] with Catalog {
+trait CodeSection extends Registers with AsmSection[InstructionResult] with Catalog {
 
     def byte(value: Byte) = Constant8(value)
     def word(value: Short) = Constant16(value)
@@ -19,11 +19,11 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}
     
-    def procedure(name: String, innerCode: Any*) = {
+    def procedure(name: String, innerCode: InstructionResult*) = {
       builder += ProcedureToken(name, innerCode)
     }
     
-    def build(code: Seq[Any]): Seq[Any] =
+    def build(code: Seq[InstructionResult]): Seq[InstructionResult] =
 	   code flatMap {
 	    case ProcedureToken(name, code) => BeginProc(name) +: build(code)
 	    case CodeGroup(code) => build(code)
@@ -50,8 +50,8 @@ trait CodeSection extends Registers with AsmSection[Any] with Catalog {
 
     def jmp(ref: String) = JmpRef(ref)
 
-    def repeat(numTimes: Int, code: List[Any]): CodeGroup = {
-      val expanded = ListBuffer[Any]()
+    def repeat(numTimes: Int, code: List[InstructionResult]): CodeGroup = {
+      val expanded = ListBuffer[InstructionResult]()
       for (i <- 0 until numTimes) {
         expanded ++= code
       }

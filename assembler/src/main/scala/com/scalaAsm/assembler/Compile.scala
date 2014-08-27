@@ -68,7 +68,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     lazy val procNames   = asm.codeTokens.collect{ case BeginProc(name) => name }
     
     def onePass: Seq[Token] = asm.codeTokens flatMap {
-        case x: InstructionResult => Some(InstructionToken(x))
+        
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
@@ -78,7 +78,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
         case Reference(name) => Some(ImportRef(name))
         case label @ Label(name) => Some(label)
         case labelref @ LabelRef(name, inst, format) => Some(labelref)
-        case _ => None
+        case x: InstructionResult => Some(InstructionToken(x))
     }
 
     def positionPass: Seq[PostToken] = {

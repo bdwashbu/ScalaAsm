@@ -10,17 +10,45 @@ object Tokens {
   trait Token
   
   trait CodeToken extends Token
-  case class Reference(name: String) extends CodeToken
+  case class Reference(name: String) extends CodeToken with InstructionResult {
+    def line = ""
+    def getSize = 0
+    def getBytes = Array()
+  }
   case class JmpRef(name: String) extends CodeToken
-  case class CodeGroup(code: Seq[Any]) extends CodeToken
-  case class ProcedureToken(name: String, innerCode: Seq[Any]) extends CodeToken
-  case class Label(name: String) extends CodeToken
-  case class LabelRef[OpEn](labelRef: String, inst:OneOperandInstruction[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) extends CodeToken
+  case class CodeGroup(code: Seq[InstructionResult]) extends CodeToken with InstructionResult {
+    def line = ""
+    def getSize = 0
+    def getBytes = Array()
+  }
+  case class ProcedureToken(name: String, innerCode: Seq[InstructionResult]) extends CodeToken with InstructionResult {
+    def line = ""
+    def getSize = 0
+    def getBytes = Array()
+  }
+  case class Label(name: String) extends CodeToken with InstructionResult {
+    def line = ""
+    def getSize = 0
+    def getBytes = Array()
+  }
+  case class LabelRef[OpEn](labelRef: String, inst:OneOperandInstruction[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) extends CodeToken with InstructionResult {
+    def line = ""
+    def getSize = 0
+    def getBytes = Array()
+  } 
   case class InstructionToken(inst: InstructionResult) extends SizedToken(inst.getSize) with CodeToken
-  case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken
+  case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken with InstructionResult {
+    def line = ""
+    def getSize = 0
+    def getBytes = Array()
+  }
   
   abstract class SizedToken(val size: Int) extends Token
-  case class BeginProc(name: String) extends Token
+  case class BeginProc(name: String) extends Token with InstructionResult {
+    def line = ""
+    def getSize = 0
+    def getBytes = Array()
+  }
   case class Padding(to: Int, tokenSize: Int) extends SizedToken(tokenSize)
   case class ProcRef(procName: String) extends SizedToken(5)
   case class VarRef(procName: String) extends SizedToken(5)

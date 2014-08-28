@@ -38,7 +38,7 @@ trait OperandEncoding extends OperandSizes {
   implicit object const4 extends Sized[Constant64] { val size = 8 }
 }
 
-class OneMachineCodeBuilder[O1, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: ResolvedOneOperand[O1]) extends InstructionResult with Catalog {
+class OneMachineCodeBuilder[O1, X](operand: O1, opcode: OpcodeFormat, mnemonic: String, format: ResolvedOneOperand[O1]) extends InstructionResult {
 
   def line = mnemonic
 
@@ -72,7 +72,7 @@ abstract class ZeroOperandInstruction extends x86Instruction with Formats with O
   def get[X] = new OneMachineCodeBuilder(Constant8(0), opcode, mnemonic, new NoOperandFormat {}) {}
 }
 
-abstract class OneOperandInstruction[OpEn, -O1] extends x86Instruction with Formats with Catalog {
+abstract class OneOperandInstruction[OpEn, -O1] extends x86Instruction with Formats {
   def apply[O1: Sized, OpEn](p1: O1, format: OneOperandFormat[OpEn, O1]) = {
     val resolved = format(implicitly[Sized[O1]].size, opcode)
     new OneMachineCodeBuilder[O1,OpEn](p1, opcode, mnemonic, resolved) {}

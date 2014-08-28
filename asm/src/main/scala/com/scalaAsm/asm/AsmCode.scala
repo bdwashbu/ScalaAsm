@@ -1,15 +1,15 @@
 package com.scalaAsm.asm
 
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.x86.Instructions.Standard._
+import com.scalaAsm.x86.Instructions.{Standard, Formats}
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
 import com.scalaAsm.x86.InstructionResult
-import com.scalaAsm.x86.Instructions.Catalog
+import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
 
-trait CodeSection extends Registers with AsmSection[InstructionResult] with Catalog {
+trait CodeSection extends Registers with AsmSection[InstructionResult] with Standard.Catalog with Formats {
 
     def byte(value: Byte) = Constant8(value)
     def word(value: Short) = Constant16(value)

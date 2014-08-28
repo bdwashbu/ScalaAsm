@@ -19,6 +19,7 @@ package object x86 {
     implicit object size11 extends Sized[BaseIndex[EBP, Constant8]] {val size = 1}
     implicit object size12 extends Sized[Register[_64]] {val size = 8}
     implicit object size13 extends Sized[RegisterIndirect[RSP]] {val size = 8}
+    implicit object size21 extends Sized[RegisterIndirect[r32]] {val size = 4}
     implicit object size14 extends Sized[Register[_8]] {val size = 1}
     implicit object size15 extends Sized[SegmentRegister] {val size = 2}
     implicit object size16 extends Sized[BaseIndex[RSP, Constant8]] {val size = 1}

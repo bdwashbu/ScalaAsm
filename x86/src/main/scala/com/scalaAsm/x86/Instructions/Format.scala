@@ -42,6 +42,20 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
+  implicit object MFormat2R2 extends OneOperandFormat[M, RegisterIndirect[r64]] {
+
+    def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[RegisterIndirect[r64]](operand1Size, opcode) {
+      def getAddressingForm(operand: RegisterIndirect[r64]) = {
+            InstructionFormat (
+              addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, operand.base)), //mem.encode(opcode.opcodeExtension),
+              immediate = None
+            )
+      }
+      
+       def size = opcode.size + 1
+    }
+  }
+  
   implicit object MFormatB1 extends OneOperandFormat[M, BaseIndex[r64, _]] {
 
     def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[BaseIndex[r64, _]](operand1Size, opcode) {

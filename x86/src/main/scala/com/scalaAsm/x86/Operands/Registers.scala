@@ -3,7 +3,7 @@ package Operands
 
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 
-abstract class Register[S <: OperandSize](val name: String) extends RegisterOrMemory { type Size = S }
+abstract class Register[S <: OperandSize](val name: String)
 
 abstract class GeneralPurpose[S <: OperandSize](name: String) extends Register[S](name) {
   self =>
@@ -31,48 +31,48 @@ abstract class StackPointer[Size <: OperandSize](name: String) extends GeneralPu
 trait UniformByteRegister[Size <: OperandSize] extends GeneralPurpose[Size]
 
 // "A" family - Accumulator for operands and results
-class RAX extends GeneralPurposeA[_64]("rax")
-class EAX extends GeneralPurposeA[_32]("eax")
-class AX extends GeneralPurposeA[_16]("ax")
-class AL extends GeneralPurposeA[_8]("al")
-class AH extends GeneralPurposeA[_8]("ah") { override val ID = 4 }
+class RAX extends GeneralPurposeA[_64]("rax") with RegisterOrMemory { type Size = _64 }
+class EAX extends GeneralPurposeA[_32]("eax") with RegisterOrMemory { type Size = _32 }
+class AX extends GeneralPurposeA[_16]("ax") with RegisterOrMemory { type Size = _16 }
+class AL extends GeneralPurposeA[_8]("al") with RegisterOrMemory { type Size = _8 }
+class AH extends GeneralPurposeA[_8]("ah") with RegisterOrMemory { type Size = _8; override val ID = 4 }
 
 // "B" family - Pointer to data in the DS segment
-class RBX extends GeneralPurposeB[_64]("rbx")
-class EBX extends GeneralPurposeB[_32]("ebx")
-class BX extends GeneralPurposeB[_16]("bx")
-class BL extends GeneralPurposeB[_8]("bl")
+class RBX extends GeneralPurposeB[_64]("rbx") with RegisterOrMemory { type Size = _64 }
+class EBX extends GeneralPurposeB[_32]("ebx") with RegisterOrMemory { type Size = _32 }
+class BX extends GeneralPurposeB[_16]("bx") with RegisterOrMemory { type Size = _16 }
+class BL extends GeneralPurposeB[_8]("bl") with RegisterOrMemory { type Size = _8 }
 class BH extends GeneralPurposeB[_8]("bh") { override val ID = 7 }
 
 // "C" family - Counter for string and loop operations
-class RCX extends GeneralPurposeC[_64]("rcx")
-class ECX extends GeneralPurposeC[_32]("ecx")
-class CX extends GeneralPurposeC[_16]("cx")
-class CL extends GeneralPurposeC[_8]("cl")
+class RCX extends GeneralPurposeC[_64]("rcx") with RegisterOrMemory { type Size = _64 }
+class ECX extends GeneralPurposeC[_32]("ecx") with RegisterOrMemory { type Size = _32 }
+class CX extends GeneralPurposeC[_16]("cx") with RegisterOrMemory { type Size = _16 }
+class CL extends GeneralPurposeC[_8]("cl") with RegisterOrMemory { type Size = _8 }
 class CH extends GeneralPurposeC[_8]("ch") { override val ID = 5 }
 
 // "D" family - I/O pointer
-class RDX extends  GeneralPurposeD[_64]("rdx")
-class EDX extends GeneralPurposeD[_32]("edx")
-class DX extends GeneralPurposeD[_16]("dx")
-class DL extends GeneralPurposeD[_8]("dl")
+class RDX extends  GeneralPurposeD[_64]("rdx") with RegisterOrMemory { type Size = _64 }
+class EDX extends GeneralPurposeD[_32]("edx") with RegisterOrMemory { type Size = _32 }
+class DX extends GeneralPurposeD[_16]("dx") with RegisterOrMemory { type Size = _16 }
+class DL extends GeneralPurposeD[_8]("dl") with RegisterOrMemory { type Size = _8 }
 class DH extends GeneralPurposeD[_8]("dh") { override val ID = 6 }
 
-class RSP extends StackPointer[_64]("rsp")
-class ESP extends StackPointer[_32]("esp")
-class SP extends StackPointer[_16]("sp")
-class SPL extends StackPointer[_8]("spl") with UniformByteRegister[_8]
+class RSP extends StackPointer[_64]("rsp") with RegisterOrMemory { type Size = _64 }
+class ESP extends StackPointer[_32]("esp") with RegisterOrMemory { type Size = _32 }
+class SP extends StackPointer[_16]("sp") with RegisterOrMemory { type Size = _16 }
+class SPL extends StackPointer[_8]("spl") with UniformByteRegister[_8] with RegisterOrMemory { type Size = _8 }
 
-class RBP extends BasePointer[_64]("rbp")
-class EBP extends BasePointer[_32]("ebp")
-class BP extends BasePointer[_16]("bp")
+class RBP extends BasePointer[_64]("rbp") with RegisterOrMemory { type Size = _64 }
+class EBP extends BasePointer[_32]("ebp") with RegisterOrMemory { type Size = _32 }
+class BP extends BasePointer[_16]("bp") with RegisterOrMemory { type Size = _16 }
 
 class RSI extends SourceIndex[_64]("rsi")
 class ESI extends SourceIndex[_32]("esi")
 class SI extends SourceIndex[_16]("si")
 
-class RDI extends DestinationIndex[_64]("rdi")
-class EDI extends DestinationIndex[_32]("edi")
+class RDI extends DestinationIndex[_64]("rdi") with RegisterOrMemory { type Size = _64 }
+class EDI extends DestinationIndex[_32]("edi") with RegisterOrMemory { type Size = _32 }
 class DI extends DestinationIndex("di")
 
 class ES extends SegmentRegister("es") { val ID = 8 }

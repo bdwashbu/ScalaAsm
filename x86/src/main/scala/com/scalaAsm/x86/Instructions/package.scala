@@ -23,6 +23,7 @@ package object Instructions {
   type rel = Relative[_ <: OperandSize]
   type rel16 = Relative[WordOperand]
   type rel32 = Relative[DwordOperand]
+  type rel64 = Relative[QwordOperand]
   
   trait testOneOperand[X[G,H] <: OneOperandInstruction[G,H]] {
     def apply[O1: Sized, OpEn](p1: O1)(implicit ev: X[OpEn,O1], format: OneOperandFormat[OpEn, O1]) = ev(p1, format)

@@ -5,11 +5,12 @@ import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
+import com.scalaAsm.x86.`package`.OperandSize
 
 trait Registers {
 
-  def *(gpr: GPR) = new RegisterIndirect[GPR](gpr) {
-    type Size = gpr.Size
+  def *[X <: OperandSize](gpr: GeneralPurpose[X]) = new RegisterIndirect[GeneralPurpose[X]](gpr) {
+    type Size = X
   }
 
   def *[M <: AddressingMode](mem: M): M = mem

@@ -12,6 +12,8 @@ object ScalaBasic {
       val beginTime = System.nanoTime()
       val helloWorld = HelloWorld3.assemble.addIcon("scala.ico")
       val exe = helloWorld.link(0x2000, is64Bit = false, "kernel32.dll", "msvcrt.dll")
+//      val helloWorld = HelloWorld2.assemble.addIcon("scala.ico")
+//      val exe = helloWorld.link(0x2000, is64Bit = true, "kernel32.dll", "msvcrt.dll")
 
       outputStream.write(exe.get)
 

@@ -56,19 +56,7 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
-  implicit object MFormatB1 extends OneOperandFormat[M, BaseIndex[r64, _]] {
-
-    def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[BaseIndex[r64, _]](operand1Size, opcode) {
-      def getAddressingForm(operand: BaseIndex[r64, _]) = {
-            InstructionFormat (
-              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
-              immediate = None
-            )
-      }
-      
-       def size = opcode.size + 2
-    }
-  }
+  
   
   implicit object MFormatB2 extends OneOperandFormat[M, BaseIndex[_,Constant8]] {
 
@@ -197,6 +185,20 @@ trait LowPriorityFormats extends OperandEncoding {
 
 trait Formats extends LowPriorityFormats {
 
+  implicit object MFormatB1 extends OneOperandFormat[M, BaseIndex[r64, _]] {
+
+    def apply(operand1Size: Int, opcode: OpcodeFormat) = new ResolvedOneOperand[BaseIndex[r64, _]](operand1Size, opcode) {
+      def getAddressingForm(operand: BaseIndex[r64, _]) = {
+            InstructionFormat (
+              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
+              immediate = None
+            )
+      }
+      
+       def size = opcode.size + 2
+    }
+  }
+  
   implicit object RMFormatB1 extends TwoOperandFormat[RM, ModRM.reg, BaseIndex[StackPointer[_],Constant8]] {
 
     def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.reg, BaseIndex[StackPointer[_],Constant8]](operand1Size,operand2Size,opcode) {
@@ -290,7 +292,17 @@ trait Formats extends LowPriorityFormats {
         }
       }
   
-      def size = {println("operand2size: " + operand2Size + " op1Size:" + operand1Size + " result:" + opcode.size + 1 + operand2Size); opcode.size + 1 + operand2Size}
+      def size = opcode.size + 1 + operand2Size
+      
+      override def getPrefixes(op1: ModRM.rm, op2: imm): Option[Array[Byte]] = {
+        op1 match {
+          case reg: UniformByteRegister[_] =>
+            Some(REX.W(false).get)
+          case reg: GeneralPurpose[_64] =>
+            Some(REX.W(true).get)
+          case _ => None
+        }
+      }
     }
   }
 

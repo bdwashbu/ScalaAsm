@@ -21,7 +21,7 @@ object HelloWorld2 extends AsmProgram {
 
     procedure(name = "start",
       push(rsp),
-      push(*(rsp)),
+      push(*(rsp+byte(0))), // weird fix for [ss:rsp] whatever that means
       and(spl, byte(0xF0)),
       mov(rcx, STD_OUTPUT_HANDLE),
       sub(rsp, byte(0x20)),

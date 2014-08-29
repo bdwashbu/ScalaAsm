@@ -73,6 +73,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
         case JmpRef(name) => Some(JmpRefResolved(name))
+        case Invoke(name) => Some(InvokeRef(name))
         case Reference(name) if procNames.contains(name) => Some(ProcRef(name))
         case Reference(name) if varNames.contains(name) => Some(VarRef(name))
         case Reference(name) => Some(ImportRef(name))
@@ -117,6 +118,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
 	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).getRelative).getBytes
+	        case InvokeRef(name) => callNear(*(Constant32(imports(name) - parserPosition - 5)).getRelative).getBytes
 	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).getBytes
 	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).getBytes
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).getBytes

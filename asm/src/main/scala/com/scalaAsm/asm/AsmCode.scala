@@ -47,6 +47,8 @@ trait CodeSection extends Registers with AsmSection[InstructionResult] with Stan
     def jz[OpEn](labelRef: String)(implicit ev: JZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format)
 
     def call(refName: String) = Reference(refName)
+    
+    def invoke(refName: String) = Invoke(refName)
 
     def jmp(ref: String) = JmpRef(ref)
 

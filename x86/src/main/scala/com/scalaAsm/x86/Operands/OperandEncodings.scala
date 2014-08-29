@@ -32,7 +32,15 @@ abstract class ResolvedOneOperand[-X](operand1Size: Int, opcode: OpcodeFormat) {
 
 abstract class ResolvedTwoOperands[-X, -Y](operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) {
   def getAddressingForm(op1: X, op2: Y): InstructionFormat
-  def getPrefixes(op1: X, op2: Y): Option[Array[Byte]] = None
+  def getPrefixes(op1: X, op2: Y): Option[Array[Byte]] = {
+        op1 match {
+          case reg: UniformByteRegister[_] =>
+            Some(REX.W(false).get)
+          case reg: GeneralPurpose[_64] =>
+            Some(REX.W(true).get)
+          case _ => None
+        }
+      }
   def size: Int
 }
 

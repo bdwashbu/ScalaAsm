@@ -15,6 +15,11 @@ object Tokens {
     def getSize = 0
     def getBytes = Array()
   }
+  case class Invoke(name: String) extends CodeToken with InstructionResult {
+    def line = ""
+    def getSize = 0
+    def getBytes = Array()
+  }
   case class JmpRef(name: String) extends CodeToken
   case class CodeGroup(code: Seq[InstructionResult]) extends CodeToken with InstructionResult {
     def line = ""
@@ -53,6 +58,7 @@ object Tokens {
   case class ProcRef(procName: String) extends SizedToken(5)
   case class VarRef(procName: String) extends SizedToken(5)
   case class ImportRef(varName: String) extends SizedToken(6)
+  case class InvokeRef(varName: String) extends SizedToken(6)
   case class JmpRefResolved(varName: String) extends SizedToken(6)
   
   trait DataToken extends Token

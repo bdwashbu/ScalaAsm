@@ -179,6 +179,40 @@ trait LowPriorityFormats extends OperandEncoding {
       def size = opcode.size + 1 + operand2Size
     }
   }
+  
+  implicit object MIFormat extends TwoOperandFormat[MI, ModRM.rm, imm] {
+
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.rm, imm](operand1Size,operand2Size, opcode) {
+      def getAddressingForm(op1: ModRM.rm, op2: imm) = {
+  
+        op1 match {
+          case reg: GPR =>
+            InstructionFormat (
+              addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, reg)),//reg.encode(opcode.opcodeExtension),
+              immediate = Some(op2)
+            )
+        }
+      }
+  
+      def size = opcode.size + 1 + operand2Size
+      
+     
+    }
+  }
+  
+  implicit object OIFormat extends TwoOperandFormat[OI, ModRM.plusRd, imm] {
+
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.plusRd, imm](operand1Size,operand2Size,opcode) {
+      def getAddressingForm(op1: ModRM.plusRd, op2: imm) = {
+        InstructionFormat (
+          addressingForm = NoModRM(),
+          immediate = Some(op2)
+        )
+      }
+  
+      def size = opcode.size + operand2Size
+    }
+  }
 }
 
 
@@ -277,34 +311,6 @@ trait Formats extends LowPriorityFormats {
         def size = 4
       }
   }
-  
-  implicit object MIFormat extends TwoOperandFormat[MI, ModRM.rm, imm] {
-
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.rm, imm](operand1Size,operand2Size, opcode) {
-      def getAddressingForm(op1: ModRM.rm, op2: imm) = {
-  
-        op1 match {
-          case reg: GPR =>
-            InstructionFormat (
-              addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, reg)),//reg.encode(opcode.opcodeExtension),
-              immediate = Some(op2)
-            )
-        }
-      }
-  
-      def size = opcode.size + 1 + operand2Size
-      
-      override def getPrefixes(op1: ModRM.rm, op2: imm): Option[Array[Byte]] = {
-        op1 match {
-          case reg: UniformByteRegister[_] =>
-            Some(REX.W(false).get)
-          case reg: GeneralPurpose[_64] =>
-            Some(REX.W(true).get)
-          case _ => None
-        }
-      }
-    }
-  }
 
   implicit object RMFormat2 extends TwoOperandFormat[RM, ModRM.reg, AbsoluteAddress[Constant32]] {
 
@@ -344,20 +350,6 @@ trait Formats extends LowPriorityFormats {
       }
   
       def size = RMFormat6(operand2Size, operand1Size, opcode).size
-    }
-  }
-
-  implicit object OIFormat extends TwoOperandFormat[OI, ModRM.plusRd, imm] {
-
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) = new ResolvedTwoOperands[ModRM.plusRd, imm](operand1Size,operand2Size,opcode) {
-      def getAddressingForm(op1: ModRM.plusRd, op2: imm) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(op2)
-        )
-      }
-  
-      def size = opcode.size + operand2Size
     }
   }
 

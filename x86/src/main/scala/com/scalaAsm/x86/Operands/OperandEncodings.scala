@@ -10,37 +10,26 @@ object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), im
 
 trait OperandFormat
 
-class NoOperandFormat extends ResolvedOneOperand[Constant8](0, null) {
+class NoOperandFormat extends ResolvedOneOperand[Constant8](0, null, Array()) {
   def getAddressingForm(op1: Constant8) = NoAddressingForm
-  override def getPrefixes(op1: Constant8) = None
   val size = 1
 }
 
-abstract class TwoOperandFormat[OpEn, -X, -Y] {
-  def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat): ResolvedTwoOperands[X,Y]
-}
 
-abstract class OneOperandFormat[OpEn, -X] {
-  def apply(operand1Size: Int, opcode: OpcodeFormat): ResolvedOneOperand[X]
-}
+abstract class TwoOperandFormat[OpEn, -X, -Y] extends Function4[Int, Int, OpcodeFormat, Array[Byte], ResolvedTwoOperands[X,Y]]
+abstract class OneOperandFormat[OpEn, -X] extends Function3[Int, OpcodeFormat, Array[Byte], ResolvedOneOperand[X]]
 
-abstract class ResolvedOneOperand[-X](operand1Size: Int, opcode: OpcodeFormat) {
+abstract class ResolvedOneOperand[-X](operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) {
   def getAddressingForm(op1: X): InstructionFormat
-  def getPrefixes(op1: X): Option[Array[Byte]] = None
+  def getPrefix = prefix
   def size: Int
 }
 
-abstract class ResolvedTwoOperands[-X, -Y](operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat) {
+
+
+abstract class ResolvedTwoOperands[-X, -Y](operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) {
   def getAddressingForm(op1: X, op2: Y): InstructionFormat
-  def getPrefixes(op1: X, op2: Y): Option[Array[Byte]] = {
-        op1 match {
-          case reg: UniformByteRegister[_] =>
-            Some(REX.W(false).get)
-          case reg: GeneralPurpose[_64] =>
-            Some(REX.W(true).get)
-          case _ => None
-        }
-      }
+  def getPrefix = prefix
   def size: Int
 }
 

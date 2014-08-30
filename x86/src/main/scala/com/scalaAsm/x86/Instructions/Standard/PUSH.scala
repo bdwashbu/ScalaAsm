@@ -27,10 +27,11 @@ object PUSH extends POWLow {
 
   implicit object push1 extends PUSH_1[O, r64] {
       val opcode = OneOpcode(0x50) + rd
+      override val defaultsTo64Bit = true
   }
   
   implicit object push2 extends PUSH_1[O, r32] {
-      val opcode = OneOpcode(0x50) + rd
+      val opcode = OneOpcode(0x50) + rd 
   }
   
   implicit object push4 extends PUSH_1[I, imm8] {

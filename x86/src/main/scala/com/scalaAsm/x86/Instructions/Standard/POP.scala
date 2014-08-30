@@ -18,6 +18,7 @@ object POP {
   
   implicit object pop3 extends POP_1[O, r64] {
       val opcode = OneOpcode(0x58) + rd
+      override val defaultsTo64Bit = true
   }
   
   implicit object pop2 extends POP_1[DS, DS] {

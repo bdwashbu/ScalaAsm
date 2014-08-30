@@ -8,8 +8,9 @@ import scala.language.implicitConversions
 import java.nio.ByteBuffer
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
+import com.scalaAsm.x86.Prefixes
 
-trait CodeSection extends Registers with AsmSection[InstructionResult] with Standard.Catalog with Formats {
+trait CodeSection extends Registers with AsmSection[InstructionResult] with Standard.Catalog with Formats with Prefixes {
 
     def byte(value: Byte) = Constant8(value)
     def word(value: Short) = Constant16(value)

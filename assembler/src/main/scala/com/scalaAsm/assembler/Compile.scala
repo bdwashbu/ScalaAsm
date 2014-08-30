@@ -11,8 +11,9 @@ import com.scalaAsm.asm.Registers
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard
 import com.scalaAsm.x86.Instructions.Formats
+import com.scalaAsm.x86.Prefixes
 
-class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Standard.Catalog with Formats with Registers
+class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Standard.Catalog with Formats with Registers with Prefixes
 {
   import scala.language.postfixOps
   
@@ -124,7 +125,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).getBytes
 	        case LabelRef(name, inst, format) => {
 	          val op = (labels(name) - parserPosition - 2).toByte
-	          inst(new Constant8(op), format).getBytes
+	          inst(new Constant8(op), format, Array()).getBytes
 	        }
 	        case _ => Array[Byte]()
 	      }

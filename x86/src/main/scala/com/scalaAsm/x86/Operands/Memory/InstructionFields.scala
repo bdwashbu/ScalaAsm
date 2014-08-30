@@ -44,7 +44,7 @@ case class NoSIBWithDisplacement[Mod <: ModRM, Disp <: Constant[_]](mod: Mod, of
 case class WithSIBWithDisplacement[Mod <: ModRM, Sib <: SIB, Disp <: Constant[_]](mod: Mod, theSIB: Sib, offset: Disp) extends AddressingFormSpecifier(mod, theSIB, offset)
 
 object ModRM {
-  type rm = RegisterOrMemory
+  type rm = RegisterOrMemory[_]
   type reg = GPR
   type plusRd = rm
 }

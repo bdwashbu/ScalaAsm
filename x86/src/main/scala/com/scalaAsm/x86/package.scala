@@ -18,8 +18,8 @@ package object x86 {
     implicit object size10 extends Sized[Constant8] {val size = 1}
     implicit object size11 extends Sized[BaseIndex[EBP, Constant8]] {val size = 1}
     implicit object size12 extends Sized[Register[_64]] {val size = 8}
-    implicit object size13 extends Sized[RegisterIndirect[RSP]] {val size = 8}
-    implicit object size21 extends Sized[RegisterIndirect[r32]] {val size = 4}
+    implicit object size13 extends Sized[RegisterIndirect[_64]] {val size = 8}
+    implicit object size21 extends Sized[RegisterIndirect[_32]] {val size = 4}
     implicit object size14 extends Sized[Register[_8]] {val size = 1}
     implicit object size15 extends Sized[SegmentRegister] {val size = 2}
     implicit object size16 extends Sized[BaseIndex[RSP, Constant8]] {val size = 1}
@@ -42,13 +42,13 @@ package object x86 {
   type imm32 = Constant32
   type imm64 = Constant64
   
-  type rm = RegisterOrMemory
-  type rm8 = rm { type Size = ByteOperand }
-  type rm16 = rm { type Size = WordOperand }
-  type rm32 = rm { type Size = DwordOperand }
-  type rm64 = rm { type Size = QwordOperand }
+  type rm = RegisterOrMemory[_]
+  type rm8 = RegisterOrMemory[_8]
+  type rm16 = RegisterOrMemory[_16]
+  type rm32 = RegisterOrMemory[_32]
+  type rm64 = RegisterOrMemory[_64]
   
-  type m16 = AddressingMode { type Size = WordOperand }
+  type m16 = AddressingMode[_16]
   
   sealed trait OperandSize {
     type primitiveType

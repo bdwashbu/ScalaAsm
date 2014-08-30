@@ -3,12 +3,11 @@ package Memory
 
 import com.scalaAsm.x86._
 
-trait AddressingMode extends RegisterOrMemory
+trait AddressingMode[Size <: OperandSize] extends RegisterOrMemory[Size]
 
-trait AbsoluteAddress[C <: Constant[C]] extends AddressingMode {
+trait AbsoluteAddress[C <: Constant[C]] extends AddressingMode[C#Size] {
   self =>
-  type Size = C#Size
-  var offset: Size#primitiveType
+  var offset: C#Size#primitiveType
   def getRelative: Relative[C#Size]
   def displacement: C
 }
@@ -32,9 +31,9 @@ trait AbsoluteAddress[C <: Constant[C]] extends AddressingMode {
 //  }
 //}
 
-abstract class RegisterIndirect[-Reg <: GPR](reg: Reg) extends AddressingMode {
+abstract class RegisterIndirect[X <: OperandSize](reg: GeneralPurpose[X]) extends AddressingMode[X] {
   self =>
-  def base: GPR = reg
+  def base: GeneralPurpose[X] = reg
 //  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
 //    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
 //  }
@@ -47,7 +46,7 @@ abstract class RegisterIndirect[-Reg <: GPR](reg: Reg) extends AddressingMode {
 
 
 
-trait Relative[S <: OperandSize] extends RegisterOrMemory {
+trait Relative[S <: OperandSize] extends RegisterOrMemory[S] {
   self =>
     def displacement: Constant[_] {type Size = S}
 }

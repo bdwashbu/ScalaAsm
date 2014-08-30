@@ -63,13 +63,7 @@ case class Constant64(value: Long) extends Constant[Constant64] {
   def negate: Constant64 = this.copy(value = -this.value)
 }
 
-
-
-
-
-trait RegisterOrMemory {
-  type Size <: OperandSize
-}
+trait RegisterOrMemory[Size <: OperandSize]
 
 
 

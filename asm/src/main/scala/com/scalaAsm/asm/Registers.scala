@@ -9,11 +9,9 @@ import com.scalaAsm.x86.`package`.OperandSize
 
 trait Registers {
 
-  def *[X <: OperandSize](gpr: GeneralPurpose[X]) = new RegisterIndirect[GeneralPurpose[X]](gpr) {
-    type Size = X
-  }
+  def *[X <: OperandSize](gpr: GeneralPurpose[X]) = new RegisterIndirect[X](gpr) {}
 
-  def *[M <: AddressingMode](mem: M): M = mem
+  def *[M <: AddressingMode[_]](mem: M): M = mem
 
   def *[C <: Constant[C]](offset: C)(implicit abs: AbsoluteAddress[C]): AbsoluteAddress[C] = { abs.offset = offset.value; abs }
 

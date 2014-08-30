@@ -9,13 +9,14 @@ import java.nio.ByteBuffer
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
 import com.scalaAsm.x86.Prefixes
+import com.scalaAsm.x86.Instructions.`package`.Op
 
 trait CodeSection extends Registers with AsmSection[InstructionResult] with Standard.Catalog with Formats with Prefixes {
 
-    def byte(value: Byte) = Constant8(value)
-    def word(value: Short) = Constant16(value)
-    def dword(value: Int) = Constant32(value)
-    def qword(value: Long) = Constant64(value)
+    def byte(value: Byte) = Op(Constant8(value))
+    def word(value: Short) = Op(Constant16(value))
+    def dword(value: Int) = Op(Constant32(value))
+    def qword(value: Long) = Op(Constant64(value))
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One{}

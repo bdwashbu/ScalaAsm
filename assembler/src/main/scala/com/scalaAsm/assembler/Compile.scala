@@ -12,6 +12,7 @@ import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard
 import com.scalaAsm.x86.Instructions.Formats
 import com.scalaAsm.x86.Prefixes
+import com.scalaAsm.x86.Instructions.`package`.Op
 
 class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Standard.Catalog with Formats with Registers with Prefixes
 {
@@ -118,14 +119,14 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case InstructionToken(inst) => inst.getBytes
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).getRelative).getBytes
-	        case InvokeRef(name) => callNear(*(Constant32(imports(name) - parserPosition - 5)).getRelative).getBytes
-	        case VarRef(name) => push(Constant32(variables(name) + baseOffset)).getBytes
+	        case ProcRef(name) => callNear(Op(*(Constant32(procs(name) - parserPosition - 5)).get.getRelative)).getBytes
+	        case InvokeRef(name) => callNear(Op(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative)).getBytes
+	        case VarRef(name) => push(Op(Constant32(variables(name) + baseOffset))).getBytes
 	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).getBytes
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).getBytes
 	        case LabelRef(name, inst, format) => {
 	          val op = (labels(name) - parserPosition - 2).toByte
-	          inst(new Constant8(op), format, Array()).getBytes
+	          inst(Op(new Constant8(op)), format, Array()).getBytes
 	        }
 	        case _ => Array[Byte]()
 	      }

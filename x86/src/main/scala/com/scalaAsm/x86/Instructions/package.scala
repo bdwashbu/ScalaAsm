@@ -24,10 +24,7 @@ package object Instructions {
   type rel16 = Relative[WordOperand]
   type rel32 = Relative[DwordOperand]
   type rel64 = Relative[QwordOperand]
-  
-  trait Operand[From, To] {
-    def get: To
-  }
+ 
 
   case class Op[X](from: X) extends Operand[X, X] { def get = from }
   

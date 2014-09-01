@@ -2,7 +2,6 @@ package com.scalaAsm.x86
 package Operands
 
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
-import com.scalaAsm.x86.Instructions.`package`.Operand
 
 abstract class Register[S <: OperandSize](val name: String)
 
@@ -13,9 +12,10 @@ abstract class GeneralPurpose[S <: OperandSize](name: String) extends Register[S
   def -[Z <: Constant[Z]](offset: Operand[Z,Z]) = new BI[Z](offset.get.negate) {}
   def +[Z <: Constant[Z]](offset: Operand[Z,Z]) = new BI[Z](offset.get) {}
   
-  abstract class BI[-Disp <: Constant[_]](disp: Disp) extends AddressingMode[S] {
+  abstract class BI[Disp <: Constant[_]](disp: Disp) extends AddressingMode[S] with Operand[BI[Disp], BI[Disp]]{
     def base: GPR = self
     def displacement: Constant[_] = disp
+    def get = this
   }
 }
 

@@ -3,8 +3,13 @@ package Operands
 
 import com.scalaAsm.x86.Instructions.InstructionField
 
-trait One {
+trait One extends Operand[One,One]{
   def size = 1
+  def get = this
+}
+
+trait Operand[From, To] {
+  def get: To
 }
 
 trait Constant[Self] extends InstructionField {

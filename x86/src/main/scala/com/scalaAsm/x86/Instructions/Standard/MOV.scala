@@ -46,4 +46,8 @@ object MOVInstruction extends MOVLow {
   implicit object mov11 extends Mov2Def[MR, rm64, r64] {
       val opcode = OneOpcode(0x89)
   }
+  
+  implicit object mov12 extends Mov2Def[MI, rm64, imm32] {
+      val opcode = 0xC7 /+ 0
+  }
 }

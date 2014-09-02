@@ -25,6 +25,7 @@ package object Standard {
     object shl extends testTwoOperands[SHL_2]
     object sbb extends testTwoOperands[SBB_2]
     object test extends testTwoOperands[TEST_2]
+    object xor extends testTwoOperands[XOR_2]
     
     object retn extends testZeroOperands[RET] with testOneOperand[RETN_1]
     object leave extends testZeroOperands[LEAVE]

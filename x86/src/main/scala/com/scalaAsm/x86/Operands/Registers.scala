@@ -29,6 +29,8 @@ abstract class DestinationIndex[Size <: OperandSize](name: String) extends Gener
 abstract class BasePointer[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 5 }
 abstract class StackPointer[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 4 }
 
+abstract class Extra64Reg(name: String) extends GeneralPurpose[_64](name) with RegisterOrMemory[_64]
+
 trait UniformByteRegister[Size <: OperandSize] extends GeneralPurpose[Size]
 
 trait RegisterOperand[X] extends Operand[X,X] {
@@ -89,11 +91,12 @@ class FS extends SegmentRegister("fs") with RegisterOperand[FS] { val ID = 8 }
 class GS extends SegmentRegister("gs") with RegisterOperand[GS] { val ID = 8 }
 
 // Extra 64-bit registers
-class R8 extends GeneralPurpose[_64]("r8") with RegisterOperand[R8] { val ID = 8 }
-class R9 extends GeneralPurpose[_64]("r9") with RegisterOperand[R9] { val ID = 9 }
-class R10 extends GeneralPurpose[_64]("r10") with RegisterOperand[R10] { val ID = 10 }
-class R11 extends GeneralPurpose[_64]("r11") with RegisterOperand[R11] { val ID = 11 }
-class R12 extends GeneralPurpose[_64]("r12") with RegisterOperand[R12] { val ID = 12 }
-class R13 extends GeneralPurpose[_64]("r13") with RegisterOperand[R13] { val ID = 13 }
-class R14 extends GeneralPurpose[_64]("r14") with RegisterOperand[R14] { val ID = 14 }
-class R15 extends GeneralPurpose[_64]("r15") with RegisterOperand[R15] { val ID = 15 }
+// Uses the rex.W field to access
+class R8 extends Extra64Reg("r8") with RegisterOperand[R8] { val ID = 0 }
+class R9 extends Extra64Reg("r9") with RegisterOperand[R9] { val ID = 1 }
+class R10 extends Extra64Reg("r10") with RegisterOperand[R10] { val ID = 2 }
+class R11 extends Extra64Reg("r11") with RegisterOperand[R11] { val ID = 3 }
+class R12 extends Extra64Reg("r12") with RegisterOperand[R12] { val ID = 4 }
+class R13 extends Extra64Reg("r13") with RegisterOperand[R13] { val ID = 5 }
+class R14 extends Extra64Reg("r14") with RegisterOperand[R14] { val ID = 6 }
+class R15 extends Extra64Reg("r15") with RegisterOperand[R15] { val ID = 7 }

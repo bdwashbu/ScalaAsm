@@ -195,8 +195,6 @@ trait LowPriorityFormats extends OperandEncoding {
       }
   
       def size = prefix.size + opcode.size + 1 + operand2Size
-      
-     
     }
   }
   
@@ -218,7 +216,7 @@ trait LowPriorityFormats extends OperandEncoding {
 
 
 trait Formats extends LowPriorityFormats {
-
+  
   implicit object MFormatB1 extends OneOperandFormat[M, BaseIndex[r64, _]] {
 
     def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[BaseIndex[r64, _]](operand1Size, opcode, prefix) {
@@ -317,7 +315,7 @@ trait Formats extends LowPriorityFormats {
     def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, AbsoluteAddress[Constant32]](operand1Size,operand2Size, opcode, prefix) {
       def getAddressingForm(op1: ModRM.reg, op2: AbsoluteAddress[Constant32]) = {
         InstructionFormat (
-          addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), op2.displacement),
+          addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.displacement),
           immediate = None
         )
       }
@@ -339,8 +337,6 @@ trait Formats extends LowPriorityFormats {
       def size = prefix.size + opcode.size + 1
     }
   }
-
- 
   
   implicit object MRFormat2 extends TwoOperandFormat[MR, ModRM.reg, ModRM.reg] {
 

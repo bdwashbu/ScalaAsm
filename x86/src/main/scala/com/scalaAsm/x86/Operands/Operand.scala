@@ -2,13 +2,24 @@ package com.scalaAsm.x86
 package Operands
 
 import com.scalaAsm.x86.Instructions.InstructionField
+import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 
 trait One extends Operand[One,One]{
   def size = 1
   def get = this
 }
 
-trait Operand[From, To] {
+case class addr(name: String) extends Operand[String, AbsoluteAddress[Constant32]] {
+  var variables: Map[String, Int] = _
+  var baseOffset: Int = _
+  def get = {println(variables(name)); println(baseOffset); new AbsoluteAddress[Constant32] {
+    var offset = variables(name) + baseOffset
+    def getRelative = null
+    def displacement = Constant32(variables(name) - 2000 - 2157)
+  }}
+}
+
+trait Operand[+From, +To] {
   def get: To
 }
 

@@ -2,15 +2,21 @@ package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands.GeneralPurpose
 import com.scalaAsm.x86.Operands.UniformByteRegister
+import com.scalaAsm.x86.Operands._
 
 trait HasRexPrefix[-X] { def get: Array[Byte] }
 
-trait PrefixLow {
+trait PrefixExtraLow {
   implicit object HasNoPrefix extends HasRexPrefix[Any] { def get = Array() }
 }
 
-trait Prefixes extends PrefixLow {
+trait PrefixLow extends PrefixExtraLow {
   implicit object HasRex64 extends HasRexPrefix[GeneralPurpose[_64]] { def get = REX.W(true).get }
+}
+
+trait Prefixes extends PrefixLow {
+  implicit object HasRexR9 extends HasRexPrefix[R9] { def get = REX(true, true, false, false).get }
+  implicit object HasRexR8 extends HasRexPrefix[R8] { def get = REX(true, false, false, true).get }
   implicit object HasRexUniform extends HasRexPrefix[UniformByteRegister[_]] { def get = REX.W(false).get }
 }
 

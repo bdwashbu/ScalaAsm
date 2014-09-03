@@ -36,7 +36,7 @@ object Tokens {
     def getSize = 0
     def getBytes = Array()
   }
-  case class LabelRef[OpEn](labelRef: String, inst:OneOperandInstruction[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) extends CodeToken with InstructionResult {
+  case class LabelRef[OpEn[imm]](labelRef: String, inst:OneOperandInstruction[Constant8, OpEn], format: OneOperandFormat[Constant8, OpEn]) extends CodeToken with InstructionResult {
     def line = ""
     def getSize = 0
     def getBytes = Array()

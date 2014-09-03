@@ -6,10 +6,10 @@ trait XOR extends x86Instruction {
   val mnemonic = "XOR"
 }
 
-trait XOR_2[OpEn, -O1, -O2] extends TwoOperandInstruction[OpEn, O1,O2] with XOR
+trait XOR_2[-O1, -O2, OpEn[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with XOR
 
 object XOR {
-  implicit object xor1 extends XOR_2[MR, rm64, r64] {
+  implicit object xor1 extends XOR_2[rm64, r64, MR] {
       val opcode = OneOpcode(0x31)
   }
 }

@@ -6,15 +6,15 @@ trait TEST extends x86Instruction {
   val mnemonic = "TEST"
 }
 
-trait TEST_2[OpEn, -O1, -O2] extends TwoOperandInstruction[OpEn, O1,O2] with TEST
+trait TEST_2[-O1, -O2, OpEn[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with TEST
 
 object TEST {
   
-  implicit object test1 extends TEST_2[RM, r32, rm32] {
+  implicit object test1 extends TEST_2[r32, rm32, RM] {
       val opcode: OpcodeFormat = 0x85
   }
   
-  implicit object test2 extends TEST_2[MI, rm32, imm32] {
+  implicit object test2 extends TEST_2[rm32, imm32, MI] {
       val opcode: OpcodeFormat = 0xF7 /+ 0
   }
 }

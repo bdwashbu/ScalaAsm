@@ -6,15 +6,15 @@ trait DEC extends x86Instruction {
   val mnemonic = "DEC"
 }
 
-trait DEC_1[OpEn, -O1] extends OneOperandInstruction[OpEn, O1] with DEC
+trait DEC_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with DEC
 
 object DEC {
   
-  implicit object dec1 extends DEC_1[O, r32] {
+  implicit object dec1 extends DEC_1[r32, O] {
      val opcode = OneOpcode(0x48) + rd
   }
   
-  implicit object dec2 extends DEC_1[O, r16] {
+  implicit object dec2 extends DEC_1[r16, O] {
 	 val opcode = OneOpcode(0x48) + rw
   }
 }

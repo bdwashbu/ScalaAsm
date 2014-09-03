@@ -40,7 +40,7 @@ trait OperandEncoding extends OperandSizes {
   implicit object const4 extends Sized[Constant64] { val size = 8 }
 }
 
-abstract case class OneMachineCodeBuilder[O1, X](operand: Operand[_,O1]) extends InstructionResult {
+abstract case class OneMachineCodeBuilder[O1, OpEn[O1]](operand: Operand[_,O1]) extends InstructionResult {
 
   def line = mnemonic
   def opcode: OpcodeFormat
@@ -56,7 +56,7 @@ abstract case class OneMachineCodeBuilder[O1, X](operand: Operand[_,O1]) extends
   }
 }
 
-abstract case class TwoMachineCodeBuilder[O1, O2, X](operand: Operand[_,O1], operand2: Operand[_,O2]) extends InstructionResult {
+abstract case class TwoMachineCodeBuilder[O1, O2, OpEn[O1,O2]](operand: Operand[_,O1], operand2: Operand[_,O2]) extends InstructionResult {
 
   def line = mnemonic
   def opcode: OpcodeFormat
@@ -81,9 +81,9 @@ abstract class ZeroOperandInstruction extends x86Instruction with Formats with O
   }
 }
 
-abstract class OneOperandInstruction[OpEn, -O1] extends x86Instruction with Formats {
+abstract class OneOperandInstruction[-O1, OpEn[O1]] extends x86Instruction with Formats {
   self =>
-  def apply[O1: Sized, OpEn](p1: Operand[_,O1], format: OneOperandFormat[OpEn, O1], prefix: Array[Byte]) = {
+  def apply[O1: Sized](p1: Operand[_,O1], format: OneOperandFormat[O1, OpEn], prefix: Array[Byte]) = {
     val resolvedPrefix: Array[Byte] = if (defaultsTo64Bit) Array() else prefix
     val resolved = format(implicitly[Sized[O1]].size, opcode, resolvedPrefix)
     new OneMachineCodeBuilder[O1,OpEn](p1) {
@@ -94,11 +94,11 @@ abstract class OneOperandInstruction[OpEn, -O1] extends x86Instruction with Form
   }
 }
 
-abstract class TwoOperandInstruction[OpEn, -O1, -O2] extends x86Instruction with Formats {
+abstract class TwoOperandInstruction[-O1, -O2, OpEn[O1, O2]] extends x86Instruction with Formats {
   self =>
-  def apply[O1: Sized, O2: Sized, OpEn](p1: Operand[_,O1], p2: Operand[_,O2], format: TwoOperandFormat[OpEn, O1,O2], prefix: Array[Byte]) = {
+  def apply[O1: Sized, O2: Sized](p1: Operand[_,O1], p2: Operand[_,O2], format: TwoOperandFormat[O1, O2, OpEn], prefix: Array[Byte]) = {
     val resolved = format(implicitly[Sized[O1]].size, implicitly[Sized[O2]].size, opcode, prefix)
-    new TwoMachineCodeBuilder[O1,O2,OpEn](p1, p2) {
+    new TwoMachineCodeBuilder[O1, O2, OpEn](p1, p2) {
       def opcode = self.opcode
       def mnemonic = self.mnemonic
       def format = resolved

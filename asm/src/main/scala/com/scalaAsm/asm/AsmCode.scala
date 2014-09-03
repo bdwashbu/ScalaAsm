@@ -44,9 +44,9 @@ trait CodeSection extends Registers with AsmSection[InstructionResult] with Stan
 
     def push(param: String) = Reference(param)
 
-    def jnz[OpEn](labelRef: String)(implicit ev: JNZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format) 
+    def jnz[OpEn[imm]](labelRef: String)(implicit ev: JNZ_1[Constant8, OpEn], format: OneOperandFormat[Constant8, OpEn]) = LabelRef(labelRef, ev, format) 
 
-    def jz[OpEn](labelRef: String)(implicit ev: JZ_1[OpEn, Constant8], format: OneOperandFormat[OpEn, Constant8]) = LabelRef(labelRef, ev, format)
+    def jz[OpEn[imm]](labelRef: String)(implicit ev: JZ_1[Constant8, OpEn], format: OneOperandFormat[Constant8, OpEn]) = LabelRef(labelRef, ev, format)
 
     def call(refName: String) = Reference(refName)
     

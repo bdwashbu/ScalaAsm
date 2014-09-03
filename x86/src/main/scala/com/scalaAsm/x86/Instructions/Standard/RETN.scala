@@ -9,11 +9,11 @@ trait RETN extends x86Instruction {
   val mnemonic = "RETN"
 }
 
-trait RETN_1[OpEn, -O1] extends OneOperandInstruction[OpEn, O1] with RETN
+trait RETN_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with RETN
 
 object RETN {
   
-  implicit object retn1 extends RETN_1[I, imm16] {
+  implicit object retn1 extends RETN_1[imm16, I] {
       val opcode: OpcodeFormat = 0xC2
   }
 }

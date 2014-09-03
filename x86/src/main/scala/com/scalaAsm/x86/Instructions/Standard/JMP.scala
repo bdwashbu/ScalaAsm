@@ -6,11 +6,11 @@ trait JMP extends x86Instruction {
   val mnemonic = "JMP"
 }
 
-trait JMP_1[OpEn, -O1] extends OneOperandInstruction[OpEn, O1] with JMP 
+trait JMP_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with JMP 
 
 object JMP {
 
-  implicit object jmp2 extends JMP_1[M, rm32] {
+  implicit object jmp2 extends JMP_1[rm32, M] {
     val opcode = 0xFF /+ 4
   }
 }

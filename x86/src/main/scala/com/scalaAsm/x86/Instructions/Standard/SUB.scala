@@ -6,19 +6,19 @@ trait SUB extends x86Instruction {
   val mnemonic = "SUB"
 }
 
-trait SUB_2[OpEn, -O1, -O2] extends TwoOperandInstruction[OpEn, O1,O2] with SUB
+trait SUB_2[-O1, -O2, OpEn[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with SUB
 
 object SUB {
   
-  implicit object sub1 extends SUB_2[MI, rm32, imm8] {
+  implicit object sub1 extends SUB_2[rm32, imm8, MI] {
       val opcode = 0x83 /+ 5
   }
   
-  implicit object sub3 extends SUB_2[MI, rm64, imm8] {
+  implicit object sub3 extends SUB_2[rm64, imm8, MI] {
       val opcode = 0x83 /+ 5
   }
   
-  implicit object sub2 extends SUB_2[RM, r32, rm32] {
+  implicit object sub2 extends SUB_2[r32, rm32, RM] {
     val opcode: OpcodeFormat = 0x2B     
   }
 }

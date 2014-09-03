@@ -6,11 +6,11 @@ trait MUL extends x86Instruction {
   val mnemonic = "MUL"
 }
 
-trait MUL_1[OpEn, -O1] extends OneOperandInstruction[OpEn, O1] with MUL
+trait MUL_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with MUL
 
 object MUL {
   
-  implicit object mul1 extends MUL_1[M, rm32] {
+  implicit object mul1 extends MUL_1[rm32, M] {
       val opcode = 0xF7 /+ 4
   }
 }

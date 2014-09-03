@@ -6,11 +6,11 @@ trait SBB extends x86Instruction {
   val mnemonic = "SBB"
 }
 
-trait SBB_2[OpEn, -O1, -O2] extends TwoOperandInstruction[OpEn, O1,O2] with SBB
+trait SBB_2[-O1, -O2, OpEn[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with SBB
 
 object SBB {
   
-  implicit object sbb1 extends SBB_2[RM, r32, rm32] {
+  implicit object sbb1 extends SBB_2[r32, rm32, RM] {
       val opcode: OpcodeFormat = 0x1B
   }
 }

@@ -10,7 +10,7 @@ trait PUSH extends x86Instruction {
 }
 
 @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
-trait PUSH_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with PUSH
+trait PUSH_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn] with PUSH
 
 trait POWLow {
     

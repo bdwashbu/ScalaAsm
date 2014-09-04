@@ -8,7 +8,7 @@ trait SHL extends x86Instruction {
   val mnemonic = "SHL"
 }
 
-trait SHL_2[-O1, -O2, OpEn[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with SHL
+trait SHL_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with SHL
 
 object SHL {
   

@@ -10,6 +10,8 @@ import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
 import com.scalaAsm.x86.Prefixes
 import com.scalaAsm.x86.Instructions.`package`.Op
+import com.scalaAsm.x86.Instructions.`package`.OneOperandEncoding
+import com.scalaAsm.x86.Instructions.`package`.I
 
 trait CodeSection extends Registers with AsmSection[InstructionResult] with Standard.Catalog with Formats with Prefixes {
 
@@ -44,9 +46,9 @@ trait CodeSection extends Registers with AsmSection[InstructionResult] with Stan
 
     def push(param: String) = Reference(param)
 
-    def jnz[OpEn[imm]](labelRef: String)(implicit ev: JNZ_1[Constant8, OpEn], format: OneOperandFormat[Constant8, OpEn]) = LabelRef(labelRef, ev, format) 
+    def jnz(labelRef: String)(implicit ev: JNZ_1[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format) 
 
-    def jz[OpEn[imm]](labelRef: String)(implicit ev: JZ_1[Constant8, OpEn], format: OneOperandFormat[Constant8, OpEn]) = LabelRef(labelRef, ev, format)
+    def jz(labelRef: String)(implicit ev: JZ_1[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
 
     def call(refName: String) = Reference(refName)
     

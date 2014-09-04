@@ -6,7 +6,7 @@ trait INT extends x86Instruction {
   val mnemonic = "INT"
 }
 
-trait INT_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with INT
+trait INT_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn] with INT
 
 object INT {
 

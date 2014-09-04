@@ -8,7 +8,7 @@ trait MOVInstruction extends x86Instruction {
   val mnemonic = "MOV"
 }
 
-trait Mov2Def[-O1, -O2, OpEn[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with MOVInstruction
+trait Mov2Def[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with MOVInstruction
 
 trait MOVLow {
   

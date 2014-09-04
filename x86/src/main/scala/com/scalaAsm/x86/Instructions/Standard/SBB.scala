@@ -6,7 +6,7 @@ trait SBB extends x86Instruction {
   val mnemonic = "SBB"
 }
 
-trait SBB_2[-O1, -O2, OpEn[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with SBB
+trait SBB_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with SBB
 
 object SBB {
   

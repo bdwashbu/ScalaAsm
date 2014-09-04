@@ -65,10 +65,10 @@ package object x86 {
   type _64 = QwordOperand
   
   type r = GPR
-  type r8 = GeneralPurpose[_8]
-  type r16 = GeneralPurpose[_16]
-  type r32 = GeneralPurpose[_32]
-  type r64 = GeneralPurpose[_64]
+  type r8 = GeneralPurpose[_8] with rm8
+  type r16 = GeneralPurpose[_16] with rm16
+  type r32 = GeneralPurpose[_32] with rm32
+  type r64 = GeneralPurpose[_64] with rm64
   
   type BaseIndex[X <: GeneralPurpose[_],Y <: Constant[_]] = X#BI[Y]
 }

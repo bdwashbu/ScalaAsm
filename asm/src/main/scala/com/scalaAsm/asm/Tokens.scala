@@ -5,6 +5,7 @@ import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.x86.Operands.OneOperandFormat
 import com.scalaAsm.x86.OpcodeFormat
+import com.scalaAsm.x86.Operands.Constant
 
 object Tokens {
   trait Token
@@ -36,7 +37,7 @@ object Tokens {
     def getSize = 0
     def getBytes = Array()
   }
-  case class LabelRef[OpEn[imm]](labelRef: String, inst:OneOperandInstruction[Constant8, OpEn], format: OneOperandFormat[Constant8, OpEn]) extends CodeToken with InstructionResult {
+  case class LabelRef(labelRef: String, inst:OneOperandInstruction[Constant8, I], format: OneOperandFormat[Constant8, I]) extends CodeToken with InstructionResult {
     def line = ""
     def getSize = 0
     def getBytes = Array()

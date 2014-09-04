@@ -45,7 +45,7 @@ case class WithSIBWithDisplacement[Mod <: ModRM, Sib <: SIB, Disp <: Constant[_]
 
 object ModRM {
   type rm = RegisterOrMemory[_]
-  type reg = GPR
+  type reg = GPR with RegisterOrMemory[_]
   type plusRd = rm
 }
 

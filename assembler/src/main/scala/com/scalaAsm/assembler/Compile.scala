@@ -98,7 +98,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
          token match {
           case sizedToken: SizedToken => parserPosition += sizedToken.size
           case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-          case x:LabelRef[_] => parserPosition += 2
+          case x:LabelRef => parserPosition += 2
           case _ => 
          }
          result
@@ -148,7 +148,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
          token match {
           case sizedToken: SizedToken => parserPosition += sizedToken.size
           case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-          case x:LabelRef[_] => parserPosition += 2
+          case x:LabelRef => parserPosition += 2
           case _ => 
          }
          result

@@ -72,7 +72,7 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
-  implicit object MFormat4 extends OneOperandFormat[GPR, M] {
+  implicit object MFormat4 extends OneOperandFormat[ModRM.reg, M] {
 
     def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[GPR](operand1Size, opcode, prefix) {
       def getAddressingForm(operand: GPR) = {
@@ -100,18 +100,7 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
 
-  implicit object OFormat extends OneOperandFormat[ModRM.plusRd, O] {
-    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[ModRM.plusRd](operand1Size, opcode, prefix) {
-      def getAddressingForm(operand: ModRM.plusRd) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = None
-        )
-      }
-      
-      def size = prefix.size + opcode.size
-    }
-  }
+
 
   implicit object IFormat extends OneOperandFormat[imm, I] {
 
@@ -213,9 +202,20 @@ trait LowPriorityFormats extends OperandEncoding {
   }
 }
 
-
-
 trait Formats extends LowPriorityFormats {
+  
+  implicit object OFormat extends OneOperandFormat[ModRM.plusRd, O] {
+    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[ModRM.plusRd](operand1Size, opcode, prefix) {
+      def getAddressingForm(operand: ModRM.plusRd) = {
+        InstructionFormat (
+          addressingForm = NoModRM(),
+          immediate = None
+        )
+      }
+      
+      def size = prefix.size + opcode.size
+    }
+  }
   
   implicit object MFormatB1 extends OneOperandFormat[BaseIndex[r64, _], M] {
 
@@ -370,7 +370,7 @@ trait Formats extends LowPriorityFormats {
     }
   }
   
-  implicit object M1Format4 extends TwoOperandFormat[GPR, One, M1] with Formats {
+  implicit object M1Format4 extends TwoOperandFormat[ModRM.reg, One, M1] with Formats {
     def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[GPR, One](operand1Size, operand2Size, opcode, prefix) {
       def getAddressingForm(op1: GPR,  op2: One) = MFormat4(operand1Size, opcode, prefix).getAddressingForm(op1)
       def size = MFormat4(operand1Size, opcode, prefix).size

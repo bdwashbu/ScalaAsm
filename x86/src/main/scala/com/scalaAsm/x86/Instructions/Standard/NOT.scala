@@ -6,7 +6,7 @@ trait NOT extends x86Instruction {
   val mnemonic = "NOT"
 }
 
-trait NOT_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with NOT
+trait NOT_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn] with NOT
 
 object NOT {
   

@@ -6,7 +6,7 @@ trait JZ extends x86Instruction {
   val mnemonic = "JZ"
 }
 
-trait JZ_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with JZ
+trait JZ_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn] with JZ
 
 object JZ {
   

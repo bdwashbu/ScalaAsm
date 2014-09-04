@@ -6,7 +6,7 @@ trait CALL extends x86Instruction {
   val mnemonic = "CALL"
 }
 
-trait CALL_1[-O1, OpEn[O1]] extends OneOperandInstruction[O1, OpEn] with CALL
+trait CALL_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn] with CALL
 
 trait CALLLow {
   implicit object call2 extends CALL_1[rm32, M] {

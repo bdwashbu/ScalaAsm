@@ -6,7 +6,7 @@ trait TEST extends x86Instruction {
   val mnemonic = "TEST"
 }
 
-trait TEST_2[-O1, -O2, OpEn[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with TEST
+trait TEST_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with TEST
 
 object TEST {
   

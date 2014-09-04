@@ -6,7 +6,7 @@ trait AND extends x86Instruction {
   val mnemonic = "AND"
 }
 
-trait AND_2[-O1, -O2, OpEn[O1,O2]] extends TwoOperandInstruction[O1, O2, OpEn] with AND
+trait AND_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1,O2]] extends TwoOperandInstruction[O1, O2, OpEn] with AND
 
 trait ANDLow {
  

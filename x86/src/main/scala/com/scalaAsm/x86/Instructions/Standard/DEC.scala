@@ -17,3 +17,4 @@ object DEC {
   implicit object dec2 extends DEC_1[r16, O] {
     def opcode = 0x48 + rw
   }
+}

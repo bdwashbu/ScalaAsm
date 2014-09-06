@@ -20,7 +20,7 @@ package object Standard {
     object rdrand extends testOneOperand[RDRAND_1]
     object and extends testTwoOperands[AND_2]
     object lea extends testTwoOperands[LEA_2]
-    object mov extends testTwoOperands[Mov2Def]
+    object mov extends testTwoOperands[MOV_2]
     object shr extends testTwoOperands[SHR_2]
     object shl extends testTwoOperands[SHL_2]
     object sbb extends testTwoOperands[SBB_2]

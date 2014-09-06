@@ -11,8 +11,8 @@ trait SHL extends x86Instruction {
 trait SHL_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode] with SHL
 
 object SHL {
-  
+
   implicit object shl1 extends SHL_2[rm8, One, M1] {
-      val opcode = OneOpcode(0xD0) /+ 4
+    def opcode = 0xD0 /+ 4
   }
 }

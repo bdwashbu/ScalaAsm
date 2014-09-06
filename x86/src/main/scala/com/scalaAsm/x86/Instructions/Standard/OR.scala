@@ -11,6 +11,6 @@ trait OR_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstr
 object OR {
   
   implicit object or1 extends OR_2[rm8, imm8, MI] {
-      val opcode = 0x80 /+ 1
+      def opcode = 0x80 /+ 1
   }
 }

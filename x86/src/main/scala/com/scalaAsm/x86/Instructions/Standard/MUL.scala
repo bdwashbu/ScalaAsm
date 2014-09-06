@@ -11,6 +11,6 @@ trait MUL_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O
 object MUL {
   
   implicit object mul1 extends MUL_1[rm32, M] {
-      val opcode = 0xF7 /+ 4
+      def opcode = 0xF7 /+ 4
   }
 }

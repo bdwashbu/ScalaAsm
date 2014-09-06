@@ -11,6 +11,6 @@ trait JZ_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1
 object JZ {
   
   implicit object jz1 extends JZ_1[imm8, I] {
-      val opcode = OneOpcode(0x74)
+      def opcode = 0x74
   }
 }

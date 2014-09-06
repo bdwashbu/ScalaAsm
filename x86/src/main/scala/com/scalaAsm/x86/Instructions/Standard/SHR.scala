@@ -11,6 +11,6 @@ trait SHR_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInst
 object SHR {
   
   implicit object shr1 extends SHR_2[rm32, imm8, MI] {
-      val opcode = 0xC1 /+ 5
+      def opcode = 0xC1 /+ 5
   }
 }

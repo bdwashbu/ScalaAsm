@@ -9,6 +9,6 @@ trait LEAVE extends ZeroOperandInstruction[OneOpcode] with x86Instruction {
 object LEAVE {
   
   implicit object lea1 extends LEAVE {
-      val opcode = OneOpcode(0xC9)
+      def opcode = 0xC9
   }
 }

@@ -9,16 +9,16 @@ trait SUB extends x86Instruction {
 trait SUB_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode] with SUB
 
 object SUB {
-  
+
   implicit object sub1 extends SUB_2[rm32, imm8, MI] {
-      val opcode = 0x83 /+ 5
+    def opcode = 0x83 /+ 5
   }
-  
+
   implicit object sub3 extends SUB_2[rm64, imm8, MI] {
-      val opcode = 0x83 /+ 5
+    def opcode = 0x83 /+ 5
   }
-  
+
   implicit object sub2 extends SUB_2[r32, rm32, RM] {
-    val opcode = OneOpcode(0x2B)   
+    def opcode = 0x2B
   }
 }

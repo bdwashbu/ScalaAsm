@@ -11,6 +11,6 @@ trait LEA_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInst
 object LEA {
 
   implicit object lea1 extends LEA_2[r, rm, RM] {
-      val opcode = OneOpcode(0x8D)
+      def opcode = 0x8D
   }
 }

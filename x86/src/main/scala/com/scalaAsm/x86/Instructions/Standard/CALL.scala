@@ -10,17 +10,17 @@ trait CALL_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[
 
 trait CALLLow {
   implicit object call2 extends CALL_1[rm32, M] {
-    val opcode = 0xFF /+ 2
+    def opcode = 0xFF /+ 2
   }
 }
 
 object CALL extends CALLLow {
 
   implicit object call3 extends CALL_1[rel32, M] {
-    val opcode = OneOpcode(0xE8)
+    def opcode = 0xE8
   }
 
   implicit object call1 extends CALL_1[rm16, M] {
-    val opcode = 0xFF /+ 2
+    def opcode = 0xFF /+ 2
   }
 }

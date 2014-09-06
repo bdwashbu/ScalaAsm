@@ -11,6 +11,6 @@ trait INT_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O
 object INT {
 
   implicit object int1 extends INT_1[imm8, I] {
-    val opcode = OneOpcode(0xCD)
+    def opcode = 0xCD
   }
 }

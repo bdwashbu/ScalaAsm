@@ -11,14 +11,14 @@ trait ADD_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1,O2]] extends TwoOperandInstr
 object ADD {
   
   implicit object add1 extends ADD_2[rm32, imm8, MI] {
-      val opcode = 0x83 /+ 0
+      def opcode = 0x83 /+ 0
   }
   
   implicit object add2 extends ADD_2[rm16, imm8, MI] {
-      val opcode = 0x83 /+ 0
+      def opcode = 0x83 /+ 0
   }
   
   implicit object add3 extends ADD_2[r32, rm32, RM] {
-      val opcode = OneOpcode(0x03)
+      def opcode = 0x03
   }
 }

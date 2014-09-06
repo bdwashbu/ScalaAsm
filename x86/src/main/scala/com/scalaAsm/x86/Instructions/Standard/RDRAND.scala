@@ -13,10 +13,10 @@ trait RDRAND_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstructio
 object RDRAND {
   
   implicit object rdrand1 extends RDRAND_1[rm32, M] {
-      val opcode = (0x0F, 0xC7) /+ 6
+      def opcode = (0x0F, 0xC7) /+ 6
   }
   
   implicit object rdrand2 extends RDRAND_1[rm16, M] {
-      val opcode = (0x0F, 0xC7) /+ 6
+      def opcode = (0x0F, 0xC7) /+ 6
   }
 }

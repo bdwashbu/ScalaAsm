@@ -6,7 +6,7 @@ trait OR extends x86Instruction {
   val mnemonic = "OR"
 }
 
-trait OR_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn] with OR
+trait OR_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode] with OR
 
 object OR {
   

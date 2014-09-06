@@ -8,7 +8,7 @@ trait POP extends x86Instruction {
   val mnemonic = "POP"
 }
 
-trait POP_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn] with POP
+trait POP_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with POP
 
 object POP {
   

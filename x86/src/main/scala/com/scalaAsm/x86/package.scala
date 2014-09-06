@@ -31,10 +31,6 @@ package object x86 {
     implicit object size20 extends Sized[One] {val size = 1}
   }
 
-  trait Operands
-  case class TwoOperands[+X, +Y](_1: X, _2: Y) extends Operands
-  case class OneOperand[+X](_1: X) extends Operands
-  
   // Many of these can be found in section 3.1.1.3 of the Intel x86 manual
   
   type imm = Constant[_]

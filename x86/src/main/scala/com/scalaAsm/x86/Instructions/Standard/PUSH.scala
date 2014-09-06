@@ -10,7 +10,7 @@ trait PUSH extends x86Instruction {
 }
 
 @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
-trait PUSH_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn] with PUSH
+trait PUSH_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with PUSH
 
 trait POWLow {
     
@@ -35,18 +35,18 @@ object PUSH extends POWLow {
   }
   
   implicit object push4 extends PUSH_1[imm8, I] {
-      val opcode: OpcodeFormat = 0x6A
+      val opcode = OneOpcode(0x6A)
   }
   
   implicit object push5 extends PUSH_1[imm16, I] {
-      val opcode: OpcodeFormat = 0x68
+      val opcode = OneOpcode(0x68)
   }
   
   implicit object push6 extends PUSH_1[imm32, I] {
-      val opcode: OpcodeFormat = 0x68
+      val opcode = OneOpcode(0x68)
   }
   
   implicit object push7 extends PUSH_1[CS, CSFormat] {
-      val opcode: OpcodeFormat = 0x0E
+      val opcode = OneOpcode(0x0E)
   }
 }

@@ -12,14 +12,18 @@ object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), im
 
 trait OperandFormat
 
-class NoOperandFormat extends ResolvedOneOperand[Constant8](0, null, Array()) {
-  def getAddressingForm(op1: Constant8) = NoAddressingForm
+class NoOperandFormat extends ResolvedZeroOperand(null, Array()) {
   val size = 1
 }
 
 
 abstract class TwoOperandFormat[-X, -Y, -OpEn <: TwoOperandEncoding[X,Y]] extends Function4[Int, Int, OpcodeFormat, Array[Byte], ResolvedTwoOperands[X,Y]]
 abstract class OneOperandFormat[-X, -OpEn <: OneOperandEncoding[X]] extends Function3[Int, OpcodeFormat, Array[Byte], ResolvedOneOperand[X]]
+
+abstract class ResolvedZeroOperand(opcode: OpcodeFormat, prefix: Array[Byte]) {
+  def getPrefix = prefix
+  def size: Int
+}
 
 abstract class ResolvedOneOperand[-X](operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) {
   def getAddressingForm(op1: X): InstructionFormat

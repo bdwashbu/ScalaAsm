@@ -6,7 +6,7 @@ trait ADD extends x86Instruction {
   val mnemonic = "ADD"
 }
 
-trait ADD_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1,O2]] extends TwoOperandInstruction[O1, O2, OpEn] with ADD
+trait ADD_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1,O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode] with ADD
 
 object ADD {
   
@@ -19,6 +19,6 @@ object ADD {
   }
   
   implicit object add3 extends ADD_2[r32, rm32, RM] {
-      val opcode: OpcodeFormat = 0x03
+      val opcode = OneOpcode(0x03)
   }
 }

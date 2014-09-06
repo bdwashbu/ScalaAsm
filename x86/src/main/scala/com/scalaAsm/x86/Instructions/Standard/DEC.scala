@@ -6,7 +6,7 @@ trait DEC extends x86Instruction {
   val mnemonic = "DEC"
 }
 
-trait DEC_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn] with DEC
+trait DEC_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with DEC
 
 object DEC {
   

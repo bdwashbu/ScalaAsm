@@ -7,6 +7,7 @@ sealed trait OpcodeFormat {
   def get: Array[Byte]
   val opcodeExtension: Option[Byte] // some opcodes use the ModRM field
   def /+(x: Byte): OpcodeFormat
+  def isOpcodePlus: Boolean
 }
 
 sealed trait RegType
@@ -20,6 +21,7 @@ case class OneOpcode(operand1: Byte) extends OpcodeFormat {
   val opcodeExtension: Option[Byte] = None
   def /+(x: Byte) = new OneOpcode(operand1) { override val opcodeExtension = Some(x) }
   def +(reg: RegType) = new OpcodePlus(operand1)
+  def isOpcodePlus = false
 }
 
 class OpcodePlus(opcode1: Byte) extends OneOpcode(opcode1) {
@@ -28,6 +30,7 @@ class OpcodePlus(opcode1: Byte) extends OneOpcode(opcode1) {
 	  override val size = 1
 	  override val opcodeExtension: Option[Byte] = None
 	  override def /+(x: Byte) = new OneOpcode(opcode1) { override val opcodeExtension = Some(x) }
+    override def isOpcodePlus = true
 }
 
 case class TwoOpcodes(opcode1: Byte, opcode2: Byte) extends OpcodeFormat {
@@ -35,5 +38,6 @@ case class TwoOpcodes(opcode1: Byte, opcode2: Byte) extends OpcodeFormat {
   val size = 2
   val opcodeExtension: Option[Byte] = None
   def /+(x: Byte) = new TwoOpcodes(opcode1, opcode2) { override val opcodeExtension = Some(x) }
+  def isOpcodePlus = false
 }
 

@@ -169,18 +169,14 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
-  implicit object MIFormat extends TwoOperandFormat[ModRM.rm, imm, MI] {
+  implicit object MIFormat extends TwoOperandFormat[ModRM.reg, imm, MI] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.rm, imm](operand1Size,operand2Size, opcode, prefix) {
-      def getAddressingForm(op1: ModRM.rm, op2: imm) = {
-  
-        op1 match {
-          case reg: GPR =>
-            InstructionFormat (
-              addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, reg)),//reg.encode(opcode.opcodeExtension),
-              immediate = Some(op2)
-            )
-        }
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, imm](operand1Size,operand2Size, opcode, prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: imm) = {
+          InstructionFormat (
+            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, op1)),
+            immediate = Some(op2)
+          )
       }
   
       def size = prefix.size + opcode.size + 1 + operand2Size

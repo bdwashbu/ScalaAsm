@@ -2,10 +2,10 @@ package com.scalaAsm.x86
 
 import Operands.Memory.ModRM
 
-trait OpcodeFormat {
+sealed trait OpcodeFormat {
   def size: Int
   def get(x: Operands): Array[Byte]
-  val opcodeExtension: Option[Byte]
+  val opcodeExtension: Option[Byte] // some opcodes use the ModRM field
   def /+(x: Byte): OpcodeFormat
 }
 

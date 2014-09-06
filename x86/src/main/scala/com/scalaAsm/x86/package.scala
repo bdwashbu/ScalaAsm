@@ -6,6 +6,8 @@ import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
 package object x86 {
   
   import Operands._
+  import Operands.Memory.Relative
+  import Operands.Memory.AddressingMode
 
   trait Sized[-X] {
     val size: Int
@@ -28,13 +30,12 @@ package object x86 {
     implicit object size19 extends Sized[BaseIndex[EDI, Constant32]] {val size = 4}
     implicit object size20 extends Sized[One] {val size = 1}
   }
-  
-  import Operands.Memory.Relative
-  import Operands.Memory.AddressingMode
-  
+
   trait Operands
   case class TwoOperands[+X, +Y](_1: X, _2: Y) extends Operands
   case class OneOperand[+X](_1: X) extends Operands
+  
+  // Many of these can be found in section 3.1.1.3 of the Intel x86 manual
   
   type imm = Constant[_]
   type imm8 = Constant8
@@ -54,10 +55,10 @@ package object x86 {
     type primitiveType
   }
   
-  class ByteOperand extends OperandSize { type primitiveType = Byte }
-  class WordOperand extends OperandSize { type primitiveType = Short }
-  class DwordOperand extends OperandSize { type primitiveType = Int }
-  class QwordOperand extends OperandSize { type primitiveType = Long }
+  type ByteOperand = OperandSize { type primitiveType = Byte }
+  type WordOperand = OperandSize { type primitiveType = Short }
+  type DwordOperand = OperandSize { type primitiveType = Int }
+  type QwordOperand = OperandSize { type primitiveType = Long }
   
   type _8 = ByteOperand
   type _16 = WordOperand

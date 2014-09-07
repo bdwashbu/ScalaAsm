@@ -11,7 +11,7 @@ object HelloWorld2 extends AsmProgram {
   import com.scalaAsm.x86.Instructions.Standard._
   
   dataSections += new DataSection {
-    builder += Variable("rckeep", "0000")
+    builder += Variable("rckeep", "\0\0\0\0")
     builder += Variable("helloWorld", "Hello World!\r\n\0")
     builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\0")
   }
@@ -60,7 +60,7 @@ object HelloWorld2 extends AsmProgram {
       and(spl, byte(0xF0)),
       mov(rcx, qword(0x6)),
       sub(rsp, byte(0x20)),
-      call("WriteFile"), // needs work
+      call("GetStdHandle"), // needs work
       lea(rsp, *(rsp+byte(0x28))),
       pop(rsp),
       push(rsp),
@@ -68,14 +68,14 @@ object HelloWorld2 extends AsmProgram {
       and(spl, byte(0xF0)),
       mov(rcx, rax),
       sub(rsp, byte(0x20)),
-      call("WriteFile"), // needs work
+      call("FlushConsoleInputBuffer"), // needs work
       lea(rsp, *(rsp+byte(0x28))),
       pop(rsp),
       push(rsp),
       push(*(rsp+byte(0))),
       and(spl, byte(0xF0)),
       sub(rsp, byte(0x20)),
-      call("WriteFile"), // needs work
+      call("_getch"), // needs work
       lea(rsp, *(rsp+byte(0x28))),
       pop(rsp),
       xor(rax, rax),

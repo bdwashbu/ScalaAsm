@@ -65,7 +65,7 @@ abstract case class OneMachineCodeBuilder[O1, OpEn <: OneOperandEncoding[O1], Op
   def format: ResolvedOneOperand[O1]
 
   def getSize: Int = {
-    format.getPrefix.size + format.size
+    format.size
   }
 
   def getBytes: Array[Byte] = {
@@ -84,7 +84,7 @@ abstract case class TwoMachineCodeBuilder[O1, O2, OpEn <: TwoOperandEncoding[O1,
   def format: ResolvedTwoOperands[O1, O2]
 
   def getSize: Int = {
-    format.getPrefix.size + format.size
+    format.size
   }
 
   def getBytes: Array[Byte] = {

@@ -19,7 +19,7 @@ object HelloWorld2 extends AsmProgram {
   codeSections += new CodeSection {
     
     val STD_OUTPUT_HANDLE = qword(-11)
-    val STD_INPUT_HANDLE = byte(-10)
+    val STD_INPUT_HANDLE = qword(-10)
 
     procedure(name = "start",
       push(rsp),
@@ -58,7 +58,7 @@ object HelloWorld2 extends AsmProgram {
       push(rsp),
       push(*(rsp+byte(0))),
       and(spl, byte(0xF0)),
-      mov(rcx, qword(-0xA)),
+      mov(rcx, STD_INPUT_HANDLE),
       sub(rsp, byte(0x20)),
       invoke("GetStdHandle"), // needs work
       lea(rsp, *(rsp+byte(0x28))),

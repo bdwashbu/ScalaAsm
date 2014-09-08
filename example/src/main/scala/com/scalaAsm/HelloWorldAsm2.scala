@@ -58,7 +58,7 @@ object HelloWorld2 extends AsmProgram {
       push(rsp),
       push(*(rsp+byte(0))),
       and(spl, byte(0xF0)),
-      mov(rcx, qword(0x6)),
+      mov(rcx, qword(-0xA)),
       sub(rsp, byte(0x20)),
       call("GetStdHandle"), // needs work
       lea(rsp, *(rsp+byte(0x28))),

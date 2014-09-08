@@ -184,7 +184,7 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
     CompiledImports(
       byteOutput.toByteArray(),
       importDescriptors.size * ImageImportDescriptor.size,
-      importAddressTable.map(table => (table.thunks.size + 1) * 4).reduce(_ + _),
+      importAddressTable.map(table => (table.thunks.size + 1) * (if (is64Bit) 8 else 4)).reduce(_ + _),
       getFunctionMap(imports)
     )
   }

@@ -27,9 +27,9 @@ package object Instructions {
   trait DSFormat extends OneOperandEncoding[DS]
   
   type rel = Relative[_ <: OperandSize]
-  type rel16 = Relative[WordOperand]
-  type rel32 = Relative[DwordOperand]
-  type rel64 = Relative[QwordOperand]
+  type rel16 = Relative[_16]
+  type rel32 = Relative[_32]
+  type rel64 = Relative[_64]
  
 
   case class Op[X](from: X) extends Operand[X, X] { def get = from }

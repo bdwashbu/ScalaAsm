@@ -40,7 +40,7 @@ object HelloWorld2 extends AsmProgram {
       lea(rdx, addr("helloWorld")),
       mov(rcx, rax),
       sub(rsp, byte(0x20)),
-      call("WriteFile"), // needs work
+      invoke("WriteFile"), // needs work
       lea(rsp, *(rsp + byte(0x28))),
       pop(rsp),
       push(rsp),
@@ -52,7 +52,7 @@ object HelloWorld2 extends AsmProgram {
       lea(rdx, addr("pressAnyKey")),
       mov(rcx, rbx),
       sub(rsp, byte(0x20)),
-      call("WriteFile"), // needs work
+      invoke("WriteFile"), // needs work
       lea(rsp, *(rsp+byte(0x28))),
       pop(rsp),
       push(rsp),
@@ -60,7 +60,7 @@ object HelloWorld2 extends AsmProgram {
       and(spl, byte(0xF0)),
       mov(rcx, qword(-0xA)),
       sub(rsp, byte(0x20)),
-      call("GetStdHandle"), // needs work
+      invoke("GetStdHandle"), // needs work
       lea(rsp, *(rsp+byte(0x28))),
       pop(rsp),
       push(rsp),
@@ -68,14 +68,14 @@ object HelloWorld2 extends AsmProgram {
       and(spl, byte(0xF0)),
       mov(rcx, rax),
       sub(rsp, byte(0x20)),
-      call("FlushConsoleInputBuffer"), // needs work
+      invoke("FlushConsoleInputBuffer"), // needs work
       lea(rsp, *(rsp+byte(0x28))),
       pop(rsp),
       push(rsp),
       push(*(rsp+byte(0))),
       and(spl, byte(0xF0)),
       sub(rsp, byte(0x20)),
-      call("_getch"), // needs work
+      invoke("_getch"), // needs work
       lea(rsp, *(rsp+byte(0x28))),
       pop(rsp),
       xor(rax, rax),

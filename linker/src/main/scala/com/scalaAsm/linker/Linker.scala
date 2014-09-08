@@ -120,7 +120,7 @@ case class Linker(executableImports: CompiledImports, code: Array[Byte], is64Bit
         subsystem = 3,
         dllCharacteristics = 0,
         sizeOfStackReserve = 0x100000,
-        sizeOfStackCommit = 0x1000,
+        sizeOfStackCommit = if (is64Bit) 0x10000 else 0x1000,
         sizeOfHeapReserve = 0x100000,
         sizeOfHeapCommit = 0x1000,
         loaderFlags = 0,

@@ -116,23 +116,30 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     val procs = compiledAsm.positionPass collect {case Proc(offset, name) => (name, offset)} toMap
     val labels = compiledAsm.positionPass collect {case LabelResolved(offset, name) => (name, offset)} toMap    
     
-    for (token <- compiledAsm.onePass) {
-      token match {
-        case InstructionToken(inst) => inst match {
-          case OneMachineCodeBuilder(x: addr) => x.variables = variables; x.baseOffset = baseOffset
-          case TwoMachineCodeBuilder(op1: addr, _) => op1.variables = variables; op1.baseOffset = baseOffset
-          case TwoMachineCodeBuilder(_, op2: addr) => op2.variables = variables; op2.baseOffset = baseOffset
-          case _ =>
-        }
-        case _ =>
-      }
-    }
+//    for (token <- compiledAsm.onePass) {
+//      token match {
+//        case InstructionToken(inst) => inst match {
+//          case OneMachineCodeBuilder(x: addr) => x.variables = variables; x.baseOffset = baseOffset
+//          case TwoMachineCodeBuilder(op1: addr, _) => op1.variables = variables; op1.baseOffset = baseOffset
+//          case TwoMachineCodeBuilder(_, op2: addr) => op2.variables = variables; op2.baseOffset = baseOffset
+//          case _ =>
+//        }
+//        case _ =>
+//      }
+//    }
     
     val code: Array[Byte] = {
       var parserPosition = 0
       for (token <- compiledAsm.onePass) yield {
         val result = token match {
-	        case InstructionToken(inst) => inst.getBytes
+	        case InstructionToken(inst) => { inst match {
+              case OneMachineCodeBuilder(x: addr) => x.variables = variables; x.baseOffset = baseOffset; x.parserPosition = parserPosition
+              case TwoMachineCodeBuilder(op1: addr, _) => op1.variables = variables; op1.baseOffset = baseOffset;  op1.parserPosition = parserPosition
+              case TwoMachineCodeBuilder(_, op2: addr) => op2.variables = variables; op2.baseOffset = baseOffset;  op2.parserPosition = parserPosition
+              case _ =>
+            }
+	          inst.getBytes
+	        }
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
 	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).get.getRelative).getBytes

@@ -18,72 +18,41 @@ import com.scalaAsm.portableExe.FileHeader
 import com.scalaAsm.portableExe.NtHeader
 import com.scalaAsm.portableExe.sections.ResourceGen
 
-abstract class Linker {
-  def is64Bit: Boolean
-  def link(executableImports: CompiledImports, code: Array[Byte],
-    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]]): PortableExecutable
-}
-
-class Linker32 extends Linker {
+class Linker64 extends Linker {
   
-  import java.nio.ByteBuffer
-  import java.nio.ByteOrder
-  import com.scalaAsm.asm.CodeSection
-
-  def is64Bit = false
+  def is64Bit = true
   
   def link(executableImports: CompiledImports, code: Array[Byte],
     addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]]): PortableExecutable = {
 
     val rawDataSize = rawData.length
 
-    // Standard real-mode dos program that prints an error if it cannot be run
-    
-    val dosWarning = "This program cannot be run in DOS mode.\r\r\n$"
-    def getStub: Array[Byte] = {
-      import com.scalaAsm.x86.Instructions.Standard._
-      val dosStub = new CodeSection {
-        builder += push(cs)
-        builder += pop(ds)
-        builder += mov(dx, word(0xE.toByte))
-        builder += mov(ah, byte(0x9))
-        builder += int(byte(0x21))
-        builder += mov(ax, word(0x4C01))
-        builder += int(byte(0x21))
-      }
-  
-      val bbuf = ByteBuffer.allocate(dosStub.getRawBytes.length + dosWarning.length);
-      bbuf.put(dosStub.getRawBytes)
-      bbuf.put(dosWarning.toCharArray() map (_.toByte))
-      bbuf.array()
-    }
-    
     val dosHeader = DosHeader(
       e_magic = "MZ",
-      e_cblp = 144,
-      e_cp = 3,
+      e_cblp = 108,
+      e_cp = 1,
       e_crlc = 0,
-      e_cparhdr = 4,
+      e_cparhdr = 2,
       e_minalloc = 0,
       e_maxalloc = 65535.toShort,
       e_ss = 0,
-      e_sp = 184,
+      e_sp = 0,
       e_csum = 0,
-      e_ip = 0,
+      e_ip = 17,
       e_cs = 0,
       e_lfarlc = 64,
       e_ovno = 0,
-      e_res = Array.fill(4)(0.toShort),
-      e_oemid = 0,
-      e_oeminfo = 0,
-      e_res2 = Array.fill(10)(0.toShort),
-      e_lfanew = 128,
-      dosStub = getStub)
+      e_res = Array[Int](0, 0, 26967, 13934).map(_.toShort),
+      e_oemid = 8244,
+      e_oeminfo = 29264,
+      e_res2 = Array[Int](26479, 24946, 8557, 2573, 46116, 47625, 256, 8653, 19636, 8653).map(_.toShort),
+      e_lfanew = 96,
+      watermark = "GoLink, GoAsm www.GoDevTool.com\0")
 
     val standardSections = List(
       SectionHeader(
-        name = ".text",
-        virtualSize = code.size,
+        name = "code",
+        virtualSize = 0xE0,
         virtualAddress = 0x1000,
         sizeOfRawData = 0x200,
         pointerToRawData = 0x200,
@@ -96,8 +65,8 @@ class Linker32 extends Linker {
           Characteristic.READ.id),
 
       SectionHeader(
-        name = ".data",
-        virtualSize = rawDataSize + executableImports.rawData.size,
+        name = "data",
+        virtualSize = 0x30,
         virtualAddress = 0x2000,
         sizeOfRawData = 0x200,
         pointerToRawData = 0x400,
@@ -107,7 +76,21 @@ class Linker32 extends Linker {
         lineNumbers = 0,
         characteristics = Characteristic.INITIALIZED.id |
           Characteristic.READ.id |
-          Characteristic.WRITE.id))
+          Characteristic.WRITE.id),
+          
+      SectionHeader(
+        name = ".idata",
+        virtualSize = 0x10A,
+        virtualAddress = 0x3000,
+        sizeOfRawData = 0x200,
+        pointerToRawData = 0x6400,
+        relocPtr = 0,
+        linenumPtr = 0,
+        relocations = 0,
+        lineNumbers = 0,
+        characteristics = Characteristic.CODE.id |
+          Characteristic.EXECUTE.id |
+          Characteristic.READ.id))
 
     val resourceSection: Option[SectionHeader] = resources map {res =>
       Option(SectionHeader(
@@ -127,34 +110,34 @@ class Linker32 extends Linker {
     val sections: List[SectionHeader] = standardSections ++ resourceSection
 
     val optionalHeader = OptionalHeader(
-      magic = 0x10b,
-      majorLinkerVersion = 2,
-      minorLinkerVersion = 50,
+      magic = 0x20b,
+      majorLinkerVersion = 0,
+      minorLinkerVersion = 40,
       sizeOfCode = 512,
-      sizeOfInitializedData = 546,
+      sizeOfInitializedData = 1024,
       sizeOfUninitData = 0,
       addressOfEntryPoint = 0x1000,
       baseOfCode = 0x1000,
-      baseOfData = 0x2000,
+      baseOfData = 0x400000,
 
       AdditionalFields(
-        imageBase = 0x400000,
+        imageBase = 0,
         sectionAlignment = 0x1000,
         fileAlignment = 0x200,
-        majorOperatingSystemVersion = 4,
-        minorOperatingSystemVersion = 0,
+        majorOperatingSystemVersion = 5,
+        minorOperatingSystemVersion = 2,
         majorImageVersion = 0,
         minorImageVersion = 0,
-        majorSubsystemVersion = 4,
-        minorSubsystemVersion = 0,
+        majorSubsystemVersion = 5,
+        minorSubsystemVersion = 2,
         win32Version = 0,
-        sizeOfImage = sections.last.virtualAddress + sections.last.virtualSize,
+        sizeOfImage = 0x4000,
         sizeOfHeaders = 0x200,
         checksum = 0,
         subsystem = 3,
         dllCharacteristics = 0,
         sizeOfStackReserve = 0x100000,
-        sizeOfStackCommit = 0x1000,
+        sizeOfStackCommit = 0x10000,
         sizeOfHeapReserve = 0x100000,
         sizeOfHeapCommit = 0x1000,
         loaderFlags = 0,
@@ -170,13 +153,13 @@ class Linker32 extends Linker {
         importAddressTable = executableImports.getIATDirectory(addressOfData, rawDataSize))
 
     val fileHeader = FileHeader(
-      machine = 0x14C,
+      machine = 0x8664.toShort,
       numberOfSections = sections.size.toShort,
-      timeDateStamp = 0x5132F2E5,
+      timeDateStamp = 0x535BF29F,
       pointerToSymbolTable = 0, // no importance
       numberOfSymbols = 0, // no importance
-      sizeOfOptionalHeader = 0xE0,
-      characteristics = 271)
+      sizeOfOptionalHeader = 0xF0,
+      characteristics = 47)
 
     val peHeader = new NtHeader(fileHeader, optionalHeader)
     val res: Array[Byte] = resources getOrElse Array()

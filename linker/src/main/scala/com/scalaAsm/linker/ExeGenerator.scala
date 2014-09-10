@@ -76,13 +76,12 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token], v
     }
   }
 
-  def link(addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
-    val executableImports = compiledImports(addressOfData, dlls, is64Bit)
+  def link(addressOfData: Int, linker: Linker, dlls: String*): PortableExecutable = {
+    val executableImports = compiledImports(addressOfData, dlls, linker.is64Bit)
     val code = finalizeAssembly(variables(addressOfData), executableImports.imports, baseOffset = 0x400000 /*imagebase*/)
 
     val resources = iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
     
-    val linker = Linker(executableImports, code, is64Bit, addressOfData, rawData, resources)
-    linker.link
+    linker.link(executableImports, code, addressOfData, rawData, resources)
   }
 }

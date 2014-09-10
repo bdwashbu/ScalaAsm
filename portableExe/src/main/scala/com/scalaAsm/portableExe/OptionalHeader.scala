@@ -122,7 +122,7 @@ case class OptionalHeader(
  // def size: Int = 96 + 15 * 8
 
   def apply() = {
-    val bbuf = if (magic == 0x020B) ByteBuffer.allocate(112) else ByteBuffer.allocate(96);
+    val bbuf = ByteBuffer.allocate(200)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     bbuf.putShort(magic)
     bbuf.put(majorLinkerVersion.toByte)
@@ -132,13 +132,8 @@ case class OptionalHeader(
     bbuf.putInt(sizeOfUninitData)
     bbuf.putInt(addressOfEntryPoint)
     bbuf.putInt(baseOfCode)
-    
-    if (magic == 0x020B) {
-        bbuf.putLong(additionalFields.imageBase)
-    } else {
-        bbuf.putInt(baseOfData)
-        bbuf.putInt(additionalFields.imageBase)
-    }
+    bbuf.putInt(baseOfData)
+    bbuf.putInt(additionalFields.imageBase)
     bbuf.putInt(additionalFields.sectionAlignment)
     bbuf.putInt(additionalFields.fileAlignment)
     bbuf.putShort(additionalFields.majorOperatingSystemVersion)
@@ -167,6 +162,6 @@ case class OptionalHeader(
 
     bbuf.putInt(additionalFields.loaderFlags)
     bbuf.putInt(additionalFields.numberOfRvaAndSizes)
-    bbuf.array()
+    bbuf.array().take(bbuf.position())
   }
 }

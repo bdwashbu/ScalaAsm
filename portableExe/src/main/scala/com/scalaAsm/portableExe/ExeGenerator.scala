@@ -17,16 +17,14 @@ import sections._
 case class CompiledImports(rawData: Array[Byte],
                             boundImportSize: Int,
                             nameTableSize: Int,
-                            imports: Map[String, Int]) {
+                            imports: Map[String, Int],
+                            importSymbols: Seq[ImportSymbol]) {
   
   def getImportsDirectory(importsLocation: Int) = {
     ImageDataDirectory(importsLocation, boundImportSize)
   }
   
   def getIATDirectory(IATlocation: Int) = {
-    //val endOfData = addressOfData + dataSize
-    //val IATlocation = endOfData + boundImportSize + nameTableSize
-    // addressOfData + dataSize + boundImportSize + nameTableSize
     ImageDataDirectory(IATlocation, nameTableSize)
   }  
 }

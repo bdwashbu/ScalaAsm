@@ -15,27 +15,23 @@ case class Extern(dllName: String, functionNames: Seq[String])
 
 private[portableExe] case class ImageThunkDataRVA(offset: Int) extends AnyVal
 
-case class Imports(val imports: Seq[Extern], val offset: Int) {
-
-  private def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0" else name
-
-  private trait Positionable extends ExeWriter {
+trait Positionable extends ExeWriter {
     var position: Int = 0
   }
 
-  private case class ImageImportByNameRVA(var offset: Long, dllName: String = "")
+  case class ImageImportByNameRVA(var offset: Long, dllName: String = "")
 
-  private case class ImageThunkData(imagePointer: ImageImportByNameRVA, name: String, is64Bit: Boolean) extends Positionable {
+  case class ImageThunkData(imagePointer: ImageImportByNameRVA, name: String, is64Bit: Boolean) extends Positionable {
     def write(stream: DataOutputStream) {
       position = stream.size
       if (is64Bit)
     	  write(stream, imagePointer.offset)
       else
-          write(stream, imagePointer.offset.toInt)
+        write(stream, imagePointer.offset.toInt)
     }
   }
 
-  private case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String, is64Bit: Boolean) extends Positionable {
+  case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String, is64Bit: Boolean) extends Positionable {
 
     def write(stream: DataOutputStream) {
       position = stream.size
@@ -47,9 +43,17 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
     }
   }
 
-  private trait ImportSymbol extends Positionable {
+trait ImportSymbol extends Positionable {
     val name: String
   }
+  
+case class Imports(val imports: Seq[Extern], val offset: Int) {
+
+  private def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0" else name
+
+  
+
+  
 
   private case class ImageImportByName(hint: Short = 0, name: String) extends ImportSymbol {
 
@@ -139,7 +143,6 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
       val firstThunkRVA = offset + importAddressTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position
       val originalFirstThunkRVA = offset + importNameTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position
 
-      println("FIRST THUNK: " + firstThunkRVA)
       descriptor.importedDLLname = ImageImportByNameRVA(offset + importByNames.find(x => x.name.trim == descriptor.importedDLLname.dllName).get.position)
       descriptor.firstThunk = ImageThunkDataRVA(firstThunkRVA) //point to Import Address Table (IAT)
       descriptor.originalFirstThunk = ImageThunkDataRVA(originalFirstThunkRVA) //point to Import Name Table (INT)
@@ -171,6 +174,29 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
 
     // write the contents to the real stream
 
+    if (is64Bit) {
+      
+       def swap(x: Int): Array[Byte] = {
+        val buffer = ByteBuffer.allocate(4)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        buffer.putInt(x)
+        buffer.array()
+      }
+      
+      var offset = 0
+      importAddressTable.foreach { imp =>
+        imp.thunks.foreach{ x =>
+          val tempByteOutput = new ByteArrayOutputStream()
+          val tempStream = new DataOutputStream(tempByteOutput)
+          importDescriptors.foreach(_.write(tempStream))
+          //importNameTable.foreach { _.write(tempStream) } // (INT)
+          stream.write(Array(0xFF.toByte, 0x25.toByte))
+          stream.write(swap(tempStream.size() + 18 + 48+ offset))
+          offset += 2
+        }
+        offset += 8
+      }
+    }
     importDescriptors.foreach(_.write(stream))
     importNameTable.foreach { _.write(stream) } // (INT)
     importAddressTable.foreach { _.write(stream) } // (IAT)
@@ -185,7 +211,8 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
       byteOutput.toByteArray(),
       importDescriptors.size * ImageImportDescriptor.size,
       importAddressTable.map(table => (table.thunks.size + 1) * (if (is64Bit) 8 else 4)).reduce(_ + _),
-      getFunctionMap(imports)
+      getFunctionMap(imports),
+      importByNames
     )
   }
 }

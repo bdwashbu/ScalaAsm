@@ -25,7 +25,7 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token], v
   
   case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
   
-  def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte]
+  def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte]
 
   def addIcon(path: String): Assembled = {
     new Assembled(codeTokens, dataTokens, Option(path)) {
@@ -33,8 +33,8 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token], v
       val variables = self.variables
       val compiledImports = self.compiledImports
       
-      def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte] = {
-        self.finalizeAssembly(variables, imports, baseOffset)
+      def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
+        self.finalizeAssembly(variables, imports, imports64, baseOffset)
       }
     }
   }
@@ -70,7 +70,7 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token], v
     }
     
     val test = Imports(imports = dllImports,
-                       offset = addressOfData + dataSize)
+                       offset = if (is64Bit) 0x3000 + 24 else addressOfData + dataSize)
 
     test.generateImports(is64Bit) 
     }
@@ -78,7 +78,17 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token], v
 
   def link(addressOfData: Int, linker: Linker, dlls: String*): PortableExecutable = {
     val executableImports = compiledImports(addressOfData, dlls, linker.is64Bit)
-    val code = finalizeAssembly(variables(addressOfData), executableImports.imports, baseOffset = 0x400000 /*imagebase*/)
+    
+    var offset = 0x3000
+    val symMap = executableImports.importSymbols.map { sym =>
+      val result = (sym.name.trim, offset)
+      if (!sym.name.contains(".dll")) {
+        offset += 6
+      }
+      result
+    }.toMap
+    
+    val code = finalizeAssembly(variables(addressOfData), executableImports.imports, symMap, baseOffset = 0x400000 /*imagebase*/)
 
     val resources = iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
     

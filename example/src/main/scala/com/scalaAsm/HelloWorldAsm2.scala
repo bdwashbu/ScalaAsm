@@ -13,7 +13,7 @@ object HelloWorld2 extends AsmProgram {
   dataSections += new DataSection {
     builder += Variable("rckeep", "\0\0\0\0")
     builder += Variable("helloWorld", "Hello World!\r\n\0")
-    builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\0")
+    builder += Variable("pressAnyKey", "Press any key to continue ...\0")
   }
 
   codeSections += new CodeSection {

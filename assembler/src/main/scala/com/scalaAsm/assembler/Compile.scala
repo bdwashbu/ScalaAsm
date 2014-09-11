@@ -109,8 +109,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     CompiledAssembly(onePass, positionPass)
   }
   
-  def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], baseOffset: Int): Array[Byte] = {
-    
+  def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
     lazy val varNames = variables.keys.toList
     // Build procedure map
     val procs = compiledAsm.positionPass collect {case Proc(offset, name) => (name, offset)} toMap
@@ -143,7 +142,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
 	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).get.getRelative).getBytes
-	        case InvokeRef(name) => callNear(*(Constant32(imports(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes//callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
+	        case InvokeRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes//callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
 	        case VarRef(name) => push(Op(Constant32(variables(name) + baseOffset))).getBytes
 	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).getBytes
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).getBytes

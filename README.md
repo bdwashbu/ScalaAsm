@@ -8,7 +8,7 @@ Scala x86
 
 * Maybe you've wanted to learn assembly/x86?
 
-Scala x86 is a collaboration of all these concepts.  Scala x86 can assemble x86 code and link this into a portable executable (PE) file for execution on windows 32 and soon to be 64-bit platforms.  
+Scala x86 is a collaboration of all these concepts.  Scala x86 can assemble x86 code and link this into a portable executable (PE) file for execution on windows 32 and 64-bit platforms.  
 
 
 #### Implementing x86

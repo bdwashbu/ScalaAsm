@@ -21,7 +21,7 @@ object ScalaBasic {
       val outputStream64 = new DataOutputStream(new FileOutputStream("test64.exe"));
       
       val helloWorld64 = HelloWorld2.assemble
-      val exe64 = helloWorld64.link(0x2000, new Linker64{}, "kernel32.dll", "msvcrt.dll")
+      val exe64 = helloWorld64.link(0x3000, new Linker64{}, "kernel32.dll", "msvcrt.dll")
 
       outputStream64.write(exe64.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

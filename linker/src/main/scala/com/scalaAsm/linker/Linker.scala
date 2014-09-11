@@ -8,7 +8,7 @@ import com.scalaAsm.portableExe.sections.Sections
 import com.scalaAsm.portableExe.sections.ImageExportDirectory
 import com.scalaAsm.portableExe.sections.Extern
 import com.scalaAsm.portableExe.sections.Imports
-import com.scalaAsm.portableExe.PortableExecutable
+import com.scalaAsm.portableExe.{PortableExecutable, PortableExecutable32}
 import com.scalaAsm.portableExe.sections.SectionHeader
 import com.scalaAsm.portableExe.sections.Characteristic
 import com.scalaAsm.portableExe.OptionalHeader
@@ -161,13 +161,13 @@ class Linker32 extends Linker {
         numberOfRvaAndSizes = 16))
 
     val directories = resources map {res => DataDirectories(
-      importSymbols = executableImports.getImportsDirectory(addressOfData, rawDataSize),
-      importAddressTable = executableImports.getIATDirectory(addressOfData, rawDataSize),
+      importSymbols = executableImports.getImportsDirectory(addressOfData + rawDataSize),
+      importAddressTable = executableImports.getIATDirectory(addressOfData + rawDataSize + executableImports.boundImportSize + executableImports.nameTableSize),
       resource = ImageDataDirectory(0x3000, 11300)) 
     } getOrElse
       DataDirectories(
-        importSymbols = executableImports.getImportsDirectory(addressOfData, rawDataSize),
-        importAddressTable = executableImports.getIATDirectory(addressOfData, rawDataSize))
+        importSymbols = executableImports.getImportsDirectory(addressOfData + rawDataSize),
+        importAddressTable = executableImports.getIATDirectory(addressOfData + rawDataSize + executableImports.boundImportSize + executableImports.nameTableSize))
 
     val fileHeader = FileHeader(
       machine = 0x14C,
@@ -180,6 +180,6 @@ class Linker32 extends Linker {
 
     val peHeader = new NtHeader(fileHeader, optionalHeader)
     val res: Array[Byte] = resources getOrElse Array()
-    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, executableImports, res)
+    PortableExecutable32(dosHeader, peHeader, directories, sections, code, rawData, executableImports, res)
   }
 }

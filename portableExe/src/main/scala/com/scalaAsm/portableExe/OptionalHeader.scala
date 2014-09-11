@@ -84,7 +84,7 @@ object OptionalHeader {
  */
 
 case class AdditionalFields(
-  imageBase: Int,
+  imageBase: Long,
   sectionAlignment: Int,
   fileAlignment: Int,
   majorOperatingSystemVersion: Short,
@@ -132,8 +132,12 @@ case class OptionalHeader(
     bbuf.putInt(sizeOfUninitData)
     bbuf.putInt(addressOfEntryPoint)
     bbuf.putInt(baseOfCode)
-    bbuf.putInt(baseOfData)
-    bbuf.putInt(additionalFields.imageBase)
+    if (magic != 0x020B) { // Only present on 32 bit
+      bbuf.putInt(baseOfData)
+      bbuf.putInt(additionalFields.imageBase.toInt)
+    } else {
+      bbuf.putLong(additionalFields.imageBase) // field is 8 bytes for 64 bit
+    }
     bbuf.putInt(additionalFields.sectionAlignment)
     bbuf.putInt(additionalFields.fileAlignment)
     bbuf.putShort(additionalFields.majorOperatingSystemVersion)

@@ -2,14 +2,18 @@ package com.scalaAsm.portableExe
 
 import sections._
 
-case class PortableExecutable(dosHeader: DosHeader,
+trait PortableExecutable {
+  def get(): Array[Byte]
+}
+
+case class PortableExecutable32(dosHeader: DosHeader,
 						      peHeader: NtHeader,
                  		      directories: DataDirectories,
                  		      sections: Seq[SectionHeader],
                  		      code: Array[Byte],
                  		      rawData: Array[Byte],
                  		      compiledImports: CompiledImports,
-                 		      resources: Array[Byte])
+                 		      resources: Array[Byte]) extends PortableExecutable
  {
   
   def align(array: Array[Byte], to: Int, filler: Byte = 0xCC.toByte) = {

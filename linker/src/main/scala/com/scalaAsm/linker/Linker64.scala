@@ -8,7 +8,7 @@ import com.scalaAsm.portableExe.sections.Sections
 import com.scalaAsm.portableExe.sections.ImageExportDirectory
 import com.scalaAsm.portableExe.sections.Extern
 import com.scalaAsm.portableExe.sections.Imports
-import com.scalaAsm.portableExe.PortableExecutable
+import com.scalaAsm.portableExe.{PortableExecutable, PortableExecutable64}
 import com.scalaAsm.portableExe.sections.SectionHeader
 import com.scalaAsm.portableExe.sections.Characteristic
 import com.scalaAsm.portableExe.OptionalHeader
@@ -83,7 +83,7 @@ class Linker64 extends Linker {
         virtualSize = 0x10A,
         virtualAddress = 0x3000,
         sizeOfRawData = 0x200,
-        pointerToRawData = 0x6400,
+        pointerToRawData = 0x600,
         relocPtr = 0,
         linenumPtr = 0,
         relocations = 0,
@@ -118,10 +118,10 @@ class Linker64 extends Linker {
       sizeOfUninitData = 0,
       addressOfEntryPoint = 0x1000,
       baseOfCode = 0x1000,
-      baseOfData = 0x400000,
+      baseOfData = 0,
 
       AdditionalFields(
-        imageBase = 0,
+        imageBase = 0x400000,
         sectionAlignment = 0x1000,
         fileAlignment = 0x200,
         majorOperatingSystemVersion = 5,
@@ -144,13 +144,13 @@ class Linker64 extends Linker {
         numberOfRvaAndSizes = 16))
 
     val directories = resources map {res => DataDirectories(
-      importSymbols = executableImports.getImportsDirectory(addressOfData, rawDataSize),
-      importAddressTable = executableImports.getIATDirectory(addressOfData, rawDataSize),
+      importSymbols = executableImports.getImportsDirectory(0x3018),
+      importAddressTable = executableImports.getIATDirectory(0x3054),
       resource = ImageDataDirectory(0x3000, 11300)) 
     } getOrElse
       DataDirectories(
-        importSymbols = executableImports.getImportsDirectory(addressOfData, rawDataSize),
-        importAddressTable = executableImports.getIATDirectory(addressOfData, rawDataSize))
+        importSymbols = executableImports.getImportsDirectory(0x3018),
+        importAddressTable = executableImports.getIATDirectory(0x3054))
 
     val fileHeader = FileHeader(
       machine = 0x8664.toShort,
@@ -163,6 +163,6 @@ class Linker64 extends Linker {
 
     val peHeader = new NtHeader(fileHeader, optionalHeader)
     val res: Array[Byte] = resources getOrElse Array()
-    PortableExecutable(dosHeader, peHeader, directories, sections, code, rawData, executableImports, res)
+    PortableExecutable64(dosHeader, peHeader, directories, sections, code, rawData, executableImports, res)
   }
 }

@@ -19,14 +19,14 @@ case class CompiledImports(rawData: Array[Byte],
                             nameTableSize: Int,
                             imports: Map[String, Int]) {
   
-  def getImportsDirectory(addressOfData: Int, dataSize: Int) = {
-    val importsLocation = addressOfData + dataSize
+  def getImportsDirectory(importsLocation: Int) = {
     ImageDataDirectory(importsLocation, boundImportSize)
   }
   
-  def getIATDirectory(addressOfData: Int, dataSize: Int) = {
-    val endOfData = addressOfData + dataSize
-    val IATlocation = endOfData + boundImportSize + nameTableSize
+  def getIATDirectory(IATlocation: Int) = {
+    //val endOfData = addressOfData + dataSize
+    //val IATlocation = endOfData + boundImportSize + nameTableSize
+    // addressOfData + dataSize + boundImportSize + nameTableSize
     ImageDataDirectory(IATlocation, nameTableSize)
   }  
 }

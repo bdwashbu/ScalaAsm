@@ -124,6 +124,9 @@ http://www.godevtool.com/
 
 Intel® 64 and IA-32 Architectures Software Developer Manuals: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
 
+Microsoft PE format spec:
+http://msdn.microsoft.com/en-us/library/windows/desktop/ms680547(v=vs.85).aspx
+
 The Portable Executable format from top to bottom:
 http://www.csn.ul.ie/~caolan/publink/winresdump/winresdump/doc/pefile2.html
 

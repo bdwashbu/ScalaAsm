@@ -30,6 +30,10 @@ trait Positionable extends ExeWriter {
         write(stream, imagePointer.offset.toInt)
     }
   }
+  
+  object ImageThunkData {
+    def size(is64Bit: Boolean) = if (is64Bit) 8 else 4
+  }
 
   case class ThunkArray(thunks: Seq[ImageThunkData], dllName: String, is64Bit: Boolean) extends Positionable {
 
@@ -50,10 +54,6 @@ trait ImportSymbol extends Positionable {
 case class Imports(val imports: Seq[Extern], val offset: Int) {
 
   private def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0" else name
-
-  
-
-  
 
   private case class ImageImportByName(hint: Short = 0, name: String) extends ImportSymbol {
 
@@ -119,8 +119,8 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
       ThunkArray(extern.functionNames.map(name => ImageThunkData(ImageImportByNameRVA(0), name, is64Bit)), extern.dllName, is64Bit)
     }
 
-    val importAddressTable = imports.map(toAddressTable)
-    val importNameTable = imports.map(toAddressTable)
+    val importAddressTable = imports map toAddressTable
+    val importNameTable = importAddressTable
 
     val firstByteOutput = new ByteArrayOutputStream()
     val firstStream = new DataOutputStream(firstByteOutput)
@@ -148,30 +148,23 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
       descriptor.originalFirstThunk = ImageThunkDataRVA(originalFirstThunkRVA) //point to Import Name Table (INT)
     }
 
-    for (
-      thunkArray <- importNameTable;
-      thunk <- thunkArray.thunks
-    ) {
-      thunk.imagePointer.offset = offset + importByNames.find(importEntry => importEntry.name contains thunk.name).get.position
+    def setThunkOffsets(table: Seq[com.scalaAsm.portableExe.sections.ThunkArray]) {
+      for (
+        thunkArray <- table;
+        thunk <- thunkArray.thunks
+      ) {
+        thunk.imagePointer.offset = offset + importByNames.find(importEntry => importEntry.name contains thunk.name).get.position
+      }
     }
-
-    for (
-      thunkArray <- importAddressTable;
-      thunk <- thunkArray.thunks
-    ) {
-      thunk.imagePointer.offset = offset + importByNames.find(importEntry => importEntry.name contains thunk.name).get.position
-    }
-
-    val getCompleteFunctionMap = {
-      (for (
-        table <- importAddressTable;
-        thunk <- table.thunks
-      ) yield ((thunk.name.trim(), offset + thunk.position))).toMap
-    }
+    
+    setThunkOffsets(importNameTable)
+    setThunkOffsets(importAddressTable)
 
     val byteOutput = new ByteArrayOutputStream()
     val stream = new DataOutputStream(byteOutput)
 
+    val importDescriptorOffset = importDescriptors.size * ImageImportDescriptor.size
+    
     // write the contents to the real stream
 
     if (is64Bit) {
@@ -183,18 +176,19 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
         buffer.array()
       }
       
+      val importOffset = importDescriptorOffset + (importNameTable.size + 1) * ImageThunkData.size(is64Bit) * 2
+      val numThunks = importAddressTable.map(imports => imports.thunks.size).sum
+       
+      // add jmps for the imports
+      
       var offset = 0
       importAddressTable.foreach { imp =>
-        imp.thunks.foreach{ x =>
-          val tempByteOutput = new ByteArrayOutputStream()
-          val tempStream = new DataOutputStream(tempByteOutput)
-          importDescriptors.foreach(_.write(tempStream))
-          //importNameTable.foreach { _.write(tempStream) } // (INT)
+        imp.thunks.foreach { _ =>
           stream.write(Array(0xFF.toByte, 0x25.toByte))
-          stream.write(swap(tempStream.size() + 18 + 48+ offset))
-          offset += 2
+          stream.write(swap(importOffset + (numThunks - 1) * 6 + offset))
+          offset += (ImageThunkData.size(is64Bit) - 6) // 6 is the size of the jmp instruction
         }
-        offset += 8
+        offset += 8 // jump past terminator
       }
     }
     importDescriptors.foreach(_.write(stream))
@@ -204,12 +198,16 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
 
     def getFunctionMap(externList: Seq[Extern]) = {
       val functionNames = getFunctionNames(externList)
-      getCompleteFunctionMap.filter { case (fcnName, _) => functionNames contains fcnName }
+      
+      (for (
+        table <- importAddressTable;
+        thunk <- table.thunks if functionNames contains thunk.name.trim()
+      ) yield ((thunk.name.trim(), offset + thunk.position))).toMap
     }
 
     CompiledImports(
       byteOutput.toByteArray(),
-      importDescriptors.size * ImageImportDescriptor.size,
+      importDescriptorOffset,
       importAddressTable.map(table => (table.thunks.size + 1) * (if (is64Bit) 8 else 4)).reduce(_ + _),
       getFunctionMap(imports),
       importByNames

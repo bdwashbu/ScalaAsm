@@ -49,8 +49,7 @@ class Linker64 extends Linker {
       e_lfanew = 96,
       watermark = "GoLink, GoAsm www.GoDevTool.com\0")
 
-    val standardSections = List(
-      SectionHeader(
+    val codeSection = SectionHeader(
         name = "code",
         virtualSize = 0xE0,
         virtualAddress = 0x1000,
@@ -62,9 +61,9 @@ class Linker64 extends Linker {
         lineNumbers = 0,
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
-          Characteristic.READ.id),
-
-      SectionHeader(
+          Characteristic.READ.id)
+   
+    val dataSection = SectionHeader(
         name = "data",
         virtualSize = 0x30,
         virtualAddress = 0x2000,
@@ -76,9 +75,9 @@ class Linker64 extends Linker {
         lineNumbers = 0,
         characteristics = Characteristic.INITIALIZED.id |
           Characteristic.READ.id |
-          Characteristic.WRITE.id),
+          Characteristic.WRITE.id)
           
-      SectionHeader(
+    val idataSection = SectionHeader(
         name = ".idata",
         virtualSize = 0x10A,
         virtualAddress = 0x3000,
@@ -90,7 +89,9 @@ class Linker64 extends Linker {
         lineNumbers = 0,
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
-          Characteristic.READ.id))
+          Characteristic.READ.id)
+      
+    val standardSections = List(codeSection, dataSection, idataSection)
 
     val resourceSection: Option[SectionHeader] = resources map {res =>
       Option(SectionHeader(
@@ -110,7 +111,7 @@ class Linker64 extends Linker {
     val sections: List[SectionHeader] = standardSections ++ resourceSection
 
     val optionalHeader = OptionalHeader(
-      magic = 0x20b,
+      magic = if (is64Bit) 0x20b else 0x10b,
       majorLinkerVersion = 0,
       minorLinkerVersion = 40,
       sizeOfCode = 512,
@@ -124,11 +125,11 @@ class Linker64 extends Linker {
         imageBase = 0x400000,
         sectionAlignment = 0x1000,
         fileAlignment = 0x200,
-        majorOperatingSystemVersion = 5,
+        majorOperatingSystemVersion = if (is64Bit) 5 else 4,
         minorOperatingSystemVersion = 2,
         majorImageVersion = 0,
         minorImageVersion = 0,
-        majorSubsystemVersion = 5,
+        majorSubsystemVersion = if (is64Bit) 5 else 4,
         minorSubsystemVersion = 2,
         win32Version = 0,
         sizeOfImage = 0x4000,
@@ -137,29 +138,32 @@ class Linker64 extends Linker {
         subsystem = 3,
         dllCharacteristics = 0,
         sizeOfStackReserve = 0x100000,
-        sizeOfStackCommit = 0x10000,
+        sizeOfStackCommit = if (is64Bit) 0x10000 else 0x1000,
         sizeOfHeapReserve = 0x100000,
         sizeOfHeapCommit = 0x1000,
         loaderFlags = 0,
         numberOfRvaAndSizes = 16))
+        
+    val numImportedFunctions = executableImports.importSymbols.filter(sym => !sym.name.contains(".dll")).size
 
     val directories = resources map {res => DataDirectories(
       importSymbols = executableImports.getImportsDirectory(0x3018),
       importAddressTable = executableImports.getIATDirectory(0x3054),
       resource = ImageDataDirectory(0x3000, 11300)) 
-    } getOrElse
+    } getOrElse {
       DataDirectories(
-        importSymbols = executableImports.getImportsDirectory(0x3018),
-        importAddressTable = executableImports.getIATDirectory(0x3054))
+        importSymbols = executableImports.getImportsDirectory(idataSection.virtualAddress + numImportedFunctions * 6),
+        importAddressTable = executableImports.getIATDirectory(idataSection.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize*1))
+    }
 
     val fileHeader = FileHeader(
-      machine = 0x8664.toShort,
+      machine = if (is64Bit) 0x8664.toShort else 0x14C,
       numberOfSections = sections.size.toShort,
       timeDateStamp = 0x535BF29F,
       pointerToSymbolTable = 0, // no importance
       numberOfSymbols = 0, // no importance
-      sizeOfOptionalHeader = 0xF0,
-      characteristics = 47)
+      sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
+      characteristics = if (is64Bit) 47 else 271)
 
     val peHeader = new NtHeader(fileHeader, optionalHeader)
     val res: Array[Byte] = resources getOrElse Array()

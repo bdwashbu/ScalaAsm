@@ -1,6 +1,7 @@
 package com.scalaAsm.portableExe
 
 import sections._
+import scala.collection.mutable.ArrayBuffer
 
 case class PortableExecutable64(dosHeader: DosHeader,
   peHeader: NtHeader,
@@ -19,21 +20,21 @@ case class PortableExecutable64(dosHeader: DosHeader,
 
   def get(): Array[Byte] = {
     
-    val dataSection = sections.find(section => (section.characteristics & Characteristic.INITIALIZED.id) != 0 &&
-        (section.characteristics & Characteristic.READ.id) != 0 &&
-        (section.characteristics & Characteristic.WRITE.id) != 0).get
+    val totalSize = peHeader.optionalHeader.additionalFields.sizeOfHeaders + sections.map(_.sizeOfRawData).sum
     
-    val result = align(align(dosHeader(), 16, 0) ++:
+    val result = ArrayBuffer.fill(totalSize)(0.toByte)
+
+    val headers = align(dosHeader(), 16, 0) ++:
       peHeader() ++:
       directories() ++:
-      sections.map(_.write).reduce(_ ++ _),
-      peHeader.optionalHeader.sizeOfCode, 0x00) ++:
-      align(code, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00) ++:
-      align(rawData, dataSection.sizeOfRawData, 0x00) ++:
-      align(compiledImports.rawData, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00) ++:
-      resources
+      sections.map(_.write).reduce(_ ++ _)
+    
+    result.insertAll(0, headers)
+    result.insertAll(0x200, code)
+    result.insertAll(0x400, rawData)
+    result.insertAll(0x600, compiledImports.rawData)
 
-    align(result, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00)
+    align(result.toArray, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00)
   }
 
   override def toString = {

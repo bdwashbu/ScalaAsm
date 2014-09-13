@@ -73,10 +73,10 @@ class Linker32 extends Linker {
       e_cs = 0,
       e_lfarlc = 64,
       e_ovno = 0,
-      e_res = Array.fill(4)(0.toShort),
+      e_res = (0,0,0,0),
       e_oemid = 0,
       e_oeminfo = 0,
-      e_res2 = Array.fill(10)(0.toShort),
+      e_res2 = (0,0,0,0,0,0,0,0,0,0),
       e_lfanew = 128,
       dosStub = getStub)
 

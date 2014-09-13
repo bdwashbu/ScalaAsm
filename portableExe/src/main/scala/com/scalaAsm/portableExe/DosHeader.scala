@@ -24,10 +24,11 @@ object DosHeader {
       e_cs = input.getShort(),
       e_lfarlc = input.getShort(),
       e_ovno = input.getShort(),
-      e_res = (for (i <- 0 until 4) yield input.getShort()).toArray,
+      e_res = (input.getShort(), input.getShort(), input.getShort(), input.getShort()),
       e_oemid = input.getShort(),
       e_oeminfo = input.getShort(),
-      e_res2 = (for (i <- 0 until 10) yield input.getShort()).toArray,
+      e_res2 = (input.getShort(), input.getShort(), input.getShort(), input.getShort(), input.getShort(),
+                input.getShort(), input.getShort(), input.getShort(), input.getShort(), input.getShort()), 
       e_lfanew = input.getInt()
     )
     input.position(header.e_lfanew) // skip dos stub
@@ -50,10 +51,10 @@ case class DosHeader(
   e_cs: Short, // Initial (relative) CS value
   e_lfarlc: Short, // File address of relocation table
   e_ovno: Short, // Overlay number
-  e_res: Array[Short], // Reserved words
+  e_res: Tuple4[Short, Short, Short, Short], // Reserved words
   e_oemid: Short, // OEM identifier (for e_oeminfo)
   e_oeminfo: Short, // OEM information; e_oemid specific
-  e_res2: Array[Short], // Reserved words
+  e_res2: Tuple10[Short, Short, Short, Short, Short, Short, Short, Short, Short, Short], // Reserved words
   e_lfanew: Int,
   dosStub:  Array[Byte] = Array(),
   watermark: String = "") { // File address of new exe header
@@ -75,10 +76,10 @@ case class DosHeader(
     bbuf.putShort(e_cs)
     bbuf.putShort(e_lfarlc)
     bbuf.putShort(e_ovno)
-    e_res.foreach(field => bbuf.putShort(field))
+    e_res.productIterator.foreach(field => bbuf.putShort(field.asInstanceOf[Short]))
     bbuf.putShort(e_oemid)
     bbuf.putShort(e_oeminfo)
-    e_res2.foreach(field => bbuf.putShort(field))
+    e_res2.productIterator.foreach(field => bbuf.putShort(field.asInstanceOf[Short]))
     bbuf.putInt(e_lfanew)
     bbuf.put(dosStub)
     bbuf.put(watermark.getBytes)

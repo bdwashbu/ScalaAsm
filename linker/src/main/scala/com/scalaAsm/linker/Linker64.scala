@@ -42,10 +42,10 @@ class Linker64 extends Linker {
       e_cs = 0,
       e_lfarlc = 64,
       e_ovno = 0,
-      e_res = Array[Int](0, 0, 26967, 13934).map(_.toShort),
+      e_res = (0, 0, 26967, 13934),
       e_oemid = 8244,
       e_oeminfo = 29264,
-      e_res2 = Array[Int](26479, 24946, 8557, 2573, 46116, 47625, 256, 8653, 19636, 8653).map(_.toShort),
+      e_res2 = (26479, 24946, 8557, 2573, 46116.toShort, 47625.toShort, 256, 8653, 19636, 8653),
       e_lfanew = 96,
       watermark = "GoLink, GoAsm www.GoDevTool.com\0")
 

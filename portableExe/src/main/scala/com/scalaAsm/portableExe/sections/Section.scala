@@ -28,6 +28,8 @@ object SectionHeader {
   }
 }
 
+case class Section(header: SectionHeader, contents: Array[Byte])
+
 case class SectionHeader(
   name: String,
   virtualSize: Int,

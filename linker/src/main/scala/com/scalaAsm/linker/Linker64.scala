@@ -4,13 +4,8 @@ import com.scalaAsm.portableExe.CompiledImports
 import com.scalaAsm.portableExe.DosHeader
 import com.scalaAsm.portableExe.PeHeader
 import com.scalaAsm.portableExe.DataDirectories
-import com.scalaAsm.portableExe.sections.Sections
-import com.scalaAsm.portableExe.sections.ImageExportDirectory
-import com.scalaAsm.portableExe.sections.Extern
-import com.scalaAsm.portableExe.sections.Imports
+import com.scalaAsm.portableExe.sections._
 import com.scalaAsm.portableExe.{PortableExecutable, PortableExecutable64}
-import com.scalaAsm.portableExe.sections.SectionHeader
-import com.scalaAsm.portableExe.sections.Characteristic
 import com.scalaAsm.portableExe.OptionalHeader
 import com.scalaAsm.portableExe.AdditionalFields
 import com.scalaAsm.portableExe.ImageDataDirectory
@@ -49,7 +44,8 @@ class Linker64 extends Linker {
       e_lfanew = 96,
       watermark = "GoLink, GoAsm www.GoDevTool.com\0")
 
-    val codeSection = SectionHeader(
+    val codeSection = Section(
+      SectionHeader(
         name = "code",
         virtualSize = 0xE0,
         virtualAddress = 0x1000,
@@ -61,9 +57,11 @@ class Linker64 extends Linker {
         lineNumbers = 0,
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
-          Characteristic.READ.id)
+          Characteristic.READ.id) 
+      , code)
    
-    val dataSection = SectionHeader(
+    val dataSection = Section(
+      SectionHeader(
         name = "data",
         virtualSize = 0x30,
         virtualAddress = 0x2000,
@@ -76,8 +74,10 @@ class Linker64 extends Linker {
         characteristics = Characteristic.INITIALIZED.id |
           Characteristic.READ.id |
           Characteristic.WRITE.id)
-          
-    val idataSection = SectionHeader(
+      , rawData)
+      
+    val idataSection = Section(
+      SectionHeader(
         name = ".idata",
         virtualSize = 0x10A,
         virtualAddress = 0x3000,
@@ -90,11 +90,13 @@ class Linker64 extends Linker {
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
           Characteristic.READ.id)
+     , executableImports.rawData)
       
     val standardSections = List(codeSection, dataSection, idataSection)
 
-    val resourceSection: Option[SectionHeader] = resources map {res =>
-      Option(SectionHeader(
+    val resourceSection: Option[Section] = resources map {res =>
+      Option(Section(
+       SectionHeader(
         name = ".rsrc",
         virtualSize = res.length,
         virtualAddress = 0x3000,
@@ -105,10 +107,10 @@ class Linker64 extends Linker {
         relocations = 0,
         lineNumbers = 0,
         characteristics = Characteristic.INITIALIZED.id |
-          Characteristic.READ.id))
+          Characteristic.READ.id), res))
     } getOrElse None
 
-    val sections: List[SectionHeader] = standardSections ++ resourceSection
+    val sections: List[Section] = standardSections ++ resourceSection
 
     val optionalHeader = OptionalHeader(
       magic = if (is64Bit) 0x20b else 0x10b,
@@ -152,8 +154,8 @@ class Linker64 extends Linker {
       resource = ImageDataDirectory(0x3000, 11300)) 
     } getOrElse {
       DataDirectories(
-        importSymbols = executableImports.getImportsDirectory(idataSection.virtualAddress + numImportedFunctions * 6),
-        importAddressTable = executableImports.getIATDirectory(idataSection.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize*1))
+        importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
+        importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize*1))
     }
 
     val fileHeader = FileHeader(
@@ -166,7 +168,7 @@ class Linker64 extends Linker {
       characteristics = if (is64Bit) 47 else 271)
 
     val peHeader = new NtHeader(fileHeader, optionalHeader)
-    val res: Array[Byte] = resources getOrElse Array()
-    PortableExecutable64(dosHeader, peHeader, directories, sections, code, rawData, executableImports, res)
+
+    PortableExecutable64(dosHeader, peHeader, directories, sections)
   }
 }

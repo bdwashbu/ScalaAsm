@@ -129,8 +129,15 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
       importEntry.functionNames.map(name => ImageImportByName(0, name + "\0")) :+ DLLName(alignTo16(importEntry.dllName + "\0"))
     }
 
+    val numThunks = importAddressTable.map(imports => imports.thunks.size).sum
+    val lengthOfJmps = numThunks * 6
+    
     // first, just place everything into a temp stream. we dont care about the contents, we just want position values.
 
+    if (is64Bit) {
+      firstStream.write(Array.fill(lengthOfJmps)(0.toByte))
+    }
+    
     importDescriptors.foreach(_.write(firstStream))
     importNameTable.foreach {_.write(firstStream) } // (INT)
     importAddressTable.foreach {_.write(firstStream) } // (IAT)
@@ -143,9 +150,10 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
       val firstThunkRVA = offset + importAddressTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position
       val originalFirstThunkRVA = offset + importNameTable.find(x => x.dllName.trim == descriptor.importedDLLname.dllName).get.position
 
+      descriptor.originalFirstThunk = ImageThunkDataRVA(originalFirstThunkRVA) //point to Import Name Table (INT)
       descriptor.importedDLLname = ImageImportByNameRVA(offset + importByNames.find(x => x.name.trim == descriptor.importedDLLname.dllName).get.position)
       descriptor.firstThunk = ImageThunkDataRVA(firstThunkRVA) //point to Import Address Table (IAT)
-      descriptor.originalFirstThunk = ImageThunkDataRVA(originalFirstThunkRVA) //point to Import Name Table (INT)
+      
     }
 
     def setThunkOffsets(table: Seq[com.scalaAsm.portableExe.sections.ThunkArray]) {
@@ -177,18 +185,21 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
       }
       
       val importOffset = importDescriptorOffset + (importNameTable.size + 1) * ImageThunkData.size(is64Bit) * 2
-      val numThunks = importAddressTable.map(imports => imports.thunks.size).sum
-       
+      
+      
       // add jmps for the imports
       
-      var offset = 0
+      var jmpPos = 6
+      var offset2 = lengthOfJmps + importOffset
       importAddressTable.foreach { imp =>
         imp.thunks.foreach { _ =>
           stream.write(Array(0xFF.toByte, 0x25.toByte))
-          stream.write(swap(importOffset + (numThunks - 1) * 6 + offset))
-          offset += (ImageThunkData.size(is64Bit) - 6) // 6 is the size of the jmp instruction
+          stream.write(swap(offset2 - jmpPos))
+          //offset2 += (ImageThunkData.size(is64Bit) - 6) // 6 is the size of the jmp instruction
+          offset2 += ImageThunkData.size(is64Bit)
+          jmpPos += 6
         }
-        offset += 8 // jump past terminator
+        offset2 += ImageThunkData.size(is64Bit) // jump past terminator
       }
     }
     importDescriptors.foreach(_.write(stream))

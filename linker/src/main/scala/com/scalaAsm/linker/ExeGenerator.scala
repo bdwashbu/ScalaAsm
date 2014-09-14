@@ -70,7 +70,7 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token], v
     }
     
     val test = Imports(imports = dllImports,
-                       offset = if (is64Bit) 0x3000 + 24 else addressOfData + dataSize)
+                       offset = if (is64Bit) 0x3000 else addressOfData + dataSize)
 
     test.generateImports(is64Bit) 
     }

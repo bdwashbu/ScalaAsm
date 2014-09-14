@@ -15,10 +15,8 @@ import com.scalaAsm.portableExe.sections.ResourceGen
 
 class Linker64 extends Linker {
   
-  def is64Bit = true
-  
   def link(executableImports: CompiledImports, code: Array[Byte],
-    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]]): PortableExecutable = {
+    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]], is64Bit: Boolean): PortableExecutable = {
 
     val rawDataSize = rawData.length
 
@@ -47,10 +45,10 @@ class Linker64 extends Linker {
     val codeSection = Section(
       SectionHeader(
         name = "code",
-        virtualSize = 0xE0,
+        virtualSize = code.length,
         virtualAddress = 0x1000,
         sizeOfRawData = 0x200,
-        pointerToRawData = 0x200,
+        pointerToRawData = 0x400,
         relocPtr = 0,
         linenumPtr = 0,
         relocations = 0,
@@ -63,10 +61,10 @@ class Linker64 extends Linker {
     val dataSection = Section(
       SectionHeader(
         name = "data",
-        virtualSize = 0x30,
+        virtualSize = rawData.length,
         virtualAddress = 0x2000,
         sizeOfRawData = 0x200,
-        pointerToRawData = 0x400,
+        pointerToRawData = 0x600,
         relocPtr = 0,
         linenumPtr = 0,
         relocations = 0,
@@ -79,10 +77,10 @@ class Linker64 extends Linker {
     val idataSection = Section(
       SectionHeader(
         name = ".idata",
-        virtualSize = 0x10A,
+        virtualSize = executableImports.rawData.length,
         virtualAddress = 0x3000,
         sizeOfRawData = 0x200,
-        pointerToRawData = 0x600,
+        pointerToRawData = 0x800,
         relocPtr = 0,
         linenumPtr = 0,
         relocations = 0,
@@ -153,9 +151,15 @@ class Linker64 extends Linker {
       importAddressTable = executableImports.getIATDirectory(0x3054),
       resource = ImageDataDirectory(0x3000, 11300)) 
     } getOrElse {
-      DataDirectories(
-        importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
-        importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize*1))
+      if (is64Bit) {
+        DataDirectories(
+          importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
+          importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize))
+      } else {
+         DataDirectories(
+          importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress),
+          importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + executableImports.nameTableSize))
+      }
     }
 
     val fileHeader = FileHeader(

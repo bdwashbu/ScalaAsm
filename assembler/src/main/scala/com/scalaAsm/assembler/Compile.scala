@@ -143,7 +143,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
 	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
 	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).get.getRelative).getBytes
 	        case InvokeRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes//callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
-	        case VarRef(name) => push(Op(Constant32(variables(name) + baseOffset))).getBytes
+	        case VarRef(name) => push(Op(Constant32(variables(name) + baseOffset - 0x1000))).getBytes // fix
 	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).getBytes
 	        case ImportRef(name) => callNear(*(Constant32(imports(name) + baseOffset))).getBytes
 	        case LabelRef(name, inst, format) => {

@@ -19,9 +19,8 @@ import com.scalaAsm.portableExe.NtHeader
 import com.scalaAsm.portableExe.sections.ResourceGen
 
 abstract class Linker {
-  def is64Bit: Boolean
   def link(executableImports: CompiledImports, code: Array[Byte],
-    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]]): PortableExecutable
+    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]], is64Bit: Boolean): PortableExecutable
 }
 
 class Linker32 extends Linker {
@@ -29,11 +28,9 @@ class Linker32 extends Linker {
   import java.nio.ByteBuffer
   import java.nio.ByteOrder
   import com.scalaAsm.asm.CodeSection
-
-  def is64Bit = false
   
   def link(executableImports: CompiledImports, code: Array[Byte],
-    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]]): PortableExecutable = {
+    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]], is64Bit: Boolean): PortableExecutable = {
 
     val rawDataSize = rawData.length
 

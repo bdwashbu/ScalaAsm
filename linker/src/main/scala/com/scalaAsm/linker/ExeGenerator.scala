@@ -70,14 +70,14 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token], v
     }
     
     val test = Imports(imports = dllImports,
-                       offset = if (is64Bit) 0x3000 else addressOfData + dataSize)
+                       offset = 0x3000)
 
     test.generateImports(is64Bit) 
     }
   }
 
-  def link(addressOfData: Int, linker: Linker, dlls: String*): PortableExecutable = {
-    val executableImports = compiledImports(addressOfData, dlls, linker.is64Bit)
+  def link(addressOfData: Int, linker: Linker, is64Bit: Boolean, dlls: String*): PortableExecutable = {
+    val executableImports = compiledImports(addressOfData, dlls, is64Bit)
     
     var offset = 0x3000
     val symMap = executableImports.importSymbols.map { sym =>
@@ -92,6 +92,6 @@ abstract class Assembled(val codeTokens: Seq[Any], val dataTokens: Seq[Token], v
 
     val resources = iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
     
-    linker.link(executableImports, code, addressOfData, rawData, resources)
+    linker.link(executableImports, code, addressOfData, rawData, resources, is64Bit)
   }
 }

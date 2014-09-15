@@ -16,19 +16,19 @@ case class PortableExecutable64(dosHeader: DosHeader,
 
   def get(): Array[Byte] = {
     
-    val totalSize = peHeader.optionalHeader.additionalFields.sizeOfHeaders + sections.map(_.header.sizeOfRawData).sum
+    val totalSize = sections.last.header.pointerToRawData + sections.last.header.sizeOfRawData
     
-    val result = ArrayBuffer.fill(totalSize)(0.toByte)
-
+    var result = ArrayBuffer.fill(totalSize)(0.toByte)
+    
     val headers = align(dosHeader(), 16, 0) ++:
       peHeader() ++:
       directories() ++:
       sections.map(_.header.write).reduce(_ ++ _)
     
-    result.insertAll(0, headers)
-    sections.foreach{section => result.insertAll(section.header.pointerToRawData, section.contents)}
+    result = result.patch(0, headers, headers.length)
+    sections.foreach{section => result = result.patch(section.header.pointerToRawData, section.contents, section.contents.length)}
 
-    align(result.toArray, peHeader.optionalHeader.additionalFields.fileAlignment, 0x00)
+    result.toArray
   }
 
   override def toString = {

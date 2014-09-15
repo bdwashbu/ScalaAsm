@@ -134,9 +134,9 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
     
     // first, just place everything into a temp stream. we dont care about the contents, we just want position values.
 
-    if (is64Bit) {
+    //if (is64Bit) {
       firstStream.write(Array.fill(lengthOfJmps)(0.toByte))
-    }
+    //}
     
     importDescriptors.foreach(_.write(firstStream))
     importNameTable.foreach {_.write(firstStream) } // (INT)
@@ -175,7 +175,7 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
     
     // write the contents to the real stream
 
-    if (is64Bit) {
+    //if (is64Bit) {
       
        def swap(x: Int): Array[Byte] = {
         val buffer = ByteBuffer.allocate(4)
@@ -193,15 +193,20 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
       var offset2 = lengthOfJmps + importOffset
       importAddressTable.foreach { imp =>
         imp.thunks.foreach { _ =>
-          stream.write(Array(0xFF.toByte, 0x25.toByte))
-          stream.write(swap(offset2 - jmpPos))
+          if (is64Bit) {
+            stream.write(Array(0xFF.toByte, 0x25.toByte))
+            stream.write(swap(offset2 - jmpPos))
+          } else {
+            stream.write(Array(0xFF.toByte, 0x25.toByte))
+            stream.write(swap(offset2 + 0x403000))
+          }
           //offset2 += (ImageThunkData.size(is64Bit) - 6) // 6 is the size of the jmp instruction
           offset2 += ImageThunkData.size(is64Bit)
           jmpPos += 6
         }
         offset2 += ImageThunkData.size(is64Bit) // jump past terminator
       }
-    }
+    //}
     importDescriptors.foreach(_.write(stream))
     importNameTable.foreach { _.write(stream) } // (INT)
     importAddressTable.foreach { _.write(stream) } // (IAT)

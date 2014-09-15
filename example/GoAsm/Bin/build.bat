@@ -1,2 +1,2 @@
-GoAsm /x64 HelloWorld.obj HelloWorld
-GoLink /console HelloWorld.obj kernel32.dll msvcrt.dll
+GoAsm HelloWorld32.obj HelloWorld32
+GoLink /console HelloWorld32.obj kernel32.dll msvcrt.dll

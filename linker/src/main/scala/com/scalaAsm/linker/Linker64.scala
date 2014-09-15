@@ -119,7 +119,7 @@ class Linker64 extends Linker {
       sizeOfUninitData = 0,
       addressOfEntryPoint = 0x1000,
       baseOfCode = 0x1000,
-      baseOfData = 0,
+      baseOfData = 0x2000,
 
       AdditionalFields(
         imageBase = 0x400000,
@@ -151,15 +151,15 @@ class Linker64 extends Linker {
       importAddressTable = executableImports.getIATDirectory(0x3054),
       resource = ImageDataDirectory(0x3000, 11300)) 
     } getOrElse {
-      if (is64Bit) {
+      //if (is64Bit) {
         DataDirectories(
           importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
           importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize))
-      } else {
-         DataDirectories(
-          importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress),
-          importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + executableImports.nameTableSize))
-      }
+//      } else {
+//         DataDirectories(
+//          importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress),
+//          importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + executableImports.nameTableSize))
+//      }
     }
 
     val fileHeader = FileHeader(

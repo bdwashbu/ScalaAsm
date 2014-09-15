@@ -59,7 +59,7 @@ object Tokens {
   case class Padding(to: Int, tokenSize: Int) extends SizedToken(tokenSize)
   case class ProcRef(procName: String) extends SizedToken(5)
   case class VarRef(procName: String) extends SizedToken(5)
-  case class ImportRef(varName: String) extends SizedToken(6)
+  case class ImportRef(varName: String) extends SizedToken(5)
   case class InvokeRef(varName: String) extends SizedToken(5)
   case class JmpRefResolved(varName: String) extends SizedToken(6)
   

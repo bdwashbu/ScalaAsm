@@ -184,13 +184,13 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
         buffer.array()
       }
       
-      val importOffset = importDescriptorOffset + (importNameTable.size + 1) * ImageThunkData.size(is64Bit) * 2
-      
+      val iatOffset = importDescriptorOffset + importAddressTable.map(x => ImageThunkData.size(is64Bit) + x.thunks.size * ImageThunkData.size(is64Bit)).sum
       
       // add jmps for the imports
       
       var jmpPos = 6
-      var offset2 = lengthOfJmps + importOffset
+      var offset2 = lengthOfJmps + iatOffset
+
       importAddressTable.foreach { imp =>
         imp.thunks.foreach { _ =>
           if (is64Bit) {

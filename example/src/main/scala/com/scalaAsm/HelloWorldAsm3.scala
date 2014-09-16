@@ -38,7 +38,8 @@ object HelloWorld3 extends AsmProgram {
     val hFile = *(ebp + byte(-4))
     val lpBuffer = *(ebp + byte(8))
     val STD_OUTPUT_HANDLE = byte(-11)
-
+    val STD_INPUT_HANDLE = byte(-10)
+    
     procedure(name = "flushBuffer",
       push(ebp),
       mov(ebp, esp),
@@ -60,9 +61,6 @@ object HelloWorld3 extends AsmProgram {
       leave(()),
       retn(word(4)))
 
-    builder += align(0x10)
-    val STD_INPUT_HANDLE = byte(-10)
-
     procedure(name = "waitForKeypress",
       push(STD_INPUT_HANDLE),
       call("GetStdHandle"),
@@ -75,8 +73,6 @@ object HelloWorld3 extends AsmProgram {
       jz(byte(-17)), // if a key has not been pressed, loop around again
       call("_getch"),
       retn(()))
-
-    builder += align(0x10)
 
     procedure(name = "strlen",
       mov(eax, *(esp + byte(4))), // pointer to string

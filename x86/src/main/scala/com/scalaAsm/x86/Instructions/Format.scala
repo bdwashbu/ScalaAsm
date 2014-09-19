@@ -58,10 +58,10 @@ trait LowPriorityFormats extends OperandEncoding {
   
   
   
-  implicit object MFormatB2 extends OneOperandFormat[BaseIndex[_,Constant8], M] {
+  implicit object MFormatB2 extends OneOperandFormat[BaseIndex[_,_8], M] {
 
-    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[BaseIndex[_,Constant8]](operand1Size, opcode, prefix) {
-      def getAddressingForm(operand: BaseIndex[_,Constant8]) = {
+    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[BaseIndex[_,_8]](operand1Size, opcode, prefix) {
+      def getAddressingForm(operand: BaseIndex[_,_8]) = {
             InstructionFormat (
               NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcode.opcodeExtension.get, operand.base), operand.displacement),
               immediate = None
@@ -130,10 +130,10 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
-  implicit object OffsetFormat2 extends OneOperandFormat[BaseIndex[_,Constant8], Offset] {
+  implicit object OffsetFormat2 extends OneOperandFormat[BaseIndex[_,_8], Offset] {
 
-    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[BaseIndex[_,Constant8]](operand1Size, opcode, prefix) {
-      def getAddressingForm(operand: BaseIndex[_,Constant8]) = {
+    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[BaseIndex[_,_8]](operand1Size, opcode, prefix) {
+      def getAddressingForm(operand: BaseIndex[_,_8]) = {
         InstructionFormat (
           NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcode.opcodeExtension.get, operand.base), operand.displacement),
           immediate = None
@@ -144,10 +144,10 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
-  implicit object MRFormat extends TwoOperandFormat[BaseIndex[_,Constant8], ModRM.reg, MR] {
+  implicit object MRFormat extends TwoOperandFormat[BaseIndex[_,_8], ModRM.reg, MR] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[BaseIndex[_,Constant8], ModRM.reg](operand1Size,operand2Size,opcode, prefix) {
-      def getAddressingForm(op1: BaseIndex[_,Constant8], op2: ModRM.reg) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[BaseIndex[_,_8], ModRM.reg](operand1Size,operand2Size,opcode, prefix) {
+      def getAddressingForm(op1: BaseIndex[_,_8], op2: ModRM.reg) = {
         RMFormat(operand2Size, operand1Size, opcode, prefix).getAddressingForm(op2, op1)
       }
   
@@ -155,10 +155,10 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
-  implicit object RMFormat extends TwoOperandFormat[ModRM.reg, BaseIndex[_,Constant8], RM] {
+  implicit object RMFormat extends TwoOperandFormat[ModRM.reg, BaseIndex[_,_8], RM] {
     
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, BaseIndex[_,Constant8]](operand1Size,operand2Size,opcode, prefix) {
-      def getAddressingForm(op1: ModRM.reg, op2: BaseIndex[_,Constant8]) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, BaseIndex[_,_8]](operand1Size,operand2Size,opcode, prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: BaseIndex[_,_8]) = {
         InstructionFormat (
             NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement),
             immediate = None
@@ -227,10 +227,10 @@ trait Formats extends LowPriorityFormats {
     }
   }
   
-  implicit object RMFormatB1 extends TwoOperandFormat[ModRM.reg, BaseIndex[StackPointer[_],Constant8], RM] {
+  implicit object RMFormatB1 extends TwoOperandFormat[ModRM.reg, BaseIndex[StackPointer[_ <: OperandSize],_8], RM] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, BaseIndex[StackPointer[_],Constant8]](operand1Size,operand2Size,opcode,prefix) {
-      def getAddressingForm(op1: ModRM.reg, op2: BaseIndex[StackPointer[_],Constant8]) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, BaseIndex[StackPointer[_ <: OperandSize],_8]](operand1Size,operand2Size,opcode,prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: BaseIndex[StackPointer[_ <: OperandSize],_8]) = {
         InstructionFormat (
       	    WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement),
             immediate = None
@@ -241,10 +241,10 @@ trait Formats extends LowPriorityFormats {
     }
   }
   
-  implicit object RMFormatB2 extends TwoOperandFormat[ModRM.reg, BaseIndex[_,Constant32], RM] {
+  implicit object RMFormatB2 extends TwoOperandFormat[ModRM.reg, BaseIndex[_,_32], RM] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, BaseIndex[_,Constant32]](operand1Size,operand2Size,opcode,prefix) {
-      def getAddressingForm(op1: ModRM.reg, op2: BaseIndex[_,Constant32]) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, BaseIndex[_,_32]](operand1Size,operand2Size,opcode,prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: BaseIndex[_,_32]) = {
         InstructionFormat (
       	    NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = op2.base), op2.displacement),  
             immediate = None
@@ -270,10 +270,10 @@ trait Formats extends LowPriorityFormats {
     }
   }
   
-  implicit object MFormat5 extends OneOperandFormat[AbsoluteAddress[Constant32], M] {
+  implicit object MFormat5 extends OneOperandFormat[AbsoluteAddress[_32], M] {
 
-    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[AbsoluteAddress[Constant32]](operand1Size, opcode, prefix) {
-      def getAddressingForm(operand: AbsoluteAddress[Constant32]) = {
+    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[AbsoluteAddress[_32]](operand1Size, opcode, prefix) {
+      def getAddressingForm(operand: AbsoluteAddress[_32]) = {
             InstructionFormat (
               addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, new EBP), operand.displacement), //mem.encode(opcode.opcodeExtension),
               immediate = None
@@ -284,7 +284,7 @@ trait Formats extends LowPriorityFormats {
     }
   }
   
-    implicit object AbsoluteAddress32 extends AbsoluteAddress[Constant32] {
+    implicit object AbsoluteAddress32 extends AbsoluteAddress[_32] {
       selff =>
         var offset = 0
       def displacement = Constant32(offset)
@@ -295,7 +295,7 @@ trait Formats extends LowPriorityFormats {
       }
     }
   
-  implicit object AbsoluteAddress64 extends AbsoluteAddress[Constant64] {
+  implicit object AbsoluteAddress64 extends AbsoluteAddress[_64] {
     selff =>
       var offset:Long = 0
       def displacement = Constant64(offset)
@@ -306,10 +306,10 @@ trait Formats extends LowPriorityFormats {
       }
   }
 
-  implicit object RMFormat2 extends TwoOperandFormat[ModRM.reg, AbsoluteAddress[Constant32], RM] {
+  implicit object RMFormat2 extends TwoOperandFormat[ModRM.reg, AbsoluteAddress[_32], RM] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, AbsoluteAddress[Constant32]](operand1Size,operand2Size, opcode, prefix) {
-      def getAddressingForm(op1: ModRM.reg, op2: AbsoluteAddress[Constant32]) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, AbsoluteAddress[_32]](operand1Size,operand2Size, opcode, prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: AbsoluteAddress[_32]) = {
         InstructionFormat (
           addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.displacement),
           immediate = None

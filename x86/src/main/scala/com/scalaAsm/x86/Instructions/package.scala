@@ -32,7 +32,7 @@ package object Instructions {
   type rel64 = Relative[_64]
  
 
-  case class Op[X](from: X) extends Operand[X, X] { def get = from }
+  
 
   //trait testOneOperand[X <: x86Instruction] {
   //  def apply[O1: Sized, OpEn <: OneOperandEncoding[O1]](p1: Operand[_,O1])(implicit ev: OneOperandInstruction[O1, OpEn] with X, format: OneOperandFormat[O1, OpEn], prefix: HasRexPrefix[O1]) = ev(p1, format, implicitly[HasRexPrefix[O1]].get)

@@ -9,7 +9,6 @@ import java.nio.ByteBuffer
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
 import com.scalaAsm.x86.Prefixes
-import com.scalaAsm.x86.Instructions.`package`.Op
 import com.scalaAsm.x86.Instructions.`package`.OneOperandEncoding
 import com.scalaAsm.x86.Instructions.`package`.I
 

@@ -12,10 +12,10 @@ import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard
 import com.scalaAsm.x86.Instructions.Formats
 import com.scalaAsm.x86.Prefixes
-import com.scalaAsm.x86.Instructions.`package`.Op
 import com.scalaAsm.x86.Instructions.OneMachineCodeBuilder
 import com.scalaAsm.x86.Operands.addr
 import com.scalaAsm.x86.Instructions.TwoMachineCodeBuilder
+import com.scalaAsm.x86.Operands.Op
 
 class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Standard.Catalog with Formats with Registers with Prefixes
 {

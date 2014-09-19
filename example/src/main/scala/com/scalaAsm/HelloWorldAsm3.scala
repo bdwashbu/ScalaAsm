@@ -70,7 +70,7 @@ object HelloWorld3 extends AsmProgram {
       call("Sleep"),
       call("_kbhit"),
       test(eax, eax), // eax is 0 if a key has not been pressed
-      jz(byte(-17)), // if a key has not been pressed, loop around again
+      jz(byte(-16)), // if a key has not been pressed, loop around again
       call("_getch"),
       retn(()))
 

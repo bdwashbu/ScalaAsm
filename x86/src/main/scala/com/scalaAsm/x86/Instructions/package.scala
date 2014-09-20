@@ -39,7 +39,7 @@ package object Instructions {
   //}
   
   trait testOneOperand[X[G,OpEn <: OneOperandEncoding[G]] <: OneOperandInstruction[G,OpEn,_]] {
-    def apply[O1: Sized, OpEn <: OneOperandEncoding[O1], Opcode](p1: Operand[_,O1])(implicit ev: X[O1, OpEn], format: OneOperandFormat[O1, OpEn], prefix: HasRexPrefix[O1]) = ev(p1, format, implicitly[HasRexPrefix[O1]].get)
+    def apply[O1, OpEn <: OneOperandEncoding[O1], Opcode](p1: Operand[_,O1])(implicit ev: X[O1, OpEn], format: OneOperandFormat[O1, OpEn], prefix: HasRexPrefix[O1]) = ev(p1, format, implicitly[HasRexPrefix[O1]].get)
   }
   
   //trait testTwoOperands[X <: x86Instruction] {
@@ -47,7 +47,7 @@ package object Instructions {
   //}
   
   trait testTwoOperands[X[G,H,OpEn <: TwoOperandEncoding[G,H]] <: TwoOperandInstruction[G,H,OpEn,_]] {
-    def apply[O1: Sized, O2: Sized, OpEn <: TwoOperandEncoding[O1,O2], Opcode](p1: Operand[_,O1], p2: Operand[_,O2])(implicit ev: X[O1, O2, OpEn], format: TwoOperandFormat[O1, O2, OpEn], prefix: HasRexPrefix[O1]) = ev(p1,p2, format, implicitly[HasRexPrefix[O1]].get)
+    def apply[O1, O2, OpEn <: TwoOperandEncoding[O1,O2], Opcode](p1: Operand[_,O1], p2: Operand[_,O2])(implicit ev: X[O1, O2, OpEn], format: TwoOperandFormat[O1, O2, OpEn], prefix: HasRexPrefix[O1]) = ev(p1,p2, format, implicitly[HasRexPrefix[O1]].get)
   }
   
   class testZeroOperands[X <: ZeroOperandInstruction[_]] {

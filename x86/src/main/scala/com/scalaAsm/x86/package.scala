@@ -32,10 +32,10 @@ package object x86 {
   // Many of these can be found in section 3.1.1.3 of the Intel x86 manual
   
   type imm = Constant[_ <: OperandSize]
-  type imm8 = Constant8
-  type imm16 = Constant16
-  type imm32 = Constant32
-  type imm64 = Constant64
+  type imm8 = Constant[_8]
+  type imm16 = Constant[_16]
+  type imm32 = Constant[_32]
+  type imm64 = Constant[_64]
   
   type rm = RegisterOrMemory[_ <: OperandSize]
   type rm8 = RegisterOrMemory[_8]

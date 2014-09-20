@@ -68,7 +68,7 @@ trait LowPriorityFormats extends OperandEncoding {
             )
       }
       
-       def size = prefix.size + opcode.size + 1 + operand1Size
+       def size = prefix.size + opcode.size + 1 + 1
     }
   }
   
@@ -102,17 +102,59 @@ trait LowPriorityFormats extends OperandEncoding {
 
 
 
-  implicit object IFormat extends OneOperandFormat[imm, I] {
+  implicit object IFormat8 extends OneOperandFormat[imm8, I] {
 
-    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[imm](operand1Size, opcode, prefix) {
-      def getAddressingForm(operand: imm) = {
+    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[imm8](operand1Size, opcode, prefix) {
+      def getAddressingForm(operand: imm8) = {
         InstructionFormat (
           addressingForm = NoModRM(),
           immediate = Some(operand)
         )
       }
       
-      def size = prefix.size + opcode.size + operand1Size
+      def size = prefix.size + opcode.size + 1
+    }
+  }
+  
+  implicit object IFormat16 extends OneOperandFormat[imm16, I] {
+
+    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[imm16](operand1Size, opcode, prefix) {
+      def getAddressingForm(operand: imm16) = {
+        InstructionFormat (
+          addressingForm = NoModRM(),
+          immediate = Some(operand)
+        )
+      }
+      
+      def size = prefix.size + opcode.size + 2
+    }
+  }
+  
+  implicit object IFormat32 extends OneOperandFormat[imm32, I] {
+
+    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[imm32](operand1Size, opcode, prefix) {
+      def getAddressingForm(operand: imm32) = {
+        InstructionFormat (
+          addressingForm = NoModRM(),
+          immediate = Some(operand)
+        )
+      }
+      
+      def size = prefix.size + opcode.size + 4
+    }
+  }
+  
+  implicit object IFormat64 extends OneOperandFormat[imm64, I] {
+
+    def apply(operand1Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedOneOperand[imm64](operand1Size, opcode, prefix) {
+      def getAddressingForm(operand: imm64) = {
+        InstructionFormat (
+          addressingForm = NoModRM(),
+          immediate = Some(operand)
+        )
+      }
+      
+      def size = prefix.size + opcode.size + 8
     }
   }
 

@@ -182,7 +182,7 @@ trait LowPriorityFormats extends OperandEncoding {
         )
       }
       
-      def size = prefix.size + opcode.size + 1 + operand1Size
+      def size = prefix.size + opcode.size + 1 + 1
     }
   }
   
@@ -211,17 +211,59 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
-  implicit object MIFormat extends TwoOperandFormat[ModRM.reg, imm, MI] {
+  implicit object MIFormat8 extends TwoOperandFormat[ModRM.reg, imm8, MI] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, imm](operand1Size,operand2Size, opcode, prefix) {
-      def getAddressingForm(op1: ModRM.reg, op2: imm) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, imm8](operand1Size,operand2Size, opcode, prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: imm8) = {
           InstructionFormat (
             addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, op1)),
             immediate = Some(op2)
           )
       }
   
-      def size = prefix.size + opcode.size + 1 + operand2Size
+      def size = prefix.size + opcode.size + 1 + 1
+    }
+  }
+  
+  implicit object MIFormat16 extends TwoOperandFormat[ModRM.reg, imm16, MI] {
+
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, imm16](operand1Size,operand2Size, opcode, prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: imm16) = {
+          InstructionFormat (
+            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, op1)),
+            immediate = Some(op2)
+          )
+      }
+  
+      def size = prefix.size + opcode.size + 1 + 2
+    }
+  }
+  
+  implicit object MIFormat32 extends TwoOperandFormat[ModRM.reg, imm32, MI] {
+
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, imm32](operand1Size,operand2Size, opcode, prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: imm32) = {
+          InstructionFormat (
+            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, op1)),
+            immediate = Some(op2)
+          )
+      }
+  
+      def size = prefix.size + opcode.size + 1 + 4
+    }
+  }
+  
+  implicit object MIFormat64 extends TwoOperandFormat[ModRM.reg, imm64, MI] {
+
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.reg, imm64](operand1Size,operand2Size, opcode, prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: imm64) = {
+          InstructionFormat (
+            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcode.opcodeExtension.get, op1)),
+            immediate = Some(op2)
+          )
+      }
+  
+      def size = prefix.size + opcode.size + 1 + 8
     }
   }
   

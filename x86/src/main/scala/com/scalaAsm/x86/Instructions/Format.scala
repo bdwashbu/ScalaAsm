@@ -267,17 +267,59 @@ trait LowPriorityFormats extends OperandEncoding {
     }
   }
   
-  implicit object OIFormat extends TwoOperandFormat[ModRM.plusRd, imm, OI] {
+  implicit object OIFormat64 extends TwoOperandFormat[ModRM.plusRd, imm64, OI] {
 
-    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.plusRd, imm](operand1Size,operand2Size,opcode, prefix) {
-      def getAddressingForm(op1: ModRM.plusRd, op2: imm) = {
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.plusRd, imm64](operand1Size,operand2Size,opcode, prefix) {
+      def getAddressingForm(op1: ModRM.plusRd, op2: imm64) = {
         InstructionFormat (
           addressingForm = NoModRM(),
           immediate = Some(op2)
         )
       }
   
-      def size = prefix.size + opcode.size + operand2Size
+      def size = prefix.size + opcode.size + 8
+    }
+  }
+  
+  implicit object OIFormat32 extends TwoOperandFormat[ModRM.plusRd, imm32, OI] {
+
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.plusRd, imm32](operand1Size,operand2Size,opcode, prefix) {
+      def getAddressingForm(op1: ModRM.plusRd, op2: imm32) = {
+        InstructionFormat (
+          addressingForm = NoModRM(),
+          immediate = Some(op2)
+        )
+      }
+  
+      def size = prefix.size + opcode.size + 4
+    }
+  }
+  
+  implicit object OIFormat16 extends TwoOperandFormat[ModRM.plusRd, imm16, OI] {
+
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.plusRd, imm16](operand1Size,operand2Size,opcode, prefix) {
+      def getAddressingForm(op1: ModRM.plusRd, op2: imm16) = {
+        InstructionFormat (
+          addressingForm = NoModRM(),
+          immediate = Some(op2)
+        )
+      }
+  
+      def size = prefix.size + opcode.size + 2
+    }
+  }
+  
+  implicit object OIFormat8 extends TwoOperandFormat[ModRM.plusRd, imm8, OI] {
+
+    def apply(operand1Size: Int, operand2Size: Int, opcode: OpcodeFormat, prefix: Array[Byte]) = new ResolvedTwoOperands[ModRM.plusRd, imm8](operand1Size,operand2Size,opcode, prefix) {
+      def getAddressingForm(op1: ModRM.plusRd, op2: imm8) = {
+        InstructionFormat (
+          addressingForm = NoModRM(),
+          immediate = Some(op2)
+        )
+      }
+  
+      def size = prefix.size + opcode.size + 1
     }
   }
 }
@@ -321,7 +363,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
-      def size = prefix.size + opcode.size + 2 + operand2Size
+      def size = prefix.size + opcode.size + 2 + 1
     }
   }
   
@@ -335,7 +377,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
-      def size = prefix.size + opcode.size + 1 + operand2Size
+      def size = prefix.size + opcode.size + 1 + 4
     }
   }
   
@@ -364,7 +406,7 @@ trait Formats extends LowPriorityFormats {
             )
       }
       
-       def size = prefix.size + opcode.size + 1 + operand1Size
+       def size = prefix.size + opcode.size + 1 + 4
     }
   }
   
@@ -400,7 +442,7 @@ trait Formats extends LowPriorityFormats {
         )
       }
   
-      def size = prefix.size + opcode.size + 1 + operand2Size
+      def size = prefix.size + opcode.size + 1 + 4
     }
   }
   

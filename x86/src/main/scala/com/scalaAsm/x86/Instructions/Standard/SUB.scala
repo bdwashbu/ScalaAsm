@@ -16,6 +16,7 @@ object SUB {
 
   implicit object sub3 extends SUB_2[rm64, imm8, MI] {
     def opcode = 0x83 /+ 5
+    override def prefix = REX.W(true)
   }
 
   implicit object sub2 extends SUB_2[r32, rm32, RM] {

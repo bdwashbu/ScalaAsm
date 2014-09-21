@@ -2,6 +2,8 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
+import com.scalaAsm.x86.Operands.UniformByteRegister
+
 trait AND extends x86Instruction {
   val mnemonic = "AND"
 }
@@ -13,6 +15,10 @@ trait ANDLow {
   implicit object and1 extends AND_2[r32, rm32, RM] {
       def opcode = 0x23
   } 
+  
+  implicit object and3 extends AND_2[rm8, imm8, MI] {
+      def opcode = 0x80 /+ 4
+  }
 }
 
 object AND extends ANDLow {
@@ -21,8 +27,9 @@ object AND extends ANDLow {
       def opcode = 0x23
   }
   
-  implicit object and3 extends AND_2[rm8, imm8, MI] {
-      def opcode = 0x80 /+ 4
+  implicit object and13 extends AND_2[UniformByteRegister[_8], imm8, MI] {
+    def opcode = 0x80 /+ 4
+    override def prefix = REX(false, false, false, false)
   }
   
   implicit object and4 extends AND_2[rm16, imm16, MI] {

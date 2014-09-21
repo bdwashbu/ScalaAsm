@@ -41,13 +41,16 @@ object MOVInstruction extends MOVLow {
 
   implicit object mov10 extends MOV_2[r64, imm64, OI] {
     def opcode = 0xB8 + rd
+    override def prefix = REX.W(true)
   }
 
   implicit object mov11 extends MOV_2[rm64, r64, MR] {
     def opcode = 0x89
+    override def prefix = REX.W(true)
   }
 
   implicit object mov12 extends MOV_2[rm64, imm32, MI] {
     def opcode = 0xC7 /+ 0
+    override def prefix = REX.W(true)
   }
 }

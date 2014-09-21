@@ -24,7 +24,9 @@ trait x86Instruction extends Instruction {
   import scala.language.implicitConversions
   val mnemonic: String
   val defaultsTo64Bit = false
+  def prefix = Seq[Prefix]()
   
+  implicit def toPrefixSeq(x: Prefix) = Seq(x)
   implicit def toByte(x: Int) = x.toByte
   implicit def toOneOpcode(x: Int): OneOpcode = OneOpcode(x.toByte)
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
@@ -97,8 +99,8 @@ abstract class ZeroOperandInstruction[Opcode <: OpcodeFormat] extends x86Instruc
 abstract class OneOperandInstruction[-O1, -OpEn <: OneOperandEncoding[O1], Opcode <: OpcodeFormat] extends x86Instruction with Formats {
   self =>
   def opcode: Opcode
-  def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[_, X], format: OneOperandFormat[X, OpEn2], prefix: Array[Byte]) = {
-    val resolvedPrefix: Array[Byte] = if (defaultsTo64Bit) Array() else prefix
+  def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[_, X], format: OneOperandFormat[X, OpEn2], prefix: Seq[Prefix]) = {
+    val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
     val resolved = format(opcode, resolvedPrefix)
     new OneMachineCodeBuilder[X,OpEn2, Opcode](p1) {
       val opcode = self.opcode
@@ -112,7 +114,7 @@ abstract class TwoOperandInstruction[-O1, -O2, -OpEn <: TwoOperandEncoding[O1, O
   self =>
   def opcode: Opcode
   
-  def apply[X, Y, OpEn2 <: TwoOperandEncoding[X, Y]](p1: Operand[_, X], p2: Operand[_, Y], format: TwoOperandFormat[X, Y, OpEn2], prefix: Array[Byte]) = {
+  def apply[X, Y, OpEn2 <: TwoOperandEncoding[X, Y]](p1: Operand[_, X], p2: Operand[_, Y], format: TwoOperandFormat[X, Y, OpEn2], prefix: Seq[Prefix]) = {
     val resolved = format(opcode, prefix)
     new TwoMachineCodeBuilder[X, Y, OpEn2, Opcode](p1, p2) {
       val opcode = self.opcode

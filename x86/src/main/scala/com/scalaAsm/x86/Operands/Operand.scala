@@ -14,9 +14,9 @@ case class addr(name: String) extends Operand[String, AbsoluteAddress[_32]] {
   var baseOffset: Int = _
   var parserPosition: Int = 0
   def get = new AbsoluteAddress[_32] {
-    var offset = {println("variable: " + name + " loc: " + variables(name)); variables(name)}
+    var offset = variables(name)
     def getRelative = null
-    def displacement = {println("variable: " + name + " loc: " + variables(name)); Constant32(variables(name) - 0x2000 - parserPosition - 7)}
+    def displacement = Constant32(variables(name) - 0x2000 - parserPosition - 7)
   }
 }
 

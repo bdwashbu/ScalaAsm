@@ -31,7 +31,7 @@ abstract class StackPointer[Size <: OperandSize](name: String) extends GeneralPu
 
 abstract class Extra64Reg(name: String) extends GeneralPurpose[_64](name) with RegisterOrMemory[_64]
 
-trait UniformByteRegister[Size <: OperandSize] extends GeneralPurpose[Size]
+trait UniformByteRegister[Size <: OperandSize] extends GeneralPurpose[Size] with RegisterOrMemory[Size]
 
 trait RegisterOperand[X] extends Operand[X,X] {
   self: X =>

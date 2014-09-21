@@ -4,23 +4,16 @@ import com.scalaAsm.x86.Operands.GeneralPurpose
 import com.scalaAsm.x86.Operands.UniformByteRegister
 import com.scalaAsm.x86.Operands._
 
-trait HasRexPrefix[-X] { def get: Array[Byte] }
-
-trait PrefixExtraLow {
-  implicit object HasNoPrefix extends HasRexPrefix[Any] { def get = Array() }
-}
-
-trait PrefixLow extends PrefixExtraLow {
-  implicit object HasRex64 extends HasRexPrefix[GeneralPurpose[_64]] { def get = REX.W(true).get }
-}
-
-trait Prefixes extends PrefixLow {
-  implicit object HasRexR9 extends HasRexPrefix[R9] { def get = REX(true, true, false, false).get }
-  implicit object HasRexR8 extends HasRexPrefix[R8] { def get = REX(true, false, false, true).get }
-  implicit object HasRexUniform extends HasRexPrefix[UniformByteRegister[_]] { def get = REX.W(false).get }
+trait Prefix {
+  def get: Array[Byte]
 }
 
 // 64-bit (R)egister (EX)tension prefix
+
+//A REX prefix must be encoded when:
+//* using 64-bit operand size and the instruction does not default to 64-bit operand size; or
+//* using one of the extended registers (R8 to R15, XMM8 to XMM15, YMM8 to YMM15, CR8 to CR15 and DR8 to DR15); or
+//* using one of the uniform byte registers SPL, BPL, SIL or DIL.
 
 object REX {
   def W(value: Boolean) = REX(value, false, false, false) // When 1, a 64-bit operand size is used. Otherwise, when 0, the default operand size is used
@@ -29,7 +22,7 @@ object REX {
   def B(value: Boolean) = REX(false, false, false, value) // Extension of the ModR/M r/m field, SIB base field, or Opcode reg field
 }
 
-case class REX(W: Boolean, R: Boolean, X: Boolean, B: Boolean) {
+case class REX(W: Boolean, R: Boolean, X: Boolean, B: Boolean) extends Prefix {
   def get = {
     val prefix: Byte = (64 + 
       (if (W) 8 else 0) +

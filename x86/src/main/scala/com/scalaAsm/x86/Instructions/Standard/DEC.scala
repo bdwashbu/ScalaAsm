@@ -2,13 +2,9 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-trait DEC extends x86Instruction {
-  val mnemonic = "DEC"
-}
+abstract class DEC_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode]("DEC")
 
-trait DEC_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with DEC
-
-object DEC {
+object DEC_1 {
 
   implicit object dec1 extends DEC_1[r32, O] {
     def opcode = 0x48 + rd

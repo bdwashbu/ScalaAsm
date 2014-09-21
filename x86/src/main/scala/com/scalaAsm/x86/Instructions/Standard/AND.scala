@@ -4,11 +4,7 @@ package Standard
 
 import com.scalaAsm.x86.Operands.UniformByteRegister
 
-trait AND extends x86Instruction {
-  val mnemonic = "AND"
-}
-
-trait AND_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1,O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode] with AND
+abstract class AND_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1,O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode]("AND")
 
 trait ANDLow {
  
@@ -21,7 +17,7 @@ trait ANDLow {
   }
 }
 
-object AND extends ANDLow {
+object AND_2 extends ANDLow {
 
   implicit object and2 extends AND_2[r16, rm16, RM] {
       def opcode = 0x23

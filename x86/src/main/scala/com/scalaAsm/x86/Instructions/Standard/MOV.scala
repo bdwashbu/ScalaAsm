@@ -4,11 +4,7 @@ package Standard
 
 import com.scalaAsm.x86.Operands.TwoOperandFormat
 
-trait MOVInstruction extends x86Instruction {
-  val mnemonic = "MOV"
-}
-
-trait MOV_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode] with MOVInstruction
+abstract class MOV_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode]("MOV")
 
 trait MOVLow {
 
@@ -17,7 +13,7 @@ trait MOVLow {
   }
 }
 
-object MOVInstruction extends MOVLow {
+object MOV_2 extends MOVLow {
 
   implicit object mov3 extends MOV_2[r32, rm32, RM] {
     def opcode = 0x8B

@@ -5,12 +5,8 @@ package Standard
 import com.scalaAsm.x86.Operands._
 import scala.annotation.implicitNotFound
 
-trait PUSH extends x86Instruction {
-  val mnemonic = "PUSH"
-}
-
 @implicitNotFound(msg = "Cannot find PUSH implementation for ${O1}")
-trait PUSH_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with PUSH
+abstract class PUSH_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode]("PUSH")
 
 trait POWLow {
     
@@ -23,7 +19,7 @@ trait POWLow {
   }
 }
 
-object PUSH extends POWLow {
+object PUSH_1 extends POWLow {
 
   implicit object push1 extends PUSH_1[r64, O] {
       def opcode = 0x50 + rd

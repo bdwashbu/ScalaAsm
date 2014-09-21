@@ -4,13 +4,9 @@ package Standard
 
 import scala.annotation.implicitNotFound
 
-trait RDRAND extends x86Instruction {
-  val mnemonic = "RDRAND"
-}
+abstract class RDRAND_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, TwoOpcodes]("RDRAND")
 
-trait RDRAND_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, TwoOpcodes] with RDRAND
-
-object RDRAND {
+object RDRAND_1 {
   
   implicit object rdrand1 extends RDRAND_1[rm32, M] {
       def opcode = (0x0F, 0xC7) /+ 6

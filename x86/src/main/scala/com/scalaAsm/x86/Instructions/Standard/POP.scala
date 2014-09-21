@@ -4,13 +4,9 @@ package Standard
 
 import com.scalaAsm.x86.Operands._
 
-trait POP extends x86Instruction {
-  val mnemonic = "POP"
-}
+abstract class POP_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode]("POP")
 
-trait POP_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with POP
-
-object POP {
+object POP_1 {
 
   implicit object pop1 extends POP_1[r32, O] {
     def opcode = 0x58 + rd

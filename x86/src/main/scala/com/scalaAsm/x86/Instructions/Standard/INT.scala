@@ -2,13 +2,9 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-trait INT extends x86Instruction {
-  val mnemonic = "INT"
-}
+abstract class INT_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode]("INT")
 
-trait INT_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with INT
-
-object INT {
+object INT_1 {
 
   implicit object int1 extends INT_1[imm8, I] {
     def opcode = 0xCD

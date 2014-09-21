@@ -2,13 +2,9 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-trait MUL extends x86Instruction {
-  val mnemonic = "MUL"
-}
+abstract class MUL_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode]("MUL")
 
-trait MUL_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with MUL
-
-object MUL {
+object MUL_1 {
   
   implicit object mul1 extends MUL_1[rm32, M] {
       def opcode = 0xF7 /+ 4

@@ -96,7 +96,7 @@ abstract class ZeroOperandInstruction[Opcode <: OpcodeFormat] extends x86Instruc
   }
 }
 
-abstract class OneOperandInstruction[-O1, -OpEn <: OneOperandEncoding[O1], Opcode <: OpcodeFormat] extends x86Instruction with Formats {
+abstract class OneOperandInstruction[-O1, -OpEn <: OneOperandEncoding[O1], Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
   self =>
   def opcode: Opcode
   def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[_, X], format: OneOperandFormat[X, OpEn2], prefix: Seq[Prefix]) = {
@@ -110,7 +110,7 @@ abstract class OneOperandInstruction[-O1, -OpEn <: OneOperandEncoding[O1], Opcod
   }
 }
 
-abstract class TwoOperandInstruction[-O1, -O2, -OpEn <: TwoOperandEncoding[O1, O2], Opcode <: OpcodeFormat] extends x86Instruction with Formats {
+abstract class TwoOperandInstruction[-O1, -O2, -OpEn <: TwoOperandEncoding[O1, O2], Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
   self =>
   def opcode: Opcode
   

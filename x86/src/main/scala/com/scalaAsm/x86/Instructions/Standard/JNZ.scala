@@ -2,13 +2,9 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-trait JNZ extends x86Instruction {
-  val mnemonic = "JNZ"
-}
+abstract class JNZ_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode]("JNZ")
 
-trait JNZ_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode] with JNZ
-
-object JNZ {
+object JNZ_1 {
   
   implicit object jnz1 extends JNZ_1[imm8, I] {
       def opcode = 0x75

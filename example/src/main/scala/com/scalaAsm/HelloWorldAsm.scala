@@ -11,7 +11,7 @@ object HelloWorld extends AsmProgram {
   
   dataSections += new DataSection {
     builder += Variable("helloWorld", "Hello World!\r\n\u0000")
-    builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\u0000")
+    builder += Variable("pressAnyKey", "Press any key to continue ...\u0000")
   }
 
   codeSections += new CodeSection {
@@ -20,27 +20,17 @@ object HelloWorld extends AsmProgram {
     val STD_INPUT_HANDLE = byte(-10)
 
     procedure(name = "start",
-      push(STD_OUTPUT_HANDLE),
-      call("GetStdHandle"),
-      mov(ebx, eax),
-      push(byte(0)),
-      push(byte(0)),
-      push(byte(0x0E)),
       push("helloWorld"),
-      push(eax),
-      call("WriteFile"),
-      push(byte(0)),
-      push(byte(0)),
-      push(byte(0x1D)),
+      call("printf"),
+      pop(ebx),
       push("pressAnyKey"),
-      push(ebx),
-      call("WriteFile"),
+      call("printf"),
+      pop(ebx),
       push(STD_INPUT_HANDLE),
       call("GetStdHandle"),
       push(eax),
       call("FlushConsoleInputBuffer"),
       call("_getch"),
-      mov(eax, dword(0)),
       retn(())
     )
   }

@@ -10,6 +10,7 @@ package object Standard {
     object mul extends testOneOperand[MUL_1]
     
     object push extends testOneOperand[PUSH_1]
+    object pushf extends testZeroOperands[PUSHF_1]
     object pop extends testOneOperand[POP_1]
     object dec extends testOneOperand[DEC_1]
     object not extends testOneOperand[NOT_1]

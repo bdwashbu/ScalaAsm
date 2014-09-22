@@ -2,9 +2,7 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-abstract class RET extends ZeroOperandInstruction[OneOpcode] with x86Instruction {
-  val mnemonic = "RET"
-}
+abstract class RET extends ZeroOperandInstruction[OneOpcode]("RET")
 
 object RET {
 

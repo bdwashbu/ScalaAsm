@@ -2,9 +2,7 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-trait LEAVE extends ZeroOperandInstruction[OneOpcode] with x86Instruction {
-  val mnemonic = "LEAVE"
-}
+abstract class LEAVE extends ZeroOperandInstruction[OneOpcode]("LEAVE")
 
 object LEAVE {
   

@@ -86,7 +86,7 @@ abstract case class TwoMachineCodeBuilder[O1, O2, OpEn <: TwoOperandEncoding[O1,
   }
 }
 
-abstract class ZeroOperandInstruction[Opcode <: OpcodeFormat] extends x86Instruction with Formats {
+abstract class ZeroOperandInstruction[Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
   self =>
   def opcode: Opcode
   def get[X] = new ZeroMachineCodeBuilder[Opcode] {

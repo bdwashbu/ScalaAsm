@@ -32,18 +32,7 @@ trait AbsoluteAddress[Size <: OperandSize] extends AddressingMode[Size] with Ope
 //  }
 //}
 
-abstract class RegisterIndirect[X <: OperandSize](reg: GeneralPurpose[X]) extends AddressingMode[X] with Operand[RegisterIndirect[X], RegisterIndirect[X]]{
-  self =>
-  def base: GeneralPurpose[X] = reg
-  def get = this
-//  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-//    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
-//  }
-  
-//  def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-//    OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
-//  }
-}
+
 
 
 

@@ -3,7 +3,6 @@ package com.scalaAsm.asm
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
-import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.`package`.OperandSize
 
@@ -15,7 +14,7 @@ trait Registers {
 
   def *[C <: OperandSize](offset: Constant[C])(implicit abs: AbsoluteAddress[C]): AbsoluteAddress[C] = { abs.offset = offset.value; abs }
 
-  def *[X <: OperandSize](gpr: GeneralPurpose[X]) = new RegisterIndirect[X](gpr) {}
+  def *[X <: OperandSize](gpr: GeneralPurpose[X]) = Op(new gpr.Indirect {})
   
   object rdi extends RDI
   object rax extends RAX

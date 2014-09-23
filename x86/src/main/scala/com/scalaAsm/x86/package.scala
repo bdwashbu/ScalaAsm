@@ -2,7 +2,7 @@ package com.scalaAsm
 
 import com.scalaAsm.x86.Operands.Memory.Relative
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
-import com.scalaAsm.x86.Operands.Memory.RegisterIndirect
+
 package object x86 {
   
   import Operands._

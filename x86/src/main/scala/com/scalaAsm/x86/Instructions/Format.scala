@@ -44,10 +44,10 @@ trait LowPriorityFormats {
     }
   }
   
-  implicit object MFormat2 extends OneOperandFormat[r32#Indirect, M] {
+  trait MFormatIGeneric[X <: r32#Indirect] extends OneOperandFormat[X, M] {
 
-    def apply(opcode: OpcodeFormat, prefix: Seq[Prefix]) = new ResolvedOneOperand[r32#Indirect](opcode, prefix) {
-      def getAddressingForm(operand: r32#Indirect) = {
+    def apply(opcode: OpcodeFormat, prefix: Seq[Prefix]) = new ResolvedOneOperand[X](opcode, prefix) {
+      def getAddressingForm(operand: X) = {
             InstructionFormat (
               addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, operand.base)), //mem.encode(opcode.opcodeExtension),
               immediate = None
@@ -57,6 +57,14 @@ trait LowPriorityFormats {
        def size = prefix.size + opcode.size + 1
     }
   }
+  
+  implicit object MFormatIGeneric1 extends MFormatIGeneric[EAX#Indirect]
+  implicit object MFormatIGeneric2 extends MFormatIGeneric[ECX#Indirect]
+  implicit object MFormatIGeneric3 extends MFormatIGeneric[EDX#Indirect]
+  implicit object MFormatIGeneric4 extends MFormatIGeneric[EBX#Indirect]
+  implicit object MFormatIGeneric6 extends MFormatIGeneric[ESI#Indirect]
+  implicit object MFormatIGeneric7 extends MFormatIGeneric[EDI#Indirect]
+  // There is no [EBP], its slot is used by 32-disp only mode
   
   implicit object MFormat2R2 extends OneOperandFormat[r64#Indirect, M] {
 
@@ -114,7 +122,12 @@ trait LowPriorityFormats {
     }
   }
 
-
+  implicit object I2Format extends TwoOperandFormat[ModRM.reg, imm, I2] {
+    def apply(opcode: OpcodeFormat, prefix: Seq[Prefix]) = new ResolvedTwoOperands[ModRM.reg, imm](opcode, prefix) {
+      def getAddressingForm(op1: ModRM.reg, op2: imm) = InstructionFormat (NoModRM(), Some(op2))
+      def size = prefix.size + opcode.size + 1
+    }
+  }
 
   implicit object IFormat8 extends OneOperandFormat[imm8, I] {
 
@@ -546,8 +559,8 @@ trait Formats extends LowPriorityFormats {
   
   implicit object M1Format2 extends TwoOperandFormat[r32#Indirect, One, M1] with Formats {
     def apply(opcode: OpcodeFormat, prefix: Seq[Prefix]) = new ResolvedTwoOperands[r32#Indirect, One](opcode, prefix) {
-      def getAddressingForm(op1: r32#Indirect,  op2: One) = MFormat2(opcode, prefix).getAddressingForm(op1)
-      def size = MFormat2(opcode, prefix).size
+      def getAddressingForm(op1: r32#Indirect,  op2: One) = new MFormatIGeneric[r32#Indirect]{}.apply(opcode, prefix).getAddressingForm(op1)
+      def size = new MFormatIGeneric[r32#Indirect]{}.apply(opcode, prefix).size
     }
   }
   

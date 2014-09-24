@@ -40,7 +40,7 @@ package object x86 {
   type _32 = DwordOperand
   type _64 = QwordOperand
   
-  type r = GPR
+  type r = GPR with rm
   type r8 = GeneralPurpose[_8] with rm8
   type r16 = GeneralPurpose[_16] with rm16
   type r32 = GeneralPurpose[_32] with rm32

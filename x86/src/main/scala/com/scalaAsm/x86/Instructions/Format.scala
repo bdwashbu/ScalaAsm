@@ -122,6 +122,7 @@ trait LowPriorityFormats {
     }
   }
 
+  // abbreviated  reg/imm format, used with common instrctions like 'add(eax, byte(8))'
   implicit object I2Format extends TwoOperandFormat[ModRM.reg, imm, I2] {
     def apply(opcode: OpcodeFormat, prefix: Seq[Prefix]) = new ResolvedTwoOperands[ModRM.reg, imm](opcode, prefix) {
       def getAddressingForm(op1: ModRM.reg, op2: imm) = InstructionFormat (NoModRM(), Some(op2))

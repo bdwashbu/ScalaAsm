@@ -17,29 +17,22 @@ class NoOperandFormat extends ResolvedZeroOperand(null, Seq()) {
 }
 
 
-abstract class TwoOperandFormat[-X, -Y, -OpEn <: TwoOperandEncoding[X,Y]] extends Function2[OpcodeFormat, Seq[Prefix], ResolvedTwoOperands[X,Y]]
-abstract class OneOperandFormat[-X, -OpEn <: OneOperandEncoding[X]] extends Function2[OpcodeFormat, Seq[Prefix], ResolvedOneOperand[X]]
+abstract class TwoOperandFormat[-X, -Y, -OpEn <: TwoOperandEncoding[X,Y]] {
+  def getAddressingForm(op1: X, op2: Y, opcode: OpcodeFormat): InstructionFormat
+  def getPrefix(prefix: Seq[Prefix]): Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
+  def size(opcode: OpcodeFormat, prefix: Seq[Prefix]): Int
+}
+
+abstract class OneOperandFormat[-X, -OpEn <: OneOperandEncoding[X]] {
+  def getAddressingForm(op1: X, opcode: OpcodeFormat): InstructionFormat
+  def getPrefix(prefix: Seq[Prefix]): Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
+  def size(opcode: OpcodeFormat, prefix: Seq[Prefix]): Int
+}
 
 abstract class ResolvedZeroOperand(opcode: OpcodeFormat, prefix: Seq[Prefix]) {
   def getPrefix: Array[Byte] = Array()
   def size: Int
 }
-
-abstract class ResolvedOneOperand[-X](opcode: OpcodeFormat, prefix: Seq[Prefix]) {
-  def getAddressingForm(op1: X): InstructionFormat
-  def getPrefix: Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
-  def size: Int
-}
-
-
-
-abstract class ResolvedTwoOperands[-X, -Y](opcode: OpcodeFormat, prefix: Seq[Prefix]) {
-  def getAddressingForm(op1: X, op2: Y): InstructionFormat
-  def getPrefix: Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
-  def size: Int
-}
-
-
 
 
 

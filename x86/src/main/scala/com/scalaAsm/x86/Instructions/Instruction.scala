@@ -53,17 +53,18 @@ abstract case class OneMachineCodeBuilder[O1, OpEn <: OneOperandEncoding[O1], Op
   val line = mnemonic
   val opcode: Opcode
   val mnemonic: String
-  def format: ResolvedOneOperand[O1]
+  def format: OneOperandFormat[O1, OpEn]
+  val prefix: Seq[Prefix]
 
   def getSize: Int = {
-    format.size
+    format.size(opcode, prefix)
   }
 
   def getBytes: Array[Byte] = {
     if (opcode.isInstanceOf[OpcodePlus] && operand.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
       opcode.asInstanceOf[OpcodePlus].reg = operand.get.asInstanceOf[ModRM.reg]
     }
-    format.getPrefix ++: opcode.get ++: format.getAddressingForm(operand.get).getBytes
+    format.getPrefix(prefix) ++: opcode.get ++: format.getAddressingForm(operand.get, opcode).getBytes
   }
 }
 
@@ -72,17 +73,18 @@ abstract case class TwoMachineCodeBuilder[O1, O2, OpEn <: TwoOperandEncoding[O1,
   val line = mnemonic
   val opcode: Opcode
   val mnemonic: String
-  def format: ResolvedTwoOperands[O1, O2]
+  def format: TwoOperandFormat[O1, O2, OpEn]
+  val prefix: Seq[Prefix]
 
   def getSize: Int = {
-    format.size
+    format.size(opcode, prefix)
   }
 
   def getBytes: Array[Byte] = {
     if (opcode.isOpcodePlus && operand.get.isInstanceOf[ModRM.reg]) { // this is even more hacky as hell!
       opcode.asInstanceOf[OpcodePlus].reg = operand.get.asInstanceOf[ModRM.reg]
     }
-    format.getPrefix ++: opcode.get ++: format.getAddressingForm(operand.get, operand2.get).getBytes
+    format.getPrefix(prefix) ++: opcode.get ++: format.getAddressingForm(operand.get, operand2.get, opcode).getBytes
   }
 }
 
@@ -99,13 +101,14 @@ abstract class ZeroOperandInstruction[Opcode <: OpcodeFormat](val mnemonic: Stri
 abstract class OneOperandInstruction[-O1, -OpEn <: OneOperandEncoding[O1], Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
   self =>
   def opcode: Opcode
-  def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[_, X], format: OneOperandFormat[X, OpEn2], prefix: Seq[Prefix]) = {
+  def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[_, X], format2: OneOperandFormat[X, OpEn2], prefix: Seq[Prefix]) = {
     val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-    val resolved = format(opcode, resolvedPrefix)
+
     new OneMachineCodeBuilder[X,OpEn2, Opcode](p1) {
       val opcode = self.opcode
       val mnemonic = self.mnemonic
-      def format = resolved
+      def format = format2
+      val prefix = resolvedPrefix
     }
   }
 }
@@ -114,12 +117,13 @@ abstract class TwoOperandInstruction[-O1, -O2, -OpEn <: TwoOperandEncoding[O1, O
   self =>
   def opcode: Opcode
   
-  def apply[X, Y, OpEn2 <: TwoOperandEncoding[X, Y]](p1: Operand[_, X], p2: Operand[_, Y], format: TwoOperandFormat[X, Y, OpEn2], prefix: Seq[Prefix]) = {
-    val resolved = format(opcode, prefix)
+  def apply[X, Y, OpEn2 <: TwoOperandEncoding[X, Y]](p1: Operand[_, X], p2: Operand[_, Y], format2: TwoOperandFormat[X, Y, OpEn2], prefix: Seq[Prefix]) = {
+    val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
     new TwoMachineCodeBuilder[X, Y, OpEn2, Opcode](p1, p2) {
       val opcode = self.opcode
       val mnemonic = self.mnemonic
-      def format = resolved
+      def format = format2
+      val prefix = resolvedPrefix
     }
   }
 }

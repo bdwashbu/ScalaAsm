@@ -10,7 +10,7 @@ trait Registers {
 
   
 
-  def *[A <: GPR, B <: OperandSize](mem: A#BI[B]): Operand[_,A#BI[B]] = Op(mem)
+  def *[A <: GPR, B <: OperandSize](mem: A#BaseIndex[B]): Operand[_,A#BaseIndex[B]] = Op(mem)
 
   def *[C <: OperandSize](offset: Constant[C])(implicit abs: AbsoluteAddress[C]): AbsoluteAddress[C] = { abs.offset = offset.value; abs }
 

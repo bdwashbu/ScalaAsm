@@ -46,5 +46,6 @@ package object x86 {
   type r32 = GeneralPurpose[_32] with rm32
   type r64 = GeneralPurpose[_64] with rm64
   
-  type BaseIndex[Z <: GeneralPurpose[_], Y <: OperandSize] = Z#BI[Y]
+  
+  type +[Z <: GeneralPurpose[_], Y <: OperandSize] = Z#BaseIndex[Y]
 }

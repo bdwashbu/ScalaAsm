@@ -9,13 +9,12 @@ abstract class GeneralPurpose[S <: OperandSize](name: String) extends Register[S
   self2 =>
     
   val ID: Int
-  def -[Z <: OperandSize](offset: Operand[_,Constant[Z]]) = new BI[Z] {val displacement = offset.get.negate}
-  def +[Z <: OperandSize](offset: Operand[_,Constant[Z]]) = new BI[Z] {val displacement = offset.get}
+  def -[Z <: OperandSize](offset: Operand[_,Constant[Z]]) = new BaseIndex(offset.get.negate) {}
+  def +[Z <: OperandSize](offset: Operand[_,Constant[Z]]) = new BaseIndex(offset.get) {}
   
-  abstract class BI[Y <: OperandSize] extends AddressingMode[S] {
+  abstract class BaseIndex[Y <: OperandSize](val displacement: Constant[Y]) extends AddressingMode[S] {
     def base: GeneralPurpose[S] = self2
-    def displacement: Constant[Y]
-    def get: BI[Y] = this
+    def get: BaseIndex[Y] = this
   }
   
   abstract class Indirect extends AddressingMode[S] {

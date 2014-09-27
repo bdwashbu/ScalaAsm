@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: coff
+Bundle-SymbolicName: coff
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: coff.jar
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.scalaAsm.portableExe

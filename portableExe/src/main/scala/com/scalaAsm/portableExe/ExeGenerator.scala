@@ -9,10 +9,10 @@ import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
-import com.scalaAsm.utils.Endian
 import java.io.File
 import java.io.FileInputStream
 import sections._
+import com.scalaAsm.portableExe._
   
 case class CompiledImports(rawData: Array[Byte],
                             boundImportSize: Int,

@@ -7,8 +7,6 @@ package object x86 {
   
   import Operands._
   import Operands.Memory.Relative
-  import Operands.Memory.AddressingMode
-
 
   // Many of these can be found in section 3.1.1.3 of the Intel x86 manual
   
@@ -23,8 +21,6 @@ package object x86 {
   type rm16 = RegisterOrMemory[_16]
   type rm32 = RegisterOrMemory[_32]
   type rm64 = RegisterOrMemory[_64]
-  
-  type m16 = AddressingMode[_16]
   
   sealed trait OperandSize {
     type primitiveType
@@ -46,6 +42,10 @@ package object x86 {
   type r32 = GeneralPurpose[_32] with rm32
   type r64 = GeneralPurpose[_64] with rm64
   
+  type rel = Relative[_ <: OperandSize]
+  type rel16 = Relative[_16]
+  type rel32 = Relative[_32]
+  type rel64 = Relative[_64]
   
-  type +[Z <: GeneralPurpose[_], Y <: OperandSize] = Z#BaseIndex[Y]
+  type +[Reg <: GeneralPurpose[_], Y <: OperandSize] = Reg#BaseIndex[Y]
 }

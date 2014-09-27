@@ -33,13 +33,13 @@ protected[x86] case class InstructionFormat (
 
 case class NoModRM() extends AddressingFormSpecifier(NoModField, NoSibField, NoDispField)
 
-case class OnlyDisplacement(offset: Constant[_ <: OperandSize]) extends AddressingFormSpecifier(NoModField, NoSibField, offset)
+case class OnlyDisplacement[Offset <: Constant[_ <: OperandSize]](offset: Offset) extends AddressingFormSpecifier(NoModField, NoSibField, offset)
 
 case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier(mod, NoSibField, NoDispField)
 
 case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier(mod, theSIB, NoDispField)
 
-case class NoSIBWithDisplacement(mod: ModRM, offset: Constant[_ <: OperandSize]) extends AddressingFormSpecifier(mod, NoSibField, offset)
+case class NoSIBWithDisplacement[Offset <: Constant[_ <: OperandSize]](mod: ModRM, offset: Offset) extends AddressingFormSpecifier(mod, NoSibField, offset)
 
 case class WithSIBWithDisplacement[Mod <: ModRM, Sib <: SIB, Disp <: Constant[_]](mod: Mod, theSIB: Sib, offset: Disp) extends AddressingFormSpecifier(mod, theSIB, offset)
 

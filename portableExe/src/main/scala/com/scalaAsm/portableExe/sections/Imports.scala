@@ -175,38 +175,35 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
     
     // write the contents to the real stream
 
-    //if (is64Bit) {
-      
-       def swap(x: Int): Array[Byte] = {
-        val buffer = ByteBuffer.allocate(4)
-        buffer.order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(x)
-        buffer.array()
-      }
-      
-      val iatOffset = importDescriptorOffset + importAddressTable.map(x => ImageThunkData.size(is64Bit) + x.thunks.size * ImageThunkData.size(is64Bit)).sum
-      
-      // add jmps for the imports
-      
-      var jmpPos = 6
-      var offset2 = lengthOfJmps + iatOffset
+     def swap(x: Int): Array[Byte] = {
+      val buffer = ByteBuffer.allocate(4)
+      buffer.order(ByteOrder.LITTLE_ENDIAN)
+      buffer.putInt(x)
+      buffer.array()
+    }
+    
+    val iatOffset = importDescriptorOffset + importAddressTable.map(x => ImageThunkData.size(is64Bit) + x.thunks.size * ImageThunkData.size(is64Bit)).sum
+    
+    // add jmps for the imports
+    
+    var jmpPos = 6
+    var offset2 = lengthOfJmps + iatOffset
 
-      importAddressTable.foreach { imp =>
-        imp.thunks.foreach { _ =>
-          if (is64Bit) {
-            stream.write(Array(0xFF.toByte, 0x25.toByte))
-            stream.write(swap(offset2 - jmpPos))
-          } else {
-            stream.write(Array(0xFF.toByte, 0x25.toByte))
-            stream.write(swap(offset2 + 0x403000))
-          }
-          //offset2 += (ImageThunkData.size(is64Bit) - 6) // 6 is the size of the jmp instruction
-          offset2 += ImageThunkData.size(is64Bit)
-          jmpPos += 6
+    for (table <- importAddressTable) {
+      for (thunk <- table.thunks) {
+        stream.write(Array(0xFF.toByte, 0x25.toByte))
+        if (is64Bit) {          
+          stream.write(swap(offset2 - jmpPos)) // RIP addressing
+        } else {
+          stream.write(swap(offset2 + 0x403000))
         }
-        offset2 += ImageThunkData.size(is64Bit) // jump past terminator
+        //offset2 += (ImageThunkData.size(is64Bit) - 6) // 6 is the size of the jmp instruction
+        offset2 += ImageThunkData.size(is64Bit)
+        jmpPos += 6
       }
-    //}
+      offset2 += ImageThunkData.size(is64Bit) // jump past terminator
+    }
+    
     importDescriptors.foreach(_.write(stream))
     importNameTable.foreach { _.write(stream) } // (INT)
     importAddressTable.foreach { _.write(stream) } // (IAT)

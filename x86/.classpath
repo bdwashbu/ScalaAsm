@@ -4,7 +4,6 @@
   <classpathentry kind="src" path="src\test\scala" output="target\scala-2.11\test-classes"/>
   <classpathentry kind="src" path="src\test\java" output="target\scala-2.11\test-classes"/>
   <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
-  <classpathentry kind="src" path="/utils" exported="true" combineaccessrules="false"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
   <classpathentry kind="output" path="bin"/>
 </classpath>

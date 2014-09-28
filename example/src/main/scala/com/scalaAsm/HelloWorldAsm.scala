@@ -1,9 +1,8 @@
 package com.scalaAsm
 
-import com.scalaAsm.assembler.AsmProgram
+import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
-import com.scalaAsm.asm.CodeSection
 
 object HelloWorld extends AsmProgram {
   

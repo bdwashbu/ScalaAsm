@@ -6,4 +6,5 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: asm.jar
 Export-Package: com.scalaAsm.asm
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.scalaAsm.x86
+Import-Package: com.scalaAsm.coff,
+ com.scalaAsm.x86

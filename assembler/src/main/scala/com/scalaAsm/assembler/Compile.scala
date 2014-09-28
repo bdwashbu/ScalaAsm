@@ -14,77 +14,28 @@ import com.scalaAsm.x86.Instructions.OneMachineCodeBuilder
 import com.scalaAsm.x86.Operands.addr
 import com.scalaAsm.x86.Instructions.TwoMachineCodeBuilder
 import com.scalaAsm.x86.Operands.Op
+import com.scalaAsm.asm.AsmProgram
+import scala.collection.mutable.ListBuffer
 
-class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Standard.Catalog with Formats with Registers
-{
+class Assembler extends Standard.Catalog with Formats with Registers {
   self =>
   import scala.language.postfixOps
-  
-  val (rawData, variables) = compileData(data)
-            
-  val compiledAsm = compileAssembly(variables)
-  val unboundSymbols = Set(compiledAsm.onePass.collect { case ImportRef(name) => name} ++ 
-                   compiledAsm.onePass.collect { case InvokeRef(name) => name}).flatten.toSeq
-  
-  def getAssembled: Assembled = {
-    new Assembled {
-      val rawData = self.rawData
-      val variables = self.variables
-      val compiledAsm = self.compiledAsm
-      val unboundSymbols = self.unboundSymbols
-      def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int)
-               = self.finalizeAssembly(variables, imports, imports64, baseOffset)
-    }
-  }
-    
-  //val compiledImports = compileImports(rawData.size, unboundSymbols)   
-  
-  def compileData(dataTokens: Seq[Token]): (Array[Byte], (Int) => Map[String, Int]) = {
 
-    val dataSection: Seq[PostToken] = {
-      var parserPosition = 0
-      for (token <- dataTokens) yield {
-        val result = token match {
-	      case Variable(name, value) => PostVar(name, value, parserPosition)
-	      case Align(to, filler, _) => ByteOutputPost( Array.fill((to - (parserPosition % to)) % to)(filler))
-        }
-        token match {
-          case sizedToken: SizedToken => parserPosition += sizedToken.size
-          case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-        }
-        
-        result
-      }      
-    }
-    
-    val dataBytes = (dataSection flatMap {
-        case ByteOutputPost(padding) => Some(padding)
-        case PostVar(_,value,_) => Some(value.toCharArray().map(_.toByte))
-        case _ => None
-    })
-      
-    val data = Array.fill[Byte](8)(0x00) ++: dataBytes.reduce(_ ++: _)
+  def assemble(program: AsmProgram): Assembled = {
 
-    // a map of variable to its RVA
-    def createDefMap(dataSection: Seq[PostToken]): (Int) => Map[String, Int] = {
-    	(dataAddress: Int) => (dataSection flatMap {
-	      case PostVar(name, value, pos) => Some((name, pos + dataAddress + 8))
-	      case _ => None
-	    } toMap)
-    }
-    
-    (data, createDefMap(dataSection))
-  }
-  
-  case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
-  
-  def compileAssembly(variables: (Int) => Map[String, Int]): CompiledAssembly = {
+    val codeTokens: ListBuffer[Any] = program.codeSections.flatMap { seg => seg.build(seg.builder.toSeq) }
 
-    lazy val varNames    = variables(0).keys.toList
-    lazy val procNames   = code.collect{ case BeginProc(name) => name }
-    
-    def onePass: Seq[Token] = code flatMap {
-        
+    val dataTokens = program.dataSections flatMap { seg => seg.compile }
+
+    val (rawData2, variables2) = compileData(dataTokens)
+
+    def compileAssembly(variables: (Int) => Map[String, Int]): CompiledAssembly = {
+
+      lazy val varNames = variables(0).keys.toList
+      lazy val procNames = codeTokens.collect { case BeginProc(name) => name }
+
+      def onePass: Seq[Token] = codeTokens flatMap {
+
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
@@ -96,84 +47,140 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Standard.Catalog wit
         case label @ Label(name) => Some(label)
         case labelref @ LabelRef(name, inst, format) => Some(labelref)
         case x: InstructionResult => Some(InstructionToken(x))
-    }
-
-    def positionPass: Seq[PostToken] = {
-      var parserPosition = 0
-      onePass flatMap { token =>
-        val result = token match {
-	        case BeginProc(name) => Some(Proc(parserPosition, name))
-	        case Label(name) => Some(LabelResolved(parserPosition, name))
-	        case _ => None
-	      }
-         token match {
-          case sizedToken: SizedToken => parserPosition += sizedToken.size
-          case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-          case x:LabelRef => parserPosition += 2
-          case _ => 
-         }
-         result
       }
+
+      def positionPass: Seq[PostToken] = {
+        var parserPosition = 0
+        onePass flatMap { token =>
+          val result = token match {
+            case BeginProc(name) => Some(Proc(parserPosition, name))
+            case Label(name) => Some(LabelResolved(parserPosition, name))
+            case _ => None
+          }
+          token match {
+            case sizedToken: SizedToken => parserPosition += sizedToken.size
+            case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+            case x: LabelRef => parserPosition += 2
+            case _ =>
+          }
+          result
+        }
+      }
+
+      CompiledAssembly(onePass, positionPass)
     }
- 
-    CompiledAssembly(onePass, positionPass)
-  }
-  
-  def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
-    lazy val varNames = variables.keys.toList
-    // Build procedure map
-    val procs = compiledAsm.positionPass collect {case Proc(offset, name) => (name, offset)} toMap
-    val labels = compiledAsm.positionPass collect {case LabelResolved(offset, name) => (name, offset)} toMap    
     
-//    for (token <- compiledAsm.onePass) {
-//      token match {
-//        case InstructionToken(inst) => inst match {
-//          case OneMachineCodeBuilder(x: addr) => x.variables = variables; x.baseOffset = baseOffset
-//          case TwoMachineCodeBuilder(op1: addr, _) => op1.variables = variables; op1.baseOffset = baseOffset
-//          case TwoMachineCodeBuilder(_, op2: addr) => op2.variables = variables; op2.baseOffset = baseOffset
-//          case _ =>
-//        }
-//        case _ =>
-//      }
-//    }
-    
-    val code: Array[Byte] = {
-      var parserPosition = 0
-      for (token <- compiledAsm.onePass) yield {
-        val result = token match {
-	        case InstructionToken(inst) => { inst match {
-              case OneMachineCodeBuilder(x: addr) => x.variables = variables; x.baseOffset = baseOffset; x.parserPosition = parserPosition
-              case TwoMachineCodeBuilder(op1: addr, _) => op1.variables = variables; op1.baseOffset = baseOffset;  op1.parserPosition = parserPosition
-              case TwoMachineCodeBuilder(_, op2: addr) => op2.variables = variables; op2.baseOffset = baseOffset;  op2.parserPosition = parserPosition
+    val compiledAsm2 = compileAssembly(variables2)
+
+    new Assembled {
+      val rawData = rawData2
+      val variables = variables2
+      val compiledAsm = compiledAsm2
+      val unboundSymbols = Set(compiledAsm.onePass.collect { case ImportRef(name) => name } ++
+        compiledAsm.onePass.collect { case InvokeRef(name) => name }).flatten.toSeq
+      
+        def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
+        lazy val varNames = variables.keys.toList
+        // Build procedure map
+        val procs = compiledAsm.positionPass collect { case Proc(offset, name) => (name, offset) } toMap
+        val labels = compiledAsm.positionPass collect { case LabelResolved(offset, name) => (name, offset) } toMap
+
+        //    for (token <- compiledAsm.onePass) {
+        //      token match {
+        //        case InstructionToken(inst) => inst match {
+        //          case OneMachineCodeBuilder(x: addr) => x.variables = variables; x.baseOffset = baseOffset
+        //          case TwoMachineCodeBuilder(op1: addr, _) => op1.variables = variables; op1.baseOffset = baseOffset
+        //          case TwoMachineCodeBuilder(_, op2: addr) => op2.variables = variables; op2.baseOffset = baseOffset
+        //          case _ =>
+        //        }
+        //        case _ =>
+        //      }
+        //    }
+
+        val code: Array[Byte] = {
+          var parserPosition = 0
+          for (token <- compiledAsm.onePass) yield {
+            val result = token match {
+              case InstructionToken(inst) => {
+                inst match {
+                  case OneMachineCodeBuilder(x: addr) =>
+                    x.variables = variables; x.baseOffset = baseOffset; x.parserPosition = parserPosition
+                  case TwoMachineCodeBuilder(op1: addr, _) =>
+                    op1.variables = variables; op1.baseOffset = baseOffset; op1.parserPosition = parserPosition
+                  case TwoMachineCodeBuilder(_, op2: addr) =>
+                    op2.variables = variables; op2.baseOffset = baseOffset; op2.parserPosition = parserPosition
+                  case _ =>
+                }
+                inst.getBytes
+              }
+              case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
+              case Padding(to, _) => Array.fill(to)(0xCC.toByte)
+              case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).get.getRelative).getBytes
+              case InvokeRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes //callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
+              case VarRef(name) => push(Op(Constant32(variables(name) + baseOffset - 0x1000))).getBytes // fix
+              case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).getBytes
+              case ImportRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes
+              case LabelRef(name, inst, format) => {
+                val op = (labels(name) - parserPosition - 2).toByte
+                inst(Op(new Constant8(op)), format, Seq()).getBytes
+              }
+              case _ => Array[Byte]()
+            }
+            token match {
+              case sizedToken: SizedToken => parserPosition += sizedToken.size
+              case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+              case x: LabelRef => parserPosition += 2
               case _ =>
             }
-	          inst.getBytes
-	        }
-	        case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
-	        case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-	        case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).get.getRelative).getBytes
-	        case InvokeRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes//callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
-	        case VarRef(name) => push(Op(Constant32(variables(name) + baseOffset - 0x1000))).getBytes // fix
-	        case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).getBytes
-	        case ImportRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes
-	        case LabelRef(name, inst, format) => {
-	          val op = (labels(name) - parserPosition - 2).toByte
-	          inst(Op(new Constant8(op)), format, Seq()).getBytes
-	        }
-	        case _ => Array[Byte]()
-	      }
-         token match {
+            result
+          }
+        }.reduce(_ ++ _)
+
+        code
+      }
+    }
+  }
+
+  //val compiledImports = compileImports(rawData.size, unboundSymbols)   
+
+  def compileData(dataTokens: Seq[Token]): (Array[Byte], (Int) => Map[String, Int]) = {
+
+    val dataSection: Seq[PostToken] = {
+      var parserPosition = 0
+      for (token <- dataTokens) yield {
+        val result = token match {
+          case Variable(name, value) => PostVar(name, value, parserPosition)
+          case Align(to, filler, _) => ByteOutputPost(Array.fill((to - (parserPosition % to)) % to)(filler))
+        }
+        token match {
           case sizedToken: SizedToken => parserPosition += sizedToken.size
           case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-          case x:LabelRef => parserPosition += 2
-          case _ => 
-         }
-         result
-      }
-    }.reduce(_ ++ _)
-    
+        }
 
-    
-    code 
+        result
+      }
+    }
+
+    val dataBytes = (dataSection flatMap {
+      case ByteOutputPost(padding) => Some(padding)
+      case PostVar(_, value, _) => Some(value.toCharArray().map(_.toByte))
+      case _ => None
+    })
+
+    val data = Array.fill[Byte](8)(0x00) ++: dataBytes.reduce(_ ++: _)
+
+    // a map of variable to its RVA
+    def createDefMap(dataSection: Seq[PostToken]): (Int) => Map[String, Int] = {
+      (dataAddress: Int) =>
+        (dataSection flatMap {
+          case PostVar(name, value, pos) => Some((name, pos + dataAddress + 8))
+          case _ => None
+        } toMap)
+    }
+
+    (data, createDefMap(dataSection))
   }
+
+  case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
+
 }

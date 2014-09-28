@@ -12,13 +12,69 @@ import com.scalaAsm.portableExe.ImageDataDirectory
 import com.scalaAsm.portableExe.FileHeader
 import com.scalaAsm.portableExe.NtHeader
 import com.scalaAsm.portableExe.sections.ResourceGen
+import com.scalaAsm.coff.Assembled
+import java.io.File
+import java.io.FileInputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class Linker64 extends Linker {
   
-  def link(executableImports: CompiledImports, code: Array[Byte],
-    addressOfData: Int, rawData: Array[Byte], resources: Option[Array[Byte]], is64Bit: Boolean): PortableExecutable = {
+  def compileImports(dataSize: Int, possibleFunctions: Seq[String]): (Int, Seq[String], Boolean) => CompiledImports = { 
+    
+    (addressOfData: Int, dlls: Seq[String], is64Bit: Boolean) => {
+    val dllImports = dlls flatMap { dll =>
+	    val file = new File("C:/Windows/System32/" + dll);
+	 
+	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
+	      
+	    //convert file into array of bytes
+	    val fileInputStream = new FileInputStream(file);
+	    fileInputStream.read(bFile);
+	    fileInputStream.close();
+	    
+	    val bbuf = ByteBuffer.wrap(bFile)
+	    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+	    
+	    val dosHeader = DosHeader.getDosHeader(bbuf)
+	    val peHeader = PeHeader.getPeHeader(bbuf)
+	    val dirs = DataDirectories.getDirectories(bbuf)
+	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
+	
+	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
+	    val importedSymbols = export.functionNames intersect possibleFunctions
 
-    val rawDataSize = rawData.length
+	    if (importedSymbols.isEmpty)
+	      None
+	    else
+	      Some(Extern(dll, importedSymbols))
+    }
+    
+    val test = Imports(imports = dllImports,
+                       offset = 0x3000)
+
+    test.generateImports(is64Bit) 
+    }
+  }
+  
+  def link(assembled: Assembled, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
+
+    val executableImports = compileImports(assembled.rawData.size, assembled.unboundSymbols)(addressOfData, dlls, is64Bit)
+    
+    var offset = 0x3000
+    val symMap = executableImports.importSymbols.map { sym =>
+      val result = (sym.name.trim, offset)
+      if (!sym.name.contains(".dll")) {
+        offset += 6
+      }
+      result
+    }.toMap
+    
+    val code = assembled.finalizeAssembly(assembled.variables(addressOfData), executableImports.imports, symMap, baseOffset = 0x400000 /*imagebase*/)
+
+    val resources = assembled.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
+    
+    val rawDataSize = assembled.rawData.length
 
     val dosHeader = DosHeader(
       e_magic = "MZ",
@@ -61,7 +117,7 @@ class Linker64 extends Linker {
     val dataSection = Section(
       SectionHeader(
         name = "data",
-        virtualSize = rawData.length,
+        virtualSize = assembled.rawData.length,
         virtualAddress = 0x2000,
         sizeOfRawData = 0x200,
         pointerToRawData = 0x600,
@@ -72,7 +128,7 @@ class Linker64 extends Linker {
         characteristics = Characteristic.INITIALIZED.id |
           Characteristic.READ.id |
           Characteristic.WRITE.id)
-      , rawData)
+      , assembled.rawData)
       
     val idataSection = Section(
       SectionHeader(

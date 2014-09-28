@@ -5,7 +5,7 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Instructions.Standard.CALL_1
 import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
-import com.scalaAsm.linker.Assembled
+import com.scalaAsm.coff.Assembled
 import com.scalaAsm.asm.Registers
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard
@@ -26,7 +26,7 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
   val unboundSymbols = Set(compiledAsm.onePass.collect { case ImportRef(name) => name} ++ 
                        compiledAsm.onePass.collect { case InvokeRef(name) => name}).flatten.toSeq
     
-  val compiledImports = compileImports(rawData.size, unboundSymbols)   
+  //val compiledImports = compileImports(rawData.size, unboundSymbols)   
   
   def compileData(dataTokens: Seq[Token]): (Array[Byte], (Int) => Map[String, Int]) = {
 

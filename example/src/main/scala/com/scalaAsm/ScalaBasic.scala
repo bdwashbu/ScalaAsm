@@ -1,7 +1,7 @@
 package com.scalaAsm
 
 import java.io._
-import com.scalaAsm.linker.{Linker32, Linker64}
+import com.scalaAsm.linker.{Linker64}
 
 object ScalaBasic {
 
@@ -9,10 +9,11 @@ object ScalaBasic {
     try {
 
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
+      val linker = new Linker64{}
 
       val beginTime = System.nanoTime()
       val helloWorld = HelloWorld3.assemble//.addIcon("scala.ico")
-      val exe = helloWorld.link(0x3000, new Linker64{}, false, "kernel32.dll", "msvcrt.dll")
+      val exe = linker.link(helloWorld, 0x3000, false, "kernel32.dll", "msvcrt.dll")
       
       outputStream.write(exe.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
@@ -21,7 +22,7 @@ object ScalaBasic {
       val outputStream64 = new DataOutputStream(new FileOutputStream("test64.exe"));
       
       val helloWorld64 = HelloWorld2.assemble
-      val exe64 = helloWorld64.link(0x3000, new Linker64{}, true, "kernel32.dll", "msvcrt.dll")
+      val exe64 = linker.link(helloWorld64, 0x3000, true, "kernel32.dll", "msvcrt.dll")
 
       outputStream64.write(exe64.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

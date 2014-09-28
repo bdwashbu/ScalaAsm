@@ -6,3 +6,4 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: coff.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.scalaAsm.portableExe
+Export-Package: com.scalaAsm.coff

@@ -22,10 +22,11 @@ lazy val x86 = project.in(file("x86"))
 lazy val portableExe = project.in(file("portableExe"))
     .dependsOn(asm, x86)
 
-lazy val linker = project.in(file("linker"))
+lazy val coff = project.in(file("coff"))
     .dependsOn(asm, portableExe)
 
-lazy val coff = project.in(file("coff"))
+lazy val linker = project.in(file("linker"))
+    .dependsOn(asm, portableExe, coff)
 
 lazy val assembler = project.in(file("assembler"))
     .dependsOn(asm, linker)

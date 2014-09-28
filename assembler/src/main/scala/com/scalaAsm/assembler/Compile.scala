@@ -15,16 +15,27 @@ import com.scalaAsm.x86.Operands.addr
 import com.scalaAsm.x86.Instructions.TwoMachineCodeBuilder
 import com.scalaAsm.x86.Operands.Op
 
-class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data) with Standard.Catalog with Formats with Registers
+class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Standard.Catalog with Formats with Registers
 {
+  self =>
   import scala.language.postfixOps
   
   val (rawData, variables) = compileData(data)
-    
-  val compiledAsm = compileAssembly(this, variables)
-  
+            
+  val compiledAsm = compileAssembly(variables)
   val unboundSymbols = Set(compiledAsm.onePass.collect { case ImportRef(name) => name} ++ 
-                       compiledAsm.onePass.collect { case InvokeRef(name) => name}).flatten.toSeq
+                   compiledAsm.onePass.collect { case InvokeRef(name) => name}).flatten.toSeq
+  
+  def getAssembled: Assembled = {
+    new Assembled {
+      val rawData = self.rawData
+      val variables = self.variables
+      val compiledAsm = self.compiledAsm
+      val unboundSymbols = self.unboundSymbols
+      def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int)
+               = self.finalizeAssembly(variables, imports, imports64, baseOffset)
+    }
+  }
     
   //val compiledImports = compileImports(rawData.size, unboundSymbols)   
   
@@ -65,13 +76,14 @@ class AsmCompiler(code: Seq[Any], data: Seq[Token]) extends Assembled(code, data
     (data, createDefMap(dataSection))
   }
   
-  def compileAssembly(asm: Assembled,
-                      variables: (Int) => Map[String, Int]): CompiledAssembly = {
+  case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
+  
+  def compileAssembly(variables: (Int) => Map[String, Int]): CompiledAssembly = {
 
     lazy val varNames    = variables(0).keys.toList
-    lazy val procNames   = asm.codeTokens.collect{ case BeginProc(name) => name }
+    lazy val procNames   = code.collect{ case BeginProc(name) => name }
     
-    def onePass: Seq[Token] = asm.codeTokens flatMap {
+    def onePass: Seq[Token] = code flatMap {
         
         case x: SizedToken => Some(x)
         case x: DynamicSizedToken => Some(x)

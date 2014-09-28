@@ -2,7 +2,6 @@ package com.scalaAsm.portableExe
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import com.scalaAsm.asm.CodeSection
 
 object DosHeader {
     

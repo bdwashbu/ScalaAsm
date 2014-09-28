@@ -17,7 +17,7 @@ trait AsmProgram {
     
     val dataTokens = dataSections flatMap {seg => seg.compile}
 
-    new AsmCompiler(codeTokens, dataTokens)
+    new AsmCompiler(codeTokens, dataTokens).getAssembled
   }
 
 //  def getAssembledPermutations: Iterator[Assembled] = {

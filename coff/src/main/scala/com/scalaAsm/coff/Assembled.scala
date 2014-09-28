@@ -6,7 +6,7 @@ abstract class Assembled(val iconPath: Option[String] = None) {
   val variables: (Int) => Map[String, Int]
   val unboundSymbols: Seq[String]
 
-  def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte]
+  def finalizeAssembly(addressOfData: Int, imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte]
 
   def addIcon(path: String): Assembled = {
     new Assembled(Option(path)) {
@@ -14,8 +14,8 @@ abstract class Assembled(val iconPath: Option[String] = None) {
       val variables = self.variables
       val unboundSymbols = self.unboundSymbols
 
-      def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
-        self.finalizeAssembly(variables, imports, imports64, baseOffset)
+      def finalizeAssembly(addressOfData: Int, imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
+        self.finalizeAssembly(addressOfData, imports, imports64, baseOffset)
       }
     }
   }

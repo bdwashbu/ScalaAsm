@@ -20,9 +20,8 @@ import java.nio.ByteOrder
 
 class Linker64 extends Linker {
   
-  def compileImports(dataSize: Int, possibleFunctions: Seq[String]): (Int, Seq[String], Boolean) => CompiledImports = { 
+  def compileImports(assembled: Assembled, addressOfData: Int, dlls: Seq[String], is64Bit: Boolean): CompiledImports = { 
     
-    (addressOfData: Int, dlls: Seq[String], is64Bit: Boolean) => {
     val dllImports = dlls flatMap { dll =>
 	    val file = new File("C:/Windows/System32/" + dll);
 	 
@@ -42,7 +41,7 @@ class Linker64 extends Linker {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-	    val importedSymbols = export.functionNames intersect possibleFunctions
+	    val importedSymbols = export.functionNames intersect assembled.unboundSymbols
 
 	    if (importedSymbols.isEmpty)
 	      None
@@ -50,16 +49,14 @@ class Linker64 extends Linker {
 	      Some(Extern(dll, importedSymbols))
     }
     
-    val test = Imports(imports = dllImports,
-                       offset = 0x3000)
+    val test = Imports(imports = dllImports, offset = 0x3000)
 
     test.generateImports(is64Bit) 
-    }
   }
   
   def link(assembled: Assembled, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
 
-    val executableImports = compileImports(assembled.rawData.size, assembled.unboundSymbols)(addressOfData, dlls, is64Bit)
+    val executableImports = compileImports(assembled, addressOfData, dlls, is64Bit)
     
     var offset = 0x3000
     val symMap = executableImports.importSymbols.map { sym =>
@@ -70,11 +67,9 @@ class Linker64 extends Linker {
       result
     }.toMap
     
-    val code = assembled.finalizeAssembly(assembled.variables(addressOfData), executableImports.imports, symMap, baseOffset = 0x400000 /*imagebase*/)
+    val code = assembled.finalizeAssembly(addressOfData, executableImports.imports, symMap, baseOffset = 0x400000 /*imagebase*/)
 
     val resources = assembled.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
-    
-    val rawDataSize = assembled.rawData.length
 
     val dosHeader = DosHeader(
       e_magic = "MZ",

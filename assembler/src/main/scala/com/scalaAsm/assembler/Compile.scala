@@ -79,8 +79,9 @@ class Assembler extends Standard.Catalog with Formats with Registers {
       val unboundSymbols = Set(compiledAsm.onePass.collect { case ImportRef(name) => name } ++
         compiledAsm.onePass.collect { case InvokeRef(name) => name }).flatten.toSeq
       
-        def finalizeAssembly(variables: Map[String, Int], imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
-        lazy val varNames = variables.keys.toList
+      def finalizeAssembly(addressOfData: Int, imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
+        val varMap = variables(addressOfData)
+        lazy val varNames = varMap.keys.toList
         // Build procedure map
         val procs = compiledAsm.positionPass collect { case Proc(offset, name) => (name, offset) } toMap
         val labels = compiledAsm.positionPass collect { case LabelResolved(offset, name) => (name, offset) } toMap
@@ -104,11 +105,11 @@ class Assembler extends Standard.Catalog with Formats with Registers {
               case InstructionToken(inst) => {
                 inst match {
                   case OneMachineCodeBuilder(x: addr) =>
-                    x.variables = variables; x.baseOffset = baseOffset; x.parserPosition = parserPosition
+                    x.variables = varMap; x.baseOffset = baseOffset; x.parserPosition = parserPosition
                   case TwoMachineCodeBuilder(op1: addr, _) =>
-                    op1.variables = variables; op1.baseOffset = baseOffset; op1.parserPosition = parserPosition
+                    op1.variables = varMap; op1.baseOffset = baseOffset; op1.parserPosition = parserPosition
                   case TwoMachineCodeBuilder(_, op2: addr) =>
-                    op2.variables = variables; op2.baseOffset = baseOffset; op2.parserPosition = parserPosition
+                    op2.variables = varMap; op2.baseOffset = baseOffset; op2.parserPosition = parserPosition
                   case _ =>
                 }
                 inst.getBytes
@@ -117,7 +118,7 @@ class Assembler extends Standard.Catalog with Formats with Registers {
               case Padding(to, _) => Array.fill(to)(0xCC.toByte)
               case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).get.getRelative).getBytes
               case InvokeRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes //callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
-              case VarRef(name) => push(Op(Constant32(variables(name) + baseOffset - 0x1000))).getBytes // fix
+              case VarRef(name) => push(Op(Constant32(varMap(name) + baseOffset - 0x1000))).getBytes // fix
               case JmpRefResolved(name) => jmp(*(Constant32(imports(name) + baseOffset))).getBytes
               case ImportRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes
               case LabelRef(name, inst, format) => {

@@ -16,12 +16,14 @@ import com.scalaAsm.x86.Instructions.TwoMachineCodeBuilder
 import com.scalaAsm.x86.Operands.Op
 import com.scalaAsm.asm.AsmProgram
 import scala.collection.mutable.ListBuffer
+import com.scalaAsm.asm.`package`.x86Mode
+import com.scalaAsm.asm.Addressing
 
-class Assembler extends Standard.Catalog with Formats with Registers {
+class Assembler extends Standard.Catalog with Formats with Addressing {
   self =>
   import scala.language.postfixOps
 
-  def assemble(program: AsmProgram): Assembled = {
+  def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Assembled = {
 
     val codeTokens: ListBuffer[Any] = program.codeSections.flatMap { seg => seg.build(seg.builder.toSeq) }
 

@@ -3,8 +3,9 @@ package com.scalaAsm
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
+import com.scalaAsm.asm.`package`.x86_32
 
-object HelloWorld extends AsmProgram {
+object HelloWorld extends AsmProgram[x86_32] {
   
   import com.scalaAsm.x86.Instructions.Standard._
   

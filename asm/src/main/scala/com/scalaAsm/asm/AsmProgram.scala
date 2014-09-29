@@ -13,13 +13,19 @@ import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
 import com.scalaAsm.x86.Instructions.`package`.OneOperandEncoding
 import com.scalaAsm.x86.Instructions.`package`.I
 
+trait x86Mode
+trait x86_64 extends x86_32
+trait x86_32 extends x86Mode
+
 trait AsmProgram[Mode <: x86Mode] {
 
   val codeSections = new ListBuffer[CodeSection]()
   val dataSections = new ListBuffer[DataSection]()
 
-  trait CodeSection extends Registers[Mode] with AsmSection[InstructionResult] with Standard.Catalog with Formats with Addressing {
+  trait CodeSection extends Registers[Mode] with Standard.Catalog with Formats with Addressing {
 
+    val builder = new ListBuffer[InstructionResult]()
+    
     def byte(value: Byte) = Op(Constant8(value))
     def word(value: Short) = Op(Constant16(value))
     def dword(value: Int) = Op(Constant32(value))

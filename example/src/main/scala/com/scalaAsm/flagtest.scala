@@ -4,7 +4,7 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.Operands.addr
-import com.scalaAsm.asm.`package`.x86_32
+import com.scalaAsm.asm.x86_32
 
 object FlagTest extends AsmProgram[x86_32] {
   

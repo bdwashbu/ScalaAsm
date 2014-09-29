@@ -16,7 +16,7 @@ import com.scalaAsm.x86.Instructions.TwoMachineCodeBuilder
 import com.scalaAsm.x86.Operands.Op
 import com.scalaAsm.asm.AsmProgram
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.asm.`package`.x86Mode
+import com.scalaAsm.asm.x86Mode
 import com.scalaAsm.asm.Addressing
 
 class Assembler extends Standard.Catalog with Formats with Addressing {

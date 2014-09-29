@@ -4,9 +4,11 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.HashMap
 import com.scalaAsm.asm.Tokens.Token
 
-trait DataSection extends AsmSection[Token] {
+trait DataSection {
   
   import Tokens._
+  
+  val builder = new ListBuffer[Token]()
 
   def compile: Seq[Token] = {
     builder.toSeq.head +: builder.toSeq.tail.flatMap { token => Seq[Token](token, align(0x4, 0x00)) }

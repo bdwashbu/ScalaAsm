@@ -6,21 +6,21 @@ import com.scalaAsm.x86.`package`.OperandSize
 trait Registers[Mode <: x86Mode] {
 
 
-   object rdi extends RDI with Operand[RDI, RDI] {def get = new RDI{}}
-    def rax(implicit ev: Mode =:= x86_64) = new Operand[RAX, RAX] {def get = new RAX{}}
-    object rcx extends RCX with Operand[RCX, RCX] {def get = this}
-    object rbp extends RBP with Operand[RBP, RBP] {def get = this}
-    object rdx extends RDX with Operand[RDX, RDX] {def get = this}
-    object rbx extends RBX with Operand[RBX, RBX] {def get = this}
-    object rsp extends RSP with Operand[RSP, RSP] {def get = this}
+    def rdi(implicit ev: Mode <:< x86_64) = new RDI with Operand[RDI, RDI] {def get = this}
+    def rax(implicit ev: Mode <:< x86_64) = new RAX with Operand[RAX, RAX] {def get = this}
+    def rcx(implicit ev: Mode <:< x86_64) = new RCX with Operand[RCX, RCX] {def get = this}
+    def rbp(implicit ev: Mode <:< x86_64) = new RBP with Operand[RBP, RBP] {def get = this}
+    def rdx(implicit ev: Mode <:< x86_64) = new RDX with Operand[RDX, RDX] {def get = this}
+    def rbx(implicit ev: Mode <:< x86_64) = new RBX with Operand[RBX, RBX] {def get = this}
+    def rsp(implicit ev: Mode <:< x86_64) = new RSP with Operand[RSP, RSP] {def get = this}
   
-    object edi extends EDI with Operand[EDI, EDI] {def get = this}
-    object ebx extends EBX with Operand[EBX, EBX] {def get = this}
-    object eax extends EAX with Operand[EAX, EAX] {def get = this}
-    object ecx extends ECX with Operand[ECX, ECX] {def get = this}
-    object ebp extends EBP with Operand[EBP, EBP] {def get = this}
-    object edx extends EDX with Operand[EDX, EDX] {def get = this}
-    object esp extends ESP with Operand[ESP, ESP] {def get = this}
+    def edi(implicit ev: Mode <:< x86_32) = new EDI with Operand[EDI, EDI] {def get = this}
+    def ebx(implicit ev: Mode <:< x86_32) = new EBX with Operand[EBX, EBX] {def get = this}
+    def eax(implicit ev: Mode <:< x86_32) = new EAX with Operand[EAX, EAX] {def get = this}
+    def ecx(implicit ev: Mode <:< x86_32) = new ECX with Operand[ECX, ECX] {def get = this}
+    def ebp(implicit ev: Mode <:< x86_32) = new EBP with Operand[EBP, EBP] {def get = this}
+    def edx(implicit ev: Mode <:< x86_32) = new EDX with Operand[EDX, EDX] {def get = this}
+    def esp(implicit ev: Mode <:< x86_32) = new ESP with Operand[ESP, ESP] {def get = this}
   
     object ax extends AX with Operand[AX, AX] {def get = this}
     object cx extends CX with Operand[CX, CX] {def get = this}

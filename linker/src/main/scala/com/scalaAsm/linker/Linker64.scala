@@ -41,7 +41,7 @@ class Linker64 extends Linker {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-	    val importedSymbols = export.functionNames intersect assembled.unboundSymbols
+	    val importedSymbols = export.functionNames intersect assembled.symbols.map(_.symbolName).toSeq
 
 	    if (importedSymbols.isEmpty)
 	      None
@@ -67,7 +67,7 @@ class Linker64 extends Linker {
       result
     }.toMap
     
-    val code = assembled.finalizeAssembly(addressOfData, executableImports.imports, symMap, baseOffset = 0x400000 /*imagebase*/)
+    val code = assembled.finalizeAssembly(addressOfData, symMap, baseOffset = 0x400000 /*imagebase*/)
 
     val resources = assembled.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
 

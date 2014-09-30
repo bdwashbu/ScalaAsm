@@ -31,9 +31,9 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
 
     val (rawData2, variables2) = compileData(dataTokens)
 
-    def compileAssembly(variables: (Int) => Map[String, Int]): CompiledAssembly = {
+    def compileAssembly(variables: Map[String, Int]): CompiledAssembly = {
 
-      lazy val varNames = variables(0).keys.toList
+      lazy val varNames = variables.keys.toList
       lazy val procNames = codeTokens.collect { case BeginProc(name) => name }
 
       def onePass: Seq[Token] = codeTokens flatMap {
@@ -82,7 +82,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
         compiledAsm.onePass.collect { case InvokeRef(name) => name }).flatten.toSeq
       
       def finalizeAssembly(addressOfData: Int, imports: Map[String, Int], imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
-        val varMap = variables(addressOfData)
+        val varMap = variables map { case (name, offset) => (name, offset + addressOfData) } // apply offset
         lazy val varNames = varMap.keys.toList
         // Build procedure map
         val procs = compiledAsm.positionPass collect { case Proc(offset, name) => (name, offset) } toMap
@@ -146,7 +146,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
 
   //val compiledImports = compileImports(rawData.size, unboundSymbols)   
 
-  def compileData(dataTokens: Seq[Token]): (Array[Byte], (Int) => Map[String, Int]) = {
+  def compileData(dataTokens: Seq[Token]): (Array[Byte], Map[String, Int]) = {
 
     val dataSection: Seq[PostToken] = {
       var parserPosition = 0
@@ -164,19 +164,18 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
       }
     }
 
-    val dataBytes = (dataSection flatMap {
+    val dataBytes = dataSection flatMap {
       case ByteOutputPost(padding) => Some(padding)
       case PostVar(_, value, _) => Some(value.toCharArray().map(_.toByte))
       case _ => None
-    })
+    }
 
     val data = Array.fill[Byte](8)(0x00) ++: dataBytes.reduce(_ ++: _)
 
     // a map of variable to its RVA
-    def createDefMap(dataSection: Seq[PostToken]): (Int) => Map[String, Int] = {
-      (dataAddress: Int) =>
+    def createDefMap(dataSection: Seq[PostToken]): Map[String, Int] = {
         (dataSection flatMap {
-          case PostVar(name, value, pos) => Some((name, pos + dataAddress + 8))
+          case PostVar(name, value, pos) => Some((name, pos + 8)) // need the +8?
           case _ => None
         } toMap)
     }

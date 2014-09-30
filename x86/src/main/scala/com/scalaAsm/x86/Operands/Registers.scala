@@ -20,7 +20,7 @@ abstract class GeneralPurpose[S <: OperandSize](name: String) extends Register[S
   abstract class Indirect extends AddressingMode[S] {
     self =>
     def base: GeneralPurpose[S] = self2
-    def get = this
+    def get: Indirect = this
   //  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
   //    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
   //  }

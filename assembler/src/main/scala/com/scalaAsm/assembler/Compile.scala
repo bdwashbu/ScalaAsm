@@ -110,13 +110,26 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
                 relocations += RelocationEntry(parserPosition, procs(name) - parserPosition - 5, name, 0)
                 callNear(*(Constant32(0)).get.getRelative).getBytes
               }
-              case InvokeRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes //callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
-              case VarRef(name) => push(Op(Constant32(varMap(name) + baseOffset - 0x1000))).getBytes // fix
-              case JmpRefResolved(name) => jmp(*(Constant32(imports64(name) + baseOffset))).getBytes
-              case ImportRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes
+              case InvokeRef(name) => {
+                relocations += RelocationEntry(parserPosition, imports64(name) - (parserPosition + 0x1000) - 5, name, 0)
+                callNear(*(Constant32(0)).get.getRelative).getBytes //callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
+              }
+              case VarRef(name) => {
+                relocations += RelocationEntry(parserPosition, varMap(name) + baseOffset - 0x1000, name, 0)
+                push(Op(Constant32(0))).getBytes // fix
+              }
+              case JmpRefResolved(name) => {
+                relocations += RelocationEntry(parserPosition, imports64(name) + baseOffset, name, 0)
+                jmp(*(Constant32(0))).getBytes
+              }
+              case ImportRef(name) => {
+                relocations += RelocationEntry(parserPosition, imports64(name) - (parserPosition + 0x1000) - 5, name, 0)
+                callNear(*(Constant32(0)).get.getRelative).getBytes
+              }
               case LabelRef(name, inst, format) => {
                 val op = (labels(name) - parserPosition - 2).toByte
-                inst(Op(new Constant8(op)), format, Seq()).getBytes
+                relocations += RelocationEntry(parserPosition, op, name, 1)
+                inst(Op(new Constant8(0)), format, Seq()).getBytes
               }
               case _ => Array[Byte]()
             }

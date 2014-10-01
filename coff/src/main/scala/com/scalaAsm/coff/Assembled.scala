@@ -38,7 +38,7 @@ abstract class Assembled(val iconPath: Option[String] = None) {
   self =>
   val rawData: Array[Byte]
   val rawCode: Array[Byte]
-  val symbols: Seq[RelocationEntry]
+  val symbols: Seq[CoffSymbol]
   val relocations: ListBuffer[RelocationEntry]
 
   def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte]

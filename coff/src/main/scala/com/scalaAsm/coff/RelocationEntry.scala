@@ -27,6 +27,8 @@ object TypeIndicator extends Enumeration {
   val IMAGE_REL_AMD64_SSPAN32  = Value(0x2010.toShort)
 }
 
+case class CoffSymbol(name: String, location: Int)
+
 case class RelocationEntry(
     referenceAddress: Long,
     newAddy: Long,

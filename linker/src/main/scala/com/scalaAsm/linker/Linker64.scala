@@ -41,7 +41,7 @@ class Linker64 extends Linker {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-	    val importedSymbols = export.functionNames intersect assembled.symbols.map(_.symbolName).toSeq
+	    val importedSymbols = export.functionNames intersect assembled.symbols.map(_.name).toSeq
 
 	    if (importedSymbols.isEmpty)
 	      None

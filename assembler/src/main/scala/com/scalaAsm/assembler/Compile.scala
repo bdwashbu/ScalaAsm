@@ -19,6 +19,7 @@ import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.x86Mode
 import com.scalaAsm.asm.Addressing
 import com.scalaAsm.coff.RelocationEntry
+import scala.collection.mutable.ArrayBuffer
 
 class Assembler extends Standard.Catalog with Formats with Addressing {
   self =>
@@ -76,11 +77,12 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
 
     new Assembled {
       val rawData = rawData2
-      val symbols = compiledAsm.onePass.collect { case ImportRef(name) => RelocationEntry(0,name,0); case InvokeRef(name) => RelocationEntry(0,name,0)} ++ variablesSymbols
+      val symbols = compiledAsm.onePass.collect { case ImportRef(name) => RelocationEntry(0,0,name,0); case InvokeRef(name) => RelocationEntry(0,0,name,0)} ++ variablesSymbols
       val rawCode = Array[Byte]()
+      val relocations = ListBuffer[RelocationEntry]()
       
-      def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
-        val varMap = variablesSymbols map { case RelocationEntry(_,name, offset) => (name, offset + addressOfData) } toMap // apply offset
+      def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte] = {
+        val varMap = variablesSymbols map { case RelocationEntry(_,_,name, offset) => (name, offset + addressOfData) } toMap // apply offset
         lazy val varNames = varMap.keys.toList
         // Build procedure map
         val procs = compiledAsm.positionPass collect { case Proc(offset, name) => (name, offset) } toMap
@@ -104,7 +106,10 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
               }
               case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
               case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-              case ProcRef(name) => callNear(*(Constant32(procs(name) - parserPosition - 5)).get.getRelative).getBytes
+              case ProcRef(name) => {
+                relocations += RelocationEntry(parserPosition, procs(name) - parserPosition - 5, name, 0)
+                callNear(*(Constant32(0)).get.getRelative).getBytes
+              }
               case InvokeRef(name) => callNear(*(Constant32(imports64(name) - (parserPosition + 0x1000) - 5)).get.getRelative).getBytes //callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
               case VarRef(name) => push(Op(Constant32(varMap(name) + baseOffset - 0x1000))).getBytes // fix
               case JmpRefResolved(name) => jmp(*(Constant32(imports64(name) + baseOffset))).getBytes
@@ -125,7 +130,9 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           }
         }.reduce(_ ++ _)
 
-        code
+        val result = ArrayBuffer[Byte]()
+        result ++= code
+        result
       }
     }
   }
@@ -161,7 +168,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): Seq[RelocationEntry] = {
         dataSection flatMap {
-          case PostVar(name, value, pos) => Some(RelocationEntry(0, name, (pos + 8).toShort)) // need the +8?
+          case PostVar(name, value, pos) => Some(RelocationEntry(0, 0, name, (pos + 8).toShort)) // need the +8?
           case _ => None
         }
     }

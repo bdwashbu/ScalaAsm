@@ -67,8 +67,14 @@ class Linker64 extends Linker {
       result
     }.toMap
     
-    val code = assembled.finalizeAssembly(addressOfData, symMap, baseOffset = 0x400000 /*imagebase*/)
+    var code = assembled.finalizeAssembly(addressOfData, symMap, baseOffset = 0x400000 /*imagebase*/)
 
+    assembled.relocations.toList.foreach { relocation =>
+      val bb = java.nio.ByteBuffer.allocate(4)
+      bb.order(ByteOrder.LITTLE_ENDIAN)
+      bb.putInt(relocation.newAddy.toInt)
+      code = code.patch(relocation.referenceAddress.toInt + 1, bb.array(), 4)
+    }
     val resources = assembled.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
 
     val dosHeader = DosHeader(
@@ -107,7 +113,7 @@ class Linker64 extends Linker {
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
           Characteristic.READ.id) 
-      , code)
+      , code.toArray)
    
     val dataSection = Section(
       SectionHeader(

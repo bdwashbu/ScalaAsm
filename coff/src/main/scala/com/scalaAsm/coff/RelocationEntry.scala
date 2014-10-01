@@ -29,6 +29,7 @@ object TypeIndicator extends Enumeration {
 
 case class RelocationEntry(
     referenceAddress: Long,
+    newAddy: Long,
     //symbolIndex: Long,
     symbolName: String, // replace with index
     reloationType: Short) {

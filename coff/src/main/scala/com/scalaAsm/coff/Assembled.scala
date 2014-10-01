@@ -4,6 +4,8 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 
 object Assembled {
   def readCoff(filePath: String): Assembled = { 
@@ -37,16 +39,18 @@ abstract class Assembled(val iconPath: Option[String] = None) {
   val rawData: Array[Byte]
   val rawCode: Array[Byte]
   val symbols: Seq[RelocationEntry]
+  val relocations: ListBuffer[RelocationEntry]
 
-  def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): Array[Byte]
+  def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte]
 
   def addIcon(path: String): Assembled = {
     new Assembled(Option(path)) {
       val rawData = self.rawData
       val rawCode = self.rawCode
       val symbols = self.symbols
+      val relocations = self.relocations
 
-      def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): Array[Byte] = {
+      def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte] = {
         self.finalizeAssembly(addressOfData, imports64, baseOffset)
       }
     }

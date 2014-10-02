@@ -17,6 +17,10 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import com.scalaAsm.coff.Sections
+import com.scalaAsm.coff.Section
+import com.scalaAsm.coff.SectionHeader
+import com.scalaAsm.coff.Characteristic
 
 class Linker64 extends Linker {
   

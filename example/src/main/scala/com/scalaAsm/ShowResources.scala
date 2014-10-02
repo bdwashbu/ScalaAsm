@@ -4,7 +4,7 @@ import java.io._
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import com.scalaAsm.portableExe._
-import com.scalaAsm.portableExe.sections.Sections
+import com.scalaAsm.coff.Sections
 //import com.scalaAsm.portableExe.sections.ParsedImageResourceDirectory
 
 

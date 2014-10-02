@@ -2,6 +2,7 @@ package com.scalaAsm.portableExe
 
 import sections._
 import scala.collection.mutable.ArrayBuffer
+import com.scalaAsm.coff.Section
 
 case class PortableExecutable64(dosHeader: DosHeader,
   peHeader: NtHeader,

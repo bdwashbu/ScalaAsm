@@ -23,6 +23,8 @@ object SectionHeader {
   }
 }
 
+case class Section(header: SectionHeader, contents: Array[Byte])
+
 // Table indexing is 1-based
 
 case class SectionHeader(

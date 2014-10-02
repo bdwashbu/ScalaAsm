@@ -1,6 +1,6 @@
 package com.scalaAsm.portableExe
 
-import sections._
+import com.scalaAsm.coff.SectionHeader
 
 trait PortableExecutable {
   def get(): Array[Byte]

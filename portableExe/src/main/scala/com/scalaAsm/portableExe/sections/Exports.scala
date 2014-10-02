@@ -2,6 +2,7 @@ package com.scalaAsm.portableExe.sections
 
 import java.nio.ByteBuffer
 import com.scalaAsm.portableExe.ImageDataDirectory
+import com.scalaAsm.coff._
 
 object ImageExportDirectory {
   def getExports(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ImageExportDirectory = {

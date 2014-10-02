@@ -6,3 +6,5 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: linker.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.scalaAsm.linker
+Import-Package: com.scalaAsm.coff,
+ com.scalaAsm.portableExe

@@ -7,5 +7,5 @@ Bundle-ClassPath: assembler.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.scalaAsm.asm,
  com.scalaAsm.coff,
- com.scalaAsm.linker
+ com.scalaAsm.x86
 Export-Package: com.scalaAsm.assembler

@@ -154,7 +154,7 @@ How to build:
 1. Set any dependencies in the top level build.sbt file
 2. Launch sbt
 3. Run the 'eclipse' command to rebuild all .classpath and .project files
-4. 
+4. Refresh projects in eclipse
 
 Output:
 ```

@@ -24,16 +24,16 @@ For the users, Scala x86 offers compile-time safety.  If bad operand types are p
 Heres an example of some PUSH instructions for 16-bit register, 8-bit immediate value, and 16-bit immediate value operands.
 
 ```scala
-implicit object push1 extends PUSH_1[O, r16] {
-  def opcode = OpcodePlusRd(0x50)
+implicit object push1 extends PUSH_1[r16, O] {
+  def opcode = 0x50 + rd
 }
   
-implicit object push2 extends PUSH_1[I, imm8] {
-  val opcode: Opcodes = 0x6A
+implicit object push2 extends PUSH_1[imm8, I] {
+  def opcode = 0x6A
 }
   
-implicit object push3 extends PUSH_1[I, imm16] {
-  val opcode: Opcodes = 0x68
+implicit object push3 extends PUSH_1[imm16, I] {
+  def opcode = 0x68
 }
 ```
 
@@ -65,7 +65,7 @@ We do know Scala x86 can be used to implement low-level assembly code. This asse
 Heres a windows console version of "Hello world!":
 
 ```scala
-object HelloWorld2 extends AsmProgram {
+object HelloWorld extends AsmProgram[x86_32] {
   
   dataSections += new DataSection {
     builder += Variable("helloWorld", "Hello World!\r\n\0")
@@ -78,27 +78,17 @@ object HelloWorld2 extends AsmProgram {
     val STD_INPUT_HANDLE = byte(-10)
 
     procedure(name = "start",
-      push(STD_OUTPUT_HANDLE),
-      call("GetStdHandle"),
-      mov(ebx, eax),
-      push(byte(0)),
-      push(byte(0)),
-      push(byte(0x0E)),
       push("helloWorld"),
-      push(eax),
-      call("WriteFile"),
-      push(byte(0)),
-      push(byte(0)),
-      push(byte(0x1D)),
+      call("printf"),
+      pop(ebx),
       push("pressAnyKey"),
-      push(ebx),
-      call("WriteFile"),
+      call("printf"),
+      pop(ebx),
       push(STD_INPUT_HANDLE),
       call("GetStdHandle"),
       push(eax),
       call("FlushConsoleInputBuffer"),
       call("_getch"),
-      mov(eax, dword(0)),
       retn
     )
   }
@@ -151,10 +141,10 @@ How to run:
 How to build:
 ========
 
-1. Set any dependencies in the top level build.sbt file
-2. Launch sbt
-3. Run the 'eclipse' command to rebuild all .classpath and .project files
-4. Refresh projects in eclipse
+1. Launch sbt
+2. Run the 'eclipse' command to rebuild all .classpath and .project files
+3. In Eclipse, under window->preferences->general->workspace->build order, uncheck 'use default order' and set the order from top to bottom: x86, coff, asm, assembler, portableExe, linker, example
+4. Refresh/Clean projects in eclipse
 
 Output:
 ```

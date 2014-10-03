@@ -4,7 +4,7 @@ name := "scala_x86"
 
 version := "1.0"
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.11.2"
 
 //playScalaSettings
 
@@ -12,7 +12,7 @@ lazy val scalax86 = project.in(file("."))
     .dependsOn(example)
     
 lazy val example = project.in(file("example"))
-    .dependsOn(asm, linker, assembler)
+    .dependsOn(asm, linker, assembler, x86)
     
 lazy val asm = project.in(file("asm"))
     .dependsOn(x86, coff)
@@ -20,7 +20,7 @@ lazy val asm = project.in(file("asm"))
 lazy val x86 = project.in(file("x86"))
 
 lazy val portableExe = project.in(file("portableExe"))
-    .dependsOn(asm, x86)
+    .dependsOn(asm, coff)
 
 lazy val coff = project.in(file("coff"))
 
@@ -28,4 +28,4 @@ lazy val linker = project.in(file("linker"))
     .dependsOn(portableExe, coff)
 
 lazy val assembler = project.in(file("assembler"))
-    .dependsOn(asm, x86)
+    .dependsOn(asm, x86, coff)

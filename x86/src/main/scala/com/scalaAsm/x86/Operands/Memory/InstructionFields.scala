@@ -85,7 +85,6 @@ object NoSibField extends NoSib {
 }
 
 abstract class NoDisp(value: Int) extends Constant[_32](value) {
-  def getBytes: Array[Byte] = Array()
   def negate = this
   def size: Int = 0
 }

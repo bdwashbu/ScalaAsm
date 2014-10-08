@@ -10,31 +10,31 @@ package object x86 {
 
   // Many of these can be found in section 3.1.1.3 of the Intel x86 manual
   
-  type imm = Constant[_ <: OperandSize]
+  type imm = Constant[_]
   type imm8 = Constant[_8]
   type imm16 = Constant[_16]
   type imm32 = Constant[_32]
   type imm64 = Constant[_64]
   
-  type rm = RegisterOrMemory[_ <: OperandSize]
+  type rm = RegisterOrMemory[_]
   type rm8 = RegisterOrMemory[_8]
   type rm16 = RegisterOrMemory[_16]
   type rm32 = RegisterOrMemory[_32]
   type rm64 = RegisterOrMemory[_64]
   
-  sealed trait OperandSize {
-    type primitiveType
-  }
+//  sealed trait OperandSize {
+//    type primitiveType
+//  }
+//  
+//  type ByteOperand = OperandSize { type primitiveType = Byte }
+//  type WordOperand = OperandSize { type primitiveType = Short }
+//  type DwordOperand = OperandSize { type primitiveType = Int }
+//  type QwordOperand = OperandSize { type primitiveType = Long }
   
-  type ByteOperand = OperandSize { type primitiveType = Byte }
-  type WordOperand = OperandSize { type primitiveType = Short }
-  type DwordOperand = OperandSize { type primitiveType = Int }
-  type QwordOperand = OperandSize { type primitiveType = Long }
-  
-  type _8 = ByteOperand
-  type _16 = WordOperand
-  type _32 = DwordOperand
-  type _64 = QwordOperand
+  type _8 = Byte
+  type _16 = Short
+  type _32 = Int
+  type _64 = Long
   
   type r = GPR with rm
   type r8 = GeneralPurpose[_8] with rm8
@@ -42,10 +42,10 @@ package object x86 {
   type r32 = GeneralPurpose[_32] with rm32
   type r64 = GeneralPurpose[_64] with rm64
   
-  type rel = Relative[_ <: OperandSize]
+  type rel = Relative[_]
   type rel16 = Relative[_16]
   type rel32 = Relative[_32]
   type rel64 = Relative[_64]
   
-  type +[Reg <: GeneralPurpose[_], Y <: OperandSize] = Reg#BaseIndex[Y]
+  type +[Reg <: GeneralPurpose[_], Y] = Reg#BaseIndex[Y]
 }

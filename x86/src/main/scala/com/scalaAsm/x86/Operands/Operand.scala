@@ -26,35 +26,34 @@ trait Operand[+From, +To] {
 
 case class Op[X](from: X) extends Operand[X, X] { def get = from }
 
-trait Constant[Size <: OperandSize] extends InstructionField {
-  def value: Size#primitiveType
+abstract class Constant[Size: Numeric](val value: Size) extends InstructionField {
   def getBytes: Array[Byte]
   def negate: Constant[Size]
   def size: Int
 }
 
-case class Constant8(value: Byte) extends Constant[_8] {
+case class Constant8(x: Byte) extends Constant(x) {
   self =>
   def getBytes: Array[Byte] = Array(value)
   def size = 1
-  def negate = this.copy(value = (-this.value).toByte)
+  def negate = Constant8(implicitly[Numeric[Byte]].negate(value))
 }
 
-case class Constant16(value: Short) extends Constant[_16] {
+case class Constant16(x: Short) extends Constant(x) {
   self =>
   def getBytes: Array[Byte] = Array((value & 0x00FF).toByte, ((value & 0xFF00) >> 8).toByte)
   def size = 2
-  def negate = this.copy(value = (-this.value).toShort)
+  def negate = Constant16(implicitly[Numeric[Short]].negate(value))
 }
 
-case class Constant32(value: Int) extends Constant[_32] {
+case class Constant32(x: Int) extends Constant(x) {
   self =>
   def getBytes: Array[Byte] = Array((value & 0x000000FF).toByte, ((value & 0x0000FF00) >> 8).toByte, ((value & 0x00FF0000) >> 16).toByte, ((value & 0xFF000000) >> 24).toByte)
   def size = 4
-  def negate = this.copy(value = -this.value)
+  def negate = Constant32(implicitly[Numeric[Int]].negate(value))
 }
 
-case class Constant64(value: Long) extends Constant[_64] {
+case class Constant64(x: Long) extends Constant(x) {
   self =>
   def getBytes: Array[Byte] = {
     import java.nio.{ByteBuffer, ByteOrder}
@@ -64,10 +63,7 @@ case class Constant64(value: Long) extends Constant[_64] {
       buffer.array()
   }
   def size = 8
-  def negate = this.copy(value = -this.value)
+  def negate = Constant64(implicitly[Numeric[Long]].negate(value))
 }
 
-trait RegisterOrMemory[Size <: OperandSize]
-
-
-
+trait RegisterOrMemory[Size]

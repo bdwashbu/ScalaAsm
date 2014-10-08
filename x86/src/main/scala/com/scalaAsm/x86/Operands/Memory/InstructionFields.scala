@@ -33,19 +33,19 @@ protected[x86] case class InstructionFormat (
 
 case class NoModRM() extends AddressingFormSpecifier(NoModField, NoSibField, NoDispField)
 
-case class OnlyDisplacement[Offset <: Constant[_ <: OperandSize]](offset: Offset) extends AddressingFormSpecifier(NoModField, NoSibField, offset)
+case class OnlyDisplacement[Offset <: Constant[_]](offset: Offset) extends AddressingFormSpecifier(NoModField, NoSibField, offset)
 
 case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier(mod, NoSibField, NoDispField)
 
 case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier(mod, theSIB, NoDispField)
 
-case class NoSIBWithDisplacement[Offset <: Constant[_ <: OperandSize]](mod: ModRM, offset: Offset) extends AddressingFormSpecifier(mod, NoSibField, offset)
+case class NoSIBWithDisplacement[Offset <: Constant[_]](mod: ModRM, offset: Offset) extends AddressingFormSpecifier(mod, NoSibField, offset)
 
 case class WithSIBWithDisplacement[Mod <: ModRM, Sib <: SIB, Disp <: Constant[_]](mod: Mod, theSIB: Sib, offset: Disp) extends AddressingFormSpecifier(mod, theSIB, offset)
 
 object ModRM {
-  type rm = RegisterOrMemory[_ <: OperandSize]
-  type reg = GPR with RegisterOrMemory[_ <: OperandSize]
+  type rm = RegisterOrMemory[_]
+  type reg = GPR with RegisterOrMemory[_]
   type plusRd = rm
 }
 
@@ -84,17 +84,13 @@ object NoSibField extends NoSib {
   val size = 0
 }
 
-trait NoDisp extends Constant[_32] {
-  type Size = ByteOperand
-  def value = 0
+abstract class NoDisp(value: Int) extends Constant[_32](value) {
   def getBytes: Array[Byte] = Array()
-  def asInt: Int = 0
-  def asLong: Long = 0
   def negate = this
   def size: Int = 0
 }
 
-object NoDispField extends NoDisp
+object NoDispField extends NoDisp(0)
 
 case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) extends ModRegisterMemory {
   def getBytes = Array(((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte)

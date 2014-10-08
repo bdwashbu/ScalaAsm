@@ -3,16 +3,16 @@ package Operands
 
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 
-abstract class Register[S <: OperandSize](val name: String)
+abstract class Register[S: Numeric](val name: String)
 
-abstract class GeneralPurpose[S <: OperandSize](name: String) extends Register[S](name) {
+abstract class GeneralPurpose[S: Numeric](name: String) extends Register[S](name) {
   self2 =>
     
   val ID: Int
-  def -[Z <: OperandSize](offset: Operand[_,Constant[Z]]) = new BaseIndex(offset.get.negate) {}
-  def +[Z <: OperandSize](offset: Operand[_,Constant[Z]]) = new BaseIndex(offset.get) {}
+  def -[Z: Numeric](offset: Operand[_,Constant[Z]]) = new BaseIndex(offset.get.negate) {}
+  def +[Z: Numeric](offset: Operand[_,Constant[Z]]) = new BaseIndex(offset.get) {}
   
-  abstract class BaseIndex[Y <: OperandSize](val displacement: Constant[Y]) extends AddressingMode[S] {
+  abstract class BaseIndex[Y: Numeric](val displacement: Constant[Y]) extends AddressingMode[S] {
     def base: GeneralPurpose[S] = self2
     def get: BaseIndex[Y] = this
   }
@@ -31,19 +31,19 @@ abstract class GeneralPurpose[S <: OperandSize](name: String) extends Register[S
   }
 }
 
-abstract class GeneralPurposeA[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 0 } 
-abstract class GeneralPurposeB[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 3 }
-abstract class GeneralPurposeC[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 1 }
-abstract class GeneralPurposeD[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 2 }
+abstract class GeneralPurposeA[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 0 } 
+abstract class GeneralPurposeB[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 3 }
+abstract class GeneralPurposeC[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 1 }
+abstract class GeneralPurposeD[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 2 }
 
-abstract class SourceIndex[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 6 }
-abstract class DestinationIndex[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 7 }
-abstract class BasePointer[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 5 }
-abstract class StackPointer[Size <: OperandSize](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 4 }
+abstract class SourceIndex[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 6 }
+abstract class DestinationIndex[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 7 }
+abstract class BasePointer[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 5 }
+abstract class StackPointer[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 4 }
 
 abstract class Extra64Reg(name: String) extends GeneralPurpose[_64](name) with RegisterOrMemory[_64]
 
-trait UniformByteRegister[Size <: OperandSize] extends GeneralPurpose[Size] with RegisterOrMemory[Size]
+trait UniformByteRegister[Size] extends GeneralPurpose[Size] with RegisterOrMemory[Size]
 
 // "A" family - Accumulator for operands and results
 class RAX extends GeneralPurposeA[_64]("rax")
@@ -88,7 +88,7 @@ class SI extends SourceIndex[_16]("si")
 
 class RDI extends DestinationIndex[_64]("rdi")
 class EDI extends DestinationIndex[_32]("edi")
-class DI extends DestinationIndex("di")
+class DI extends DestinationIndex[_16]("di")
 
 class ES extends SegmentRegister("es") { val ID = 8 }
 class CS extends SegmentRegister("cs") { val ID = 8 }

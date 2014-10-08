@@ -363,8 +363,8 @@ trait Formats extends LowPriorityFormats {
        def size(opcode: OpcodeFormat, prefix: Seq[Prefix]) = prefix.size + opcode.size + 2
   }
   
-  implicit object RMFormatB1 extends TwoOperandFormat[ModRM.reg, StackPointer[_ <: OperandSize] + _8, RM] {
-      def getAddressingForm(op1: ModRM.reg, op2: StackPointer[_ <: OperandSize] + _8, opcode: OpcodeFormat) = {
+  implicit object RMFormatB1 extends TwoOperandFormat[ModRM.reg, StackPointer[_] + _8, RM] {
+      def getAddressingForm(op1: ModRM.reg, op2: StackPointer[_] + _8, opcode: OpcodeFormat) = {
         InstructionFormat (
       	    WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement),
             immediate = None

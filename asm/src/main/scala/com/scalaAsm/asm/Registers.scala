@@ -1,7 +1,6 @@
 package com.scalaAsm.asm
 
 import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.`package`.OperandSize
 
 trait Registers[Mode <: x86Mode] {
 

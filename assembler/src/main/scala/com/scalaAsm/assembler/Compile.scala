@@ -18,7 +18,7 @@ import com.scalaAsm.asm.AsmProgram
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.x86Mode
 import com.scalaAsm.asm.Addressing
-import com.scalaAsm.coff.RelocationEntry
+import com.scalaAsm.coff.Relocation
 import scala.collection.mutable.ArrayBuffer
 import com.scalaAsm.coff.CoffSymbol
 
@@ -80,7 +80,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
       val rawData = rawData2
       val symbols = compiledAsm.onePass.collect { case ImportRef(name) => CoffSymbol(name,0); case InvokeRef(name) => CoffSymbol(name,0)} ++ variablesSymbols
       val rawCode = Array[Byte]()
-      val relocations = ListBuffer[RelocationEntry]()
+      val relocations = ListBuffer[Relocation]()
       
       def finalizeAssembly(addressOfData: Int, imports: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte] = {
         val varMap = variablesSymbols map { case CoffSymbol(name, offset) => (name, offset + addressOfData) } toMap // apply offset
@@ -107,28 +107,28 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
               case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
               case Padding(to, _) => Array.fill(to)(0xCC.toByte)
               case ProcRef(name) => {
-                relocations += RelocationEntry(parserPosition, refSymbols(name) - parserPosition - 5, name, 0)
+                relocations += Relocation(parserPosition, refSymbols(name) - parserPosition - 5, name, 0)
                 callNear(*(Constant32(0)).get.getRelative).getBytes
               }
               case InvokeRef(name) => {
-                relocations += RelocationEntry(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
+                relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
                 callNear(*(Constant32(0)).get.getRelative).getBytes //callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
               }
               case VarRef(name) => {
-                relocations += RelocationEntry(parserPosition, refSymbols(name) + baseOffset - 0x1000, name, 0)
+                relocations += Relocation(parserPosition, refSymbols(name) + baseOffset - 0x1000, name, 0)
                 push(Op(Constant32(0))).getBytes // fix
               }
               case JmpRefResolved(name) => {
-                relocations += RelocationEntry(parserPosition, refSymbols(name) + baseOffset, name, 0)
+                relocations += Relocation(parserPosition, refSymbols(name) + baseOffset, name, 0)
                 jmp(*(Constant32(0))).getBytes
               }
               case ImportRef(name) => {
-                relocations += RelocationEntry(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
+                relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
                 callNear(*(Constant32(0)).get.getRelative).getBytes
               }
               case LabelRef(name, inst, format) => {
                 val op = (refSymbols(name) - parserPosition - 2).toByte
-                relocations += RelocationEntry(parserPosition, op, name, 1)
+                relocations += Relocation(parserPosition, op, name, 1)
                 inst(Op(new Constant8(0)), format, Seq()).getBytes
               }
               case _ => Array[Byte]()

@@ -27,19 +27,42 @@ object TypeIndicator extends Enumeration {
   val IMAGE_REL_AMD64_SSPAN32  = Value(0x2010.toShort)
 }
 
-case class CoffSymbol(name: String, location: Int)
+object RelocationEntry {
+  def getRelocationEntry(input: ByteBuffer): RelocationEntry = {
+    input.order(ByteOrder.LITTLE_ENDIAN)
+    RelocationEntry(
+      referenceAddress = input.getInt(),
+      symbolIndex = input.getInt(),
+    	reloationType = input.getShort()) 
+  }
+}
 
 case class RelocationEntry(
-    referenceAddress: Long,
-    newAddy: Long,
-    //symbolIndex: Long,
-    symbolName: String, // replace with index
+    referenceAddress: Int,
+    symbolIndex: Int,
     reloationType: Short) {
   
   def apply() = {
     val bbuf = ByteBuffer.allocate(10)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    bbuf.putLong(referenceAddress)
+    bbuf.putInt(referenceAddress)
+    bbuf.putInt(symbolIndex)
+    bbuf.putShort(reloationType)
+    bbuf.array()
+  }
+  
+}
+
+case class Relocation(
+    referenceAddress: Int,
+    newAddy: Int,
+    symbolName: String,
+    reloationType: Short) {
+  
+  def apply() = {
+    val bbuf = ByteBuffer.allocate(10)
+    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+    bbuf.putInt(referenceAddress)
     //bbuf.putLong(symbolIndex)
     bbuf.putShort(reloationType)
     bbuf.array()

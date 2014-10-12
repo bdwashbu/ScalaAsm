@@ -23,7 +23,9 @@ object SectionHeader {
   }
 }
 
-case class Section(header: SectionHeader, contents: Array[Byte])
+case class Section(header: SectionHeader, contents: Array[Byte]) {
+  override def toString = "Section(" + header.toString() + ", " + contents(0) + ")"
+}
 
 // Table indexing is 1-based
 

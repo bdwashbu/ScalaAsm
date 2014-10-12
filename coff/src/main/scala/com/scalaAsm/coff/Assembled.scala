@@ -28,8 +28,32 @@ object Assembled {
       for (i <- 0 until coffHeader.numberOfSections)
          yield SectionHeader.getSectionHeader(bbuf)
     
+    val sections = sectionHeaders map { header =>
+      val sectionData = Array.fill[Byte](header.sizeOfRawData)(0)
+      bbuf.get(sectionData, 0, header.sizeOfRawData)
+      Section(header, sectionData)
+    } 
+    
+    val relocations = sectionHeaders flatMap { header =>
+      for (i <- 0 until header.relocations)
+         yield RelocationEntry.getRelocationEntry(bbuf)
+    }
+    
+    val symbolTable = for (i <- 0 until coffHeader.numberOfSymbols)
+         yield SymbolEntry.getSymbolEntry(bbuf)
+    
+    val sizeOfStrings = bbuf.getInt()
+    println("size: " + sizeOfStrings)
+    val stringData = Array.fill[Byte](sizeOfStrings - 4)(0)
+    bbuf.get(stringData, 0, sizeOfStrings - 4)
+    val strings = new String(stringData).split("\0");     
+    
     println(coffHeader)
     sectionHeaders.foreach(println)
+    sections.foreach(println)
+    relocations.foreach(println)
+    symbolTable.foreach(println)
+    strings.foreach(println)
     null
   }
 }
@@ -39,7 +63,7 @@ abstract class Assembled(val iconPath: Option[String] = None) {
   val rawData: Array[Byte]
   val rawCode: Array[Byte]
   val symbols: Seq[CoffSymbol]
-  val relocations: ListBuffer[RelocationEntry]
+  val relocations: ListBuffer[Relocation]
 
   def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte]
 

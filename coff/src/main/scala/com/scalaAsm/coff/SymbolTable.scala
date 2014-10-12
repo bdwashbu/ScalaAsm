@@ -12,10 +12,10 @@ object SymbolEntry {
      SymbolEntry(
          name = name map(_.toChar) mkString,
          value = input.getInt(),
-         sectionNumber   = input.getShort(),
-         symbolType    = input.getShort(),
+         sectionNumber = input.getShort(),
+         symbolType = input.getShort(),
          storageClass = input.get(),
-         auxillaryCount    = input.get()
+         auxiliarySymbols = for (i <- 0 until input.get()) yield AuxiliarySectionDefinition.getAuxSectionDef(input)
      )
   }
 }
@@ -26,7 +26,7 @@ case class SymbolEntry (
     sectionNumber: Short,
     symbolType: Short,
     storageClass: Byte,
-    auxillaryCount: Byte) {
+    auxiliarySymbols: Seq[AuxiliarySymbol]) {
   
   def apply() = {
     val bbuf = ByteBuffer.allocate(18)
@@ -36,8 +36,47 @@ case class SymbolEntry (
     bbuf.putShort(sectionNumber)
     bbuf.putShort(symbolType)
     bbuf.put(storageClass)
-    bbuf.put(auxillaryCount)
+    bbuf.put(auxiliarySymbols.size.toByte)
     bbuf.array()
+  } 
+}
+
+trait AuxiliarySymbol
+
+object AuxiliarySectionDefinition {
+  def getAuxSectionDef(input: ByteBuffer): AuxiliarySectionDefinition = {
+     val result = AuxiliarySectionDefinition(
+         length = input.getInt(),
+         numberOfRelocations = input.getShort(),
+         numberOfLineNumbers = input.getShort(),
+         checksum = input.getInt(),
+         number = input.getShort(),
+         selection = input.get()
+     )
+     input.get() // toss out padding
+     input.get()
+     input.get()
+     result
   }
+}
+
+case class AuxiliarySectionDefinition (
+    length: Int,
+    numberOfRelocations: Short,
+    numberOfLineNumbers: Short,
+    checksum: Int,
+    number: Short,
+    selection: Byte) extends AuxiliarySymbol {
   
+  def apply() = {
+    val bbuf = ByteBuffer.allocate(18)
+    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+    bbuf.putInt(length)
+    bbuf.putShort(numberOfRelocations)
+    bbuf.putShort(numberOfLineNumbers)
+    bbuf.putInt(checksum)
+    bbuf.putInt(number)
+    bbuf.put(selection)
+    bbuf.array()
+  } 
 }

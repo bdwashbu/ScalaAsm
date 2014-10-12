@@ -39,21 +39,50 @@ object Assembled {
          yield RelocationEntry.getRelocationEntry(bbuf)
     }
     
-    val symbolTable = for (i <- 0 until coffHeader.numberOfSymbols)
-         yield SymbolEntry.getSymbolEntry(bbuf)
+    val symbolTable = new ListBuffer[SymbolEntry]()
+    
+    var symbolCount = 0
+    while (symbolCount < coffHeader.numberOfSymbols) {
+      val newSymbol = SymbolEntry.getSymbolEntry(bbuf)
+      symbolCount += 1 + newSymbol.auxiliarySymbols.size
+      println(symbolCount)
+      symbolTable += newSymbol
+    }
     
     val sizeOfStrings = bbuf.getInt()
     println("size: " + sizeOfStrings)
     val stringData = Array.fill[Byte](sizeOfStrings - 4)(0)
     bbuf.get(stringData, 0, sizeOfStrings - 4)
-    val strings = new String(stringData).split("\0");     
+    
+    
+    var stringPos = 4
+    val strings = new String(stringData).split('\u0000').map{ str =>
+      val result = (stringPos, str)
+      stringPos += str.length() + 1
+      result
+    }.toMap
+    
+    val symbols = symbolTable.map { entry =>
+      if (entry.name(0) == '\u0000' && entry.name(1) == '\u0000' && entry.name(2) == '\u0000' && entry.name(3) == '\u0000') {
+        val bbuf2 = ByteBuffer.allocate(4)
+        bbuf2.order(ByteOrder.LITTLE_ENDIAN)
+        bbuf2.put(entry.name(4).toByte)
+        bbuf2.put(entry.name(5).toByte)
+        bbuf2.put(entry.name(6).toByte)
+        bbuf2.put(entry.name(7).toByte)
+        bbuf2.rewind()
+        val offset = bbuf2.getInt()
+        entry.copy(name = strings(offset))
+      } else {
+        entry.copy(name = entry.name.trim)       
+      }
+    }
     
     println(coffHeader)
     sectionHeaders.foreach(println)
     sections.foreach(println)
     relocations.foreach(println)
-    symbolTable.foreach(println)
-    strings.foreach(println)
+    symbols.foreach(println)
     null
   }
 }

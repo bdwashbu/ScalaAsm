@@ -10,13 +10,10 @@ trait One extends Operand[One,One]{
 }
 
 case class addr(name: String) extends Operand[String, AbsoluteAddress[_32]] {
-  var variables: Map[String, Int] = _
-  var baseOffset: Int = _
-  var parserPosition: Int = 0
   def get = new AbsoluteAddress[_32] {
-    var offset = variables(name)
+    var offset = 0
     def getRelative = null
-    def displacement = Constant32(variables(name) - 0x2000 - parserPosition - 7)
+    def displacement = Constant32(0)
   }
 }
 

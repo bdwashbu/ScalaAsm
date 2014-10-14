@@ -94,12 +94,12 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
             val result = token match {
               case InstructionToken(inst) => {
                 inst match {
-                  case OneMachineCodeBuilder(x: addr) =>
-                    x.variables = varMap; x.baseOffset = baseOffset; x.parserPosition = parserPosition
-                  case TwoMachineCodeBuilder(op1: addr, _) =>
-                    op1.variables = varMap; op1.baseOffset = baseOffset; op1.parserPosition = parserPosition
-                  case TwoMachineCodeBuilder(_, op2: addr) =>
-                    op2.variables = varMap; op2.baseOffset = baseOffset; op2.parserPosition = parserPosition
+                  case OneMachineCodeBuilder(addr(name)) =>
+                    relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+                  case TwoMachineCodeBuilder(addr(name), _) =>
+                    relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+                  case TwoMachineCodeBuilder(_, addr(name)) =>
+                    relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
                   case _ =>
                 }
                 inst.getBytes

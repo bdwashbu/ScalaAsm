@@ -88,49 +88,50 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
         // Build procedure map
         val refSymbols = (compiledAsm.positionPass collect { case Proc(offset, name) => (name, offset); case LabelResolved(offset, name) => (name, offset) } toMap) ++ imports ++ varMap
 
+        var parserPosition = 0
+        for (token <- compiledAsm.onePass) {
+          token match {
+            case InstructionToken(inst) => inst match {
+                case OneMachineCodeBuilder(addr(name)) =>
+                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+                case TwoMachineCodeBuilder(addr(name), _) =>
+                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+                case TwoMachineCodeBuilder(_, addr(name)) =>
+                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+                case _ =>
+              }
+            case ProcRef(name) =>
+              relocations += Relocation(parserPosition, refSymbols(name) - parserPosition - 5, name, 0)
+            case InvokeRef(name) =>
+              relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
+            case VarRef(name) =>
+              relocations += Relocation(parserPosition, refSymbols(name) + baseOffset - 0x1000, name, 0)
+            case JmpRefResolved(name) =>
+              relocations += Relocation(parserPosition, refSymbols(name) + baseOffset, name, 0)
+            case ImportRef(name) =>
+              relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
+            case LabelRef(name, inst, format) =>
+              relocations += Relocation(parserPosition, (refSymbols(name) - parserPosition - 2).toByte, name, 1)
+            case _ =>
+          }
+          token match {
+            case sizedToken: SizedToken => parserPosition += sizedToken.size
+            case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+            case x: LabelRef => parserPosition += 2
+            case _ =>
+          }
+        }
+        
         val code: Array[Byte] = {
-          var parserPosition = 0
+          parserPosition = 0
           for (token <- compiledAsm.onePass) yield {
             val result = token match {
-              case InstructionToken(inst) => {
-                inst match {
-                  case OneMachineCodeBuilder(addr(name)) =>
-                    relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
-                  case TwoMachineCodeBuilder(addr(name), _) =>
-                    relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
-                  case TwoMachineCodeBuilder(_, addr(name)) =>
-                    relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
-                  case _ =>
-                }
-                inst.getBytes
-              }
+              case InstructionToken(inst) => inst.getBytes
               case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
               case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-              case ProcRef(name) => {
-                relocations += Relocation(parserPosition, refSymbols(name) - parserPosition - 5, name, 0)
-                callNear(*(Constant32(0)).get.getRelative).getBytes
-              }
-              case InvokeRef(name) => {
-                relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
-                callNear(*(Constant32(0)).get.getRelative).getBytes //callNear(*(Constant32(imports(name) - parserPosition - 5)).get.getRelative).getBytes
-              }
-              case VarRef(name) => {
-                relocations += Relocation(parserPosition, refSymbols(name) + baseOffset - 0x1000, name, 0)
-                push(Op(Constant32(0))).getBytes // fix
-              }
-              case JmpRefResolved(name) => {
-                relocations += Relocation(parserPosition, refSymbols(name) + baseOffset, name, 0)
-                jmp(*(Constant32(0))).getBytes
-              }
-              case ImportRef(name) => {
-                relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
-                callNear(*(Constant32(0)).get.getRelative).getBytes
-              }
-              case LabelRef(name, inst, format) => {
-                val op = (refSymbols(name) - parserPosition - 2).toByte
-                relocations += Relocation(parserPosition, op, name, 1)
-                inst(Op(new Constant8(0)), format, Seq()).getBytes
-              }
+              case ProcRef(_) | InvokeRef(_) | ImportRef(_) => callNear(*(Constant32(0)).get.getRelative).getBytes
+              case VarRef(_) => push(Op(Constant32(0))).getBytes
+              case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
               case _ => Array[Byte]()
             }
             token match {

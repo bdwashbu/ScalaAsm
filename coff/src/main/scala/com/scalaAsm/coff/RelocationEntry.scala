@@ -55,7 +55,6 @@ case class RelocationEntry(
 
 case class Relocation(
     referenceAddress: Int,
-    newAddy: Int,
     symbolName: String,
     reloationType: Short) {
   

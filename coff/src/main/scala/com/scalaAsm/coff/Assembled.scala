@@ -90,21 +90,23 @@ object Assembled {
 abstract class Assembled(val iconPath: Option[String] = None) {
   self =>
   val rawData: Array[Byte]
-  val rawCode: Array[Byte]
   val symbols: Seq[CoffSymbol]
   val relocations: ListBuffer[Relocation]
+  val varMap: Map[String, Int]
+  val refSymbols: Map[String, Int]
 
-  def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte]
+  def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte]
 
   def addIcon(path: String): Assembled = {
     new Assembled(Option(path)) {
       val rawData = self.rawData
-      val rawCode = self.rawCode
       val symbols = self.symbols
       val relocations = self.relocations
+      val varMap = self.varMap
+      val refSymbols = self.refSymbols
 
-      def finalizeAssembly(addressOfData: Int, imports64: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte] = {
-        self.finalizeAssembly(addressOfData, imports64, baseOffset)
+      def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {
+        self.getCode(addressOfData, baseOffset)
       }
     }
   }

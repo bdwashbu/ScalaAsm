@@ -79,39 +79,70 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
     new Assembled {
       val rawData = rawData2
       val symbols = compiledAsm.onePass.collect { case ImportRef(name) => CoffSymbol(name,0); case InvokeRef(name) => CoffSymbol(name,0)} ++ variablesSymbols
-      val rawCode = Array[Byte]()
       val relocations = ListBuffer[Relocation]()
+      val varMap: Map[String, Int] = variablesSymbols map { case CoffSymbol(name, offset) => (name, offset) } toMap // apply offset
+
+      // Build procedure map
+      val refSymbols: Map[String, Int] = (compiledAsm.positionPass collect { case Proc(offset, name) => (name, offset); case LabelResolved(offset, name) => (name, offset) } toMap) ++ varMap
       
-      def finalizeAssembly(addressOfData: Int, imports: Map[String, Int], baseOffset: Int): ArrayBuffer[Byte] = {
-        val varMap = variablesSymbols map { case CoffSymbol(name, offset) => (name, offset + addressOfData) } toMap // apply offset
-
-        // Build procedure map
-        val refSymbols = (compiledAsm.positionPass collect { case Proc(offset, name) => (name, offset); case LabelResolved(offset, name) => (name, offset) } toMap) ++ imports ++ varMap
-
+      def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {
+        
         var parserPosition = 0
+//        for (token <- compiledAsm.onePass) {
+//          token match {
+//            case InstructionToken(inst) => inst match {
+//                case OneMachineCodeBuilder(addr(name)) =>
+//                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 1)
+//                case TwoMachineCodeBuilder(addr(name), _) =>
+//                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 1)
+//                case TwoMachineCodeBuilder(_, addr(name)) =>
+//                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 1)
+//                case _ =>
+//              }
+//            case ProcRef(name) =>
+//              relocations += Relocation(parserPosition, refSymbols(name) - parserPosition - 5, name, 2)
+//            case InvokeRef(name) =>
+//              relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 3)
+//            case VarRef(name) =>
+//              relocations += Relocation(parserPosition, refSymbols(name) + baseOffset - 0x1000, name, 4)
+//            //case JmpRefResolved(name) =>
+//            //  relocations += Relocation(parserPosition, refSymbols(name) + baseOffset, name, 4)
+//            case ImportRef(name) =>
+//              relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 3)
+//            case LabelRef(name, inst, format) =>
+//              relocations += Relocation(parserPosition, (refSymbols(name) - parserPosition - 2).toByte, name, 6)
+//            case _ =>
+//          }
+//          token match {
+//            case sizedToken: SizedToken => parserPosition += sizedToken.size
+//            case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+//            case x: LabelRef => parserPosition += 2
+//            case _ =>
+//          }
+//        }
         for (token <- compiledAsm.onePass) {
           token match {
             case InstructionToken(inst) => inst match {
                 case OneMachineCodeBuilder(addr(name)) =>
-                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+                  relocations += Relocation(parserPosition+2, 0, name, 1)
                 case TwoMachineCodeBuilder(addr(name), _) =>
-                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+                  relocations += Relocation(parserPosition+2, 0, name, 1)
                 case TwoMachineCodeBuilder(_, addr(name)) =>
-                  relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+                  relocations += Relocation(parserPosition+2, 0, name, 1)
                 case _ =>
               }
             case ProcRef(name) =>
-              relocations += Relocation(parserPosition, refSymbols(name) - parserPosition - 5, name, 0)
+              relocations += Relocation(parserPosition, 0, name, 2)
             case InvokeRef(name) =>
-              relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
+              relocations += Relocation(parserPosition, 0, name, 3)
             case VarRef(name) =>
-              relocations += Relocation(parserPosition, refSymbols(name) + baseOffset - 0x1000, name, 0)
-            case JmpRefResolved(name) =>
-              relocations += Relocation(parserPosition, refSymbols(name) + baseOffset, name, 0)
+              relocations += Relocation(parserPosition, 0, name, 4)
+            //case JmpRefResolved(name) =>
+            //  relocations += Relocation(parserPosition, 0, name, 5)
             case ImportRef(name) =>
-              relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
+              relocations += Relocation(parserPosition, 0, name, 3)
             case LabelRef(name, inst, format) =>
-              relocations += Relocation(parserPosition, (refSymbols(name) - parserPosition - 2).toByte, name, 1)
+              relocations += Relocation(parserPosition, 0, name, 6)
             case _ =>
           }
           token match {

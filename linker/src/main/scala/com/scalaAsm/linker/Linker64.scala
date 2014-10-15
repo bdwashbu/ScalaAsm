@@ -71,18 +71,79 @@ class Linker64 extends Linker {
       result
     }.toMap
     
-    var code = assembled.finalizeAssembly(addressOfData, symMap, baseOffset = 0x400000 /*imagebase*/)
+    var code = assembled.getCode(addressOfData, baseOffset = 0x400000)
+    
+//    var parserPosition = 0
+//      for (token <- compiledAsm.onePass) {
+//        token match {
+//          case InstructionToken(inst) => inst match {
+//              case OneMachineCodeBuilder(addr(name)) =>
+//                relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+//              case TwoMachineCodeBuilder(addr(name), _) =>
+//                relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+//              case TwoMachineCodeBuilder(_, addr(name)) =>
+//                relocations += Relocation(parserPosition+2, varMap(name) - 0x2000 - parserPosition - 7, name, 0)
+//              case _ =>
+//            }
+//          case ProcRef(name) =>
+//            relocations += Relocation(parserPosition, refSymbols(name) - parserPosition - 5, name, 0)
+//          case InvokeRef(name) =>
+//            relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
+//          case VarRef(name) =>
+//            relocations += Relocation(parserPosition, refSymbols(name) + baseOffset - 0x1000, name, 0)
+//          case JmpRefResolved(name) =>
+//            relocations += Relocation(parserPosition, refSymbols(name) + baseOffset, name, 0)
+//          case ImportRef(name) =>
+//            relocations += Relocation(parserPosition, refSymbols(name) - (parserPosition + 0x1000) - 5, name, 0)
+//          case LabelRef(name, inst, format) =>
+//            relocations += Relocation(parserPosition, (refSymbols(name) - parserPosition - 2).toByte, name, 1)
+//          case _ =>
+//        }
+//        token match {
+//          case sizedToken: SizedToken => parserPosition += sizedToken.size
+//          case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+//          case x: LabelRef => parserPosition += 2
+//          case _ =>
+//        }
+//      }
+    
+    val newRefSymbols = assembled.refSymbols ++ symMap
 
     assembled.relocations.toList.foreach { relocation =>
       
-      if (relocation.reloationType == 0) {
+      if (relocation.reloationType != 6) {
         val bb = java.nio.ByteBuffer.allocate(4)
         bb.order(ByteOrder.LITTLE_ENDIAN)
-        bb.putInt(relocation.newAddy.toInt)
-        code = code.patch(relocation.referenceAddress.toInt + 1, bb.array(), 4)
-      } else if (relocation.reloationType == 1) {
-        code(relocation.referenceAddress.toInt + 1) = relocation.newAddy.toByte
-      } 
+        
+        relocation.reloationType match {
+          case 1 =>
+            bb.putInt(assembled.varMap(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 2 =>
+            bb.putInt(newRefSymbols(relocation.symbolName) - relocation.referenceAddress - 5)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 3 =>
+            bb.putInt(newRefSymbols(relocation.symbolName) - (relocation.referenceAddress + 0x1000) - 5)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 4 =>
+            bb.putInt(newRefSymbols(relocation.symbolName) - 0x1000 + addressOfData + 0x400000)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 5 =>
+            bb.putInt(newRefSymbols(relocation.symbolName) + 0x400000)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 6 =>
+            val bb1 = java.nio.ByteBuffer.allocate(1)
+            bb1.order(ByteOrder.LITTLE_ENDIAN)
+            bb1.put((newRefSymbols(relocation.symbolName) - relocation.referenceAddress - 2).toByte)
+            code = code.patch(relocation.referenceAddress + 1, bb1.array(), 1)
+        }
+     } else {
+       val bb1 = java.nio.ByteBuffer.allocate(1)
+            bb1.order(ByteOrder.LITTLE_ENDIAN)
+            bb1.put((newRefSymbols(relocation.symbolName) - relocation.referenceAddress - 2).toByte)
+            code = code.patch(relocation.referenceAddress + 1, bb1.array(), 1)
+       // code(relocation.referenceAddress.toInt + 1) = (assembled.varMap(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5).toByte
+     } 
     }
     val resources = assembled.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
 

@@ -122,31 +122,39 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           }
         }
         
-        val code: Array[Byte] = {
-          parserPosition = 0
-          for (token <- compiledAsm.onePass) yield {
-            val result = token match {
-              case InstructionToken(inst) => inst.getBytes
-              case Align(to, filler, _) => Array.fill((to - (parserPosition % to)) % to)(filler)
-              case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-              case ProcRef(_) | InvokeRef(_) | ImportRef(_) => callNear(*(Constant32(0)).get.getRelative).getBytes
-              case VarRef(_) => push(Op(Constant32(0))).getBytes
-              case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
-              case _ => Array[Byte]()
-            }
-            token match {
-              case sizedToken: SizedToken => parserPosition += sizedToken.size
-              case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-              case x: LabelRef => parserPosition += 2
-              case _ =>
-            }
-            result
+        val code = ArrayBuffer[Byte]()
+        
+        for (token <- compiledAsm.onePass) {
+          val result = token match {
+            case InstructionToken(inst) => inst.getBytes
+            case Padding(to, _) => Array.fill(to)(0xCC.toByte)
+            case ProcRef(_) | InvokeRef(_) | ImportRef(_) => callNear(*(Constant32(0)).get.getRelative).getBytes
+            case VarRef(_) => push(Op(Constant32(0))).getBytes
+            case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
+            case _ => Array[Byte]()
           }
-        }.reduce(_ ++ _)
+          code ++= result
+        }
 
-        val result = ArrayBuffer[Byte]()
-        result ++= code
-        result
+        parserPosition = 0
+        for (token <- compiledAsm.onePass) {
+          token match {
+            case Align(to, filler, _) => {
+              for (i <- 0 until (to - (parserPosition % to)) % to) {
+                code.insert(parserPosition, filler)
+              }
+            }
+            case _ =>
+          }
+          token match {
+            case sizedToken: SizedToken => parserPosition += sizedToken.size
+            case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+            case x: LabelRef => parserPosition += 2
+            case _ =>
+          }
+        }
+        
+        code
       }
     }
   }

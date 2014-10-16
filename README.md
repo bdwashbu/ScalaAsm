@@ -1,4 +1,4 @@
-Scala x86
+Scala x86 ![Alt text](/example/smooth-spiral.png)
 ========
 #### An x86 Assembler/Linker written in Scala
 

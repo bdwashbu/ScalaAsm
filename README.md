@@ -2,11 +2,11 @@ Scala x86 ![Alt text](/example/smooth-spiral.png)
 ========
 #### An x86 Assembler/Linker written in Scala
 
-Welcome to the premiere Scala source of all things x86_64, Portable Executable, and COFF!
+Welcome to the best Scala source for all things x86_64, Portable Executable (.exe), and COFF (.obj)!
 
-Scala x86 is a collection of libraries that one could write a programming language with.
+Scala x86 is a back-end for a compiler.  Its a collection of libraries that one could write a programming language with.
 
-So far, we have an simple low-level assembly language written.  It can assemble x86 code into object files and then the linker will make it into an executable for windows 32 or 64-bit platforms.  
+So far, theres a simple low-level assembly API written.  It can assemble x86 code into object files and then the linker will make it into an executable for windows 32 or 64-bit platforms.  
 
 #### Implementing x86
 

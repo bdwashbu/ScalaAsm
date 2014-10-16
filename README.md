@@ -1,6 +1,5 @@
 Scala x86 ![Alt text](/example/smooth-spiral.png)
 ========
-#### An x86 Assembler/Linker written in Scala
 
 Welcome to the best Scala source for all things x86_64, Portable Executable (.exe), and COFF (.obj)!
 

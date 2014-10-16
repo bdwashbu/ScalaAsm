@@ -82,7 +82,7 @@ class Linker64 extends Linker {
         
         relocation.reloationType match {
           case 1 => // addr
-            bb.putInt(assembled.varMap(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
+            bb.putInt(newRefSymbols(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 2 => // ProcRef
             bb.putInt(newRefSymbols(relocation.symbolName) - relocation.referenceAddress - 5)

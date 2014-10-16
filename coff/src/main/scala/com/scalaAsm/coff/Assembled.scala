@@ -92,7 +92,6 @@ abstract class Assembled(val iconPath: Option[String] = None) {
   val rawData: Array[Byte]
   val symbols: Seq[CoffSymbol]
   val relocations: ListBuffer[Relocation]
-  val varMap: Map[String, Int]
   val refSymbols: Map[String, Int]
 
   def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte]
@@ -102,7 +101,6 @@ abstract class Assembled(val iconPath: Option[String] = None) {
       val rawData = self.rawData
       val symbols = self.symbols
       val relocations = self.relocations
-      val varMap = self.varMap
       val refSymbols = self.refSymbols
 
       def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {

@@ -59,8 +59,7 @@ object Tokens {
   case class Padding(to: Int, tokenSize: Int) extends SizedToken(tokenSize)
   case class ProcRef(procName: String) extends SizedToken(5)
   case class VarRef(procName: String) extends SizedToken(5)
-  case class ImportRef(varName: String) extends SizedToken(5)
-  case class InvokeRef(varName: String) extends SizedToken(5)
+  
   case class JmpRefResolved(varName: String) extends SizedToken(6)
   
   trait DataToken extends Token
@@ -69,6 +68,8 @@ object Tokens {
   abstract class DynamicSizedToken(val size: (Int) => Int) extends Token
 
   sealed trait PostToken
+  case class ImportRef(position: Int, varName: String) extends SizedToken(5) with PostToken
+  case class InvokeRef(position: Int, varName: String) extends SizedToken(5) with PostToken
   case class LabelResolved(position: Int, name: String) extends PostToken
   case class LabelRefResolved(position: Int, name: String, opCode: Byte) extends PostToken
   case class ByteOutputPost(bytes: Array[Byte]) extends PostToken

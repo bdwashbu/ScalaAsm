@@ -44,10 +44,10 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
         case x: DynamicSizedToken => Some(x)
         case proc @ BeginProc(_) => Some(proc)
         case JmpRef(name) => Some(JmpRefResolved(name))
-        case Invoke(name) => Some(InvokeRef(name))
+        case Invoke(name) => Some(InvokeRef(0, name))
         case Reference(name) if procNames.contains(name) => Some(ProcRef(name))
         case Reference(name) if variableNames.contains(name) => Some(VarRef(name))
-        case Reference(name) => Some(ImportRef(name))
+        case Reference(name) => Some(ImportRef(0, name))
         case label @ Label(name) => Some(label)
         case labelref @ LabelRef(name, inst, format) => Some(labelref)
         case x: InstructionResult => Some(InstructionToken(x))
@@ -59,6 +59,8 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           val result = token match {
             case BeginProc(name) => Some(Proc(parserPosition, name))
             case Label(name) => Some(LabelResolved(parserPosition, name))
+            case InvokeRef(_,name) => Some(InvokeRef(parserPosition, name))
+            case ImportRef(_,name) => Some(ImportRef(parserPosition, name))
             case _ => None
           }
           token match {
@@ -78,7 +80,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
 
     new Assembled {
       val rawData = rawData2
-      val symbols = compiledAsm.onePass.collect { case ImportRef(name) => CoffSymbol(name,0); case InvokeRef(name) => CoffSymbol(name,0)} ++ variablesSymbols
+      val symbols = compiledAsm.onePass.collect { case ImportRef(offset, name) => CoffSymbol(name,offset); case InvokeRef(offset, name) => CoffSymbol(name,offset)} ++ variablesSymbols
       val relocations = ListBuffer[Relocation]()
       val varMap: Map[String, Int] = variablesSymbols map { case CoffSymbol(name, offset) => (name, offset) } toMap // apply offset
 
@@ -102,11 +104,11 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
               }
             case ProcRef(name) =>
               relocations += Relocation(parserPosition, name, 2)
-            case InvokeRef(name) =>
+            case InvokeRef(_, name) =>
               relocations += Relocation(parserPosition, name, 3)
             case VarRef(name) =>
               relocations += Relocation(parserPosition, name, 4)
-            case ImportRef(name) =>
+            case ImportRef(_, name) =>
               relocations += Relocation(parserPosition, name, 3)
             case LabelRef(name, inst, format) =>
               relocations += Relocation(parserPosition, name, 6)
@@ -126,7 +128,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           val result = token match {
             case InstructionToken(inst) => inst.getBytes
             case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-            case ProcRef(_) | InvokeRef(_) | ImportRef(_) => callNear(*(Constant32(0)).get.getRelative).getBytes
+            case ProcRef(_) | InvokeRef(_,_) | ImportRef(_,_) => callNear(*(Constant32(0)).get.getRelative).getBytes
             case VarRef(_) => push(Op(Constant32(0))).getBytes
             case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
             case _ => Array[Byte]()

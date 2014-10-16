@@ -2,14 +2,11 @@ Scala x86 ![Alt text](/example/smooth-spiral.png)
 ========
 #### An x86 Assembler/Linker written in Scala
 
-* Have you ever wanted to design your own programming language?
+Welcome to the premiere Scala source of all things x86_64, Portable Executable, and COFF!
 
-* Have you ever wondered how executable files work on windows?
+Scala x86 is a collection of libraries that one could write a programming language with.
 
-* Maybe you've wanted to learn assembly/x86?
-
-Scala x86 is a collaboration of all these concepts.  Scala x86 can assemble x86 code and link this into a portable executable (PE) file for execution on windows 32 and 64-bit platforms.  
-
+So far, we have an simple low-level assembly language written.  It can assemble x86 code into object files and then the linker will make it into an executable for windows 32 or 64-bit platforms.  
 
 #### Implementing x86
 
@@ -39,7 +36,7 @@ implicit object push3 extends PUSH_1[imm16, I] {
 
 [See more instructions](/x86/src/main/scala/com/scalaAsm/x86/Instructions/Standard "More instructions")
 
-Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with the opcode gives us enough information to completely implement the instruction (at a high level)!
+Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with only the opcode sometimes gives us enough information to completely define the instruction!
 
 ![Alt text](/example/push.png "PUSH examples")
 
@@ -98,8 +95,8 @@ object HelloWorld extends AsmProgram[x86_32] {
 Heres code to output the executable:
 
 ```scala
-val asm = HelloWorld.assemble
-val exe = asm.link(0x2000, "kernel32.dll", "msvcrt.dll")
+val obj = assembler.assemble(HelloWorld1)
+val exe = linker.link(obj, 0x2000, is64Bit=false, "kernel32.dll", "msvcrt.dll")
 
 val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
 outputStream.write(exe.get)

@@ -5,7 +5,7 @@ Welcome to the best Scala source for all things x86_64, Portable Executable (.ex
 
 Scala x86 is a back-end for a compiler.  Its a collection of libraries that one could write a programming language with.
 
-So far, theres a simple low-level assembly API written.  It can assemble x86 code into object files and then the link it into an executable for windows 32 or 64-bit platforms.  
+So far, theres a simple low-level assembly API written.  It can assemble x86 code into object files and then link it into an executable for windows 32 or 64-bit platforms.  
 
 #### Implementing x86
 

@@ -21,6 +21,7 @@ import com.scalaAsm.coff.Sections
 import com.scalaAsm.coff.Section
 import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
+import com.scalaAsm.coff.CoffSymbol
 
 class Linker64 extends Linker {
   
@@ -45,8 +46,8 @@ class Linker64 extends Linker {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-	    val importedSymbols = export.functionNames intersect assembled.symbols.map(_.name).toSeq
-
+	    val importedSymbols = export.functionNames intersect assembled.relocations.filter(_.relocationType == 3).map(_.symbolName).toSeq
+	    
 	    if (importedSymbols.isEmpty)
 	      None
 	    else
@@ -60,41 +61,47 @@ class Linker64 extends Linker {
   
   def link(assembled: Assembled, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
 
+    // need to run this first because it loads up the relocations.  need to clean this up
+    var code = assembled.getCode(addressOfData, baseOffset = 0x400000)
+    
     val executableImports = compileImports(assembled, addressOfData, dlls, is64Bit)
     
     var offset = 0x3000
     val symMap = executableImports.importSymbols.map { sym =>
-      val result = (sym.name.trim, offset)
+      val result = CoffSymbol(sym.name.trim, offset, 0)
       if (!sym.name.contains(".dll")) {
         offset += 6
       }
       result
-    }.toMap
+    }
     
-    var code = assembled.getCode(addressOfData, baseOffset = 0x400000)
+    
 
-    val newRefSymbols = assembled.refSymbols ++ symMap
+    val getSymbolAddress: Map[String, Int] = {
+      val newRefSymbols = assembled.refSymbols ++ symMap
+      newRefSymbols.map{sym => (sym.name, sym.location)}.toMap
+    }
 
     assembled.relocations.toList.foreach { relocation =>
       
         val bb = java.nio.ByteBuffer.allocate(4)
         bb.order(ByteOrder.LITTLE_ENDIAN)
         
-        relocation.reloationType match {
+        relocation.relocationType match {
           case 1 => // addr
-            bb.putInt(newRefSymbols(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
+            bb.putInt(getSymbolAddress(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 2 => // ProcRef
-            bb.putInt(newRefSymbols(relocation.symbolName) - relocation.referenceAddress - 5)
+            bb.putInt(getSymbolAddress(relocation.symbolName) - relocation.referenceAddress - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 3 => // InvokeRef/ImportRef
-            bb.putInt(newRefSymbols(relocation.symbolName) - (relocation.referenceAddress + 0x1000) - 5)
+            bb.putInt(getSymbolAddress(relocation.symbolName) - (relocation.referenceAddress + 0x1000) - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 4 => // VarRef
-            bb.putInt(newRefSymbols(relocation.symbolName) - 0x1000 + addressOfData + 0x400000)
+            bb.putInt(getSymbolAddress(relocation.symbolName) - 0x1000 + addressOfData + 0x400000)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 6 => // LabelRef
-            code(relocation.referenceAddress + 1) = (newRefSymbols(relocation.symbolName) - relocation.referenceAddress - 2).toByte
+            code(relocation.referenceAddress + 1) = (getSymbolAddress(relocation.symbolName) - relocation.referenceAddress - 2).toByte
         }
     }
     val resources = assembled.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None

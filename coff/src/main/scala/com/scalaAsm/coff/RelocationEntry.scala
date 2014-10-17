@@ -56,14 +56,14 @@ case class RelocationEntry(
 case class Relocation(
     referenceAddress: Int,
     symbolName: String,
-    reloationType: Short) {
+    relocationType: Short) {
   
   def apply() = {
     val bbuf = ByteBuffer.allocate(10)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     bbuf.putInt(referenceAddress)
     //bbuf.putLong(symbolIndex)
-    bbuf.putShort(reloationType)
+    bbuf.putShort(relocationType)
     bbuf.array()
   }
   

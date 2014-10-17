@@ -3,7 +3,7 @@ package com.scalaAsm.coff
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-case class CoffSymbol(name: String, location: Int)
+case class CoffSymbol(name: String, location: Int, sectionNumber: Int)
 
 object SymbolEntry {
   def getSymbolEntry(input: ByteBuffer): SymbolEntry = {

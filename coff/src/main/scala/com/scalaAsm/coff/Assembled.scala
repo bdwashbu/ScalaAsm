@@ -92,7 +92,7 @@ abstract class Assembled(val iconPath: Option[String] = None) {
   val rawData: Array[Byte]
   val symbols: Seq[CoffSymbol]
   val relocations: ListBuffer[Relocation]
-  val refSymbols: Map[String, Int]
+  val refSymbols: Seq[CoffSymbol]
 
   def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte]
 

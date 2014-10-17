@@ -80,12 +80,12 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
 
     new Assembled {
       val rawData = rawData2
-      val symbols = compiledAsm.onePass.collect { case ImportRef(offset, name) => CoffSymbol(name,offset); case InvokeRef(offset, name) => CoffSymbol(name,offset)} ++ variablesSymbols
+      val symbols = variablesSymbols
       val relocations = ListBuffer[Relocation]()
       //val varMap: Map[String, Int] = variablesSymbols map { case CoffSymbol(name, offset) => (name, offset) } toMap // apply offset
 
       // Build procedure map
-      val refSymbols: Map[String, Int] = (compiledAsm.positionPass collect { case Proc(offset, name) => (name, offset); case LabelResolved(offset, name) => (name, offset) } toMap) ++ (variablesSymbols map { case CoffSymbol(name, offset) => (name, offset) } toMap)
+      val refSymbols: Seq[CoffSymbol] = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols
       
       def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {
         
@@ -190,7 +190,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): Seq[CoffSymbol] = {
         dataSection flatMap {
-          case PostVar(name, value, pos) => Some(CoffSymbol(name, (pos + 8).toShort)) // need the +8?
+          case PostVar(name, value, pos) => Some(CoffSymbol(name, (pos + 8).toShort, 1)) // need the +8?
           case _ => None
         }
     }

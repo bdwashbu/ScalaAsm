@@ -56,9 +56,9 @@ It would be a compile time error because there is no PUSH implementation defined
 
 The hope is that Scala x86 can be used to implement a turing-complete programming language, but this is still an area of research.
 
-We do know Scala x86 can be used to implement low-level assembly code. This assembly currently supports many useful  features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using first-class scala constructs.
+Scala x86 can be used to implement low-level assembly code. This assembly currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
 
-Heres the most consise 32-bit windows console "Hello world!":
+Heres the a short 32-bit windows console "Hello world!":
 
 ```scala
 object HelloWorld extends AsmProgram[x86_32] {
@@ -91,7 +91,7 @@ object HelloWorld extends AsmProgram[x86_32] {
 }
 ```
 
-Heres code to output the executable:
+Heres code to build and output the executable:
 
 ```scala
 val obj = assembler.assemble(HelloWorld1)

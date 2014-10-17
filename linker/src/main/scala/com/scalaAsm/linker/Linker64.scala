@@ -61,7 +61,6 @@ class Linker64 extends Linker {
   
   def link(assembled: Assembled, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
 
-    // need to run this first because it loads up the relocations.  need to clean this up
     var code = assembled.getCode(addressOfData, baseOffset = 0x400000)
     
     val executableImports = compileImports(assembled, addressOfData, dlls, is64Bit)

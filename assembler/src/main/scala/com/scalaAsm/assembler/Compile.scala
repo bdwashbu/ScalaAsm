@@ -81,34 +81,34 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
     new Assembled {
       val rawData = rawData2
       val symbols = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols
-      val relocations = ListBuffer[Relocation]()
-
-      def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {
-        
+      val relocations = getRelocations
+      
+      def getRelocations: Seq[Relocation] = {
         var parserPosition = 0
 
-        for (token <- compiledAsm.onePass) {
+        compiledAsm.onePass.flatMap { token =>
+          var result: Option[Relocation] = None
           token match {
             case InstructionToken(inst) => inst match {
                 case OneMachineCodeBuilder(addr(name)) =>
-                  relocations += Relocation(parserPosition+2, name, 1)
+                  result = Some(Relocation(parserPosition+2, name, 1))
                 case TwoMachineCodeBuilder(addr(name), _) =>
-                  relocations += Relocation(parserPosition+2, name, 1)
+                  result = Some(Relocation(parserPosition+2, name, 1))
                 case TwoMachineCodeBuilder(_, addr(name)) =>
-                  relocations += Relocation(parserPosition+2, name, 1)
+                  result = Some(Relocation(parserPosition+2, name, 1))
                 case _ =>
               }
             case ProcRef(name) =>
-              relocations += Relocation(parserPosition, name, 2)
+              result = Some(Relocation(parserPosition, name, 2))
             case InvokeRef(_, name) =>
-              relocations += Relocation(parserPosition, name, 3)
+              result = Some(Relocation(parserPosition, name, 3))
             case VarRef(name) =>
-              relocations += Relocation(parserPosition, name, 4)
+              result = Some(Relocation(parserPosition, name, 4))
             case ImportRef(_, name) =>
-              relocations += Relocation(parserPosition, name, 3)
+              result = Some(Relocation(parserPosition, name, 3))
             case LabelRef(name, inst, format) =>
-              relocations += Relocation(parserPosition, name, 6)
-            case _ =>
+              result = Some(Relocation(parserPosition, name, 6))
+            case _ => None
           }
           token match {
             case sizedToken: SizedToken => parserPosition += sizedToken.size
@@ -116,7 +116,13 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
             case x: LabelRef => parserPosition += 2
             case _ =>
           }
+          result
         }
+      }
+
+      def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {
+        
+        var parserPosition = 0
         
         val code = ArrayBuffer[Byte]()
         

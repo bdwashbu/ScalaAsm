@@ -80,13 +80,9 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
 
     new Assembled {
       val rawData = rawData2
-      val symbols = variablesSymbols
+      val symbols = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols
       val relocations = ListBuffer[Relocation]()
-      //val varMap: Map[String, Int] = variablesSymbols map { case CoffSymbol(name, offset) => (name, offset) } toMap // apply offset
 
-      // Build procedure map
-      val refSymbols: Seq[CoffSymbol] = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols
-      
       def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {
         
         var parserPosition = 0

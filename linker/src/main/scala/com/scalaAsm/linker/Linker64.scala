@@ -67,18 +67,16 @@ class Linker64 extends Linker {
     val executableImports = compileImports(assembled, addressOfData, dlls, is64Bit)
     
     var offset = 0x3000
-    val symMap = executableImports.importSymbols.map { sym =>
+    val importSymbols = executableImports.importSymbols.map { sym =>
       val result = CoffSymbol(sym.name.trim, offset, 0)
       if (!sym.name.contains(".dll")) {
         offset += 6
       }
       result
     }
-    
-    
 
     val getSymbolAddress: Map[String, Int] = {
-      val newRefSymbols = assembled.refSymbols ++ symMap
+      val newRefSymbols = assembled.symbols ++ importSymbols
       newRefSymbols.map{sym => (sym.name, sym.location)}.toMap
     }
 

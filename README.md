@@ -58,7 +58,7 @@ The hope is that Scala x86 can be used to implement a turing-complete programmin
 
 We do know Scala x86 can be used to implement low-level assembly code. This assembly currently supports many useful  features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using first-class scala constructs.
 
-Heres a windows console version of "Hello world!":
+Heres the most consise 32-bit windows console "Hello world!":
 
 ```scala
 object HelloWorld extends AsmProgram[x86_32] {
@@ -105,7 +105,7 @@ outputStream.close
 References:
 ========
 
-A huge shoutout to Jeremy Gordon for GoAsm, the best 64-bit windows assembler, which I am quite inspired by
+A huge shoutout to Jeremy Gordon for GoAsm, the best 64-bit windows assembler!
 http://www.godevtool.com/
 
 Intel® 64 and IA-32 Architectures Software Developer Manuals: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
@@ -134,6 +134,12 @@ How to run:
 4. Observe 'test.exe' get generated
 5. Execute 'test.exe'
 
+Output:
+```
+Hello World!
+Press any key to continue ...
+```
+
 How to build:
 ========
 
@@ -142,8 +148,4 @@ How to build:
 3. In Eclipse, under window->preferences->general->workspace->build order, uncheck 'use default order' and set the order from top to bottom: x86, coff, asm, assembler, portableExe, linker, example
 4. Refresh/Clean projects in eclipse
 
-Output:
-```
-Hello World!
-Press any key to continue ...
-```
+

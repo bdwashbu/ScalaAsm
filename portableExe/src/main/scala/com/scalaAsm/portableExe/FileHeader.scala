@@ -26,8 +26,8 @@ case class FileHeader(
     machine: Short,
     numberOfSections: Short,
     timeDateStamp: Int,
-    pointerToSymbolTable: Int, // no importance
-    numberOfSymbols: Int, // no importance
+    pointerToSymbolTable: Int, // only .obj file
+    numberOfSymbols: Int, // only .obj file
     sizeOfOptionalHeader: Short,
     characteristics: Short) {
 

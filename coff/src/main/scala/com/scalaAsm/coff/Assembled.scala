@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
 
 object Assembled {
-  def readCoff(filePath: String): Assembled = { 
+  def readCoff(filePath: String): Coff = { 
     
     val file = new File(filePath);
  
@@ -87,23 +87,17 @@ object Assembled {
   }
 }
 
-abstract class Assembled(val iconPath: Option[String] = None) {
+abstract class Coff(val iconPath: Option[String] = None) {
   self =>
-  val rawData: Array[Byte]
+  val sections: Seq[Section]
   val symbols: Seq[CoffSymbol]
   val relocations: Seq[Relocation]
 
-  def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte]
-
-  def addIcon(path: String): Assembled = {
-    new Assembled(Option(path)) {
-      val rawData = self.rawData
+  def addIcon(path: String): Coff = {
+    new Coff(Option(path)) {
+      val sections = self.sections
       val symbols = self.symbols
       val relocations = self.relocations
-
-      def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {
-        self.getCode(addressOfData, baseOffset)
-      }
     }
   }
 }

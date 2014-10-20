@@ -21,18 +21,22 @@ import com.scalaAsm.asm.Addressing
 import com.scalaAsm.coff.Relocation
 import scala.collection.mutable.ArrayBuffer
 import com.scalaAsm.coff.CoffSymbol
+import com.scalaAsm.coff.Section
+import com.scalaAsm.coff.Coff
+import com.scalaAsm.coff.SectionHeader
+import com.scalaAsm.coff.Characteristic
 
 class Assembler extends Standard.Catalog with Formats with Addressing {
   self =>
   import scala.language.postfixOps
 
-  def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Assembled = {
+  def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Coff = {
 
     val codeTokens: ListBuffer[Any] = program.codeSections.flatMap { seg => seg.build(seg.builder.toSeq) }
 
     val dataTokens = program.dataSections flatMap { seg => seg.compile }
 
-    val (rawData2, variablesSymbols) = compileData(dataTokens)
+    val (rawData, variablesSymbols) = compileData(dataTokens)
 
     def compileAssembly(variableNames: Seq[String]): CompiledAssembly = {
 
@@ -77,11 +81,83 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
     }
     
     val compiledAsm = compileAssembly(variablesSymbols.map(_.name).toSeq)
+    
+    val code: Array[Byte] = {
+        
+        var parserPosition = 0
+        
+        val code = ArrayBuffer[Byte]()
+        
+        for (token <- compiledAsm.onePass) {
+          val result = token match {
+            case InstructionToken(inst) => inst.getBytes
+            case Padding(to, _) => Array.fill(to)(0xCC.toByte)
+            case ProcRef(_) | InvokeRef(_,_) | ImportRef(_,_) => callNear(*(Constant32(0)).get.getRelative).getBytes
+            case VarRef(_) => push(Op(Constant32(0))).getBytes
+            case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
+            case _ => Array[Byte]()
+          }
+          code ++= result
+        }
 
-    new Assembled {
-      val rawData = rawData2
+        parserPosition = 0
+        for (token <- compiledAsm.onePass) {
+          token match {
+            case Align(to, filler, _) => {
+              for (i <- 0 until (to - (parserPosition % to)) % to) {
+                code.insert(parserPosition, filler)
+              }
+            }
+            case _ =>
+          }
+          token match {
+            case sizedToken: SizedToken => parserPosition += sizedToken.size
+            case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+            case x: LabelRef => parserPosition += 2
+            case _ =>
+          }
+        }
+        
+        code.toArray
+      }
+
+    new Coff {
       val symbols = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols
       val relocations = getRelocations
+      
+      val codeSection = Section(
+      SectionHeader(
+        name = "code",
+        virtualSize = code.length,
+        virtualAddress = 0x1000,
+        sizeOfRawData = 0x200,
+        pointerToRawData = 0x400,
+        relocPtr = 0,
+        linenumPtr = 0,
+        relocations = 0,
+        lineNumbers = 0,
+        characteristics = Characteristic.CODE.id |
+          Characteristic.EXECUTE.id |
+          Characteristic.READ.id) 
+      , code.toArray)
+   
+    val dataSection = Section(
+      SectionHeader(
+        name = "data",
+        virtualSize = rawData.length,
+        virtualAddress = 0x2000,
+        sizeOfRawData = 0x200,
+        pointerToRawData = 0x600,
+        relocPtr = 0,
+        linenumPtr = 0,
+        relocations = 0,
+        lineNumbers = 0,
+        characteristics = Characteristic.INITIALIZED.id |
+          Characteristic.READ.id |
+          Characteristic.WRITE.id)
+      , rawData)
+      
+      val sections = Seq(codeSection, dataSection)
       
       def getRelocations: Seq[Relocation] = {
         var parserPosition = 0
@@ -118,45 +194,6 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           }
           result
         }
-      }
-
-      def getCode(addressOfData: Int, baseOffset: Int): ArrayBuffer[Byte] = {
-        
-        var parserPosition = 0
-        
-        val code = ArrayBuffer[Byte]()
-        
-        for (token <- compiledAsm.onePass) {
-          val result = token match {
-            case InstructionToken(inst) => inst.getBytes
-            case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-            case ProcRef(_) | InvokeRef(_,_) | ImportRef(_,_) => callNear(*(Constant32(0)).get.getRelative).getBytes
-            case VarRef(_) => push(Op(Constant32(0))).getBytes
-            case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
-            case _ => Array[Byte]()
-          }
-          code ++= result
-        }
-
-        parserPosition = 0
-        for (token <- compiledAsm.onePass) {
-          token match {
-            case Align(to, filler, _) => {
-              for (i <- 0 until (to - (parserPosition % to)) % to) {
-                code.insert(parserPosition, filler)
-              }
-            }
-            case _ =>
-          }
-          token match {
-            case sizedToken: SizedToken => parserPosition += sizedToken.size
-            case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-            case x: LabelRef => parserPosition += 2
-            case _ =>
-          }
-        }
-        
-        code
       }
     }
   }

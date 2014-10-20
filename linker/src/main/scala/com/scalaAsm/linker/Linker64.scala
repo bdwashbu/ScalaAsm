@@ -22,10 +22,11 @@ import com.scalaAsm.coff.Section
 import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
 import com.scalaAsm.coff.CoffSymbol
+import com.scalaAsm.coff.Coff
 
 class Linker64 extends Linker {
   
-  def compileImports(assembled: Assembled, addressOfData: Int, dlls: Seq[String], is64Bit: Boolean): CompiledImports = { 
+  def compileImports(objFile: Coff, dlls: Seq[String], is64Bit: Boolean): CompiledImports = { 
     
     val dllImports = dlls flatMap { dll =>
 	    val file = new File("C:/Windows/System32/" + dll);
@@ -46,7 +47,7 @@ class Linker64 extends Linker {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-	    val importedSymbols = export.functionNames intersect assembled.relocations.filter(_.relocationType == 3).map(_.symbolName).toSeq
+	    val importedSymbols = export.functionNames intersect objFile.relocations.filter(_.relocationType == 3).map(_.symbolName).toSeq
 	    
 	    if (importedSymbols.isEmpty)
 	      None
@@ -59,11 +60,9 @@ class Linker64 extends Linker {
     test.generateImports(is64Bit) 
   }
   
-  def link(assembled: Assembled, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
+  def link(objFile: Coff, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
 
-    var code = assembled.getCode(addressOfData, baseOffset = 0x400000)
-    
-    val executableImports = compileImports(assembled, addressOfData, dlls, is64Bit)
+    val executableImports = compileImports(objFile, dlls, is64Bit)
     
     var offset = 0x3000
     val importSymbols = executableImports.importSymbols.map { sym =>
@@ -75,33 +74,12 @@ class Linker64 extends Linker {
     }
 
     val getSymbolAddress: Map[String, Int] = {
-      val newRefSymbols = assembled.symbols ++ importSymbols
+      val newRefSymbols = objFile.symbols ++ importSymbols
       newRefSymbols.map{sym => (sym.name, sym.location)}.toMap
     }
 
-    assembled.relocations.toList.foreach { relocation =>
-      
-        val bb = java.nio.ByteBuffer.allocate(4)
-        bb.order(ByteOrder.LITTLE_ENDIAN)
-        
-        relocation.relocationType match {
-          case 1 => // addr
-            bb.putInt(getSymbolAddress(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
-            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 2 => // ProcRef
-            bb.putInt(getSymbolAddress(relocation.symbolName) - relocation.referenceAddress - 5)
-            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 3 => // InvokeRef/ImportRef
-            bb.putInt(getSymbolAddress(relocation.symbolName) - (relocation.referenceAddress + 0x1000) - 5)
-            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 4 => // VarRef
-            bb.putInt(getSymbolAddress(relocation.symbolName) - 0x1000 + addressOfData + 0x400000)
-            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 6 => // LabelRef
-            code(relocation.referenceAddress + 1) = (getSymbolAddress(relocation.symbolName) - relocation.referenceAddress - 2).toByte
-        }
-    }
-    val resources = assembled.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
+    
+    val resources = objFile.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
 
     val dosHeader = DosHeader(
       e_magic = "MZ",
@@ -125,38 +103,34 @@ class Linker64 extends Linker {
       e_lfanew = 96,
       watermark = "GoLink, GoAsm www.GoDevTool.com\0")
 
-    val codeSection = Section(
-      SectionHeader(
-        name = "code",
-        virtualSize = code.length,
-        virtualAddress = 0x1000,
-        sizeOfRawData = 0x200,
-        pointerToRawData = 0x400,
-        relocPtr = 0,
-        linenumPtr = 0,
-        relocations = 0,
-        lineNumbers = 0,
-        characteristics = Characteristic.CODE.id |
-          Characteristic.EXECUTE.id |
-          Characteristic.READ.id) 
-      , code.toArray)
-   
-    val dataSection = Section(
-      SectionHeader(
-        name = "data",
-        virtualSize = assembled.rawData.length,
-        virtualAddress = 0x2000,
-        sizeOfRawData = 0x200,
-        pointerToRawData = 0x600,
-        relocPtr = 0,
-        linenumPtr = 0,
-        relocations = 0,
-        lineNumbers = 0,
-        characteristics = Characteristic.INITIALIZED.id |
-          Characteristic.READ.id |
-          Characteristic.WRITE.id)
-      , assembled.rawData)
+    val codeSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.CODE.id) != 0 }.get
+    val dataSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.WRITE.id) != 0 }.get
       
+    var code = codeSection.contents
+    
+    objFile.relocations.toList.foreach { relocation =>
+      
+        val bb = java.nio.ByteBuffer.allocate(4)
+        bb.order(ByteOrder.LITTLE_ENDIAN)
+        
+        relocation.relocationType match {
+          case 1 => // addr
+            bb.putInt(getSymbolAddress(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 2 => // ProcRef
+            bb.putInt(getSymbolAddress(relocation.symbolName) - relocation.referenceAddress - 5)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 3 => // InvokeRef/ImportRef
+            bb.putInt(getSymbolAddress(relocation.symbolName) - (relocation.referenceAddress + 0x1000) - 5)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 4 => // VarRef
+            bb.putInt(getSymbolAddress(relocation.symbolName) - 0x1000 + addressOfData + 0x400000)
+            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 6 => // LabelRef
+            code(relocation.referenceAddress + 1) = (getSymbolAddress(relocation.symbolName) - relocation.referenceAddress - 2).toByte
+        }
+    }
+    
     val idataSection = Section(
       SectionHeader(
         name = ".idata",
@@ -173,7 +147,7 @@ class Linker64 extends Linker {
           Characteristic.READ.id)
      , executableImports.rawData)
       
-    val standardSections = List(codeSection, dataSection, idataSection)
+    val standardSections = List(codeSection.copy(contents = code), dataSection, idataSection)
 
     val resourceSection: Option[Section] = resources map {res =>
       Option(Section(

@@ -9,7 +9,7 @@ import java.io.FileInputStream
 import scala.collection.mutable.ListBuffer
 
 object ResourceGen {
-  def compileResources(beginningOfSection: Int, iconName: String): Array[Byte] = { 
+  def compileResources(resLocation: Int, iconName: String): Array[Byte] = { 
     
     val file = new File(iconName);
 	 
@@ -33,12 +33,12 @@ object ResourceGen {
     val first = IdResourceDirectoryEntry(DirectoryTypeID.icon.id, 
             ResourceDirectory(IdResourceDirectoryEntry(
                 1, ResourceDirectory(LeafResourceDirectoryEntry(
-                    0x409, ImageResourceDataEntry(ResourceData(icon.drop(22))))))))
+                    0x409, ImageResourceDataEntry(ResourceData(icon.drop(22)), resLocation))))))
                     
     val second = IdResourceDirectoryEntry(DirectoryTypeID.groupIcon.id,
             ResourceDirectory(NamedResourceDirectoryEntry(
                 ImageResourceDirString("MAINICON"), ResourceDirectory(LeafResourceDirectoryEntry(
-                    0x409, ImageResourceDataEntry(ResourceData(icon.take(20))))))))
+                    0x409, ImageResourceDataEntry(ResourceData(icon.take(20)), resLocation))))))
     
     val res = RootDir(ResourceDirectory(first, second))
     
@@ -136,12 +136,12 @@ case class ResourceData(data: Array[Byte]) extends ResourceField {
   def getChildren = Nil
 }
 
-case class ImageResourceDataEntry(data: ResourceData) extends ResourceField {
+case class ImageResourceDataEntry(data: ResourceData, resLocation: Int) extends ResourceField {
 
   def apply: Array[Byte] = {
     val buffer = ByteBuffer.allocate(16);
     buffer.order(ByteOrder.LITTLE_ENDIAN)
-    buffer.putInt(0x3000 + data.position)
+    buffer.putInt(resLocation + data.position)
     buffer.putInt(data.size)
     buffer.putInt(0)
     buffer.putInt(0)
@@ -394,18 +394,16 @@ object ParsedImageResourceDirectoryEntry {
 }
 
 object ImageResourceDataEntry {
-  def getDataEntry(input: ByteBuffer, beginningOfSection: Int): ImageResourceDataEntry = {
+  def getDataEntry(input: ByteBuffer, beginningOfSection: Int, resLocation: Int): ImageResourceDataEntry = {
     val offset = input.getInt
     val size = input.getInt
     val codePage = input.getInt
     val reserved = input.getInt
-    
-    
 
     input.position(offset + beginningOfSection)
     
     val data = Array.fill(size)(0.toByte)
     input.get(data)
-    ImageResourceDataEntry(ResourceData(data))
+    ImageResourceDataEntry(ResourceData(data), resLocation)
   }
 }

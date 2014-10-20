@@ -79,7 +79,7 @@ class Linker64 extends Linker {
     }
 
     
-    val resources = objFile.iconPath map (path => Option(ResourceGen.compileResources(0x3000, path))) getOrElse None
+    val resources = objFile.iconPath map (path => Option(ResourceGen.compileResources(0x4000, path))) getOrElse None
 
     val dosHeader = DosHeader(
       e_magic = "MZ",
@@ -154,9 +154,9 @@ class Linker64 extends Linker {
        SectionHeader(
         name = ".rsrc",
         virtualSize = res.length,
-        virtualAddress = 0x3000,
+        virtualAddress = 0x4000,
         sizeOfRawData = res.length,
-        pointerToRawData = 0x600,
+        pointerToRawData = 0xA00,
         relocPtr = 0,
         linenumPtr = 0,
         relocations = 0,
@@ -189,7 +189,7 @@ class Linker64 extends Linker {
         majorSubsystemVersion = if (is64Bit) 5 else 4,
         minorSubsystemVersion = 2,
         win32Version = 0,
-        sizeOfImage = 0x4000,
+        sizeOfImage = 0x5000,
         sizeOfHeaders = 0x200,
         checksum = 0,
         subsystem = 3,
@@ -204,9 +204,9 @@ class Linker64 extends Linker {
     val numImportedFunctions = executableImports.importSymbols.filter(sym => !sym.name.contains(".dll")).size
 
     val directories = resources map {res => DataDirectories(
-      importSymbols = executableImports.getImportsDirectory(0x3018),
-      importAddressTable = executableImports.getIATDirectory(0x3054),
-      resource = ImageDataDirectory(0x3000, 11300)) 
+      importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
+      importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize),
+      resource = ImageDataDirectory(0x4000, 11300)) 
     } getOrElse {
         DataDirectories(
           importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),

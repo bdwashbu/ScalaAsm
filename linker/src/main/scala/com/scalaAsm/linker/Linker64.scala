@@ -81,28 +81,6 @@ class Linker64 extends Linker {
     
     val resources = objFile.iconPath map (path => Option(ResourceGen.compileResources(0x4000, path))) getOrElse None
 
-    val dosHeader = DosHeader(
-      e_magic = "MZ",
-      e_cblp = 108,
-      e_cp = 1,
-      e_crlc = 0,
-      e_cparhdr = 2,
-      e_minalloc = 0,
-      e_maxalloc = 65535.toShort,
-      e_ss = 0,
-      e_sp = 0,
-      e_csum = 0,
-      e_ip = 17,
-      e_cs = 0,
-      e_lfarlc = 64,
-      e_ovno = 0,
-      e_res = (0, 0, 26967, 13934),
-      e_oemid = 8244,
-      e_oeminfo = 29264,
-      e_res2 = (26479, 24946, 8557, 2573, 46116.toShort, 47625.toShort, 256, 8653, 19636, 8653),
-      e_lfanew = 96,
-      watermark = "GoLink, GoAsm www.GoDevTool.com\0")
-
     val codeSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.CODE.id) != 0 }.get
     val dataSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.WRITE.id) != 0 }.get
       
@@ -167,6 +145,26 @@ class Linker64 extends Linker {
 
     val sections: List[Section] = standardSections ++ resourceSection
 
+    val dosHeader = DosHeader(
+      e_cblp = 108,
+      e_cp = 1,
+      e_crlc = 0,
+      e_cparhdr = 2,
+      e_minalloc = 0,
+      e_maxalloc = 65535.toShort,
+      e_ss = 0,
+      e_sp = 0,
+      e_csum = 0,
+      e_ip = 17,
+      e_cs = 0,
+      e_lfarlc = 64,
+      e_ovno = 0,
+      e_res = (0, 0, 26967, 13934),
+      e_oemid = 8244,
+      e_oeminfo = 29264,
+      e_res2 = (26479, 24946, 8557, 2573, 46116.toShort, 47625.toShort, 256, 8653, 19636, 8653),
+      watermark = "Scala x86\0")
+      
     val optionalHeader = OptionalHeader(
       magic = if (is64Bit) 0x20b else 0x10b,
       majorLinkerVersion = 0,

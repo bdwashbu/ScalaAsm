@@ -21,7 +21,7 @@ case class PortableExecutable64(dosHeader: DosHeader,
     
     var result = ArrayBuffer.fill(totalSize)(0.toByte)
     
-    val headers = align(dosHeader(), 16, 0) ++:
+    val headers = align(dosHeader(), 32, 0) ++:
       peHeader() ++:
       directories() ++:
       sections.map(_.header.write).reduce(_ ++ _)

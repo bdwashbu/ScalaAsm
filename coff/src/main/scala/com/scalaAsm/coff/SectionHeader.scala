@@ -9,7 +9,7 @@ object SectionHeader {
      val name = Array.fill(8)(0.toByte)
      input.get(name)
      SectionHeader(
-         name = name map(_.toChar) mkString,
+         name = name.map(_.toChar).mkString.trim,
          virtualSize = input.getInt(),
          virtualAddress   = input.getInt(),
          sizeOfRawData    = input.getInt(),

@@ -1,8 +1,9 @@
 package com.scalaAsm
 
 import java.io._
-import com.scalaAsm.linker.{Linker64}
+import com.scalaAsm.linker.Linker
 import com.scalaAsm.assembler.Assembler
+import com.scalaAsm.coff.Assembled
 
 object ScalaBasic {
 
@@ -11,10 +12,10 @@ object ScalaBasic {
 
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
       val assembler = new Assembler {}
-      val linker = new Linker64{}
+      val linker = new Linker{}
 
       val beginTime = System.nanoTime()
-      val helloWorld = assembler.assemble(HelloWorld3)
+      val helloWorld = assembler.assemble(HelloWorld3).addIcon("scala.ico")
       val exe = linker.link(helloWorld, 0x3000, false, "kernel32.dll", "msvcrt.dll")
       
       outputStream.write(exe.get)
@@ -23,12 +24,22 @@ object ScalaBasic {
       
       val outputStream64 = new DataOutputStream(new FileOutputStream("test64.exe"));
       
-      val helloWorld64 = assembler.assemble(HelloWorld2)
+      val helloWorld64 = assembler.assemble(HelloWorld2).addIcon("scala.ico")
       val exe64 = linker.link(helloWorld64, 0x3000, true, "kernel32.dll", "msvcrt.dll")
 
       outputStream64.write(exe64.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
       outputStream64.close
+      
+      //val outputStream2 = new DataOutputStream(new FileOutputStream("test2.exe"));
+      
+      val coff = Assembled.readCoff("test.obj")
+//      val exe2 = linker.link(coff, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+//      
+//      outputStream2.write(exe2.get)
+//      println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
+//      outputStream2.close
+      println(coff)
       
     } catch {
       case e: Exception => e.printStackTrace()

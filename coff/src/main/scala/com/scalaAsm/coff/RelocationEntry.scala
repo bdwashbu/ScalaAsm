@@ -58,6 +58,10 @@ case class Relocation(
     symbolName: String,
     relocationType: Short) {
   
+  override def toString = {
+    "Relocation(" + referenceAddress + ", \"" + symbolName + "\"" + ", " + relocationType + ')'
+  }
+  
   def apply() = {
     val bbuf = ByteBuffer.allocate(10)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)

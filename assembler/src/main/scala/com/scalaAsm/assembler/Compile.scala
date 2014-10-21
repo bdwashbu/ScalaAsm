@@ -190,11 +190,11 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
         }
       }
     
-    new Coff {
-      val symbols = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols
-      val relocations = getRelocations
-      val sections = Seq(codeSection, dataSection)
-    }
+    Coff(
+      symbols = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols,
+      relocations = getRelocations,
+      sections = Seq(codeSection, dataSection)
+    )
   }
 
   def compileData(dataTokens: Seq[Token]): (Array[Byte], Seq[CoffSymbol]) = {

@@ -3,10 +3,14 @@ package com.scalaAsm.coff
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-case class CoffSymbol(name: String, location: Int, sectionNumber: Int)
+case class CoffSymbol(name: String, location: Int, sectionNumber: Short) {
+  override def toString = {
+    "CoffSymbol(\"" + name + "\", " + location + ", " + sectionNumber + ')'
+  }
+}
 
-object SymbolEntry {
-  def getSymbolEntry(input: ByteBuffer): SymbolEntry = {
+object StandardSymbolEntry {
+  def getSymbolEntry(input: ByteBuffer): StandardSymbolEntry = {
      val rawName = Array.fill(8)(0.toByte)
      input.get(rawName)
      val name = rawName map(_.toChar) mkString
@@ -15,7 +19,7 @@ object SymbolEntry {
      val symbolType = SymbolType(input.getShort())
      val storageClass = StorageClass(input.get())
      val numAuxiliary = input.get()
-     SymbolEntry(
+     StandardSymbolEntry(
          name,
          value,
          sectionNumber,
@@ -65,13 +69,15 @@ object StorageClass {
   }
 }
 
-case class SymbolEntry (
+trait SymbolEntry 
+
+case class StandardSymbolEntry (
     name: String,
     value: Int,
     sectionNumber: Short,
     symbolType: SymbolType,
     storageClass: StorageClass,
-    auxiliarySymbols: Seq[AuxiliarySymbol]) {
+    auxiliarySymbols: Seq[AuxiliarySymbol]) extends SymbolEntry {
   
   def apply() = {
     val bbuf = ByteBuffer.allocate(18)
@@ -86,7 +92,7 @@ case class SymbolEntry (
   } 
 }
 
-trait AuxiliarySymbol
+trait AuxiliarySymbol extends SymbolEntry
 
 // For symbol entries with a storage class of 3
 object AuxiliarySectionDefinition {

@@ -22,7 +22,6 @@ object SymbolEntry {
          symbolType,
          storageClass,
          auxiliarySymbols = for (i <- 0 until numAuxiliary) yield {
-           println(storageClass)
            storageClass match {
              case IMAGE_SYM_CLASS_STATIC => AuxiliarySectionDefinition.getAuxSectionDef(input)
              case IMAGE_SYM_CLASS_FILE => AuxiliaryFormatFiles.getAuxFormatFiles(input)

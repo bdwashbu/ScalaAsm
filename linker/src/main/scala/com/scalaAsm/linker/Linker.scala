@@ -26,7 +26,7 @@ import com.scalaAsm.coff.Coff
 
 class Linker {
   
-  def compileImports(objFile: Coff, dlls: Seq[String], is64Bit: Boolean): CompiledImports = { 
+  def compileImports(objFile: Coff, dlls: Seq[String], is64Bit: Boolean, importsLoc: Int): CompiledImports = { 
     
     val dllImports = dlls flatMap { dll =>
 	    val file = new File("C:/Windows/System32/" + dll);
@@ -55,14 +55,14 @@ class Linker {
 	      Some(Extern(dll, importedSymbols))
     }
     
-    val test = Imports(imports = dllImports, offset = 0x3000)
+    val test = Imports(imports = dllImports, offset = importsLoc)
 
     test.generateImports(is64Bit) 
   }
   
   def link(objFile: Coff, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
 
-    val executableImports = compileImports(objFile, dlls, is64Bit)
+    val executableImports = compileImports(objFile, dlls, is64Bit, 0x3000)
     
     var offset = 0x3000
     val importSymbols = executableImports.importSymbols.map { sym =>
@@ -220,8 +220,6 @@ class Linker {
       sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
       characteristics = if (is64Bit) 47 else 271)
 
-    val peHeader = new NtHeader(fileHeader, optionalHeader)
-
-    PortableExecutable(dosHeader, peHeader, directories, sections)
+    PortableExecutable(dosHeader, NtHeader(fileHeader, optionalHeader), directories, sections)
   }
 }

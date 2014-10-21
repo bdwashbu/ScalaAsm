@@ -121,11 +121,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
         code.toArray
       }
 
-    new Coff {
-      val symbols = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols
-      val relocations = getRelocations
-      
-      val codeSection = Section(
+    val codeSection = Section(
       SectionHeader(
         name = "code",
         virtualSize = code.length,
@@ -156,8 +152,6 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           Characteristic.READ.id |
           Characteristic.WRITE.id)
       , rawData)
-      
-      val sections = Seq(codeSection, dataSection)
       
       def getRelocations: Seq[Relocation] = {
         var parserPosition = 0
@@ -195,10 +189,13 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           result
         }
       }
+    
+    new Coff {
+      val symbols = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols
+      val relocations = getRelocations
+      val sections = Seq(codeSection, dataSection)
     }
   }
-
-  //val compiledImports = compileImports(rawData.size, unboundSymbols)   
 
   def compileData(dataTokens: Seq[Token]): (Array[Byte], Seq[CoffSymbol]) = {
 
@@ -218,11 +215,11 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
       }
     }
 
-    val data = dataSection.foldLeft(Array[Byte]())((a,b) => a ++: (b match {
+    val data = dataSection.map {
       case ByteOutputPost(padding) => padding
       case PostVar(_, value, _) => value.toCharArray().map(_.toByte)
       case _ => Array[Byte]()
-    }))
+    }.reduce(_ ++ _)
 
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): Seq[CoffSymbol] = {

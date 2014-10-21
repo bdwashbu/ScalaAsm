@@ -218,18 +218,16 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
       }
     }
 
-    val dataBytes = dataSection flatMap {
-      case ByteOutputPost(padding) => Some(padding)
-      case PostVar(_, value, _) => Some(value.toCharArray().map(_.toByte))
-      case _ => None
-    }
-
-    val data = Array.fill[Byte](8)(0x00) ++: dataBytes.reduce(_ ++: _)
+    val data = dataSection.foldLeft(Array[Byte]())((a,b) => a ++: (b match {
+      case ByteOutputPost(padding) => padding
+      case PostVar(_, value, _) => value.toCharArray().map(_.toByte)
+      case _ => Array[Byte]()
+    }))
 
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): Seq[CoffSymbol] = {
         dataSection flatMap {
-          case PostVar(name, value, pos) => Some(CoffSymbol(name, (pos + 8).toShort, 1)) // need the +8?
+          case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 1)) // need the +8?
           case _ => None
         }
     }

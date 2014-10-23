@@ -153,6 +153,13 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           Characteristic.WRITE.id)
       , rawData)
       
+      val symbols = (compiledAsm.positionPass collect {
+        case Proc(offset, name) => CoffSymbol(name, offset, 2);
+        case LabelResolved(offset, name) => CoffSymbol(name, offset, 2)
+        case InvokeRef(offset,name) => CoffSymbol(name, offset, 0)
+        case ImportRef(offset,name) => CoffSymbol(name, offset, 0)
+      }) ++ variablesSymbols
+      
       def getRelocations: Seq[Relocation] = {
         var parserPosition = 0
 
@@ -161,23 +168,23 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           token match {
             case InstructionToken(inst) => inst match {
                 case OneMachineCodeBuilder(addr(name)) =>
-                  result = Some(Relocation(parserPosition+2, name, 1))
+                  result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
                 case TwoMachineCodeBuilder(addr(name), _) =>
-                  result = Some(Relocation(parserPosition+2, name, 1))
+                  result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
                 case TwoMachineCodeBuilder(_, addr(name)) =>
-                  result = Some(Relocation(parserPosition+2, name, 1))
+                  result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
                 case _ =>
               }
             case ProcRef(name) =>
-              result = Some(Relocation(parserPosition, name, 2))
+              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 2))
             case InvokeRef(_, name) =>
-              result = Some(Relocation(parserPosition, name, 3))
+              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 4))
             case VarRef(name) =>
-              result = Some(Relocation(parserPosition, name, 4))
+              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 3))
             case ImportRef(_, name) =>
-              result = Some(Relocation(parserPosition, name, 3))
+              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 4))
             case LabelRef(name, inst, format) =>
-              result = Some(Relocation(parserPosition, name, 6))
+              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 6))
             case _ => None
           }
           token match {
@@ -191,7 +198,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
       }
     
     Coff(
-      symbols = (compiledAsm.positionPass collect { case Proc(offset, name) => CoffSymbol(name, offset, 2); case LabelResolved(offset, name) => CoffSymbol(name, offset, 2) }) ++ variablesSymbols,
+      symbols = symbols,
       relocations = getRelocations,
       sections = Seq(codeSection, dataSection)
     )

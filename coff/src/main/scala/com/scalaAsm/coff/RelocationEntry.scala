@@ -55,11 +55,11 @@ case class RelocationEntry(
 
 case class Relocation(
     referenceAddress: Int,
-    symbolName: String,
+    symbol: CoffSymbol,
     relocationType: Short) {
   
   override def toString = {
-    "Relocation(" + referenceAddress + ", \"" + symbolName + "\"" + ", " + relocationType + ')'
+    "Relocation(" + referenceAddress + ", \"" + symbol.name + "\"" + ", " + relocationType + ')'
   }
   
   def apply() = {

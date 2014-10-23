@@ -89,7 +89,7 @@ object Assembled {
     val resolvedRelocations = relocations.toSeq map { reloc =>
       Relocation (
         reloc.referenceAddress,
-        symbols(reloc.symbolIndex).name,
+        symbols(reloc.symbolIndex),
         reloc.reloationType) }
     
     Coff(sections, symbols.values.toSeq, resolvedRelocations, None)

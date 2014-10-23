@@ -47,8 +47,10 @@ class Linker {
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
-	    val importedSymbols = export.functionNames intersect objFile.relocations.filter(_.relocationType == 3).map(_.symbolName).toSeq
+	    val importedSymbols = export.functionNames intersect objFile.relocations.filter(reloc => reloc.symbol.sectionNumber == 0).map(_.symbol.name).toSeq
 	    
+      println(export.functionNames)
+      
 	    if (importedSymbols.isEmpty)
 	      None
 	    else
@@ -93,19 +95,19 @@ class Linker {
         
         relocation.relocationType match {
           case 1 => // addr
-            bb.putInt(getSymbolAddress(relocation.symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
+            bb.putInt(getSymbolAddress(relocation.symbol.name) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 2 => // ProcRef
-            bb.putInt(getSymbolAddress(relocation.symbolName) - relocation.referenceAddress - 5)
+            bb.putInt(getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 3 => // InvokeRef/ImportRef
-            bb.putInt(getSymbolAddress(relocation.symbolName) - (relocation.referenceAddress + 0x1000) - 5)
+          case 4 => // InvokeRef/ImportRef
+            bb.putInt(getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 4 => // VarRef
-            bb.putInt(getSymbolAddress(relocation.symbolName) - 0x1000 + addressOfData + 0x400000)
+          case 3 => // VarRef
+            bb.putInt(getSymbolAddress(relocation.symbol.name) - 0x1000 + addressOfData + 0x400000)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 6 => // LabelRef
-            code(relocation.referenceAddress + 1) = (getSymbolAddress(relocation.symbolName) - relocation.referenceAddress - 2).toByte
+            code(relocation.referenceAddress + 1) = (getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 2).toByte
         }
     }
     

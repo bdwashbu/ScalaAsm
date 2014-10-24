@@ -3,7 +3,7 @@ package com.scalaAsm.coff
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-case class CoffSymbol(name: String, location: Int, sectionNumber: Short) {
+case class CoffSymbol(name: String, location: Int, sectionNumber: Short, symbolType: SymbolType, storageClass: StorageClass) {
   override def toString = {
     "CoffSymbol(\"" + name + "\", " + location + ", " + sectionNumber + ')'
   }
@@ -80,6 +80,7 @@ case class StandardSymbolEntry (
     auxiliarySymbols: Seq[AuxiliarySymbol]) extends SymbolEntry {
   
   def apply() = {
+    import scala.language.implicitConversions
     val bbuf = ByteBuffer.allocate(18)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     bbuf.put(name.toCharArray() map (_.toByte))

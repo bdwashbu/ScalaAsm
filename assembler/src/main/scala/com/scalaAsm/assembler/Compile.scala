@@ -25,6 +25,7 @@ import com.scalaAsm.coff.Section
 import com.scalaAsm.coff.Coff
 import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
+import com.scalaAsm.coff.{IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION}
 
 class Assembler extends Standard.Catalog with Formats with Addressing {
   self =>
@@ -154,10 +155,10 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
       , rawData)
       
       val symbols = (compiledAsm.positionPass collect {
-        case Proc(offset, name) => CoffSymbol(name, offset, 2);
-        case LabelResolved(offset, name) => CoffSymbol(name, offset, 2)
-        case InvokeRef(offset,name) => CoffSymbol(name, offset, 0)
-        case ImportRef(offset,name) => CoffSymbol(name, offset, 0)
+        case Proc(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL);
+        case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)
+        case InvokeRef(offset,name) => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)
+        case ImportRef(offset,name) => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)
       }) ++ variablesSymbols
       
       def getRelocations: Seq[Relocation] = {
@@ -178,11 +179,11 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
             case ProcRef(name) =>
               result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 2))
             case InvokeRef(_, name) =>
-              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 20))
+              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 3))
             case VarRef(name) =>
-              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 6))
+              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 5))
             case ImportRef(_, name) =>
-              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 20))
+              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 3))
             case LabelRef(name, inst, format) =>
               result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 7))
             case _ => None
@@ -206,9 +207,11 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
 
   def compileData(dataTokens: Seq[Token]): (Array[Byte], Seq[CoffSymbol]) = {
 
+    // Here, we implicitly add a "KEEP" variable to hold results
+    
     val dataSection: Seq[PostToken] = {
       var parserPosition = 0
-      for (token <- dataTokens) yield {
+      for (token <- Variable("KEEP", "\0\0\0\0") +: dataTokens) yield {
         val result = token match {
           case Variable(name, value) => PostVar(name, value, parserPosition)
           case Align(to, filler, _) => ByteOutputPost(Array.fill((to - (parserPosition % to)) % to)(filler))
@@ -231,7 +234,7 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): Seq[CoffSymbol] = {
         dataSection flatMap {
-          case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 1)) // need the +8?
+          case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 1, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)) // need the +8?
           case _ => None
         }
     }

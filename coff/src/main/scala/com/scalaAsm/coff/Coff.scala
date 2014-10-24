@@ -76,10 +76,10 @@ object Assembled {
           bbuf2.rewind()
           val offset = bbuf2.getInt()
           val copy = sym.copy(name = strings(offset))
-          Some(index, CoffSymbol(copy.name, copy.value, copy.sectionNumber))
+          Some(index, CoffSymbol(copy.name, copy.value, copy.sectionNumber, copy.symbolType, copy.storageClass))
         } else {
           val copy = sym.copy(name = sym.name.trim)
-          Some(index, CoffSymbol(copy.name, copy.value, copy.sectionNumber))
+          Some(index, CoffSymbol(copy.name, copy.value, copy.sectionNumber, copy.symbolType, copy.storageClass))
         }
       case _ => None
       }

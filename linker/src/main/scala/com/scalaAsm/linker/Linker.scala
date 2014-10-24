@@ -23,6 +23,7 @@ import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
 import com.scalaAsm.coff.CoffSymbol
 import com.scalaAsm.coff.Coff
+import com.scalaAsm.coff.{IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION}
 import scala.collection.mutable.ListBuffer
 
 class Linker {
@@ -64,28 +65,46 @@ class Linker {
   def link(objFile: Coff, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
 
     val executableImports = compileImports(objFile, dlls, is64Bit, 0x3000)
-    println("PPPPPPPPPPPPPPPPPPPPPP")
+
     var offset = 0x3000
-    val importSymbols = executableImports.importSymbols.map { sym =>
-      val result = CoffSymbol(sym.name.trim, offset, 0)
+    val importSymbols = executableImports.importSymbols.flatMap { sym => 
       if (!sym.name.contains(".dll")) {
+        val result = CoffSymbol(sym.name.trim, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)
         offset += 6
-      }
-      result
+        Some(result)
+      } else None
     }
 
     val getSymbolAddress: Map[String, Int] = {
       val newRefSymbols = objFile.symbols ++ importSymbols
-      newRefSymbols.map{sym => (sym.name, sym.location)}.toMap
-    }
+      
+      val keep = newRefSymbols.filter(sym => sym.name == "KEEP")
+      val boundVars = newRefSymbols.filter(sym => sym.name != "KEEP" && sym.storageClass == IMAGE_SYM_CLASS_EXTERNAL && sym.sectionNumber == 1) // TODO: 1 being data.  Make this dynamic
 
+      val vars = keep ++ boundVars
+      
+      // shift everything over for KEEP
+      val keepAdded = vars.head +: vars.tail.map{sym => sym.copy(location = sym.location + 4)}
+      println(keepAdded)
+      
+      val otherStuff = newRefSymbols.diff(vars)
+      
+      (keepAdded ++ otherStuff).map{sym => (sym.name, sym.location)}.toMap
+    }
     
     val resources = objFile.iconPath map (path => Option(ResourceGen.compileResources(0x4000, path))) getOrElse None
 
     val codeSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.CODE.id) != 0 }.get
-    val dataSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.WRITE.id) != 0 }.get
-      
+    val tempDataSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.WRITE.id) != 0 }.get
+    
+    // Add room for KEEP
+    val dataSection = tempDataSection.copy(contents = Array[Byte](0,0,0,0) ++ tempDataSection.contents)
+    
+     //val dataSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.WRITE.id) != 0 }.get
+    
     var code = codeSection.contents
+    
+    println(getSymbolAddress)
     
     objFile.relocations.toList.foreach { relocation =>
       
@@ -99,12 +118,19 @@ class Linker {
           case 2 => // ProcRef
             bb.putInt(getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 20 => // InvokeRef/ImportRef
+          case 3 => // InvokeRef/ImportRef
             bb.putInt(getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 6 => // VarRef
+          case 20 => // GoAsm InvokeRef/ImportRef
+            println("ref addy: " + (getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 5))
+            bb.putInt(getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 5 + 1)
+            code = code.patch(relocation.referenceAddress, bb.array(), 4)
+          case 5 => // VarRef
             bb.putInt(getSymbolAddress(relocation.symbol.name) - 0x1000 + addressOfData + 0x400000)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
+          case 6 => // GoAsm VarRef
+            bb.putInt(getSymbolAddress(relocation.symbol.name) - 0x1000 + addressOfData + 0x400000)
+            code = code.patch(relocation.referenceAddress, bb.array(), 4)
           case 7 => // LabelRef
             code(relocation.referenceAddress + 1) = (getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 2).toByte
         }
@@ -221,7 +247,7 @@ class Linker {
         majorSubsystemVersion = if (is64Bit) 5 else 4,
         minorSubsystemVersion = 2,
         win32Version = 0,
-        sizeOfImage = 0x5000,
+        sizeOfImage = peSections.last.header.virtualAddress + 0x1000,
         sizeOfHeaders = 0x200,
         checksum = 0,
         subsystem = 3,

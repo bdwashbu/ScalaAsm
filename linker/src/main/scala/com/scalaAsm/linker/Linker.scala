@@ -23,6 +23,7 @@ import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
 import com.scalaAsm.coff.CoffSymbol
 import com.scalaAsm.coff.Coff
+import scala.collection.mutable.ListBuffer
 
 class Linker {
   
@@ -49,8 +50,6 @@ class Linker {
 	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
 	    val importedSymbols = export.functionNames intersect objFile.relocations.filter(reloc => reloc.symbol.sectionNumber == 0).map(_.symbol.name).toSeq
 	    
-      println(export.functionNames)
-      
 	    if (importedSymbols.isEmpty)
 	      None
 	    else
@@ -65,7 +64,7 @@ class Linker {
   def link(objFile: Coff, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
 
     val executableImports = compileImports(objFile, dlls, is64Bit, 0x3000)
-    
+    println("PPPPPPPPPPPPPPPPPPPPPP")
     var offset = 0x3000
     val importSymbols = executableImports.importSymbols.map { sym =>
       val result = CoffSymbol(sym.name.trim, offset, 0)
@@ -100,13 +99,13 @@ class Linker {
           case 2 => // ProcRef
             bb.putInt(getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 4 => // InvokeRef/ImportRef
+          case 20 => // InvokeRef/ImportRef
             bb.putInt(getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 3 => // VarRef
+          case 6 => // VarRef
             bb.putInt(getSymbolAddress(relocation.symbol.name) - 0x1000 + addressOfData + 0x400000)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 6 => // LabelRef
+          case 7 => // LabelRef
             code(relocation.referenceAddress + 1) = (getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 2).toByte
         }
     }
@@ -128,9 +127,11 @@ class Linker {
      , executableImports.rawData)
       
     val standardSections = List(codeSection.copy(contents = code), dataSection, idataSection)
-
-    val resourceSection: Option[Section] = resources map {res =>
-      Option(Section(
+    val sections = ListBuffer[Section]() ++ standardSections
+    
+    if (objFile.iconPath.isDefined) {
+      val res = ResourceGen.compileResources(0x4000, objFile.iconPath.get)
+      sections += Section(
        SectionHeader(
         name = ".rsrc",
         virtualSize = res.length,
@@ -142,10 +143,32 @@ class Linker {
         relocations = 0,
         lineNumbers = 0,
         characteristics = Characteristic.INITIALIZED.id |
-          Characteristic.READ.id), res))
-    } getOrElse None
-
-    val sections: List[Section] = standardSections ++ resourceSection
+          Characteristic.READ.id), res)
+    }
+    
+    var virtAddress = 0x1000
+    var rawPointer = 0x200
+    val peSections: Seq[Section] = 
+      sections map { section =>
+        val size: Int = (section.header.sizeOfRawData / 0x200) + 1
+        val result = Section(
+         SectionHeader(
+          name = section.header.name,
+          virtualSize = section.header.sizeOfRawData,
+          virtualAddress = virtAddress,
+          sizeOfRawData = size * 0x200,
+          pointerToRawData = rawPointer,
+          relocPtr = 0,
+          linenumPtr = 0,
+          relocations = 0,
+          lineNumbers = 0,
+          characteristics = section.header.characteristics), section.contents)
+       
+      rawPointer += size * 0x200
+      val newVirtAddress: Int = ((size * 0x200) / 0x1000) + 1
+      virtAddress += newVirtAddress * 0x1000
+      result
+    }
 
     val dosHeader = DosHeader(
       e_cblp = 108,
@@ -166,6 +189,15 @@ class Linker {
       e_oeminfo = 29264,
       e_res2 = (26479, 24946, 8557, 2573, 46116.toShort, 47625.toShort, 256, 8653, 19636, 8653),
       watermark = "Scala x86\0")
+      
+    val fileHeader = FileHeader(
+      machine = if (is64Bit) 0x8664.toShort else 0x14C,
+      numberOfSections = peSections.size.toShort,
+      timeDateStamp = 0x535BF29F,
+      pointerToSymbolTable = 0, // no importance
+      numberOfSymbols = 0, // no importance
+      sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
+      characteristics = if (is64Bit) 47 else 271)
       
     val optionalHeader = OptionalHeader(
       magic = if (is64Bit) 0x20b else 0x10b,
@@ -213,15 +245,6 @@ class Linker {
           importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize))
     }
 
-    val fileHeader = FileHeader(
-      machine = if (is64Bit) 0x8664.toShort else 0x14C,
-      numberOfSections = sections.size.toShort,
-      timeDateStamp = 0x535BF29F,
-      pointerToSymbolTable = 0, // no importance
-      numberOfSymbols = 0, // no importance
-      sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
-      characteristics = if (is64Bit) 47 else 271)
-
-    PortableExecutable(dosHeader, NtHeader(fileHeader, optionalHeader), directories, sections)
+    PortableExecutable(dosHeader, NtHeader(fileHeader, optionalHeader), directories, peSections)
   }
 }

@@ -118,16 +118,9 @@ class Linker {
           case 2 => // ProcRef
             bb.putInt(getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 5)
             code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 3 => // InvokeRef/ImportRef
-            bb.putInt(getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 5)
-            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
-          case 20 => // GoAsm InvokeRef/ImportRef
-            println("ref addy: " + (getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 5))
-            bb.putInt(getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 5 + 1)
+          case 20 => // InvokeRef/ImportRef
+            bb.putInt(getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 4)
             code = code.patch(relocation.referenceAddress, bb.array(), 4)
-          case 5 => // VarRef
-            bb.putInt(getSymbolAddress(relocation.symbol.name) - 0x1000 + addressOfData + 0x400000)
-            code = code.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 6 => // GoAsm VarRef
             bb.putInt(getSymbolAddress(relocation.symbol.name) - 0x1000 + addressOfData + 0x400000)
             code = code.patch(relocation.referenceAddress, bb.array(), 4)

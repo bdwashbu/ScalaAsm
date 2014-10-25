@@ -179,11 +179,11 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
             case ProcRef(name) =>
               result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 2))
             case InvokeRef(_, name) =>
-              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 3))
+              result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
             case VarRef(name) =>
-              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 5))
+              result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 6))
             case ImportRef(_, name) =>
-              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 3))
+              result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
             case LabelRef(name, inst, format) =>
               result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 7))
             case _ => None

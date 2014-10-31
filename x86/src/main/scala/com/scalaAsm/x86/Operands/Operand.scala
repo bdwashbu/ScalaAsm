@@ -4,12 +4,12 @@ package Operands
 import com.scalaAsm.x86.Instructions.InstructionField
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 
-trait One extends Operand[One,One]{
+trait One extends Operand[One]{
   def size = 1
   def get = this
 }
 
-case class addr(name: String) extends Operand[String, AbsoluteAddress[_32]] {
+case class addr(name: String) extends Operand[AbsoluteAddress[_32]] {
   def get = new AbsoluteAddress[_32] {
     var offset = 0
     def getRelative = null
@@ -17,11 +17,11 @@ case class addr(name: String) extends Operand[String, AbsoluteAddress[_32]] {
   }
 }
 
-trait Operand[+From, +To] {
+trait Operand[+To] {
   def get: To
 }
 
-case class Op[X](from: X) extends Operand[X, X] { def get = from }
+case class Op[X](from: X) extends Operand[X] { def get = from }
 
 abstract class Constant[Size: Numeric](val value: Size) extends InstructionField {
   import java.nio.{ByteBuffer, ByteOrder}

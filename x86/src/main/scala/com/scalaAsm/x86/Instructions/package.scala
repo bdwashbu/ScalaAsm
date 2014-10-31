@@ -30,11 +30,11 @@ package object Instructions {
   trait DSFormat extends OneOperandEncoding[DS]
   
   trait testOneOperand[X[G,OpEn <: OneOperandEncoding[G]] <: OneOperandInstruction[G,OpEn,_]] {
-    def apply[O1, OpEn <: OneOperandEncoding[O1], Opcode](p1: Operand[_,O1])(implicit ev: X[O1, OpEn], format: OneOperandFormat[O1, OpEn]) = ev(p1, format, ev.prefix)
+    def apply[O1, OpEn <: OneOperandEncoding[O1], Opcode](p1: Operand[O1])(implicit ev: X[O1, OpEn], format: OneOperandFormat[O1, OpEn]) = ev(p1, format, ev.prefix)
   }
   
   trait testTwoOperands[X[G,H,OpEn <: TwoOperandEncoding[G,H]] <: TwoOperandInstruction[G,H,OpEn,_]] {
-    def apply[O1, O2, OpEn <: TwoOperandEncoding[O1,O2], Opcode](p1: Operand[_,O1], p2: Operand[_,O2])(implicit ev: X[O1, O2, OpEn], format: TwoOperandFormat[O1, O2, OpEn]) = ev(p1,p2, format, ev.prefix)
+    def apply[O1, O2, OpEn <: TwoOperandEncoding[O1,O2], Opcode](p1: Operand[O1], p2: Operand[O2])(implicit ev: X[O1, O2, OpEn], format: TwoOperandFormat[O1, O2, OpEn]) = ev(p1,p2, format, ev.prefix)
   }
   
   class testZeroOperands[X <: ZeroOperandInstruction[_]] {

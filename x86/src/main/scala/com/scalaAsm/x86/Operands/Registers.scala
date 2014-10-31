@@ -9,8 +9,8 @@ abstract class GeneralPurpose[S: Numeric](name: String) extends Register[S](name
   self2 =>
     
   val ID: Int
-  def -[Z: Numeric](offset: Operand[_,Constant[Z]]) = new BaseIndex(offset.get.negate) {}
-  def +[Z: Numeric](offset: Operand[_,Constant[Z]]) = new BaseIndex(offset.get) {}
+  def -[Z: Numeric](offset: Operand[Constant[Z]]) = new BaseIndex(offset.get.negate) {}
+  def +[Z: Numeric](offset: Operand[Constant[Z]]) = new BaseIndex(offset.get) {}
   
   abstract class BaseIndex[Y: Numeric](val displacement: Constant[Y]) extends AddressingMode[S] {
     def base: GeneralPurpose[S] = self2

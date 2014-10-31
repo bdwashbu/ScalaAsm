@@ -78,18 +78,13 @@ class Linker {
     val getSymbolAddress: Map[String, Int] = {
       val newRefSymbols = objFile.symbols ++ importSymbols
       
-      val keep = newRefSymbols.filter(sym => sym.name == "KEEP")
-      val boundVars = newRefSymbols.filter(sym => sym.name != "KEEP" && sym.storageClass == IMAGE_SYM_CLASS_EXTERNAL && sym.sectionNumber == 1) // TODO: 1 being data.  Make this dynamic
+      val vars = newRefSymbols.filter(sym => sym.storageClass == IMAGE_SYM_CLASS_EXTERNAL && sym.sectionNumber == 1) // TODO: 1 being data.  Make this dynamic
 
-      val vars = keep ++ boundVars
-      
       // shift everything over for KEEP
-      val keepAdded = vars.head +: vars.tail.map{sym => sym.copy(location = sym.location + 4)}
-      println(keepAdded)
       
       val otherStuff = newRefSymbols.diff(vars)
       
-      (keepAdded ++ otherStuff).map{sym => (sym.name, sym.location)}.toMap
+      (vars ++ otherStuff).map{sym => (sym.name, sym.location)}.toMap
     }
     
     val resources = objFile.iconPath map (path => Option(ResourceGen.compileResources(0x4000, path))) getOrElse None
@@ -98,7 +93,7 @@ class Linker {
     val tempDataSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.WRITE.id) != 0 }.get
     
     // Add room for KEEP
-    val dataSection = tempDataSection.copy(contents = Array[Byte](0,0,0,0) ++ tempDataSection.contents)
+    val dataSection = tempDataSection.copy(contents = tempDataSection.contents)
     
      //val dataSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.WRITE.id) != 0 }.get
     

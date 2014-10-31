@@ -5,7 +5,7 @@ import com.scalaAsm.x86._
 
 trait AddressingMode[Size] extends RegisterOrMemory[Size] 
 
-trait AbsoluteAddress[Size] extends AddressingMode[Size] with Operand[AbsoluteAddress[Size], AbsoluteAddress[Size]] {
+trait AbsoluteAddress[Size] extends AddressingMode[Size] with Operand[AbsoluteAddress[Size]] {
   self =>
   var offset: Size
   def getRelative: Relative[Size]
@@ -37,7 +37,7 @@ trait AbsoluteAddress[Size] extends AddressingMode[Size] with Operand[AbsoluteAd
 
 
 
-trait Relative[S] extends RegisterOrMemory[S] with Operand[Relative[S], Relative[S]]{
+trait Relative[S] extends RegisterOrMemory[S] with Operand[Relative[S]]{
   self =>
     def displacement: Constant[S]
     def get = this

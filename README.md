@@ -105,7 +105,7 @@ outputStream.close
 References:
 ========
 
-A huge shoutout to Jeremy Gordon for GoAsm, the best 64-bit windows assembler!
+A huge shoutout to Jeremy Gordon and Wayne Radburn for GoAsm, the best 64-bit windows assembler!
 http://www.godevtool.com/
 
 Intel® 64 and IA-32 Architectures Software Developer Manuals: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html

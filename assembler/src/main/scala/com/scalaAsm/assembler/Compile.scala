@@ -7,6 +7,7 @@ import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.coff.Assembled
 import com.scalaAsm.asm.Registers
+import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard
 import com.scalaAsm.x86.Instructions.Formats
@@ -33,9 +34,9 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
 
   def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Coff = {
 
-    val codeTokens: ListBuffer[Any] = program.codeSections.flatMap { seg => seg.build(seg.builder.toSeq) }
+    val codeTokens: ListBuffer[Any] = program.sections.collect{ case (x: AsmProgram[_]#CodeSection) => x}.flatMap { seg => seg.build(seg.builder.toSeq) }
 
-    val dataTokens = program.dataSections flatMap { seg => seg.compile }
+    val dataTokens = program.sections.collect{ case (x: DataSection) => x} flatMap { seg => seg.compile }
 
     val (rawData, variablesSymbols) = compileData(dataTokens)
 

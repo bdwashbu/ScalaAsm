@@ -9,13 +9,13 @@ object HelloWorld3 extends AsmProgram[x86_32] {
   
   import com.scalaAsm.x86.Instructions.Standard._
 
-  dataSections += new DataSection {
+  sections += new DataSection {
     builder += Variable("pressAnyKey", "Press any key to continue ...\0")
     builder += Variable("newline", "\r\n\0")
     builder += Variable("helloWorld", "Hello World!\n\0")
   }
 
-  codeSections += new CodeSection {
+  sections += new CodeSection {
 
     procedure(name = "start",
       call("printHelloWorld"),

@@ -17,12 +17,13 @@ trait x86Mode
 trait x86_64 extends x86_32
 trait x86_32 extends x86Mode
 
+trait AsmSection
+
 trait AsmProgram[Mode <: x86Mode] {
 
-  val codeSections = new ListBuffer[CodeSection]()
-  val dataSections = new ListBuffer[DataSection]()
+  val sections = new ListBuffer[AsmSection]()
 
-  trait CodeSection extends Registers[Mode] with Standard.Catalog with Formats with Addressing {
+  trait CodeSection extends Registers[Mode] with Standard.Catalog with Formats with Addressing with AsmSection {
 
     val builder = new ListBuffer[InstructionResult]()
     

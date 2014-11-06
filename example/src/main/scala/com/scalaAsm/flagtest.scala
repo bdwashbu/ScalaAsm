@@ -10,13 +10,13 @@ object FlagTest extends AsmProgram[x86_32] {
   
   import com.scalaAsm.x86.Instructions.Standard._
   
-  dataSections += new DataSection {
+  sections += new DataSection {
     builder += Variable("rckeep", "\0\0\0\0\0\0\0\0")
     builder += Variable("flagTest", "Running flag test!\r\n\u0000")
     builder += Variable("result", "flag value: %x\r\n\u0000")
   }
 
-  codeSections += new CodeSection {
+  sections += new CodeSection {
     
     val STD_OUTPUT_HANDLE = byte(-11)
     val STD_INPUT_HANDLE = byte(-10)

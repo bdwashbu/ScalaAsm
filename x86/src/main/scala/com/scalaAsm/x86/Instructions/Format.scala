@@ -36,7 +36,7 @@ trait LowPriorityFormats {
        def size(opcode: OpcodeFormat, prefix: Seq[Prefix]) = prefix.size + opcode.size + 8
   }
   
-  trait MFormatIGeneric[X <: r32#Indirect] extends OneOperandFormat[X, M] {
+  trait MFormatIGeneric[X <: GeneralPurpose[_32]#Indirect] extends OneOperandFormat[X, M] {
 
       def getAddressingForm(operand: X, opcode: OpcodeFormat) = {
             InstructionFormat (
@@ -56,9 +56,9 @@ trait LowPriorityFormats {
   implicit object MFormatIGeneric7 extends MFormatIGeneric[EDI#Indirect]
   // There is no [EBP], its slot is used by 32-disp only mode
   
-  implicit object MFormat2R2 extends OneOperandFormat[r64#Indirect, M] {
+  implicit object MFormat2R2 extends OneOperandFormat[GeneralPurpose[_64]#Indirect, M] {
 
-      def getAddressingForm(operand: r64#Indirect, opcode: OpcodeFormat) = {
+      def getAddressingForm(operand: GeneralPurpose[_64]#Indirect, opcode: OpcodeFormat) = {
             InstructionFormat (
               addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcode.opcodeExtension.get, operand.base)), //mem.encode(opcode.opcodeExtension),
               immediate = None

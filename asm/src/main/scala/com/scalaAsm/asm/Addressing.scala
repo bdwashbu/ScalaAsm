@@ -10,6 +10,6 @@ trait Addressing {
 
   def *[C: Numeric](offset: Constant[C])(implicit abs: AbsoluteAddress[C]): AbsoluteAddress[C] = { abs.offset = offset.value; abs }
 
-  def *[X: Numeric](gpr: GeneralPurpose[X]) = Op(new gpr.Indirect {})
+  def *[Y <: GeneralPurpose[_]](gpr: Operand[Y]): Operand[Y#Indirect] = Op(gpr.get.getIndirect)
   
 }

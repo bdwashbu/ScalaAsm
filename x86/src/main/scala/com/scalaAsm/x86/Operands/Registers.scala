@@ -6,29 +6,22 @@ import com.scalaAsm.x86.Operands.Memory.AddressingMode
 abstract class Register[S: Numeric](val name: String)
 
 abstract class GeneralPurpose[S: Numeric](name: String) extends Register[S](name) {
-  self2 =>
+  self =>
     
   val ID: Int
-  def -[Z: Numeric](offset: Operand[Constant[Z]]) = new BaseIndex(offset.get.negate) {}
-  def +[Z: Numeric](offset: Operand[Constant[Z]]) = new BaseIndex(offset.get) {}
   
   abstract class BaseIndex[Y: Numeric](val displacement: Constant[Y]) extends AddressingMode[S] {
-    def base: GeneralPurpose[S] = self2
+    def base: GeneralPurpose[S] = self
     def get: BaseIndex[Y] = this
   }
   
   abstract class Indirect extends AddressingMode[S] {
-    self =>
-    def base: GeneralPurpose[S] = self2
+    def base: GeneralPurpose[S] = self
     def get: Indirect = this
-  //  def encode(reg: GPR, opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-  //    OnlyModRM(ModRMReg(NoDisplacement, reg, rm = base))
-  //  }
-    
-  //  def encode(opcodeExtend: Option[Byte]): AddressingFormSpecifier = {
-  //    OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtend.get, base))
-  //  }
   }
+  
+  def getIndirect: this.type#Indirect = new Indirect{}
+  def getBaseIndex[Y: Numeric](const: Constant[Y]) = new BaseIndex(const) {}
 }
 
 abstract class GeneralPurposeA[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 0 } 

@@ -6,9 +6,9 @@ import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86.Instructions.{Standard, Formats}
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.InstructionResult
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
-import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
 import com.scalaAsm.x86.Instructions.`package`.OneOperandEncoding
 import com.scalaAsm.x86.Instructions.`package`.I
@@ -39,10 +39,16 @@ trait AsmProgram[Mode <: x86Mode] {
       builder += ProcedureToken(name, innerCode)
     }
 
+    case class Code(code: InstructionResult*) extends InstructionResult {
+      def line = ""
+      def getSize = 0
+      def getBytes = Array()
+    }
+    
     def build(code: Seq[InstructionResult]): Seq[InstructionResult] =
       code flatMap {
         case ProcedureToken(name, code) => BeginProc(name) +: build(code)
-        case CodeGroup(code) => build(code)
+        case Code(codes @ _*) => build(codes)
         case token => List(token)
       }
 
@@ -68,12 +74,12 @@ trait AsmProgram[Mode <: x86Mode] {
 
     def jmp(ref: String) = JmpRef(ref)
 
-    def repeat(numTimes: Int, code: List[InstructionResult]): CodeGroup = {
+    def repeat(numTimes: Int, code: List[InstructionResult]): Code = {
       val expanded = ListBuffer[InstructionResult]()
       for (i <- 0 until numTimes) {
         expanded ++= code
       }
-      CodeGroup(expanded.toList)
+      Code(expanded:_*)
     }
   }
 }

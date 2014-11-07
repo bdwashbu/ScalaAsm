@@ -11,9 +11,9 @@ import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard
 import com.scalaAsm.x86.Instructions.Formats
-import com.scalaAsm.x86.Instructions.OneMachineCodeBuilder
+import com.scalaAsm.x86.Instructions.OneMachineCode
 import com.scalaAsm.x86.Operands.addr
-import com.scalaAsm.x86.Instructions.TwoMachineCodeBuilder
+import com.scalaAsm.x86.Instructions.TwoMachineCode
 import com.scalaAsm.x86.Operands.Op
 import com.scalaAsm.asm.AsmProgram
 import scala.collection.mutable.ListBuffer
@@ -169,11 +169,11 @@ class Assembler extends Standard.Catalog with Formats with Addressing {
           var result: Option[Relocation] = None
           token match {
             case InstructionToken(inst) => inst match {
-                case OneMachineCodeBuilder(addr(name)) =>
+                case OneMachineCode(addr(name)) =>
                   result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
-                case TwoMachineCodeBuilder(addr(name), _) =>
+                case TwoMachineCode(addr(name), _) =>
                   result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
-                case TwoMachineCodeBuilder(_, addr(name)) =>
+                case TwoMachineCode(_, addr(name)) =>
                   result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
                 case _ =>
               }

@@ -1,12 +1,12 @@
 package com.scalaAsm.asm
 
-import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.x86.Operands.OneOperandFormat
 import com.scalaAsm.x86.OpcodeFormat
 import com.scalaAsm.x86.Operands.Constant
 import com.scalaAsm.x86.OneOpcode
+import com.scalaAsm.x86.InstructionResult
 
 object Tokens {
   trait Token
@@ -23,11 +23,7 @@ object Tokens {
     def getBytes = Array()
   }
   case class JmpRef(name: String) extends CodeToken
-  case class CodeGroup(code: Seq[InstructionResult]) extends CodeToken with InstructionResult {
-    def line = ""
-    def getSize = 0
-    def getBytes = Array()
-  }
+
   case class ProcedureToken(name: String, innerCode: Seq[InstructionResult]) extends CodeToken with InstructionResult {
     def line = ""
     def getSize = 0

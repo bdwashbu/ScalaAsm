@@ -9,22 +9,24 @@ trait Registers[Mode <: x86Mode] {
       def -[Z: Numeric](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get.negate)
       def +[Z: Numeric](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get)
     }
+    
+    case class RegisterOperand[X <: GeneralPurpose[_]](reg: X) extends Operand[X] with RegisterOps[X] { def get = reg }
 
-    def rdi(implicit ev: Mode <:< x86_64) = new Operand[RDI] with RegisterOps[RDI] {def get = new RDI}
-    def rax(implicit ev: Mode <:< x86_64) = new Operand[RAX] with RegisterOps[RAX] {def get = new RAX}
-    def rcx(implicit ev: Mode <:< x86_64) = new Operand[RCX] with RegisterOps[RCX] {def get = new RCX}
-    def rbp(implicit ev: Mode <:< x86_64) = new Operand[RBP] with RegisterOps[RBP] {def get = new RBP}
-    def rdx(implicit ev: Mode <:< x86_64) = new Operand[RDX] with RegisterOps[RDX] {def get = new RDX}
-    def rbx(implicit ev: Mode <:< x86_64) = new Operand[RBX] with RegisterOps[RBX] {def get = new RBX}
-    def rsp(implicit ev: Mode <:< x86_64) = new Operand[RSP] with RegisterOps[RSP] {def get = new RSP}
+    def rdi(implicit ev: Mode <:< x86_64) = RegisterOperand(new RDI)
+    def rax(implicit ev: Mode <:< x86_64) = RegisterOperand(new RAX)
+    def rcx(implicit ev: Mode <:< x86_64) = RegisterOperand(new RCX)
+    def rbp(implicit ev: Mode <:< x86_64) = RegisterOperand(new RBP)
+    def rdx(implicit ev: Mode <:< x86_64) = RegisterOperand(new RDX)
+    def rbx(implicit ev: Mode <:< x86_64) = RegisterOperand(new RBX)
+    def rsp(implicit ev: Mode <:< x86_64) = RegisterOperand(new RSP)
   
-    def edi(implicit ev: Mode <:< x86_32) = new Operand[EDI] with RegisterOps[EDI] {def get = new EDI}
-    def ebx(implicit ev: Mode <:< x86_32) = new Operand[EBX] with RegisterOps[EBX] {def get = new EBX}
-    def eax(implicit ev: Mode <:< x86_32) = new Operand[EAX] with RegisterOps[EAX] {def get = new EAX}
-    def ecx(implicit ev: Mode <:< x86_32) = new Operand[ECX] with RegisterOps[ECX] {def get = new ECX}
-    def ebp(implicit ev: Mode <:< x86_32) = new Operand[EBP] with RegisterOps[EBP] {def get = new EBP}
-    def edx(implicit ev: Mode <:< x86_32) = new Operand[EDX] with RegisterOps[EDX] {def get = new EDX}
-    def esp(implicit ev: Mode <:< x86_32) = new Operand[ESP] with RegisterOps[ESP] {def get = new ESP}
+    def edi(implicit ev: Mode <:< x86_32) = RegisterOperand(new EDI)
+    def ebx(implicit ev: Mode <:< x86_32) = RegisterOperand(new EBX)
+    def eax(implicit ev: Mode <:< x86_32) = RegisterOperand(new EAX)
+    def ecx(implicit ev: Mode <:< x86_32) = RegisterOperand(new ECX)
+    def ebp(implicit ev: Mode <:< x86_32) = RegisterOperand(new EBP)
+    def edx(implicit ev: Mode <:< x86_32) = RegisterOperand(new EDX)
+    def esp(implicit ev: Mode <:< x86_32) = RegisterOperand(new ESP)
   
     object ax extends AX with Operand[AX] {def get = this}
     object cx extends CX with Operand[CX] {def get = this}

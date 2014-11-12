@@ -19,7 +19,7 @@ object HelloWorld extends AsmProgram[x86_32] {
     val STD_OUTPUT_HANDLE = byte(-11)
     val STD_INPUT_HANDLE = byte(-10)
 
-    procedure(name = "start",
+    builder += Code(
       push("helloWorld"),
       call("printf"),
       pop(ebx),

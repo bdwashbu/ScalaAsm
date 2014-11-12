@@ -12,6 +12,7 @@ import java.nio.ByteBuffer
 import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
 import com.scalaAsm.x86.Instructions.`package`.OneOperandEncoding
 import com.scalaAsm.x86.Instructions.`package`.I
+import com.scalaAsm.x86.Instructions.Catalog
 
 trait x86Mode
 trait x86_64 extends x86_32
@@ -23,7 +24,7 @@ trait AsmProgram[Mode <: x86Mode] {
 
   val sections = new ListBuffer[AsmSection]()
 
-  trait CodeSection extends Registers[Mode] with Standard.Catalog with Formats with Addressing with AsmSection {
+  trait CodeSection extends Registers[Mode] with Catalog.Standard with Formats with Addressing with AsmSection {
 
     val builder = new ListBuffer[InstructionResult]()
     

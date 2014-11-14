@@ -2,20 +2,18 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-abstract class LEA_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode]("LEA")
-
+object LEA extends OperandInstruction[OneOpcode]("LEA") with leaHigh
+ 
 trait leaLow {
-  implicit object lea1 extends LEA_2[r, rm, RM] {
+  implicit object lea1 extends LEA.TwoOps[r, rm, RM] {
       def opcode = 0x8D
   }
 }
 
-object LEA_2 extends leaLow {
+trait leaHigh extends leaLow {
 
-  implicit object lea2 extends LEA_2[r64, rm, RM] {
+  implicit object lea2 extends LEA.TwoOps[r64, rm, RM] {
       def opcode = 0x8D
       override def prefix = REX.W(true)
   }
-  
-  
 }

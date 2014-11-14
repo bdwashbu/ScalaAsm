@@ -2,15 +2,15 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-abstract class TEST_2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]] extends TwoOperandInstruction[O1, O2, OpEn, OneOpcode]("TEST")
+object TEST extends OperandInstruction[OneOpcode]("TEST") with testLow
+ 
+trait testLow {
 
-object TEST_2 {
-
-  implicit object test1 extends TEST_2[r32, rm32, RM] {
+  implicit object test1 extends TEST.TwoOps[r32, rm32, RM] {
     def opcode = 0x85
   }
 
-  implicit object test2 extends TEST_2[rm32, imm32, MI] {
+  implicit object test2 extends TEST.TwoOps[rm32, imm32, MI] {
     def opcode = 0xF7 /+ 0
   }
 }

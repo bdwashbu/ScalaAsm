@@ -5,11 +5,11 @@ package Standard
 import com.scalaAsm.x86.Operands._
 import scala.annotation.implicitNotFound
 
-abstract class RETN_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode]("RETN")
-
-object RETN_1 {
+object RETN extends OperandInstruction[OneOpcode]("RETN") with RetnLow
+ 
+trait RetnLow {
   
-  implicit object retn1 extends RETN_1[imm16, I] {
+  implicit object retn1 extends RETN.OneOp[imm16, I] {
       def opcode = 0xC2
   }
 }

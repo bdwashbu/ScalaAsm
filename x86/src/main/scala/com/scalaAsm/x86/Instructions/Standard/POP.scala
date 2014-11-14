@@ -4,20 +4,20 @@ package Standard
 
 import com.scalaAsm.x86.Operands._
 
-abstract class POP_1[-O1, OpEn <: OneOperandEncoding[O1]] extends OneOperandInstruction[O1, OpEn, OneOpcode]("POP")
+object POP extends OperandInstruction[OneOpcode]("POP") with popLow
+ 
+trait popLow {
 
-object POP_1 {
-
-  implicit object pop1 extends POP_1[r32, O] {
+  implicit object pop1 extends POP.OneOp[r32, O] {
     def opcode = 0x58 + rd
   }
 
-  implicit object pop3 extends POP_1[r64, O] {
+  implicit object pop3 extends POP.OneOp[r64, O] {
     def opcode = 0x58 + rd
     override val defaultsTo64Bit = true
   }
 
-  implicit object pop2 extends POP_1[DS, DSFormat] {
+  implicit object pop2 extends POP.OneOp[DS, DSFormat] {
     def opcode = 0x1F
   }
 }

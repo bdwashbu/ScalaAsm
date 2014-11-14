@@ -9,7 +9,7 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.InstructionResult
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
-import com.scalaAsm.x86.Instructions.Standard.{JNZ_1, JZ_1}
+import com.scalaAsm.x86.Instructions.Standard.{JNZ, JZ}
 import com.scalaAsm.x86.Instructions.`package`.OneOperandEncoding
 import com.scalaAsm.x86.Instructions.`package`.I
 import com.scalaAsm.x86.Instructions.Catalog
@@ -65,9 +65,9 @@ trait AsmProgram[Mode <: x86Mode] {
 
     def push(param: String) = Reference(param)
 
-    def jnz(labelRef: String)(implicit ev: JNZ_1[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
+    def jnz(labelRef: String)(implicit ev: JNZ.OneOp[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
 
-    def jz(labelRef: String)(implicit ev: JZ_1[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
+    def jz(labelRef: String)(implicit ev: JZ.OneOp[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
 
     def call(refName: String) = Reference(refName)
 

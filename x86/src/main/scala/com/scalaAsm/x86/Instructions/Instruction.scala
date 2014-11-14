@@ -88,42 +88,74 @@ abstract case class TwoMachineCode[O1, O2, OpEn <: TwoOperandEncoding[O1,O2], Op
   }
 }
 
-abstract class ZeroOperandInstruction[Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
+//abstract class ZeroOperandInstruction[Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
+//  self =>
+//  def opcode: Opcode
+//  def get = new ZeroMachineCode[Opcode] {
+//    val opcode = self.opcode
+//    val mnemonic = self.mnemonic
+//    def format = new NoOperandFormat {}
+//  }
+//}
+
+//abstract class OneOperandInstruction[-O1, -OpEn <: OneOperandEncoding[O1], Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
+//  self =>
+//  def opcode: Opcode
+//  def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[X], format2: OneOperandFormat[X, OpEn2], prefix: Seq[Prefix]) = {
+//    val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
+//
+//    new OneMachineCode[X,OpEn2, Opcode](p1) {
+//      val opcode = self.opcode
+//      val mnemonic = self.mnemonic
+//      def format = format2
+//      val prefix = resolvedPrefix
+//    }
+//  }
+//}
+
+abstract class OperandInstruction[Opcode <: OpcodeFormat](val mnemonic: String) {
   self =>
-  def opcode: Opcode
-  def get = new ZeroMachineCode[Opcode] {
-    val opcode = self.opcode
+  
+    
+  
+  abstract class ZeroOps extends x86Instruction with Formats {
+    self2 =>
+    def opcode: Opcode
     val mnemonic = self.mnemonic
-    def format = new NoOperandFormat {}
-  }
-}
-
-abstract class OneOperandInstruction[-O1, -OpEn <: OneOperandEncoding[O1], Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
-  self =>
-  def opcode: Opcode
-  def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[X], format2: OneOperandFormat[X, OpEn2], prefix: Seq[Prefix]) = {
-    val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-
-    new OneMachineCode[X,OpEn2, Opcode](p1) {
-      val opcode = self.opcode
+    def get = new ZeroMachineCode[Opcode] {
+      val opcode = self2.opcode
       val mnemonic = self.mnemonic
-      def format = format2
-      val prefix = resolvedPrefix
+      def format = new NoOperandFormat {}
     }
   }
-}
-
-abstract class TwoOperandInstruction[-O1, -O2, -OpEn <: TwoOperandEncoding[O1, O2], Opcode <: OpcodeFormat](val mnemonic: String) extends x86Instruction with Formats {
-  self =>
-  def opcode: Opcode
   
-  def apply[X, Y, OpEn2 <: TwoOperandEncoding[X, Y]](p1: Operand[X], p2: Operand[Y], format2: TwoOperandFormat[X, Y, OpEn2], prefix: Seq[Prefix]) = {
-    val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-    new TwoMachineCode[X, Y, OpEn2, Opcode](p1, p2) {
-      val opcode = self.opcode
-      val mnemonic = self.mnemonic
-      def format = format2
-      val prefix = resolvedPrefix
+  abstract class TwoOps[-O1, -O2, -OpEn <: TwoOperandEncoding[O1, O2]]  extends x86Instruction with Formats {
+    self2 =>
+    val mnemonic = self.mnemonic
+    def opcode: Opcode
+    def apply[X, Y, OpEn2 <: TwoOperandEncoding[X, Y]](p1: Operand[X], p2: Operand[Y], format2: TwoOperandFormat[X, Y, OpEn2], prefix: Seq[Prefix]) = {
+      val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
+      new TwoMachineCode[X, Y, OpEn2, Opcode](p1, p2) {
+        val opcode = self2.opcode
+        val mnemonic = self.mnemonic
+        def format = format2
+        val prefix = resolvedPrefix
+      }
+    }
+  }
+  
+  abstract class OneOp[-O1, -OpEn <: OneOperandEncoding[O1]]  extends x86Instruction with Formats {
+    self2 =>
+    val mnemonic = self.mnemonic
+    def opcode: Opcode
+    def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[X], format2: OneOperandFormat[X, OpEn2], prefix: Seq[Prefix]) = {
+      val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
+      new OneMachineCode[X,OpEn2, Opcode](p1) {
+        val opcode = self2.opcode
+        val mnemonic = self.mnemonic
+        def format = format2
+        val prefix = resolvedPrefix
+      }
     }
   }
 }

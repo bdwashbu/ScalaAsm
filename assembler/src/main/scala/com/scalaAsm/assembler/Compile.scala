@@ -2,7 +2,7 @@ package com.scalaAsm
 package assembler
 
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.x86.Instructions.Standard.CALL_1
+import com.scalaAsm.x86.Instructions.Standard.CALL
 import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.coff.Assembled

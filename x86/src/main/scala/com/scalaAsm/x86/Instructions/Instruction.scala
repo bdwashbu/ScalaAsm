@@ -80,42 +80,44 @@ abstract case class TwoMachineCode[O1, O2, OpEn <: TwoOperandEncoding[O1,O2]](op
   }
 }
 
-abstract class OperandInstruction[Opcode <: OpcodeFormat](val mnemonic: String) {
+abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: String) {
   self =>
 
-  abstract class ZeroOps extends x86Instruction {
+  abstract class _0 extends x86Instruction {
     self2 =>
     def opcode: Opcode
-    val mnemonic = self.mnemonic
+    val mnemonic = InstructionDefinition.this.mnemonic
     def get = new ZeroMachineCode(new NoOperandFormat {}) {
       val opcode = self2.opcode
-      val mnemonic = self.mnemonic
+      val mnemonic = InstructionDefinition.this.mnemonic
     }
   }
   
-  abstract class TwoOps[-O1, -O2, -OpEn <: TwoOperandEncoding[O1, O2]]  extends x86Instruction {
+  abstract class _1[-O1, OpEn <: OneOperandEncoding[O1]]  extends x86Instruction {
     self2 =>
-    val mnemonic = self.mnemonic
+    val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
-    def apply[X, Y, OpEn2 <: TwoOperandEncoding[X, Y]](p1: Operand[X], p2: Operand[Y], format: TwoOperandFormat[X, Y, OpEn2], prefix: Seq[Prefix]) = {
+    
+    def apply[X <: O1](p1: Operand[X], format: OneOperandFormat[X, OpEn], prefix: Seq[Prefix]) = {
       val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-      new TwoMachineCode(p1, p2, format) {
+      new OneMachineCode(p1, format) {
         val opcode = self2.opcode
-        val mnemonic = self.mnemonic
+        val mnemonic = InstructionDefinition.this.mnemonic
         val prefix = resolvedPrefix
       }
     }
   }
   
-  abstract class OneOp[-O1, -OpEn <: OneOperandEncoding[O1]]  extends x86Instruction {
+  abstract class _2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]]  extends x86Instruction {
     self2 =>
-    val mnemonic = self.mnemonic
+    val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
-    def apply[X, OpEn2 <: OneOperandEncoding[X]](p1: Operand[X], format: OneOperandFormat[X, OpEn2], prefix: Seq[Prefix]) = {
+    
+    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: TwoOperandFormat[X, Y, OpEn], prefix: Seq[Prefix]) = {
       val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-      new OneMachineCode(p1, format) {
+      new TwoMachineCode(p1, p2, format) {
         val opcode = self2.opcode
-        val mnemonic = self.mnemonic
+        val mnemonic = InstructionDefinition.this.mnemonic
         val prefix = resolvedPrefix
       }
     }

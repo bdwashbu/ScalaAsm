@@ -2,11 +2,11 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-object JNZ extends OperandInstruction[OneOpcode]("JNZ") with jnzLow
+object JNZ extends InstructionDefinition[OneOpcode]("JNZ") with jnzLow
  
 trait jnzLow {
   
-  implicit object jnz1 extends JNZ.OneOp[imm8, I] {
+  implicit object jnz1 extends JNZ._1[imm8, I] {
       def opcode = 0x75
   }
 }

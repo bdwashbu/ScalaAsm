@@ -65,9 +65,9 @@ trait AsmProgram[Mode <: x86Mode] {
 
     def push(param: String) = Reference(param)
 
-    def jnz(labelRef: String)(implicit ev: JNZ.OneOp[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
+    def jnz(labelRef: String)(implicit ev: JNZ._1[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
 
-    def jz(labelRef: String)(implicit ev: JZ.OneOp[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
+    def jz(labelRef: String)(implicit ev: JZ._1[Constant8, I], format: OneOperandFormat[Constant8, I]) = LabelRef(labelRef, ev, format)
 
     def call(refName: String) = Reference(refName)
 

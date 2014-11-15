@@ -170,11 +170,11 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
           var result: Option[Relocation] = None
           token match {
             case InstructionToken(inst) => inst match {
-                case OneMachineCode(addr(name)) =>
+                case OneMachineCode(addr(name), _) =>
                   result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
-                case TwoMachineCode(addr(name), _) =>
+                case TwoMachineCode(addr(name), _, _) =>
                   result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
-                case TwoMachineCode(_, addr(name)) =>
+                case TwoMachineCode(_, addr(name), _) =>
                   result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
                 case _ =>
               }

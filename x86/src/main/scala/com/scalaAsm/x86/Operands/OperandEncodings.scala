@@ -18,15 +18,15 @@ class NoOperandFormat extends ResolvedZeroOperand(null, Seq()) {
 
 
 abstract class TwoOperandFormat[-X, -Y, -OpEn <: TwoOperandEncoding[X,Y]] {
-  def getAddressingForm(op1: X, op2: Y, opcode: OpcodeFormat): InstructionFormat
+  def getAddressingForm(op1: X, op2: Y, opcodeExtension: Byte): InstructionFormat
   def getPrefix(prefix: Seq[Prefix]): Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
-  def size(opcode: OpcodeFormat, prefix: Seq[Prefix]): Int
+  def size: Int
 }
 
 abstract class OneOperandFormat[-X, -OpEn <: OneOperandEncoding[X]] {
-  def getAddressingForm(op1: X, opcode: OpcodeFormat): InstructionFormat
+  def getAddressingForm(op1: X, opcodeExtension: Byte): InstructionFormat
   def getPrefix(prefix: Seq[Prefix]): Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
-  def size(opcode: OpcodeFormat, prefix: Seq[Prefix]): Int
+  def size: Int
 }
 
 abstract class ResolvedZeroOperand(opcode: OpcodeFormat, prefix: Seq[Prefix]) {

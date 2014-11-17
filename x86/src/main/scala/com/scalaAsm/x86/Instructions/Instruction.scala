@@ -23,8 +23,8 @@ trait x86Instruction {
   
   implicit def toPrefixSeq(x: Prefix) = Seq(x)
   implicit def toByte(x: Int) = x.toByte
-  implicit def toOneOpcode(x: Int): OneOpcode = OneOpcode(x.toByte)
-  implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
+  implicit def toOneOpcode(x: Int): OneOpcode = OneOpcode(x.toByte, prefix)
+  implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte, prefix)
 }
 
 case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mnemonic: String) extends InstructionResult {
@@ -41,19 +41,16 @@ case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mn
 case class OneMachineCode[O1, OpEn <: OneOperandEncoding[O1]](
     operand: Operand[O1],
     format: OneOperandFormat[O1, OpEn],
-    opcode: OpcodeFormat,
+    prefixAndOpcode: Array[Byte],
     mnemonic: String,
-    prefix: Seq[Prefix]) extends InstructionResult {
+    opcodeExtension: Byte) extends InstructionResult {
 
   def getSize: Int = {
-    format.size(opcode, prefix)
+    prefixAndOpcode.size + format.size
   }
 
   def getBytes: Array[Byte] = {
-    if (opcode.isInstanceOf[OpcodePlus] && operand.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
-      opcode.asInstanceOf[OpcodePlus].reg = operand.get.asInstanceOf[ModRM.reg]
-    }
-    format.getPrefix(prefix) ++: opcode.get ++: format.getAddressingForm(operand.get, opcode).getBytes
+      prefixAndOpcode ++: format.getAddressingForm(operand.get, opcodeExtension).getBytes
   }
 }
 
@@ -61,51 +58,74 @@ case class TwoMachineCode[O1, O2, OpEn <: TwoOperandEncoding[O1,O2]](
     operand: Operand[O1],
     operand2: Operand[O2],
     format: TwoOperandFormat[O1, O2, OpEn],
-    opcode: OpcodeFormat,
+    prefixAndOpcode: Array[Byte],
     mnemonic: String,
-    prefix: Seq[Prefix]) extends InstructionResult {
+    opcodeExtension: Byte) extends InstructionResult {
 
   def getSize: Int = {
-    format.size(opcode, prefix)
+    prefixAndOpcode.size + format.size
   }
 
   def getBytes: Array[Byte] = {
-    if (opcode.isOpcodePlus && operand.get.isInstanceOf[ModRM.reg]) { // this is even more hacky as hell!
-      opcode.asInstanceOf[OpcodePlus].reg = operand.get.asInstanceOf[ModRM.reg]
-    }
-    format.getPrefix(prefix) ++: opcode.get ++: format.getAddressingForm(operand.get, operand2.get, opcode).getBytes
+    prefixAndOpcode ++: format.getAddressingForm(operand.get, operand2.get, opcodeExtension).getBytes
   }
 }
 
 abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: String) {
-  self =>
 
   abstract class _0 extends x86Instruction {
-    self2 =>
     def opcode: Opcode
     val mnemonic = InstructionDefinition.this.mnemonic
     def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
   }
   
   abstract class _1[-O1, OpEn <: OneOperandEncoding[O1]]  extends x86Instruction {
-    self2 =>
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     
     def apply[X <: O1](p1: Operand[X], format: OneOperandFormat[X, OpEn], prefix: Seq[Prefix]) = {
-      val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-      OneMachineCode(p1, format, opcode, mnemonic, resolvedPrefix)
+      val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix    
+      
+      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
+        val opcodePlus = opcode.asInstanceOf[OpcodePlus]
+        opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg] 
+        val opcodeBytes = format.getPrefix(resolvedPrefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
+        if (!opcodePlus.opcodeExtension.isEmpty)
+          OneMachineCode(p1, format, opcodeBytes, mnemonic, opcodePlus.opcodeExtension.get)
+        else
+          OneMachineCode(p1, format, opcodeBytes, mnemonic, 0)
+      } else {
+        val opcodeBytes = format.getPrefix(resolvedPrefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
+        if (!opcode.opcodeExtension.isEmpty)
+          OneMachineCode(p1, format, opcodeBytes, mnemonic, opcode.opcodeExtension.get)
+        else
+          OneMachineCode(p1, format, opcodeBytes, mnemonic, 0)
+      }
     }
   }
   
   abstract class _2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]]  extends x86Instruction {
-    self2 =>
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: TwoOperandFormat[X, Y, OpEn], prefix: Seq[Prefix]) = {
-      val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-      TwoMachineCode(p1, p2, format, opcode, mnemonic, resolvedPrefix)
+      val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix   
+      
+      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
+        val opcodePlus = opcode.asInstanceOf[OpcodePlus]
+        opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
+        val opcodeBytes = format.getPrefix(resolvedPrefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
+        if (!opcodePlus.opcodeExtension.isEmpty)
+          TwoMachineCode(p1, p2, format, opcodeBytes, mnemonic, opcodePlus.opcodeExtension.get)
+        else
+          TwoMachineCode(p1, p2, format, opcodeBytes, mnemonic, 0)
+      } else {
+        val opcodeBytes = format.getPrefix(resolvedPrefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
+        if (!opcode.opcodeExtension.isEmpty)
+          TwoMachineCode(p1, p2, format, opcodeBytes, mnemonic, opcode.opcodeExtension.get)
+        else
+          TwoMachineCode(p1, p2, format, opcodeBytes, mnemonic, 0)
+      }
     }
   }
 }

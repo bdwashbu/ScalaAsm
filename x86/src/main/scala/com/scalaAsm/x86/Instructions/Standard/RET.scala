@@ -4,6 +4,6 @@ package Standard
 
 object RET extends InstructionDefinition[OneOpcode]("RET") {
   implicit object NearReturn extends _0 {
-      val opcode = OneOpcode(0xC3)
+      val opcode = OneOpcode(0xC3, Seq())
   }
 }

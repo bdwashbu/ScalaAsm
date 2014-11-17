@@ -10,6 +10,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object or extends TwoOperands[OR.type]
       object sub extends TwoOperands[SUB.type]
       object mul extends OneOperand[MUL.type]
+      object cmp extends TwoOperands[CMP.type]
       
       object push extends OneOperand[PUSH.type]
       object pushf extends ZeroOperands[PUSHF.type]

@@ -21,10 +21,10 @@ object Factorial extends AsmProgram[x86_32] {
       mov(eax, dword(1)),
       label("start"),
       cmp(ebx, byte(1)),
-      jl(end),
+      //jl(end),
       mul(ebx),
       dec(ebx),
-      jmp("start"),
+      //jmp("start"),
       label("end"),
       pop(ebp),
       retn(())

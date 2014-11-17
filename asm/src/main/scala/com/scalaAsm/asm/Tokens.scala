@@ -13,42 +13,42 @@ object Tokens {
   
   trait CodeToken extends Token
   case class Reference(name: String) extends CodeToken with InstructionResult {
-    def line = ""
+    def mnemonic = ""
     def getSize = 0
     def getBytes = Array()
   }
   case class Invoke(name: String) extends CodeToken with InstructionResult {
-    def line = ""
+    def mnemonic = ""
     def getSize = 0
     def getBytes = Array()
   }
   case class JmpRef(name: String) extends CodeToken
 
   case class ProcedureToken(name: String, innerCode: Seq[InstructionResult]) extends CodeToken with InstructionResult {
-    def line = ""
+    def mnemonic = ""
     def getSize = 0
     def getBytes = Array()
   }
   case class Label(name: String) extends CodeToken with InstructionResult {
-    def line = ""
+    def mnemonic = ""
     def getSize = 0
     def getBytes = Array()
   }
   case class LabelRef(labelRef: String, inst:InstructionDefinition[OneOpcode]#_1[Constant8, I], format: OneOperandFormat[Constant8, I]) extends CodeToken with InstructionResult {
-    def line = ""
+    def mnemonic = ""
     def getSize = 0
     def getBytes = Array()
   } 
   case class InstructionToken(inst: InstructionResult) extends SizedToken(inst.getSize) with CodeToken
   case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken with InstructionResult {
-    def line = ""
+    def mnemonic = ""
     def getSize = 0
     def getBytes = Array()
   }
   
   abstract class SizedToken(val size: Int) extends Token
   case class BeginProc(name: String) extends Token with InstructionResult {
-    def line = ""
+    def mnemonic = ""
     def getSize = 0
     def getBytes = Array()
   }

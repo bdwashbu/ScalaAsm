@@ -27,11 +27,7 @@ trait x86Instruction {
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte)
 }
 
-abstract case class ZeroMachineCode(format: ResolvedZeroOperand) extends InstructionResult {
-
-  def line = mnemonic
-  def opcode: OpcodeFormat
-  def mnemonic: String
+case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mnemonic: String) extends InstructionResult {
 
   def getSize: Int = {
     format.getPrefix.size + opcode.size
@@ -42,12 +38,12 @@ abstract case class ZeroMachineCode(format: ResolvedZeroOperand) extends Instruc
   }
 }
 
-abstract case class OneMachineCode[O1, OpEn <: OneOperandEncoding[O1]](operand: Operand[O1], format: OneOperandFormat[O1, OpEn]) extends InstructionResult {
-
-  val line = mnemonic
-  val opcode: OpcodeFormat
-  val mnemonic: String
-  val prefix: Seq[Prefix]
+case class OneMachineCode[O1, OpEn <: OneOperandEncoding[O1]](
+    operand: Operand[O1],
+    format: OneOperandFormat[O1, OpEn],
+    opcode: OpcodeFormat,
+    mnemonic: String,
+    prefix: Seq[Prefix]) extends InstructionResult {
 
   def getSize: Int = {
     format.size(opcode, prefix)
@@ -61,12 +57,13 @@ abstract case class OneMachineCode[O1, OpEn <: OneOperandEncoding[O1]](operand: 
   }
 }
 
-abstract case class TwoMachineCode[O1, O2, OpEn <: TwoOperandEncoding[O1,O2]](operand: Operand[O1], operand2: Operand[O2], format: TwoOperandFormat[O1, O2, OpEn]) extends InstructionResult {
-
-  val line = mnemonic
-  val opcode: OpcodeFormat
-  val mnemonic: String
-  val prefix: Seq[Prefix]
+case class TwoMachineCode[O1, O2, OpEn <: TwoOperandEncoding[O1,O2]](
+    operand: Operand[O1],
+    operand2: Operand[O2],
+    format: TwoOperandFormat[O1, O2, OpEn],
+    opcode: OpcodeFormat,
+    mnemonic: String,
+    prefix: Seq[Prefix]) extends InstructionResult {
 
   def getSize: Int = {
     format.size(opcode, prefix)
@@ -87,10 +84,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     self2 =>
     def opcode: Opcode
     val mnemonic = InstructionDefinition.this.mnemonic
-    def get = new ZeroMachineCode(new NoOperandFormat {}) {
-      val opcode = self2.opcode
-      val mnemonic = InstructionDefinition.this.mnemonic
-    }
+    def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
   }
   
   abstract class _1[-O1, OpEn <: OneOperandEncoding[O1]]  extends x86Instruction {
@@ -100,11 +94,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     
     def apply[X <: O1](p1: Operand[X], format: OneOperandFormat[X, OpEn], prefix: Seq[Prefix]) = {
       val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-      new OneMachineCode(p1, format) {
-        val opcode = self2.opcode
-        val mnemonic = InstructionDefinition.this.mnemonic
-        val prefix = resolvedPrefix
-      }
+      OneMachineCode(p1, format, opcode, mnemonic, resolvedPrefix)
     }
   }
   
@@ -115,11 +105,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: TwoOperandFormat[X, Y, OpEn], prefix: Seq[Prefix]) = {
       val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix
-      new TwoMachineCode(p1, p2, format) {
-        val opcode = self2.opcode
-        val mnemonic = InstructionDefinition.this.mnemonic
-        val prefix = resolvedPrefix
-      }
+      TwoMachineCode(p1, p2, format, opcode, mnemonic, resolvedPrefix)
     }
   }
 }

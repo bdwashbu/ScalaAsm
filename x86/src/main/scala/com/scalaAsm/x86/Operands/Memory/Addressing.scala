@@ -12,36 +12,9 @@ trait AbsoluteAddress[Size] extends AddressingMode[Size] with Operand[AbsoluteAd
   def displacement: Constant[Size]
   def get = this
 }
-//trait AbsoluteAddress32 extends AbsoluteAddress {
-//  self =>
-//  def displacement: Constant { type Size = self.Size}
-//    
-//  def getRelative = new Relative32 {
-//    def displacement = Constant32(self.displacement.asInt)
-//    def size = 4
-//  }
-//}
-//
-//trait AbsoluteAddress64 extends AbsoluteAddress {
-//  self =>
-//  def displacement: Constant { type Size = self.Size}
-//
-//  def getRelative = new Relative64 {
-//    def displacement = Constant64(self.displacement.asLong)
-//    def size = 8
-//  }
-//}
 
-
-
-
-
-
-trait Relative[S] extends RegisterOrMemory[S] with Operand[Relative[S]]{
+abstract class Relative[S: Numeric] extends RegisterOrMemory[S] with Operand[Relative[S]]{
   self =>
     def displacement: Constant[S]
     def get = this
 }
-
-trait Relative32 extends Relative[_32]
-trait Relative64 extends Relative[_64]

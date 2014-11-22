@@ -416,7 +416,7 @@ trait Formats extends LowPriorityFormats {
         var offset = 0
       def displacement = Constant32(offset)
         
-      def getRelative = new Relative32 {
+      def getRelative = new Relative[_32] {
         def displacement = Constant32(offset)
         def size = 4
       }
@@ -427,7 +427,7 @@ trait Formats extends LowPriorityFormats {
       var offset:Long = 0
       def displacement = Constant64(offset)
         
-      def getRelative = new Relative64 {
+      def getRelative = new Relative[_64] {
         def displacement = Constant64(offset)
         def size = 4
       }

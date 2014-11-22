@@ -3,7 +3,7 @@ package Operands
 
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 
-abstract class Register[S: Numeric](val name: String)
+abstract class Register[S: Numeric](val name: String) extends RegisterOrMemory[S]
 
 abstract class GeneralPurpose[S: Numeric](name: String) extends Register[S](name) {
   self =>
@@ -24,19 +24,19 @@ abstract class GeneralPurpose[S: Numeric](name: String) extends Register[S](name
   def getBaseIndex[Y: Numeric](const: Constant[Y]) = new BaseIndex(const) {}
 }
 
-abstract class GeneralPurposeA[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 0 } 
-abstract class GeneralPurposeB[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 3 }
-abstract class GeneralPurposeC[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 1 }
-abstract class GeneralPurposeD[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 2 }
+abstract class GeneralPurposeA[Size: Numeric](name: String) extends GeneralPurpose[Size](name)  { val ID = 0 } 
+abstract class GeneralPurposeB[Size: Numeric](name: String) extends GeneralPurpose[Size](name) { val ID = 3 }
+abstract class GeneralPurposeC[Size: Numeric](name: String) extends GeneralPurpose[Size](name) { val ID = 1 }
+abstract class GeneralPurposeD[Size: Numeric](name: String) extends GeneralPurpose[Size](name) { val ID = 2 }
 
-abstract class SourceIndex[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 6 }
-abstract class DestinationIndex[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 7 }
-abstract class BasePointer[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 5 }
-abstract class StackPointer[Size: Numeric](name: String) extends GeneralPurpose[Size](name) with RegisterOrMemory[Size] { val ID = 4 }
+abstract class SourceIndex[Size: Numeric](name: String) extends GeneralPurpose[Size](name) { val ID = 6 }
+abstract class DestinationIndex[Size: Numeric](name: String) extends GeneralPurpose[Size](name) { val ID = 7 }
+abstract class BasePointer[Size: Numeric](name: String) extends GeneralPurpose[Size](name) { val ID = 5 }
+abstract class StackPointer[Size: Numeric](name: String) extends GeneralPurpose[Size](name) { val ID = 4 }
 
-abstract class Extra64Reg(name: String) extends GeneralPurpose[_64](name) with RegisterOrMemory[_64]
+abstract class Extra64Reg(name: String) extends GeneralPurpose[_64](name)
 
-trait UniformByteRegister[Size] extends GeneralPurpose[Size] with RegisterOrMemory[Size]
+trait UniformByteRegister[Size] extends GeneralPurpose[Size]
 
 // "A" family - Accumulator for operands and results
 class RAX extends GeneralPurposeA[_64]("rax")

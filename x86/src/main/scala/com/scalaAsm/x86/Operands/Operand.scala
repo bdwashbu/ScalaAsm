@@ -63,4 +63,4 @@ case class Constant64(x: Long) extends Constant(x) {
   def negate = Constant64(getNegative)
 }
 
-trait RegisterOrMemory[Size]
+class RegisterOrMemory[Size: Numeric]

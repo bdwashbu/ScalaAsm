@@ -43,6 +43,7 @@ package object x86 {
   type r64 = GeneralPurpose[_64] with rm64
   
   type rel = Relative[_]
+  type rel8 = Relative[_8]
   type rel16 = Relative[_16]
   type rel32 = Relative[_32]
   type rel64 = Relative[_64]

@@ -52,11 +52,11 @@ push(rcx)
 
 It would be a compile time error because there is no PUSH implementation defined that takes a single 64-bit register.
 
-### Using Scala x86
+### ScalaAsm
 
 The hope is that Scala x86 can be used to implement a turing-complete programming language, but this is still an area of research.
 
-Scala x86 can be used to implement low-level assembly code. This assembly currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
+Scala x86 can be used to implement low-level assembly code. ScalaAsm currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
 
 Heres the a short 32-bit windows console "Hello world!":
 

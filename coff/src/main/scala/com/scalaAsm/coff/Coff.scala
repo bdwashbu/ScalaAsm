@@ -6,6 +6,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.immutable.SortedMap
 
 object Coff {
   def readCoff(filePath: String): Coff = { 
@@ -64,7 +65,7 @@ object Coff {
       result
     }.toMap
     
-    val symbols: Map[Int, CoffSymbol] = symbolTable.zipWithIndex.flatMap { entry => entry match {
+    val symbols: SortedMap[Int, CoffSymbol] = SortedMap(symbolTable.zipWithIndex.flatMap { entry => entry match {
       case (sym @ StandardSymbolEntry(symName,_,_,_,_,_), index) =>
         if (symName(0) == '\u0000' && symName(1) == '\u0000' && symName(2) == '\u0000' && symName(3) == '\u0000') {
           val bbuf2 = ByteBuffer.allocate(4)
@@ -83,7 +84,7 @@ object Coff {
         }
       case _ => None
       }
-    }.toMap
+    }: _*) // trick to turn a list into a SortedMap
     
     // resolve the strings
     val resolvedRelocations = relocations.toSeq map { reloc =>
@@ -123,7 +124,11 @@ case class Coff(sections: Seq[Section], relocations: Seq[Relocation], symbols: S
     val allSections = sections.map(_.contents).reduce(_++_)
     val allReloc = relocations.map(_.apply()).reduce(_++_)
     
-    outputStream.write(header() ++ sectionHeaders.map(_.write).reduce(_ ++ _) ++ allSections ++ allReloc)
+    val longSymbols = symbols.filter(_.name.length >= 8)
+    
+    val allSymbols = symbols.map(_.apply()).reduce(_++_)
+    
+    outputStream.write(header() ++ sectionHeaders.map(_.write).reduce(_ ++ _) ++ allSections ++ allReloc ++ allSymbols)
     outputStream.close()
   }
   

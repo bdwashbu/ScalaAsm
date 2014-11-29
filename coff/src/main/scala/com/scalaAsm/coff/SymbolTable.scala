@@ -7,6 +7,23 @@ case class CoffSymbol(name: String, location: Int, sectionNumber: Short, symbolT
   override def toString = {
     "CoffSymbol(\"" + name + "\", " + location + ", " + sectionNumber + ')'
   }
+  
+  def apply() = {
+    import scala.language.implicitConversions
+    val bbuf = ByteBuffer.allocate(18)
+    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+    if (name.length >= 8) {
+      bbuf.putInt(0)
+      bbuf.putInt(0)
+    } else {
+      bbuf.put(name.toCharArray() map (_.toByte))
+    }
+    bbuf.putInt(0)
+    bbuf.putShort(sectionNumber)
+    bbuf.putShort(symbolType.value)
+    bbuf.put(storageClass.value)
+    bbuf.array()
+  }
 }
 
 object StandardSymbolEntry {
@@ -29,6 +46,7 @@ object StandardSymbolEntry {
            storageClass match {
              case IMAGE_SYM_CLASS_STATIC => AuxiliarySectionDefinition.getAuxSectionDef(input)
              case IMAGE_SYM_CLASS_FILE => AuxiliaryFormatFiles.getAuxFormatFiles(input)
+             case _ => null
            }
          }
      )

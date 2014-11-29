@@ -45,6 +45,7 @@ object ScalaBasic {
       val outputStream2 = new DataOutputStream(new FileOutputStream("test2.exe"));
       
       val coff = Coff.readCoff("helloWorld32.obj")
+      coff.write("testCoff.o")
       val exe2 = linker.link(coff, 0x3000, false, "kernel32.dll", "msvcrt.dll")
       
       outputStream2.write(exe2.get)

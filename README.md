@@ -20,22 +20,27 @@ For the users, Scala x86 offers compile-time safety.  If bad operand types are p
 Heres an example of some PUSH instructions for 16-bit register, 8-bit immediate value, and 16-bit immediate value operands.
 
 ```scala
-implicit object push1 extends PUSH_1[r16, O] {
-  def opcode = 0x50 + rd
+implicit object push1 extends PUSH._1[r64, O] {
+  def opcode = 0x50 + ro
+  override val defaultsTo64Bit = true
+}
+
+implicit object push2 extends PUSH._1[r16, O] {
+  def opcode = 0x50 + rw
 }
   
-implicit object push2 extends PUSH_1[imm8, I] {
+implicit object push3 extends PUSH._1[imm8, I] {
   def opcode = 0x6A
 }
   
-implicit object push3 extends PUSH_1[imm16, I] {
+implicit object push4 extends PUSH._1[imm16, I] {
   def opcode = 0x68
 }
 ```
 
 [See more instructions](/x86/src/main/scala/com/scalaAsm/x86/Instructions/Standard "More instructions")
 
-Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with only the opcode sometimes gives us enough information to completely define the instruction!
+Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with only the opcode sometimes gives us enough information to completely define the instruction!  Scala x86 aims to make the common instructions easy to define, but allow for corner cases as well (such as the 'defaultsTo64Bit' modifer seen here on the 64-bit register version).
 
 ![Alt text](/example/push.png "PUSH examples")
 
@@ -47,10 +52,10 @@ The "Op/En" field is an abbreviation for the type of expected operands e.g "I" m
 Assuming those are the only versions of PUSH available, if you tried calling:
 
 ```scala
-push(rcx)
+push(ecx)
 ```
 
-It would be a compile time error because there is no PUSH implementation defined that takes a single 64-bit register.
+It would be a compile time error because there is no PUSH implementation defined that takes a single 32-bit register.
 
 ### ScalaAsm
 

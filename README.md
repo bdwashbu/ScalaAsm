@@ -1,17 +1,17 @@
 Scala x86 ![Alt text](/example/smooth-spiral.png)
 ========
 
-Welcome to the best Scala source for all things x86_64, Portable Executable (.exe), and COFF (.obj)!
+Welcome to the best Scala source for all things x86_64, Portable Executable (.exe), and COFF (.o)!
 
 Scala x86 is a back-end for a compiler.  Its a collection of libraries that one could write a programming language with.
 
-So far, theres a simple low-level assembly API written.  It can assemble x86 code into object files and then link it into an executable for windows 32 or 64-bit platforms.  
+ScalaAsm is the name of the simple low-level assembly API.  It can assemble x86 code into object files and then link it into an executable for windows 32 or 64-bit platforms.  
 
 #### Implementing x86
 
 Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set.  There are hundreds of instructions and each one could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10+ thousand instructions needing to be implemented if you want to be thorough.  The Intel x86 spec is 3300 pages, after all.
 
-For the implementers, Scala x86 strives to make the process of defining instructions as easy and simple as possible.  It was designed for this.  It resembles the Intel specification at all times.  When you have thousands of definitions like this, strong type safety and consise notation help reduce the chance of errors.  Scala x86 provides this, which is useful because there are still thousands of instructions that have yet to be implemented.
+For the implementers, Scala x86 strives to make the process of defining instructions as easy and simple as possible.  It was designed for this.  It resembles the Intel specification at all times.  When you have thousands of definitions like this, strong type safety and consise notation really help reduce the chance of errors.  Scala x86 provides this, which is useful because there are still thousands of instructions that have yet to be implemented.
 
 For the users, Scala x86 offers compile-time safety.  If bad operand types are passed into an instruction the Scala compiler will see this and flag an error, using type classes. 
 
@@ -52,11 +52,11 @@ push(rcx)
 
 It would be a compile time error because there is no PUSH implementation defined that takes a single 64-bit register.
 
-### Using Scala x86
+### ScalaAsm
 
 The hope is that Scala x86 can be used to implement a turing-complete programming language, but this is still an area of research.
 
-Scala x86 can be used to implement low-level assembly code. This assembly currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
+Scala x86 can be used to implement low-level assembly code. ScalaAsm currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
 
 Heres the a short 32-bit windows console "Hello world!":
 

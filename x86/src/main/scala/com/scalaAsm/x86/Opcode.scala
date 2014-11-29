@@ -15,6 +15,7 @@ sealed trait RegType
 case object rw extends RegType
 case object rd extends RegType
 case object rb extends RegType
+case object ro extends RegType
 
 case class OneOpcode(operand: Byte, prefix: Seq[Prefix]) extends OpcodeFormat {
   def get = Array(operand)

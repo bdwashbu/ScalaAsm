@@ -20,7 +20,7 @@ trait PUSHLow {
   
  trait PUSHHigh extends PUSHLow {
     implicit object push1 extends PUSH._1[r64, O] {
-        def opcode = 0x50 + rd
+        def opcode = 0x50 + ro
         override val defaultsTo64Bit = true
     }
     

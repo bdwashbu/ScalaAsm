@@ -21,8 +21,7 @@ Heres an example of some PUSH instructions for 64-bit register, 16-bit register,
 
 ```scala
 implicit object push1 extends PUSH._1[r64, O] {
-  def opcode = 0x50 + ro
-  override val defaultsTo64Bit = true
+  def opcode = 0x50 + rd
 }
 
 implicit object push2 extends PUSH._1[r16, O] {
@@ -40,7 +39,7 @@ implicit object push4 extends PUSH._1[imm16, I] {
 
 [See more instructions](/x86/src/main/scala/com/scalaAsm/x86/Instructions/Standard "More instructions")
 
-Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with only the opcode sometimes gives us enough information to completely define the instruction!  Scala x86 aims to make the common instructions easy to define, but allow for corner cases as well (such as the 'defaultsTo64Bit' modifer seen here on the 64-bit register version).
+Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with only the opcode sometimes gives us enough information to completely define the instruction!
 
 ![Alt text](/example/push.png "PUSH examples")
 

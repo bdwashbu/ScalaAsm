@@ -1,11 +1,11 @@
 Scala x86 ![Alt text](/example/smooth-spiral.png)
 ========
 
-Welcome to the best Scala source for all things x86_64, Portable Executable (.exe), and COFF (.o)!
+Welcome to the best Scala source for all things x64, Portable Executable (.exe), and COFF (.o)!
 
 Scala x86 is a back-end for a compiler.  Its a collection of libraries that one could write a programming language with.
 
-ScalaAsm is the name of the simple low-level assembly API.  It can assemble x86 code into object files and then link it into an executable for windows 32 or 64-bit platforms.  
+ScalaAsm is a simple low-level assembly API.  It can assemble x86 code into object files and then link it into an executable for windows 32 or 64-bit platforms.  
 
 #### Implementing x86
 

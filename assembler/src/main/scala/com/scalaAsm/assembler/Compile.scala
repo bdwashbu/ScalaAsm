@@ -5,7 +5,6 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Instructions.Standard.CALL
 import com.scalaAsm.x86.Operands.Constant32
 import com.scalaAsm.x86.Operands.Constant8
-import com.scalaAsm.coff.Assembled
 import com.scalaAsm.asm.Registers
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
@@ -201,13 +200,13 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
       }
     
     Coff(
-      symbols = symbols,
+      sections = Seq(codeSection, dataSection),
       relocations = getRelocations,
-      sections = Seq(codeSection, dataSection)
+      symbols = symbols     
     )
   }
 
-  def compileData(dataTokens: Seq[Token]): (Array[Byte], Seq[CoffSymbol]) = {
+  private def compileData(dataTokens: Seq[Token]): (Array[Byte], Seq[CoffSymbol]) = {
 
     // Here, we implicitly add a "KEEP" variable to hold results
     
@@ -244,6 +243,6 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
     (data, createDefMap(dataSection))
   }
 
-  case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
+  private case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
 
 }

@@ -7,7 +7,7 @@ import java.nio.ByteOrder
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
 
-object Assembled {
+object Coff {
   def readCoff(filePath: String): Coff = { 
     
     val file = new File(filePath);
@@ -92,13 +92,39 @@ object Assembled {
         symbols(reloc.symbolIndex),
         reloc.reloationType) }
     
-    Coff(sections, symbols.values.toSeq, resolvedRelocations, None)
+    Coff(sections, resolvedRelocations, symbols.values.toSeq, None)
   }
 }
 
-case class Coff(sections: Seq[Section], symbols: Seq[CoffSymbol], relocations: Seq[Relocation], val iconPath: Option[String] = None) {
+case class Coff(sections: Seq[Section], relocations: Seq[Relocation], symbols: Seq[CoffSymbol], val iconPath: Option[String] = None) {
   def addIcon(path: String): Coff = {
-    Coff(sections, symbols, relocations, Option(path))
+    Coff(sections, relocations, symbols, Option(path))
+  }
+  
+  def write(fileName: String) = {
+    import java.io._
+    val is64Bit = false
+    
+    val outputStream = new DataOutputStream(new FileOutputStream(fileName));
+    
+    val header = CoffHeader(
+      machine = if (is64Bit) 0x8664.toShort else 0x14C,
+      numberOfSections = sections.size.toShort,
+      timeDateStamp = 0x535BF29F,
+      pointerToSymbolTable = 0, // no importance
+      numberOfSymbols = symbols.size, // no importance
+      sizeOfOptionalHeader = 0,
+      characteristics = if (is64Bit) 47 else 271)
+      
+    val sectionHeaders = sections map { section =>
+      section.header
+    }
+    
+    val allSections = sections.map(_.contents).reduce(_++_)
+    val allReloc = relocations.map(_.apply()).reduce(_++_)
+    
+    outputStream.write(header() ++ sectionHeaders.map(_.write).reduce(_ ++ _) ++ allSections ++ allReloc)
+    outputStream.close()
   }
   
   override def toString: String = {

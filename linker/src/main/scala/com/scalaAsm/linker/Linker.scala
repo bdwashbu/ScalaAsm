@@ -12,7 +12,6 @@ import com.scalaAsm.portableExe.ImageDataDirectory
 import com.scalaAsm.portableExe.FileHeader
 import com.scalaAsm.portableExe.NtHeader
 import com.scalaAsm.portableExe.sections.ResourceGen
-import com.scalaAsm.coff.Assembled
 import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer

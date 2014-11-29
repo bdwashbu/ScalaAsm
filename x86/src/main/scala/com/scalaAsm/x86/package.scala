@@ -8,7 +8,7 @@ package object x86 {
   import Operands._
   import Operands.Memory.Relative
 
-  // Many of these can be found in section 3.1.1.3 of the Intel x86 manual
+  // These can be found in section 3.1.1.3 of the Intel x86 manual
   
   type imm = Constant[_]
   type imm8 = Constant[_8]
@@ -21,16 +21,7 @@ package object x86 {
   type rm16 = RegisterOrMemory[_16]
   type rm32 = RegisterOrMemory[_32]
   type rm64 = RegisterOrMemory[_64]
-  
-//  sealed trait OperandSize {
-//    type primitiveType
-//  }
-//  
-//  type ByteOperand = OperandSize { type primitiveType = Byte }
-//  type WordOperand = OperandSize { type primitiveType = Short }
-//  type DwordOperand = OperandSize { type primitiveType = Int }
-//  type QwordOperand = OperandSize { type primitiveType = Long }
-  
+
   type _8 = Byte
   type _16 = Short
   type _32 = Int

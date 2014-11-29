@@ -51,7 +51,7 @@
 //	      call("waitForKeypress")
 //	      push("newline")
 //	      call("flushBuffer")
-//	      push(imm8(0))
+//	      push(Imm8(0))
 //	      call("ExitProcess")
 //	    }
 //	
@@ -75,28 +75,28 @@
 //	          
 //	          inst match {
 //	            case ADD(IMM(x),IMM(y)) => {
-//	              mov(resultReg, imm32(x.toInt))
-//			      add(resultReg, imm8(y.toInt))
+//	              mov(resultReg, Imm32(x.toInt))
+//			      add(resultReg, Imm8(y.toInt))
 //	              RESULT(resultReg)
 //	            }
 //	            case MINUS(IMM(x),IMM(y)) => {
-//	              mov(resultReg, imm32(x.toInt))
-//			      sub(resultReg, imm8(y.toInt))
+//	              mov(resultReg, Imm32(x.toInt))
+//			      sub(resultReg, Imm8(y.toInt))
 //	              RESULT(resultReg)
 //	            }
 //	            case TIMES(IMM(x),IMM(y)) => {
-//		             mov(eax, imm32(x.toInt))
-//				     mov(resultReg, imm32(y.toInt))
+//		             mov(eax, Imm32(x.toInt))
+//				     mov(resultReg, Imm32(y.toInt))
 //				     mul(resultReg)  
 //				     mov(resultReg, eax)
 //				     RESULT(resultReg)
 //	            }
 //	            case ADD(IMM(x),RESULT(y)) => {
 //	              if (resultReg != y) {
-//		              mov(resultReg, imm32(x.toInt))
+//		              mov(resultReg, Imm32(x.toInt))
 //				      add(resultReg, y)
 //	              } else {
-//	                add(resultReg, imm8(x.toInt))
+//	                add(resultReg, Imm8(x.toInt))
 //	              }
 //	              RESULT(resultReg)
 //	            }
@@ -105,24 +105,24 @@
 //	            }
 //	            case MINUS(IMM(x),RESULT(y)) => {
 //	              if (resultReg != y) {
-//		              mov(resultReg, imm32(x.toInt))
+//		              mov(resultReg, Imm32(x.toInt))
 //				      sub(resultReg, y)
 //	              } else {
-//	                sub(resultReg, imm8(x.toInt))
+//	                sub(resultReg, Imm8(x.toInt))
 //	              }
 //	              RESULT(resultReg)
 //	            }
 //	            case MINUS(RESULT(x),IMM(z)) => {
 //	              if (resultReg != x) {
 //		              mov(resultReg, x)
-//				      sub(resultReg, imm8(z.toInt))
+//				      sub(resultReg, Imm8(z.toInt))
 //	              } else {
-//	                sub(resultReg, imm8(z.toInt))
+//	                sub(resultReg, Imm8(z.toInt))
 //	              }
 //	              RESULT(resultReg)
 //	            }
 //	            case TIMES(IMM(x),RESULT(y)) => {
-//	                 mov(eax, imm32(x.toInt))
+//	                 mov(eax, Imm32(x.toInt))
 //				     mov(resultReg, y)
 //				     mul(resultReg)  
 //				     mov(resultReg, eax)
@@ -168,7 +168,7 @@
 //	      push(transformed.reg)
 //	      push("helloWorld")
 //	      call("printf")
-//	      add(esp, imm8(8))
+//	      add(esp, Imm8(8))
 //	      retn
 //	    }
 //	    
@@ -229,18 +229,18 @@
 //      val numberOfBytesWritten = *(ebp + byte(-8))
 //      val hFile = *(ebp + byte(-4))
 //      val lpBuffer = *(ebp + byte(8))
-//      val STD_OUTPUT_HANDLE = imm8(-11)
+//      val STD_OUTPUT_HANDLE = Imm8(-11)
 //
 //      push(ebp)
 //      mov(ebp, esp)
-//      add(esp, imm8(-12))
+//      add(esp, Imm8(-12))
 //      push(STD_OUTPUT_HANDLE)
 //      call("GetStdHandle")
 //      mov(hFile, eax)
 //      push(lpBuffer)
 //      call("strlen")
 //      mov(numberOfBytesToWrite, eax)
-//      push(imm8(0))
+//      push(Imm8(0))
 //      lea(eax, numberOfBytesWritten)
 //      push(eax)
 //      push(numberOfBytesToWrite)
@@ -249,24 +249,24 @@
 //      call("WriteFile")
 //      mov(eax, numberOfBytesWritten)
 //      leave
-//      retn(imm16(4))
+//      retn(Imm16(4))
 //    }
 //
 //    align(0x10)
 //
 //    proc("waitForKeypress") {
 //
-//      val STD_INPUT_HANDLE = imm8(-10)
+//      val STD_INPUT_HANDLE = Imm8(-10)
 //
 //      push(STD_INPUT_HANDLE)
 //      call("GetStdHandle")
 //      push(eax)
 //      call("FlushConsoleInputBuffer")
-//      push(imm8(1))
+//      push(Imm8(1))
 //      call("Sleep")
 //      call("_kbhit")
 //      test(eax, eax)
-//      jz(imm8(-17))
+//      jz(Imm8(-17))
 //      call("_getch")
 //      retn
 //    }
@@ -279,13 +279,13 @@
 //      lea(edx, *(eax + byte(3)))
 //      push(ebp)
 //      push(edi)
-//      mov(ebp, imm32(0x80808080))
+//      mov(ebp, Imm32(0x80808080))
 //
 //      label("start")
 //
 //      for (i <- 0 until 3) {
 //        mov(edi, *(eax)) // read first 4 bytes
-//        add(eax, imm8(4)) // increment pointer
+//        add(eax, Imm8(4)) // increment pointer
 //        lea(ecx, *(edi - dword(0x1010101))) // subtract 1 from each byte
 //        not(edi) // invert all bytes
 //        and(ecx, edi)
@@ -294,7 +294,7 @@
 //      }
 //
 //      mov(edi, *(eax))
-//      add(eax, imm8(4))
+//      add(eax, Imm8(4))
 //      lea(ecx, *(edi - dword(0x1010101)))
 //      not(edi)
 //      and(ecx, edi)
@@ -302,16 +302,16 @@
 //      jz("start")
 //
 //      label("test")
-//      test(ecx, imm32(0x8080)) // test first 2 bytes
+//      test(ecx, Imm32(0x8080)) // test first 2 bytes
 //      jnz("end")
-//      shr(ecx, imm8(0x10))
-//      add(eax, imm8(2))
+//      shr(ecx, Imm8(0x10))
+//      add(eax, Imm8(2))
 //      label("end")
 //      shl(cl, One)
 //      sbb(eax, edx) // compute length
 //      pop(edi)
 //      pop(ebp)
-//      retn(imm16(4))
+//      retn(Imm16(4))
 //    }
 //
 //    align(2)

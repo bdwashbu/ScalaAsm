@@ -3,7 +3,7 @@ package Instructions
 package Standard
 
 import com.scalaAsm.x86.Operands.EAX
-import com.scalaAsm.x86.Operands.GeneralPurposeA
+import com.scalaAsm.x86.Operands.AccumulatorRegister
 import com.scalaAsm.x86.Operands.RAX
 
 object ADD extends InstructionDefinition[OneOpcode]("ADD") with AddOptimization
@@ -24,11 +24,11 @@ trait AddLow {
 }
 
 trait AddMedium extends AddLow {
-  implicit object add4 extends ADD._2[GeneralPurposeA[_], imm32, I2] { // convenience opcode, 1 byte shorter (no modRM byte)
+  implicit object add4 extends ADD._2[AccumulatorRegister[_], imm32, I2] { // convenience opcode, 1 byte shorter (no modRM byte)
       def opcode = 0x05
   }
   
-  implicit object add5 extends ADD._2[GeneralPurposeA[_], imm8, I2] { // convenience opcode, 1 byte shorter (no modRM byte)
+  implicit object add5 extends ADD._2[AccumulatorRegister[_], imm8, I2] { // convenience opcode, 1 byte shorter (no modRM byte)
       def opcode = 0x04
   }
 }

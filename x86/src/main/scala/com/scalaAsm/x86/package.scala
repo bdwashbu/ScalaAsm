@@ -27,11 +27,11 @@ package object x86 {
   type _32 = Int
   type _64 = Long
   
-  type r = GPR with rm
-  type r8 = GeneralPurpose[_8] with rm8
-  type r16 = GeneralPurpose[_16] with rm16
-  type r32 = GeneralPurpose[_32] with rm32
-  type r64 = GeneralPurpose[_64] with rm64
+  type r = GPR
+  type r8 = GeneralPurpose[_8]
+  type r16 = GeneralPurpose[_16]
+  type r32 = GeneralPurpose[_32]
+  type r64 = GeneralPurpose[_64]
   
   type rel = Relative[_]
   type rel8 = Relative[_8]

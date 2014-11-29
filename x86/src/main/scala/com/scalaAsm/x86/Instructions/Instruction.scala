@@ -18,7 +18,6 @@ trait InstructionField {
 trait x86Instruction {
   import scala.language.implicitConversions
   val mnemonic: String
-  val defaultsTo64Bit = false
   def prefix = Seq[Prefix]()
   
   implicit def toPrefixSeq(x: Prefix) = Seq(x)
@@ -83,17 +82,16 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     
-    def apply[X <: O1](p1: Operand[X], format: OneOperandFormat[X, OpEn], prefix: Seq[Prefix]) = {
-      val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix    
+    def apply[X <: O1](p1: Operand[X], format: OneOperandFormat[X, OpEn], prefix: Seq[Prefix]) = {  
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
       
       if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
         opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg] 
-        val opcodeBytes = format.getPrefix(resolvedPrefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
+        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
         OneMachineCode(p1, format, opcodeBytes, mnemonic, opEx)
       } else {
-        val opcodeBytes = format.getPrefix(resolvedPrefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
+        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
         OneMachineCode(p1, format, opcodeBytes, mnemonic, opEx)
       }
     }
@@ -104,16 +102,15 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def opcode: Opcode
     
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: TwoOperandFormat[X, Y, OpEn], prefix: Seq[Prefix]) = {
-      val resolvedPrefix: Seq[Prefix] = if (defaultsTo64Bit) Seq() else prefix   
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
       
       if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
         opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
-        val opcodeBytes = format.getPrefix(resolvedPrefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
+        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
         TwoMachineCode(p1, p2, format, opcodeBytes, mnemonic, opEx)
       } else {
-        val opcodeBytes = format.getPrefix(resolvedPrefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
+        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
         TwoMachineCode(p1, p2, format, opcodeBytes, mnemonic, opEx)
       }
     }

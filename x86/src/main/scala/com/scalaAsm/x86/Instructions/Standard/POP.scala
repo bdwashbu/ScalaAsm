@@ -14,7 +14,6 @@ trait popLow {
 
   implicit object pop3 extends POP._1[r64, O] {
     def opcode = 0x58 + rd
-    override val defaultsTo64Bit = true
   }
 
   implicit object pop2 extends POP._1[DS, DSFormat] {

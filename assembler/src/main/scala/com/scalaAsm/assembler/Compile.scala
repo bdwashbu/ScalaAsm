@@ -156,10 +156,10 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
       , rawData)
       
       val symbols = (compiledAsm.positionPass collect {
-        case Proc(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL);
-        case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)
-        case InvokeRef(offset,name) => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)
-        case ImportRef(offset,name) => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)
+        case Proc(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL, Nil);
+        case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL, Nil)
+        case InvokeRef(offset,name) => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL, Nil)
+        case ImportRef(offset,name) => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL, Nil)
       }) ++ variablesSymbols
       
       def getRelocations: Seq[Relocation] = {
@@ -235,7 +235,7 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): Seq[CoffSymbol] = {
         dataSection flatMap {
-          case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 1, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)) // need the +8?
+          case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 1, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL, Nil))
           case _ => None
         }
     }

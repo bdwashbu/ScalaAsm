@@ -40,60 +40,46 @@ object Coff {
          yield RelocationEntry.getRelocationEntry(bbuf)
     }
     
-    val symbolTable = new ListBuffer[SymbolEntry]()
+    val symbolTable = new ListBuffer[(Int, StandardSymbolEntry)]()
     
+    // read the symbols, including auxiliary entries
     var symbolCount = 0
     while (symbolCount < coffHeader.numberOfSymbols) {
-      val newSymbol = StandardSymbolEntry.getSymbolEntry(bbuf)
+      val newSymbol = StandardSymbolEntry.getSymbolEntry(bbuf) 
+      symbolTable += ((symbolCount, newSymbol))
       symbolCount += 1 + newSymbol.auxiliarySymbols.size
-      println(symbolCount)
-      symbolTable ++= (newSymbol +: newSymbol.auxiliarySymbols)
     }
     
-    
-    
+    // read string table
     val sizeOfStrings = bbuf.getInt()
-    println("size: " + sizeOfStrings)
     val stringData = Array.fill[Byte](sizeOfStrings - 4)(0)
     bbuf.get(stringData, 0, sizeOfStrings - 4)
     
-    
+    // Create a map from the strings position to the string
     var stringPos = 4
-    val strings = new String(stringData).split('\u0000').map{ str =>
+    val stringPositionMap = new String(stringData).split('\u0000').map{ str =>
       val result = (stringPos, str)
       stringPos += str.length() + 1
       result
     }.toMap
     
-    val symbols: SortedMap[Int, CoffSymbol] = SortedMap(symbolTable.zipWithIndex.flatMap { entry => entry match {
-      case (sym @ StandardSymbolEntry(symName,_,_,_,_,_), index) =>
-        if (symName(0) == '\u0000' && symName(1) == '\u0000' && symName(2) == '\u0000' && symName(3) == '\u0000') {
-          val bbuf2 = ByteBuffer.allocate(4)
-          bbuf2.order(ByteOrder.LITTLE_ENDIAN)
-          bbuf2.put(symName(4).toByte)
-          bbuf2.put(symName(5).toByte)
-          bbuf2.put(symName(6).toByte)
-          bbuf2.put(symName(7).toByte)
-          bbuf2.rewind()
-          val offset = bbuf2.getInt()
-          val copy = sym.copy(name = strings(offset))
-          Some(index, CoffSymbol(copy.name, copy.value, copy.sectionNumber, copy.symbolType, copy.storageClass))
-        } else {
-          val copy = sym.copy(name = sym.name.trim)
-          Some(index, CoffSymbol(copy.name, copy.value, copy.sectionNumber, copy.symbolType, copy.storageClass))
-        }
-      case _ => None
+    val symbolMap: SortedMap[Int, CoffSymbol] = SortedMap(symbolTable.map { case (index, sym) =>
+      val copy = if (sym.isStringReference) {
+        sym.copy(name = stringPositionMap(sym.getStringOffset))
+      } else {
+        sym.copy(name = sym.name.trim)
       }
-    }: _*) // trick to turn a list into a SortedMap
+      (index, (CoffSymbol(copy.name, copy.value, copy.sectionNumber, copy.symbolType, copy.storageClass, copy.auxiliarySymbols)))
+    }: _*)
     
     // resolve the strings
     val resolvedRelocations = relocations.toSeq map { reloc =>
       Relocation (
         reloc.referenceAddress,
-        symbols(reloc.symbolIndex),
+        symbolMap(reloc.symbolIndex),
         reloc.reloationType) }
     
-    Coff(sections, resolvedRelocations, symbols.values.toSeq, None)
+    Coff(sections, resolvedRelocations, symbolMap.values.toSeq, None)
   }
 }
 

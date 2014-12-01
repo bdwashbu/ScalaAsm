@@ -3,7 +3,7 @@ package com.scalaAsm.coff
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-case class CoffSymbol(name: String, location: Int, sectionNumber: Short, symbolType: SymbolType, storageClass: StorageClass) {
+case class CoffSymbol(name: String, location: Int, sectionNumber: Short, symbolType: SymbolType, storageClass: StorageClass, auxillary: Seq[AuxiliarySymbol]) {
   override def toString = {
     "CoffSymbol(\"" + name + "\", " + location + ", " + sectionNumber + ')'
   }
@@ -23,33 +23,6 @@ case class CoffSymbol(name: String, location: Int, sectionNumber: Short, symbolT
     bbuf.putShort(symbolType.value)
     bbuf.put(storageClass.value)
     bbuf.array()
-  }
-}
-
-object StandardSymbolEntry {
-  def getSymbolEntry(input: ByteBuffer): StandardSymbolEntry = {
-     val rawName = Array.fill(8)(0.toByte)
-     input.get(rawName)
-     val name = rawName map(_.toChar) mkString
-     val value = input.getInt()
-     val sectionNumber = input.getShort()
-     val symbolType = SymbolType(input.getShort())
-     val storageClass = StorageClass(input.get())
-     val numAuxiliary = input.get()
-     StandardSymbolEntry(
-         name,
-         value,
-         sectionNumber,
-         symbolType,
-         storageClass,
-         auxiliarySymbols = for (i <- 0 until numAuxiliary) yield {
-           storageClass match {
-             case IMAGE_SYM_CLASS_STATIC => AuxiliarySectionDefinition.getAuxSectionDef(input)
-             case IMAGE_SYM_CLASS_FILE => AuxiliaryFormatFiles.getAuxFormatFiles(input)
-             case _ => null
-           }
-         }
-     )
   }
 }
 
@@ -87,6 +60,33 @@ object StorageClass {
   }
 }
 
+object StandardSymbolEntry {
+  def getSymbolEntry(input: ByteBuffer): StandardSymbolEntry = {
+     val rawName = Array.fill(8)(0.toByte)
+     input.get(rawName)
+     val name = rawName map(_.toChar) mkString
+     val value = input.getInt()
+     val sectionNumber = input.getShort()
+     val symbolType = SymbolType(input.getShort())
+     val storageClass = StorageClass(input.get())
+     val numAuxiliary = input.get()
+     StandardSymbolEntry(
+         name,
+         value,
+         sectionNumber,
+         symbolType,
+         storageClass,
+         auxiliarySymbols = for (i <- 0 until numAuxiliary) yield {
+           storageClass match {
+             case IMAGE_SYM_CLASS_STATIC => AuxiliarySectionDefinition.getAuxSectionDef(input)
+             case IMAGE_SYM_CLASS_FILE => AuxiliaryFormatFiles.getAuxFormatFiles(input)
+             case _ => null
+           }
+         }
+     )
+  }
+}
+
 trait SymbolEntry 
 
 case class StandardSymbolEntry (
@@ -108,7 +108,20 @@ case class StandardSymbolEntry (
     bbuf.put(storageClass.value)
     bbuf.put(auxiliarySymbols.size.toByte)
     bbuf.array()
-  } 
+  }
+  
+  def isStringReference = name(0) == '\u0000' && name(1) == '\u0000' && name(2) == '\u0000' && name(3) == '\u0000'
+    
+  def getStringOffset = {
+    val bbuf2 = ByteBuffer.allocate(4)
+    bbuf2.order(ByteOrder.LITTLE_ENDIAN)
+    bbuf2.put(name(4).toByte)
+    bbuf2.put(name(5).toByte)
+    bbuf2.put(name(6).toByte)
+    bbuf2.put(name(7).toByte)
+    bbuf2.rewind()
+    bbuf2.getInt()
+  }
 }
 
 trait AuxiliarySymbol extends SymbolEntry

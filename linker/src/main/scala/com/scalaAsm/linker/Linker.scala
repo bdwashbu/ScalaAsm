@@ -68,7 +68,7 @@ class Linker {
     var offset = 0x3000
     val importSymbols = executableImports.importSymbols.flatMap { sym => 
       if (!sym.name.contains(".dll")) {
-        val result = CoffSymbol(sym.name.trim, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL)
+        val result = CoffSymbol(sym.name.trim, offset, 0, IMAGE_SYM_DTYPE_FUNCTION, IMAGE_SYM_CLASS_EXTERNAL, Nil)
         offset += 6
         Some(result)
       } else None

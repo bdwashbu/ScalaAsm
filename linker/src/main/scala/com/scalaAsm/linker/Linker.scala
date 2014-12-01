@@ -83,7 +83,7 @@ class Linker {
       
       val otherStuff = newRefSymbols.diff(vars)
       
-      (vars ++ otherStuff).map{sym => (sym.name, sym.location)}.toMap
+      (vars ++ otherStuff).map{sym => (sym.name, sym.value)}.toMap
     }
     
     val resources = objFile.iconPath map (path => Option(ResourceGen.compileResources(0x4000, path))) getOrElse None

@@ -40,12 +40,12 @@ object Coff {
          yield RelocationEntry.getRelocationEntry(bbuf)
     }
     
-    val symbolTable = new ListBuffer[(Int, StandardSymbolEntry)]()
+    val symbolTable = new ListBuffer[(Int, CoffSymbol)]()
     
     // read the symbols, including auxiliary entries
     var symbolCount = 0
     while (symbolCount < coffHeader.numberOfSymbols) {
-      val newSymbol = StandardSymbolEntry.getSymbolEntry(bbuf) 
+      val newSymbol = CoffSymbol.getSymbolEntry(bbuf) 
       symbolTable += ((symbolCount, newSymbol))
       symbolCount += 1 + newSymbol.auxiliarySymbols.size
     }
@@ -63,6 +63,7 @@ object Coff {
       result
     }.toMap
     
+    // resolve the 'name' field and create a map from a symbols index to the CoffSymbol
     val symbolMap: SortedMap[Int, CoffSymbol] = SortedMap(symbolTable.map { case (index, sym) =>
       val copy = if (sym.isStringReference) {
         sym.copy(name = stringPositionMap(sym.getStringOffset))
@@ -72,7 +73,7 @@ object Coff {
       (index, (CoffSymbol(copy.name, copy.value, copy.sectionNumber, copy.symbolType, copy.storageClass, copy.auxiliarySymbols)))
     }: _*)
     
-    // resolve the strings
+    // resolve the relocations based on the relocation's index
     val resolvedRelocations = relocations.toSeq map { reloc =>
       Relocation (
         reloc.referenceAddress,

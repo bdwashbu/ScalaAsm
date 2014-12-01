@@ -3,29 +3,6 @@ package com.scalaAsm.coff
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-case class CoffSymbol(name: String, location: Int, sectionNumber: Short, symbolType: SymbolType, storageClass: StorageClass, auxillary: Seq[AuxiliarySymbol]) {
-  override def toString = {
-    "CoffSymbol(\"" + name + "\", " + location + ", " + sectionNumber + ')'
-  }
-  
-  def apply() = {
-    import scala.language.implicitConversions
-    val bbuf = ByteBuffer.allocate(18)
-    bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    if (name.length >= 8) {
-      bbuf.putInt(0)
-      bbuf.putInt(0)
-    } else {
-      bbuf.put(name.toCharArray() map (_.toByte))
-    }
-    bbuf.putInt(0)
-    bbuf.putShort(sectionNumber)
-    bbuf.putShort(symbolType.value)
-    bbuf.put(storageClass.value)
-    bbuf.array()
-  }
-}
-
 sealed abstract class SymbolType(val value: Short)
 case object IMAGE_SYM_DTYPE_NULL extends SymbolType(0)
 case object IMAGE_SYM_DTYPE_POINTER extends SymbolType(1)
@@ -60,8 +37,8 @@ object StorageClass {
   }
 }
 
-object StandardSymbolEntry {
-  def getSymbolEntry(input: ByteBuffer): StandardSymbolEntry = {
+object CoffSymbol {
+  def getSymbolEntry(input: ByteBuffer): CoffSymbol = {
      val rawName = Array.fill(8)(0.toByte)
      input.get(rawName)
      val name = rawName map(_.toChar) mkString
@@ -70,7 +47,7 @@ object StandardSymbolEntry {
      val symbolType = SymbolType(input.getShort())
      val storageClass = StorageClass(input.get())
      val numAuxiliary = input.get()
-     StandardSymbolEntry(
+     CoffSymbol(
          name,
          value,
          sectionNumber,
@@ -89,7 +66,7 @@ object StandardSymbolEntry {
 
 trait SymbolEntry 
 
-case class StandardSymbolEntry (
+case class CoffSymbol (
     name: String,
     value: Int,
     sectionNumber: Short,
@@ -97,11 +74,20 @@ case class StandardSymbolEntry (
     storageClass: StorageClass,
     auxiliarySymbols: Seq[AuxiliarySymbol]) extends SymbolEntry {
   
+  override def toString = {
+    "CoffSymbol(\"" + name + "\", " + value + ", " + sectionNumber + ')'
+  }
+  
   def apply() = {
     import scala.language.implicitConversions
     val bbuf = ByteBuffer.allocate(18)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    bbuf.put(name.toCharArray() map (_.toByte))
+    if (name.length >= 8) {
+      bbuf.putInt(0)
+      bbuf.putInt(0)
+    } else {
+      bbuf.put(name.toCharArray() map (_.toByte))
+    }
     bbuf.putInt(value)
     bbuf.putShort(sectionNumber)
     bbuf.putShort(symbolType.value)

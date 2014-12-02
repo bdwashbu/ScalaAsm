@@ -74,11 +74,33 @@ object CoffSymbol {
       tablePositions ++: Seq((stringTablePos, string))
       stringTablePos += string.size
     }
+    
+    val posBuffer = ListBuffer[(String, Int)]()
+    var currentPos = 4
+    for (sym <- longSymbols) {
+      posBuffer += ((sym.name, currentPos))
+      currentPos += sym.name.length + 1
+    }
+    val stringTableMap = posBuffer.toMap
+    
     val stringTable = longSymbols.map(_.name.toCharArray().map(_.toByte) ++: Array('\u0000'.toByte)).reduce(_ ++ _)
     
     val tableLength = ByteBuffer.allocate(4)
     tableLength.order(ByteOrder.LITTLE_ENDIAN)
     tableLength.putInt(stringTable.length + 4)
+    
+    // resolve symbols
+    symbols.foreach{ sym =>
+      if (sym.name.length > 8) {
+        val bbuf = ByteBuffer.allocate(8)
+        bbuf.order(ByteOrder.LITTLE_ENDIAN)
+        bbuf.putInt(0)
+        bbuf.putInt(stringTableMap(sym.name))
+        sym.nameOrOffset = bbuf.array()
+      } else {
+        sym.nameOrOffset = sym.name.toCharArray().padTo(8, 0.toChar) map (_.toByte)
+      }
+    }
     
     val allSymbols = symbols.map(_.write).reduce(_++_)
     allSymbols ++ tableLength.array() ++ stringTable
@@ -100,6 +122,8 @@ case class CoffSymbol (
     storageClass: StorageClass,
     auxiliarySymbols: Seq[SymbolEntry]) extends SymbolEntry {
   
+  var nameOrOffset = Array[Byte]()
+  
   override def toString = {
     "CoffSymbol(\"" + name + "\", " + value + ", " + sectionNumber + ')'
   }
@@ -107,12 +131,8 @@ case class CoffSymbol (
   def write: Array[Byte] = {
     import scala.language.implicitConversions
     bbuf.rewind()
-    if (name.length >= 8) {
-      bbuf.putInt(0)
-      bbuf.putInt(0)
-    } else {
-      bbuf.put(name.toCharArray().padTo(8, 0.toChar) map (_.toByte))
-    }
+    // if the name is 8 char or longer, assume this is the position
+    bbuf.put(nameOrOffset)
     bbuf.putInt(value)
     bbuf.putShort(sectionNumber)
     bbuf.putShort(symbolType.raw)

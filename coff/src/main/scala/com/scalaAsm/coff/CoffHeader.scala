@@ -24,8 +24,8 @@ case class CoffHeader(
     machine: Short,
     numberOfSections: Short,
     timeDateStamp: Int,
-    pointerToSymbolTable: Int, // no importance
-    numberOfSymbols: Int, // no importance
+    pointerToSymbolTable: Int,
+    numberOfSymbols:
     sizeOfOptionalHeader: Short,
     characteristics: Short) {
 

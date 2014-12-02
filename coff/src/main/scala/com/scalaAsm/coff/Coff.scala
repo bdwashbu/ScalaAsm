@@ -100,22 +100,16 @@ case class Coff(sections: Seq[Section], relocations: Seq[Relocation], symbols: S
       numberOfSections = sections.size.toShort,
       timeDateStamp = 0x535BF29F,
       pointerToSymbolTable = 0, // no importance
-      numberOfSymbols = symbols.size, // no importance
+      numberOfSymbols = symbols.size,
       sizeOfOptionalHeader = 0,
       characteristics = if (is64Bit) 47 else 271)
       
-    val sectionHeaders = sections map { section =>
-      section.header
-    }
+    val sectionHeaders = sections.map(_.header.write).reduce(_ ++ _)
     
     val allSections = sections.map(_.contents).reduce(_++_)
     val allReloc = relocations.map(_.apply()).reduce(_++_)
     
-    val longSymbols = symbols.filter(_.name.length >= 8)
-    
-    val allSymbols = symbols.map(_.apply()).reduce(_++_)
-    
-    outputStream.write(header() ++ sectionHeaders.map(_.write).reduce(_ ++ _) ++ allSections ++ allReloc ++ allSymbols)
+    outputStream.write(header() ++ sectionHeaders ++ allSections ++ allReloc ++ CoffSymbol.writeSymbols(symbols))
     outputStream.close()
   }
   

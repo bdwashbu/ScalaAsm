@@ -2,21 +2,22 @@ package com.scalaAsm.coff
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import scala.collection.mutable.ListBuffer
 
-sealed abstract class SymbolType(val value: Short)
-case object IMAGE_SYM_DTYPE_NULL extends SymbolType(0)
-case object IMAGE_SYM_DTYPE_POINTER extends SymbolType(1)
-case object IMAGE_SYM_DTYPE_FUNCTION extends SymbolType(2)
-case object IMAGE_SYM_DTYPE_ARRAY extends SymbolType(3)
+sealed abstract class SymbolType(val raw: Short, val value: Short)
+case class IMAGE_SYM_DTYPE_NULL(rawValue: Short) extends SymbolType(rawValue, 0)
+case class IMAGE_SYM_DTYPE_POINTER(rawValue: Short) extends SymbolType(rawValue, 1)
+case class IMAGE_SYM_DTYPE_FUNCTION(rawValue: Short) extends SymbolType(rawValue, 2)
+case class IMAGE_SYM_DTYPE_ARRAY(rawValue: Short) extends SymbolType(rawValue, 3)
 
 object SymbolType {
   def apply(value: Short): SymbolType = {
    val dtype = value & 0x00FF
     dtype match {
-    case 0 => IMAGE_SYM_DTYPE_NULL
-    case 1 => IMAGE_SYM_DTYPE_POINTER
-    case 2 => IMAGE_SYM_DTYPE_FUNCTION
-    case 3 => IMAGE_SYM_DTYPE_ARRAY
+    case 0 => IMAGE_SYM_DTYPE_NULL(value)
+    case 1 => IMAGE_SYM_DTYPE_POINTER(value)
+    case 2 => IMAGE_SYM_DTYPE_FUNCTION(value)
+    case 3 => IMAGE_SYM_DTYPE_ARRAY(value)
   }}
 }
 
@@ -62,9 +63,34 @@ object CoffSymbol {
          }
      )
   }
+  
+  def writeSymbols(symbols: Seq[CoffSymbol]): Array[Byte] = {
+    val (longSymbols, shortSymbols) = symbols.partition(_.name.length >= 8)
+    
+    val tablePositions: Seq[(Int, String)] = new ListBuffer[(Int, String)]()
+    
+    var stringTablePos = 0
+    for (string <- longSymbols.map(_.name)) {
+      tablePositions ++: Seq((stringTablePos, string))
+      stringTablePos += string.size
+    }
+    val stringTable = longSymbols.map(_.name.toCharArray().map(_.toByte) ++: Array('\u0000'.toByte)).reduce(_ ++ _)
+    
+    val tableLength = ByteBuffer.allocate(4)
+    tableLength.order(ByteOrder.LITTLE_ENDIAN)
+    tableLength.putInt(stringTable.length + 4)
+    
+    val allSymbols = symbols.map(_.write).reduce(_++_)
+    allSymbols ++ tableLength.array() ++ stringTable
+  }
+  
 }
 
-trait SymbolEntry 
+trait SymbolEntry {
+  val bbuf = ByteBuffer.allocate(18)
+  bbuf.order(ByteOrder.LITTLE_ENDIAN)
+  def write: Array[Byte]
+}
 
 case class CoffSymbol (
     name: String,
@@ -72,28 +98,27 @@ case class CoffSymbol (
     sectionNumber: Short,
     symbolType: SymbolType,
     storageClass: StorageClass,
-    auxiliarySymbols: Seq[AuxiliarySymbol]) extends SymbolEntry {
+    auxiliarySymbols: Seq[SymbolEntry]) extends SymbolEntry {
   
   override def toString = {
     "CoffSymbol(\"" + name + "\", " + value + ", " + sectionNumber + ')'
   }
   
-  def apply() = {
+  def write: Array[Byte] = {
     import scala.language.implicitConversions
-    val bbuf = ByteBuffer.allocate(18)
-    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+    bbuf.rewind()
     if (name.length >= 8) {
       bbuf.putInt(0)
       bbuf.putInt(0)
     } else {
-      bbuf.put(name.toCharArray() map (_.toByte))
+      bbuf.put(name.toCharArray().padTo(8, 0.toChar) map (_.toByte))
     }
     bbuf.putInt(value)
     bbuf.putShort(sectionNumber)
-    bbuf.putShort(symbolType.value)
+    bbuf.putShort(symbolType.raw)
     bbuf.put(storageClass.value)
     bbuf.put(auxiliarySymbols.size.toByte)
-    bbuf.array()
+    bbuf.array() ++ auxiliarySymbols.map(_.write).foldLeft(Array[Byte]())(_++_)
   }
   
   def isStringReference = name(0) == '\u0000' && name(1) == '\u0000' && name(2) == '\u0000' && name(3) == '\u0000'
@@ -109,8 +134,6 @@ case class CoffSymbol (
     bbuf2.getInt()
   }
 }
-
-trait AuxiliarySymbol extends SymbolEntry
 
 // For symbol entries with a storage class of 3
 object AuxiliarySectionDefinition {
@@ -134,11 +157,10 @@ case class AuxiliarySectionDefinition (
     numberOfLineNumbers: Short,
     checksum: Int,
     number: Short,
-    selection: Byte) extends AuxiliarySymbol {
+    selection: Byte) extends SymbolEntry {
   
-  def apply() = {
-    val bbuf = ByteBuffer.allocate(18)
-    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+  def write() = {
+    bbuf.rewind()
     bbuf.putInt(length)
     bbuf.putShort(numberOfRelocations)
     bbuf.putShort(numberOfLineNumbers)
@@ -162,11 +184,10 @@ object AuxiliaryFormatFiles {
 }
 
 case class AuxiliaryFormatFiles (
-    fileName: String) extends AuxiliarySymbol {
+    fileName: String) extends SymbolEntry {
   
-  def apply() = {
-    val bbuf = ByteBuffer.allocate(18)
-    bbuf.order(ByteOrder.LITTLE_ENDIAN)
+  def write() = {
+    bbuf.rewind()
     bbuf.put(fileName.padTo(18, 0.toChar) map(_.toByte) toArray)
     bbuf.array()
   } 

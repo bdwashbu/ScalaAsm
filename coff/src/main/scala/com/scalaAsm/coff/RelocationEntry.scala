@@ -41,16 +41,6 @@ case class RelocationEntry(
     referenceAddress: Int,
     symbolIndex: Int,
     reloationType: Short) {
-  
-  def apply() = {
-    val bbuf = ByteBuffer.allocate(10)
-    bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    bbuf.putInt(referenceAddress)
-    bbuf.putInt(symbolIndex)
-    bbuf.putShort(reloationType)
-    bbuf.array()
-  }
-  
 }
 
 case class Relocation(
@@ -62,13 +52,12 @@ case class Relocation(
     "Relocation(" + referenceAddress + ", \"" + symbol.name + "\"" + ", " + relocationType + ')'
   }
   
-  def apply() = {
+  def apply(symbolMap: Map[SymbolEntry, Int]) = {
     val bbuf = ByteBuffer.allocate(10)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     bbuf.putInt(referenceAddress)
-    //bbuf.putLong(symbolIndex)
+    bbuf.putInt(symbolMap(symbol))
     bbuf.putShort(relocationType)
     bbuf.array()
   }
-  
 }

@@ -64,7 +64,7 @@ object CoffSymbol {
      )
   }
   
-  def writeSymbols(symbols: Seq[CoffSymbol]): Array[Byte] = {
+  def writeRelocationsAndSymbols(relocations: Seq[Relocation], symbols: Seq[CoffSymbol]): Array[Byte] = {
     val (longSymbols, shortSymbols) = symbols.partition(_.name.length >= 8)
     
     val tablePositions: Seq[(Int, String)] = new ListBuffer[(Int, String)]()
@@ -102,8 +102,12 @@ object CoffSymbol {
       }
     }
     
+    val allSymbolsAndAux = symbols flatMap {sym => List(sym) ++ sym.auxiliarySymbols}
+    
+    val allReloc = relocations.map(_.apply(allSymbolsAndAux.zipWithIndex.toMap)).reduce(_ ++ _)
     val allSymbols = symbols.map(_.write).reduce(_++_)
-    allSymbols ++ tableLength.array() ++ stringTable
+    
+    allReloc ++ allSymbols ++ tableLength.array() ++ stringTable
   }
   
 }

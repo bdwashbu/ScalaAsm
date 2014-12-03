@@ -3,6 +3,9 @@ package com.scalaAsm.coff
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+abstract class CoffCharacteristic(val value: Short)
+case object IMAGE_FILE_32BIT_MACHINE extends CoffCharacteristic(0x0100.toShort)
+
 object CoffHeader {
   def getCoffHeader(input: ByteBuffer): CoffHeader = {
     input.order(ByteOrder.LITTLE_ENDIAN)

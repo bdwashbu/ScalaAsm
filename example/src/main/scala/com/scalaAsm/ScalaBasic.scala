@@ -1,7 +1,6 @@
 package com.scalaAsm
 
 import java.io._
-import com.scalaAsm.linker.Linker
 import com.scalaAsm.assembler.Assembler
 import com.scalaAsm.linker.Linker
 import com.scalaAsm.coff.Coff
@@ -17,6 +16,7 @@ object ScalaBasic {
 
       var beginTime = System.nanoTime()
       val helloWorld = assembler.assemble(HelloWorld3).addIcon("scala.ico")
+      
       val exe = linker.link(helloWorld, 0x3000, false, "kernel32.dll", "msvcrt.dll")
       
       outputStream.write(exe.get)
@@ -27,6 +27,7 @@ object ScalaBasic {
 
       beginTime = System.nanoTime()
       val helloWorldSimple = assembler.assemble(HelloWorld).addIcon("scala.ico")
+      helloWorldSimple.write("testCoff.obj")
       val exeSimple = linker.link(helloWorldSimple, 0x3000, false, "kernel32.dll", "msvcrt.dll")
       
       outputStreamSimple.write(exeSimple.get)
@@ -45,7 +46,6 @@ object ScalaBasic {
       val outputStream2 = new DataOutputStream(new FileOutputStream("test2.exe"));
       
       val coff = Coff.readCoff("helloWorld32.obj")
-      coff.write("testCoff.o")
       val exe2 = linker.link(coff, 0x3000, false, "kernel32.dll", "msvcrt.dll")
       
       outputStream2.write(exe2.get)

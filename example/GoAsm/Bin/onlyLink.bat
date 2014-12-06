@@ -1,0 +1,1 @@
+GoLink /console testCoff.obj kernel32.dll msvcrt.dll

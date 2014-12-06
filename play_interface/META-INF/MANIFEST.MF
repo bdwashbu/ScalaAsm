@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: play_interface
+Bundle-SymbolicName: play_interface
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: play_interface.jar
+Export-Package: com.scalaAsm.play_interface
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.scalaAsm.asm,
+ com.scalaAsm.linker,
+ com.scalaAsm.x86

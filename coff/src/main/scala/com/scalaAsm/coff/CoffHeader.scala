@@ -28,7 +28,7 @@ case class CoffHeader(
     numberOfSections: Short,
     timeDateStamp: Int,
     pointerToSymbolTable: Int,
-    numberOfSymbols:
+    numberOfSymbols: Int,
     sizeOfOptionalHeader: Short,
     characteristics: Short) {
 

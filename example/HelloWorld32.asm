@@ -24,14 +24,14 @@ CODE SECTION
 START:
 PUSH -11                ;STD_OUTPUT_HANDLE
 CALL GetStdHandle       ;get, in eax, handle to active screen buffer
-PUSH 0,ADDR RCKEEP        ;KEEP receives output from API
+PUSH 0,RCKEEP        ;KEEP receives output from API
 PUSH 14,ADDR Hello    ;24=length of string
 PUSH EAX                ;handle to active screen buffer
 CALL WriteFile
 
 PUSH -11                ;STD_OUTPUT_HANDLE
 CALL GetStdHandle       ;get, in eax, handle to active screen buffer
-PUSH 0,ADDR RCKEEP         ;KEEP receives output from API
+PUSH 0,RCKEEP         ;KEEP receives output from API
 PUSH 29,ADDR Key    ;24=length of string
 PUSH EAX                ;handle to active screen buffer
 CALL WriteFile

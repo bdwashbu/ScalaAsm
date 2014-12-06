@@ -129,10 +129,9 @@ object x86Parser {
         val result = parseAll(expr, expression).get
         val transformed = transform(result, ebp)
 
-        val blah = this.Code(transformed.code.map(_.code).reduce{ _ ++ _}: _*)
-        builder += blah
+        builder += Code(transformed.code.map(_.code).reduce{ _ ++ _}: _*)
         
-        builder += this.Code(
+        builder += Code(
           push(transformed.reg),
           push("helloWorld"),
           call("printf"),

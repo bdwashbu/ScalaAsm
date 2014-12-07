@@ -20,7 +20,7 @@ case class TIMES_OP(x: Inst, y: Inst) extends Inst
 case class DIVIDE_OP(x: Inst, y: Inst) extends Inst
 
 case class IMM(x: Int) extends Inst
-case class RESULT(code: Seq[AsmProgram[x86_32]#CodeSection#Code], reg: Operand[r32]) extends Inst
+case class RESULT(code: Seq[AsmProgram[x86_32]#CodeSection#Code], reg: Operand[r32], availableRegs: Set[Operand[r32]]) extends Inst
 
 class Arith extends JavaTokenParsers {
 
@@ -52,82 +52,100 @@ object x86Parser {
         val STD_OUTPUT_HANDLE = byte(-11)
         val STD_INPUT_HANDLE = byte(-10)
 
-        def transform(inst: Inst, resultReg: Operand[r32]): RESULT = {
+        def transform(inst: Inst, resultReg: Operand[r32], availableRegs: Set[Operand[r32]]): RESULT = {
 
-          inst match {
-            case ADD_OP(IMM(x), IMM(y)) => {
-              val code = Code(mov(resultReg, dword(x.toInt)), add(resultReg, byte(y.toInt)))
-              RESULT(Seq(code), resultReg)
-            }
-            case MINUS_OP(IMM(x), IMM(y)) => {
-              val code = Code(mov(resultReg, dword(x.toInt)), sub(resultReg, byte(y.toInt)))
-              RESULT(Seq(code), resultReg)
-            }
-            case TIMES_OP(IMM(x), IMM(y)) => {
-              val code = Code(mov(eax, dword(x.toInt)), mov(resultReg, dword(y.toInt)), mul(resultReg), mov(resultReg, eax))
-              RESULT(Seq(code), resultReg)
-            }
-            case ADD_OP(IMM(x), RESULT(code2, y)) => {
-              val code = if (resultReg != y) {
-                Code(mov(resultReg, dword(x.toInt)), add(resultReg, y))
-              } else {
-                Code(add(resultReg, byte(x.toInt)))
+          def recurse(inst: Inst): RESULT = {
+          
+            inst match {
+              // initial conditions
+              case ADD_OP(IMM(x), IMM(y)) => {
+                val code = Code(mov(resultReg, dword(x.toInt)), add(resultReg, byte(y.toInt)))
+                RESULT(Seq(code), resultReg, availableRegs - resultReg)
               }
-              RESULT(code2 ++: Seq(code), resultReg)
-            }
-            case ADD_OP(RESULT(code, x), IMM(z)) => {
-              transform(ADD_OP(IMM(z), RESULT(code, x)), resultReg)
-            }
-            case MINUS_OP(IMM(x), RESULT(code2, y)) => {
-              val code = if (resultReg != y) {
-                Code(mov(resultReg, dword(x.toInt)), sub(resultReg, y))
-              } else {
-                Code(sub(resultReg, byte(x.toInt)))
+              case MINUS_OP(IMM(x), IMM(y)) => {
+                val code = Code(mov(resultReg, dword(x.toInt)), sub(resultReg, byte(y.toInt)))
+                RESULT(Seq(code), resultReg, availableRegs - resultReg)
               }
-              RESULT(code2 ++: Seq(code), resultReg)
-            }
-            case MINUS_OP(RESULT(code2, x), IMM(z)) => {
-              val code = if (resultReg != x) {
-                Code(mov(resultReg, x), sub(resultReg, byte(z.toInt)))
-              } else {
-                Code(sub(resultReg, byte(z.toInt)))
+              case TIMES_OP(IMM(x), IMM(y)) => {
+                val code = Code(push(eax), mov(eax, dword(x.toInt)), mov(resultReg, dword(y.toInt)), mul(resultReg), mov(resultReg, eax), pop(eax))
+                RESULT(Seq(code), resultReg, availableRegs - resultReg)
               }
-              RESULT(code2 ++: Seq(code), resultReg)
+              // answer propagation
+              case ADD_OP(IMM(x), RESULT(code2, y, aregs)) => {
+                val head = aregs.head
+                val rem = aregs.tail
+                val code = Code(mov(head, dword(x.toInt)), add(head, y))
+                RESULT(code2 ++: Seq(code), head, rem + y)
+              }
+              case ADD_OP(RESULT(code, x, aregs), IMM(z)) => {
+                recurse(ADD_OP(IMM(z), RESULT(code, x, aregs)))
+              }
+              case MINUS_OP(IMM(x), RESULT(code2, y, aregs)) => {
+                val head = aregs.head
+                val rem = aregs.tail
+                val code = Code(mov(head, dword(x.toInt)), add(head, y))
+                //val code = Code(sub(resultReg, byte(x.toInt)))
+                RESULT(code2 ++: Seq(code), resultReg, aregs + y)
+              }
+              case MINUS_OP(RESULT(code2, x, aregs), IMM(z)) => {
+                val code = if (resultReg != x) {
+                  Code(mov(resultReg, x), sub(resultReg, byte(z.toInt)))
+                } else {
+                  Code(sub(resultReg, byte(z.toInt)))
+                }
+                RESULT(code2 ++: Seq(code), resultReg, aregs + x)
+              }
+              case TIMES_OP(IMM(x), RESULT(code2, y, aregs)) => {
+                val code = Code(push(eax), mov(eax, dword(x.toInt)), mov(resultReg, y), mul(resultReg), mov(resultReg, eax), pop(eax))
+                RESULT(code2 ++: Seq(code), resultReg, aregs)
+              }
+              case TIMES_OP(RESULT(code, y, aregs), IMM(x)) => {
+                recurse(TIMES_OP(IMM(x), RESULT(code, y, aregs)))
+              }
+              case ADD_OP(RESULT(code1, x, aregs), RESULT(code2, z, aregs2)) => {
+                val combo = aregs ++ aregs2
+                val head = combo.head
+                val rem = combo.tail
+                val code = Code(mov(resultReg, x), add(resultReg, z))
+                RESULT(code2 ++: Seq(code), resultReg, rem + z)
+              }
+              case MINUS_OP(RESULT(code1, x, aregs), RESULT(code2, z, aregs2)) => {
+                val combo = aregs ++ aregs2
+                val head = combo.head
+                val rem = combo.tail
+                val code = Code(mov(resultReg, x), sub(resultReg, z))
+                RESULT(code2 ++: Seq(code), resultReg, aregs ++ aregs2 + z)
+              }
+              case TIMES_OP(RESULT(code1, x, aregs), RESULT(code2, y, aregs2)) => {
+                val combo = aregs ++ aregs2
+                val head = combo.head
+                val rem = combo.tail
+                val code = Code(push(eax), mov(eax, x), mov(resultReg, y), mul(resultReg), mov(resultReg, eax), pop(eax))
+                RESULT(code2 ++: Seq(code), resultReg, aregs ++ aregs2)
+              }
+              case ADD_OP(x, IMM(y))   => recurse(ADD_OP(recurse(x), IMM(y)))
+              case MINUS_OP(x, IMM(y)) => recurse(MINUS_OP(recurse(x), IMM(y)))
+              case TIMES_OP(x, IMM(y)) => recurse(TIMES_OP(recurse(x), IMM(y)))
+              case ADD_OP(IMM(x), y)   => recurse(ADD_OP(IMM(x), recurse(y)))
+              case MINUS_OP(IMM(x), y) => recurse(MINUS_OP(IMM(x), recurse(y)))
+              case TIMES_OP(IMM(x), y) => recurse(TIMES_OP(IMM(x), recurse(y)))
+              case ADD_OP(x, y)        => {
+                recurse(ADD_OP(recurse(x), recurse(y)))
+              }
+              case MINUS_OP(x, y)      => {
+                recurse(MINUS_OP(recurse(x), recurse(y)))
+              }
+              case TIMES_OP(x, y)      => {
+                recurse(TIMES_OP(recurse(x), recurse(y)))
+              }
+              case _                   => if (inst != null) println(inst); null
             }
-            case TIMES_OP(IMM(x), RESULT(code2, y)) => {
-              val code = Code(mov(eax, dword(x.toInt)), mov(resultReg, y), mul(resultReg), mov(resultReg, eax))
-              RESULT(code2 ++: Seq(code), resultReg)
-            }
-            case TIMES_OP(RESULT(code, y), IMM(x)) => {
-              transform(TIMES_OP(IMM(x), RESULT(code, y)), resultReg)
-            }
-            case ADD_OP(RESULT(code1, x), RESULT(code2, z)) => {
-              val code = Code(mov(resultReg, x), add(resultReg, z))
-              RESULT(code2 ++: Seq(code), resultReg)
-            }
-            case MINUS_OP(RESULT(code1, x), RESULT(code2, z)) => {
-              val code = Code(mov(resultReg, x), sub(resultReg, z))
-              RESULT(code2 ++: Seq(code), resultReg)
-            }
-            case TIMES_OP(RESULT(code1, x), RESULT(code2, y)) => {
-              val code = Code(mov(eax, x), mov(resultReg, y), mul(resultReg), mov(resultReg, eax))
-              RESULT(code2 ++: Seq(code), resultReg)
-            }
-            case ADD_OP(x, IMM(y))   => transform(ADD_OP(transform(x, edi), IMM(y)), resultReg)
-            case MINUS_OP(x, IMM(y)) => transform(MINUS_OP(transform(x, edi), IMM(y)), resultReg)
-            case TIMES_OP(x, IMM(y)) => transform(TIMES_OP(transform(x, edi), IMM(y)), resultReg)
-            case ADD_OP(IMM(x), y)   => transform(ADD_OP(IMM(x), transform(y, edx)), resultReg)
-            case MINUS_OP(IMM(x), y) => transform(MINUS_OP(IMM(x), transform(y, edx)), resultReg)
-            case TIMES_OP(IMM(x), y) => transform(TIMES_OP(IMM(x), transform(y, edx)), resultReg)
-            case ADD_OP(x, y)        => transform(ADD_OP(transform(x, edi), transform(y, edx)), resultReg)
-            case MINUS_OP(x, y)      => transform(MINUS_OP(transform(x, edi), transform(y, edx)), resultReg)
-            case TIMES_OP(x, y)      => transform(TIMES_OP(transform(x, edi), transform(y, edx)), resultReg)
-            case _                   => if (inst != null) println(inst); null
           }
+          recurse(inst)
         }
 
         val result = parseAll(expr, expression).get
-        val transformed = transform(result, ebp)
+        val transformed = transform(result, ebp, Set(edi, eax, ebx, ecx, edx))
 
         builder += Code(transformed.code.map(_.code).reduce{ _ ++ _}: _*)
         

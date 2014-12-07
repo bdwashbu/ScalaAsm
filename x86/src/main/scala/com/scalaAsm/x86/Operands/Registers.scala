@@ -3,7 +3,9 @@ package Operands
 
 import com.scalaAsm.x86.Operands.Memory.AddressingMode
 
-abstract class Register[S: Numeric](val name: String) extends RegisterOrMemory[S]
+abstract class Register[S: Numeric](val name: String) extends RegisterOrMemory[S] {
+  override def toString = name.toLowerCase()
+}
 
 object Register {
   type SegmentRegister = GeneralPurpose[_16]

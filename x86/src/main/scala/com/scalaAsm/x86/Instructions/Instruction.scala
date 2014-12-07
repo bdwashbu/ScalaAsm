@@ -43,6 +43,11 @@ case class OneMachineCode[O1, OpEn <: OneOperandEncoding[O1]](
     prefixAndOpcode: Array[Byte],
     mnemonic: String,
     opcodeExtension: Byte) extends InstructionResult {
+  
+  override def toString = {
+    val formattedMnemonic = mnemonic(0).toUpper.toString + mnemonic(1).toLower.toString + mnemonic(2).toLower.toString
+    formattedMnemonic + " " + operand.toString
+  }
 
   def getSize: Int = {
     prefixAndOpcode.size + format.size
@@ -60,6 +65,11 @@ case class TwoMachineCode[O1, O2, OpEn <: TwoOperandEncoding[O1,O2]](
     prefixAndOpcode: Array[Byte],
     mnemonic: String,
     opcodeExtension: Byte) extends InstructionResult {
+  
+  override def toString = {
+    val formattedMnemonic = mnemonic(0).toUpper.toString + mnemonic(1).toLower.toString + mnemonic(2).toLower.toString
+    formattedMnemonic + " " + operand.toString + ", " + operand2.toString
+  }
 
   def getSize: Int = {
     prefixAndOpcode.size + format.size

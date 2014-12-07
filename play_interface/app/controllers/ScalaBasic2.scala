@@ -149,13 +149,6 @@ object x86Parser {
       }
     }
   }
-
-  def getCodeString(app: AsmProgram[_]): List[String] = {
-
-    val codeSections = app.sections.collect { case x: AsmProgram[_]#CodeSection => x }
-    val codeTokens = codeSections(0).builder.toList.map(_.toString)
-    codeTokens.toList
-  }
 }
 
 //object ScalaBasic2 extends Arith {

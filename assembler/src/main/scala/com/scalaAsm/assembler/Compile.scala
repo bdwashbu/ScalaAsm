@@ -26,17 +26,19 @@ import com.scalaAsm.coff.Section
 import com.scalaAsm.coff.Coff
 import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
-import com.scalaAsm.coff.{IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION}
+import com.scalaAsm.coff.{ IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION }
 
 class Assembler extends Catalog.Standard with Formats with Addressing {
   self =>
   import scala.language.postfixOps
+  
+  case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken], variablesSymbols: Seq[CoffSymbol],
+      rawData: Array[Byte], prettyPass: Seq[InstructionResult])
+  
+  def preassemble[Mode <: x86Mode](program: AsmProgram[Mode]): CompiledAssembly = {
+    val codeTokens: ListBuffer[Any] = program.sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.build(seg.builder.toSeq) }
 
-  def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Coff = {
-
-    val codeTokens: ListBuffer[Any] = program.sections.collect{ case (x: AsmProgram[_]#CodeSection) => x}.flatMap { seg => seg.build(seg.builder.toSeq) }
-
-    val dataTokens = program.sections.collect{ case (x: DataSection) => x} flatMap { seg => seg.compile }
+    val dataTokens = program.sections.collect { case (x: DataSection) => x } flatMap { seg => seg.compile }
 
     val (rawData, variablesSymbols) = compileData(dataTokens)
 
@@ -46,82 +48,97 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
 
       def onePass: Seq[Token] = codeTokens flatMap {
 
-        case x: SizedToken => Some(x)
-        case x: DynamicSizedToken => Some(x)
-        case proc @ BeginProc(_) => Some(proc)
-        case JmpRef(name) => Some(JmpRefResolved(name))
-        case Invoke(name) => Some(InvokeRef(0, name))
-        case Reference(name) if procNames.contains(name) => Some(ProcRef(name))
+        case x: SizedToken                                   => Some(x)
+        case x: DynamicSizedToken                            => Some(x)
+        case proc @ BeginProc(_)                             => Some(proc)
+        case JmpRef(name)                                    => Some(JmpRefResolved(name))
+        case Invoke(name)                                    => Some(InvokeRef(0, name))
+        case Reference(name) if procNames.contains(name)     => Some(ProcRef(name))
         case Reference(name) if variableNames.contains(name) => Some(VarRef(name))
-        case Reference(name) => Some(ImportRef(0, name))
-        case label @ Label(name) => Some(label)
-        case labelref @ LabelRef(name, inst, format) => Some(labelref)
-        case x: InstructionResult => Some(InstructionToken(x))
+        case Reference(name)                                 => Some(ImportRef(0, name))
+        case label @ Label(name)                             => Some(label)
+        case labelref @ LabelRef(name, inst, format)         => Some(labelref)
+        case x: InstructionResult                            => Some(InstructionToken(x))
       }
 
       def positionPass: Seq[PostToken] = {
         var parserPosition = 0
         onePass flatMap { token =>
           val result = token match {
-            case BeginProc(name) => Some(Proc(parserPosition, name))
-            case Label(name) => Some(LabelResolved(parserPosition, name))
-            case InvokeRef(_,name) => Some(InvokeRef(parserPosition, name))
-            case ImportRef(_,name) => Some(ImportRef(parserPosition, name))
-            case _ => None
+            case BeginProc(name)    => Some(Proc(parserPosition, name))
+            case Label(name)        => Some(LabelResolved(parserPosition, name))
+            case InvokeRef(_, name) => Some(InvokeRef(parserPosition, name))
+            case ImportRef(_, name) => Some(ImportRef(parserPosition, name))
+            case _                  => None
           }
           token match {
-            case sizedToken: SizedToken => parserPosition += sizedToken.size
+            case sizedToken: SizedToken        => parserPosition += sizedToken.size
             case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-            case x: LabelRef => parserPosition += 2
-            case _ =>
+            case x: LabelRef                   => parserPosition += 2
+            case _                             =>
           }
           result
         }
       }
-
-      CompiledAssembly(onePass, positionPass)
-    }
-    
-    val compiledAsm = compileAssembly(variablesSymbols.map(_.name).toSeq)
-    
-    val code: Array[Byte] = {
-        
-        var parserPosition = 0
-        
-        val code = ArrayBuffer[Byte]()
-        
-        for (token <- compiledAsm.onePass) {
-          val result = token match {
-            case InstructionToken(inst) => inst.getBytes
-            case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-            case ProcRef(_) | InvokeRef(_,_) | ImportRef(_,_) => callNear(*(Constant32(0)).get.getRelative).getBytes
-            case VarRef(_) => push(Op(Constant32(0))).getBytes
-            case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
-            case _ => Array[Byte]()
-          }
-          code ++= result
+      
+      val prettyPass = onePass flatMap { token =>
+        token match {
+          case InstructionToken(inst) => Some(inst)
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(callNear(*(Constant32(0)).get.getRelative))
+          case VarRef(_) => Some(push(Op(Constant32(0))))
+          case LabelRef(_, inst, format) => Some(inst(Op(new Constant8(0)), format, Seq()))
+          case _ => None
         }
-
-        parserPosition = 0
-        for (token <- compiledAsm.onePass) {
-          token match {
-            case Align(to, filler, _) => {
-              for (i <- 0 until (to - (parserPosition % to)) % to) {
-                code.insert(parserPosition, filler)
-              }
-            }
-            case _ =>
-          }
-          token match {
-            case sizedToken: SizedToken => parserPosition += sizedToken.size
-            case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-            case x: LabelRef => parserPosition += 2
-            case _ =>
-          }
-        }
-        
-        code.toArray
       }
+
+      CompiledAssembly(onePass, positionPass, variablesSymbols, rawData, prettyPass)
+    }
+
+    compileAssembly(variablesSymbols.map(_.name).toSeq)
+  }
+
+  def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Coff = {
+
+    val compiledAsm = preassemble(program)
+
+    val code: Array[Byte] = {
+
+      var parserPosition = 0
+
+      val code = ArrayBuffer[Byte]()
+
+      for (token <- compiledAsm.onePass) {
+        val result = token match {
+          case InstructionToken(inst) => inst.getBytes
+          case Padding(to, _) => Array.fill(to)(0xCC.toByte)
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => callNear(*(Constant32(0)).get.getRelative).getBytes
+          case VarRef(_) => push(Op(Constant32(0))).getBytes
+          case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
+          case _ => Array[Byte]()
+        }
+        code ++= result
+      }
+
+      parserPosition = 0
+      for (token <- compiledAsm.onePass) {
+        token match {
+          case Align(to, filler, _) => {
+            for (i <- 0 until (to - (parserPosition % to)) % to) {
+              code.insert(parserPosition, filler)
+            }
+          }
+          case _ =>
+        }
+        token match {
+          case sizedToken: SizedToken        => parserPosition += sizedToken.size
+          case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+          case x: LabelRef                   => parserPosition += 2
+          case _                             =>
+        }
+      }
+
+      code.toArray
+    }
 
     val codeSection = Section(
       SectionHeader(
@@ -136,13 +153,12 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         lineNumbers = 0,
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
-          Characteristic.READ.id) 
-      , code.toArray)
-   
+          Characteristic.READ.id), code.toArray)
+
     val dataSection = Section(
       SectionHeader(
         name = "data",
-        virtualSize = rawData.length,
+        virtualSize = compiledAsm.rawData.length,
         virtualAddress = 0x2000,
         sizeOfRawData = 0x200,
         pointerToRawData = 0x600,
@@ -152,73 +168,71 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         lineNumbers = 0,
         characteristics = Characteristic.INITIALIZED.id |
           Characteristic.READ.id |
-          Characteristic.WRITE.id)
-      , rawData)
-      
-      val symbols = (compiledAsm.positionPass collect {
-        case Proc(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil);
-        case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
-        case InvokeRef(offset,name) => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
-        case ImportRef(offset,name) => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
-      }) ++ variablesSymbols
-      
-      def getRelocations: Seq[Relocation] = {
-        var parserPosition = 0
+          Characteristic.WRITE.id), compiledAsm.rawData)
 
-        compiledAsm.onePass.flatMap { token =>
-          var result: Option[Relocation] = None
-          token match {
-            case InstructionToken(inst) => inst match {
-                case OneMachineCode(addr(name), _, _, _, _) =>
-                  result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
-                case TwoMachineCode(addr(name), _, _, _, _, _) =>
-                  result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
-                case TwoMachineCode(_, addr(name), _, _, _, _) =>
-                  result = Some(Relocation(parserPosition+2, symbols.find { sym => sym.name == name }.get, 1))
-                case _ =>
-              }
-            case ProcRef(name) =>
-              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 2))
-            case InvokeRef(_, name) =>
-              result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
-            case VarRef(name) =>
-              result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 6))
-            case ImportRef(_, name) =>
-              result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
-            case LabelRef(name, inst, format) =>
-              result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 7))
-            case _ => None
-          }
-          token match {
-            case sizedToken: SizedToken => parserPosition += sizedToken.size
-            case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
-            case x: LabelRef => parserPosition += 2
+    val symbols = (compiledAsm.positionPass collect {
+      case Proc(offset, name)          => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil);
+      case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
+      case InvokeRef(offset, name)     => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
+      case ImportRef(offset, name)     => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
+    }) ++ compiledAsm.variablesSymbols
+
+    def getRelocations: Seq[Relocation] = {
+      var parserPosition = 0
+
+      compiledAsm.onePass.flatMap { token =>
+        var result: Option[Relocation] = None
+        token match {
+          case InstructionToken(inst) => inst match {
+            case OneMachineCode(addr(name), _, _, _, _) =>
+              result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
+            case TwoMachineCode(addr(name), _, _, _, _, _) =>
+              result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
+            case TwoMachineCode(_, addr(name), _, _, _, _) =>
+              result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case _ =>
           }
-          result
+          case ProcRef(name) =>
+            result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 2))
+          case InvokeRef(_, name) =>
+            result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
+          case VarRef(name) =>
+            result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 6))
+          case ImportRef(_, name) =>
+            result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
+          case LabelRef(name, inst, format) =>
+            result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 7))
+          case _ => None
         }
+        token match {
+          case sizedToken: SizedToken        => parserPosition += sizedToken.size
+          case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
+          case x: LabelRef                   => parserPosition += 2
+          case _                             =>
+        }
+        result
       }
-    
+    }
+
     Coff(
       sections = Seq(codeSection, dataSection),
       relocations = getRelocations,
-      symbols = symbols     
-    )
+      symbols = symbols)
   }
 
   private def compileData(dataTokens: Seq[Token]): (Array[Byte], Seq[CoffSymbol]) = {
 
     // Here, we implicitly add a "KEEP" variable to hold results
-    
+
     val dataSection: Seq[PostToken] = {
       var parserPosition = 0
       for (token <- Variable("KEEP", "\0\0\0\0") +: dataTokens) yield {
         val result = token match {
           case Variable(name, value) => PostVar(name, value, parserPosition)
-          case Align(to, filler, _) => ByteOutputPost(Array.fill((to - (parserPosition % to)) % to)(filler))
+          case Align(to, filler, _)  => ByteOutputPost(Array.fill((to - (parserPosition % to)) % to)(filler))
         }
         token match {
-          case sizedToken: SizedToken => parserPosition += sizedToken.size
+          case sizedToken: SizedToken        => parserPosition += sizedToken.size
           case sizedToken: DynamicSizedToken => parserPosition += sizedToken.size(parserPosition)
         }
 
@@ -228,21 +242,18 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
 
     val data = dataSection.map {
       case ByteOutputPost(padding) => padding
-      case PostVar(_, value, _) => value.toCharArray().map(_.toByte)
-      case _ => Array[Byte]()
+      case PostVar(_, value, _)    => value.toCharArray().map(_.toByte)
+      case _                       => Array[Byte]()
     }.reduce(_ ++ _)
 
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): Seq[CoffSymbol] = {
-        dataSection flatMap {
-          case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 1, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil))
-          case _ => None
-        }
+      dataSection flatMap {
+        case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 1, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil))
+        case _                         => None
+      }
     }
 
     (data, createDefMap(dataSection))
   }
-
-  private case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken])
-
 }

@@ -10,7 +10,10 @@ trait Registers[Mode <: x86Mode] {
       def +[Z: Numeric](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get)
     }
     
-    case class RegisterOperand[X <: GeneralPurpose[_]](reg: X) extends Operand[X] with RegisterOps[X] { def get = reg }
+    case class RegisterOperand[X <: GeneralPurpose[_]](reg: X) extends Operand[X] with RegisterOps[X] {
+      def get = reg
+      override def toString = reg.toString
+    }
 
     def rdi(implicit ev: Mode <:< x86_64) = RegisterOperand(new RDI)
     def rax(implicit ev: Mode <:< x86_64) = RegisterOperand(new RAX)

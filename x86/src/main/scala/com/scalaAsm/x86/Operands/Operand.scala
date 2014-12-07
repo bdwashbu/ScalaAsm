@@ -21,7 +21,10 @@ trait Operand[+To] {
   def get: To
 }
 
-case class Op[X](from: X) extends Operand[X] { def get = from }
+case class Op[X](from: X) extends Operand[X] {
+  def get = from
+  override def toString = from.toString
+}
 
 abstract class Constant[Size: Numeric](val value: Size) extends InstructionField {
   import java.nio.{ByteBuffer, ByteOrder}
@@ -33,6 +36,8 @@ abstract class Constant[Size: Numeric](val value: Size) extends InstructionField
   def getBytes: Array[Byte] = {
       buffer.array()
   }
+  
+  override def toString = value.toString
 }
 
 case class Constant8(x: Byte) extends Constant(x) {

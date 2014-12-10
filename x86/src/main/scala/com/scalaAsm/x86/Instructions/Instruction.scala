@@ -45,7 +45,7 @@ case class OneMachineCode[O1, OpEn <: OneOperandEncoding[O1]](
     opcodeExtension: Byte) extends InstructionResult {
   
   override def toString = {
-    val formattedMnemonic = mnemonic(0).toUpper.toString + mnemonic(1).toLower.toString + mnemonic(2).toLower.toString
+    val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
     formattedMnemonic + " " + operand.toString
   }
 
@@ -67,7 +67,7 @@ case class TwoMachineCode[O1, O2, OpEn <: TwoOperandEncoding[O1,O2]](
     opcodeExtension: Byte) extends InstructionResult {
   
   override def toString = {
-    val formattedMnemonic = mnemonic(0).toUpper.toString + mnemonic(1).toLower.toString + mnemonic(2).toLower.toString
+    val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
     formattedMnemonic + " " + operand.toString + ", " + operand2.toString
   }
 

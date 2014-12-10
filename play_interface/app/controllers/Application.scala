@@ -26,7 +26,7 @@ object Application extends Controller {
   val helloForm = Form(
     mapping(
       "expression" -> (
-        nonEmptyText(maxLength=20)
+        nonEmptyText(maxLength=30)
         verifying ("Invalid math expression!", expr => {
           try {
             val app = x86Parser.parse(expr)
@@ -89,7 +89,7 @@ object Application extends Controller {
           assembled.foreach(x => println(x.getClass.getName))
           
           val inst = assembled.takeWhile {
-            case OneMachineCode(_,_,_,mnemonic,_) if mnemonic=="PUSH" => false
+            case OneMachineCode(_,_,_,mnemonic,_) if mnemonic=="CALL" => false
             case _ => true
           }
           val result: List[String] = inst.map(_.toString())

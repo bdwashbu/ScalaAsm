@@ -9,7 +9,7 @@ ScalaAsm is a simple low-level assembly API.  Its a proof of concept.  Scala x86
 
 #### Implementing x86
 
-Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set.  There are hundreds of instructions and each one could have upwards of 20 different types of inputs!  To put this into programming terms - each instruction could be overloaded many, many times.  This means there are possibly 10+ thousand instructions needing to be implemented if you want to be thorough.  The Intel x86 spec is 3300 pages, after all.
+Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set.  There are around 700 instructions and each one could have up to 35 different types of inputs!  To put this into programming terms - most instructions are overloaded at least a couple times.  There are around 1300 instructions needing to be implemented if you want to be thorough.  The Intel x86 spec is 3300 pages, after all.
 
 For the implementers, Scala x86 strives to make the process of defining instructions as easy and simple as possible.  It was designed for this.  It resembles the Intel specification at all times.  When you have thousands of definitions like this, strong type safety and consise notation really help reduce the chance of errors.  Scala x86 provides this, which is useful because there are still thousands of instructions that have yet to be implemented.
 

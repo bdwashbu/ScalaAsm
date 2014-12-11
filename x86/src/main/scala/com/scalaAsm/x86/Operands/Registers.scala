@@ -30,13 +30,6 @@ abstract class GeneralPurpose[S: Numeric](name: String) extends Register[S](name
   def getBaseIndex[Y: Numeric](const: Constant[Y]) = new BaseIndex(const) {}
 }
 
-
-
-
-
-
-abstract class Extra64Reg(name: String) extends GeneralPurpose[_64](name)
-
 trait UniformByteRegister[Size] extends GeneralPurpose[Size]
 
 // "A" family - Accumulator for operands and results
@@ -105,6 +98,7 @@ class GS extends Register.SegmentRegister("gs") { val ID = 8 }
 
 // Extra 64-bit registers
 // Uses the rex.W field to access
+abstract class Extra64Reg(name: String) extends GeneralPurpose[_64](name)
 class R8 extends Extra64Reg("r8") { val ID = 0 }
 class R9 extends Extra64Reg("r9") { val ID = 1 }
 class R10 extends Extra64Reg("r10") { val ID = 2 }

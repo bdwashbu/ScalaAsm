@@ -7,9 +7,41 @@ import com.scalaAsm.coff.Coff
 
 object ScalaBasic {
 
+  case class x86InstructionDef(opcode: Int, mnemonic: String, operand1: String, operand2: String)
+  
+  def decodeOperandType(a: String, t: String): List[String] = {
+    (a,t) match {
+      case ("E", "b") => List("rm8")
+      case ("E", "vqp") => List("r8", "r16", "r32", "r64")
+      case ("G", "b") => List("r8")
+      case ("G", "vqp") => List("rm8", "rm16", "rm32", "rm64")
+      case _ => List()
+    }
+  }
+  
+  def loadXML() = {
+    import scala.xml.XML
+    val xml = XML.loadFile("x86reference.xml")
+    val good = (xml \\ "pri_opcd").filter{x => (x \\ "syntax" \ "mnem").text == "ADD"}
+    val defs = good.map{inst => 
+      val dst = decodeOperandType((inst \\ "dst" \ "a").text, (inst \\ "dst" \ "t").text)
+      val src = decodeOperandType((inst \\ "src" \ "a").text, (inst \\ "src" \ "t").text)
+      val opcode = (inst \@ "value").toInt
+      for {
+        dstOp <- dst
+        srcOp <- src
+      } yield x86InstructionDef(opcode, "ADD", dstOp, srcOp)
+      
+    }
+    defs.foreach(println)
+  }
+  
+  
   def main(args: Array[String]): Unit = {
     try {
 
+      loadXML()
+      
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
       val assembler = new Assembler {}
       val linker = new Linker{}

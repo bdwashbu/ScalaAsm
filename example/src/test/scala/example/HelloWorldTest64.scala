@@ -14,39 +14,50 @@ import java.io.FileInputStream
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
-import com.scalaAsm.asm.x86_32
+import com.scalaAsm.asm.x86_64
+import com.scalaAsm.x86.Operands.addr
 
-object HelloWorld extends AsmProgram[x86_32] {
-
+object HelloWorld64 extends AsmProgram[x86_64] {
+  
   import com.scalaAsm.x86.Instructions.Standard._
-  import com.scalaAsm.asm._
-
-  sections += new DataSection(
+  
+  sections += new DataSection (
     Variable("helloWorld", "Hello World!\r\n\u0000")
   ) {}
 
   sections += new CodeSection {
+    
+    val STD_OUTPUT_HANDLE = qword(-11)
+    val STD_INPUT_HANDLE = qword(-10)
 
-    builder += Code(
-      push("helloWorld"),
-      call("printf"),
-      pop(ebx),
-      retn(()))
+    procedure(name = "start",
+      push(rsp),
+      push(*(rsp)),
+      and(spl, byte(0xF0)),
+      mov(rdx, dword(0xE)),
+      lea(rcx, addr("helloWorld")),
+      sub(rsp, byte(0x20)),
+      invoke("printf"), // needs work
+      lea(rsp, *(rsp+byte(0x28))),
+      pop(rsp),
+      xor(rax, rax),
+      retn(())
+    )
   }
 }
 
-class HelloWorldTest extends FlatSpec with ShouldMatchers {
+class HelloWorldTest64 extends FlatSpec with ShouldMatchers {
 
-  "A simple 32-bit Hello world" should "print 'Hello World'" in {
+  "A 64-bit Hello world" should "print 'Hello World'" in {
     val name = System.nanoTime
     val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
     val assembler = new Assembler {}
     val linker = new Linker {}
 
     var beginTime = System.nanoTime()
-    val helloWorld = assembler.assemble(HelloWorld).addIcon("scala.ico")
+    val helloWorld = assembler.assemble(HelloWorld64).addIcon("scala.ico")
 
-    val exe = linker.link(helloWorld, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+    val exe = linker.link(helloWorld, 0x3000, true, "kernel32.dll", "msvcrt.dll")
 
     outputStream.write(exe.get)
     println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

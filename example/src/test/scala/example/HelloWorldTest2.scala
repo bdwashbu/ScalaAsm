@@ -1,31 +1,36 @@
-package com.scalaAsm
+package example
 
+import org.scalatest._
+import java.io.DataOutputStream
+import java.io.FileOutputStream
+import com.scalaAsm.assembler.Assembler
+import com.scalaAsm.linker.Linker
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.InputStream
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileInputStream
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
 
-object HelloWorld3 extends AsmProgram[x86_32] {
+object HelloWorld2 extends AsmProgram[x86_32] {
   
   import com.scalaAsm.x86.Instructions.Standard._
 
   sections += new DataSection (
-    Variable("pressAnyKey", "Press any key to continue ...\0"),
-    Variable("newline", "\r\n\0"),
-    Variable("helloWorld", "Hello World!\n\0")
+    Variable("helloWorld", "Hello World!\n\u0000")
   ) {}
 
   sections += new CodeSection {
 
     procedure(name = "start",
       call("printHelloWorld"),
-      push("pressAnyKey"),
+      push(ebx),
       call("flushBuffer"),
-      call("waitForKeypress"),
-      push("newline"),
-      call("flushBuffer"),
-      push(byte(0)),
-      call("ExitProcess"))
+      retn(()))
 
     procedure(name = "printHelloWorld",
       push("helloWorld"),
@@ -60,19 +65,6 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       mov(eax, numberOfBytesWritten),
       leave(()),
       retn(word(4)))
-
-    procedure(name = "waitForKeypress",
-      push(STD_INPUT_HANDLE),
-      call("GetStdHandle"),
-      push(eax),
-      call("FlushConsoleInputBuffer"),
-      push(byte(1)),
-      call("Sleep"),
-      call("_kbhit"),
-      test(eax, eax), // eax is 0 if a key has not been pressed
-      jz(byte(-16)), // if a key has not been pressed, loop around again
-      call("_getch"),
-      retn(()))
 
     procedure(name = "strlen",
       mov(eax, *(esp + byte(4))), // pointer to string
@@ -113,5 +105,37 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       retn(word(4)))
 
     builder += align(2)
+  }
+}
+
+class HelloWorldTest2 extends FlatSpec with ShouldMatchers {
+
+  "A complex 32-bit Hello world" should "print 'Hello World'" in {
+    val name = System.nanoTime
+    new File("test.exe").delete()
+    val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
+    val assembler = new Assembler {}
+    val linker = new Linker {}
+
+    var beginTime = System.nanoTime()
+    val helloWorld = assembler.assemble(HelloWorld2).addIcon("scala.ico")
+
+    val exe = linker.link(helloWorld, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+
+    outputStream.write(exe.get)
+    println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
+    outputStream.close
+
+    val child = Runtime.getRuntime().exec("test.exe");
+    val in = new BufferedReader(
+      new InputStreamReader(child.getInputStream()));
+
+    val output = in.readLine()
+
+    child.waitFor()
+
+    new File("test.exe").delete()
+
+    output should equal("Hello World!")
   }
 }

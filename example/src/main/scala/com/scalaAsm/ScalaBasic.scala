@@ -19,8 +19,8 @@ object ScalaBasic {
     override def toString = {
       val first = "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._2[" + operand1 + ", " + operand2 + "] {\n"
       val second = first + "  def opcode = 0x" + opcode + "\n"
-      val third = if (operand1.operandType.promotedByRex || operand2.operandType.promotedByRex) {
-        "override def prefix = REX.W(true)\n"
+      val third = if (operand1.operandType.map(_.promotedByRex).getOrElse(false) || operand2.operandType.map(_.promotedByRex).getOrElse(false)) {
+        "  override def prefix = REX.W(true)\n"
       } else ""
       second + third + "}"
     }
@@ -29,10 +29,10 @@ object ScalaBasic {
   case class x86InstructionDetails(opsize: Option[Boolean], direction: Option[Boolean])
 
   case class OperandDef(name: Option[String],
-                        operandType: OperandType,
+                        operandType: Option[OperandType],
                         addressingMethod: Option[AddressingMethod]) {
     override def toString = {
-      name getOrElse addressingMethod.toString + operandType.toString
+      name getOrElse addressingMethod.get.toString + operandType.toString
     }
   }
 
@@ -160,6 +160,7 @@ object ScalaBasic {
   }
 
   def decodeOperandType(t: String): OperandType = {
+    println(t)
     t match {
       case "a"   => Two16or32ByteOperands
       case "b"   => ByteOperand
@@ -218,8 +219,13 @@ object ScalaBasic {
   def loadXML() = {
 
     val xml = XML.loadFile("x86reference.xml")
-    val good = (xml \\ "pri_opcd").filter { x => (x \\ "syntax" \ "mnem").text == "ADD" }
+    val good = (xml \\ "pri_opcd")//.filter { x => (x \ "entry" \ "syntax" \ "mnem").text == "ADD"}
+    
+    
     val defs = good.map { inst =>
+      val opcode = Integer.parseInt(inst \@ "value", 16)
+      println("WHAT " + opcode)
+      val mnemonic = (inst \ "entry" \ "syntax" \ "mnem").text
       val opSize = getOptionalBoolean(inst \ "entry" \ "@opsize")
       val direction = getOptionalBoolean(inst \ "entry" \ "@direction")
       val dstOperand = inst \ "entry" \ "syntax" \ "dst"
@@ -229,9 +235,11 @@ object ScalaBasic {
       val dstName = if (!doesDstHaveDetails) Some(dstOperand.text) else None
       val dstType =
         if (!(dstOperand \ "t").isEmpty)
-          decodeOperandType((dstOperand \ "t").text)
+          Some(decodeOperandType((dstOperand \ "t").text))
+        else if (!(dstOperand \ "@type").isEmpty)
+          Some(decodeOperandType((dstOperand \ "@type").text))
         else
-          decodeOperandType((dstOperand \ "@type").text)
+          None
 
       val dstAddressing =
         if (!(dstOperand \ "a").isEmpty)
@@ -241,10 +249,13 @@ object ScalaBasic {
 
       val srcName = if (!doesSrcHaveDetails) Some(srcOperand.text) else None
       val srcType =
-        if (!(srcOperand \ "t").isEmpty)
-          decodeOperandType((srcOperand \ "t").text)
+        if (!(srcOperand \ "t").isEmpty) {
+          println("really?: " + (srcOperand \ "t").text)
+          Some(decodeOperandType((srcOperand \ "t").text))
+        } else if (!(srcOperand \ "@type").isEmpty)
+          Some(decodeOperandType((srcOperand \ "@type").text))
         else
-          decodeOperandType((srcOperand \ "@type").text)
+          None
           
       val srcAddressing =
         if (!(srcOperand \ "a").isEmpty)
@@ -254,10 +265,10 @@ object ScalaBasic {
 
       val dst = OperandDef(dstName, dstType, dstAddressing)
       val src = OperandDef(srcName, srcType, srcAddressing)
-      val opcode = (inst \@ "value").toInt
+      
       val opcodeEx = getOptionalInt(inst \ "entry" \ "opcd_ext")
       val details = x86InstructionDetails(opSize, direction)
-      x86InstructionDef(opcode, "ADD", dst, src, opcodeEx, details)
+      x86InstructionDef(opcode, mnemonic, dst, src, opcodeEx, details)
     }
     defs.foreach(println)
   }

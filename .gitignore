@@ -18,3 +18,5 @@ example/good/HelloWorld.exe
 example/good/HelloWorld.idb
 *.bak
 example/test64.exe
+*.classpath
+*.project

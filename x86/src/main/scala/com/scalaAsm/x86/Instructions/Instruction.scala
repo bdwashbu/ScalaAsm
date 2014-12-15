@@ -37,7 +37,7 @@ case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mn
   }
 }
 
-case class OneMachineCode[O1, OpEn <: OneOperandEncoding[O1]](
+case class OneMachineCode[O1, OpEn](
     operand: Operand[O1],
     format: OneOperandFormat[O1, OpEn],
     prefixAndOpcode: Array[Byte],
@@ -58,7 +58,7 @@ case class OneMachineCode[O1, OpEn <: OneOperandEncoding[O1]](
   }
 }
 
-case class TwoMachineCode[O1, O2, OpEn <: TwoOperandEncoding[O1,O2]](
+case class TwoMachineCode[O1, O2, OpEn](
     operand: Operand[O1],
     operand2: Operand[O2],
     format: TwoOperandFormat[O1, O2, OpEn],
@@ -88,7 +88,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
   }
   
-  abstract class _1[-O1, OpEn <: OneOperandEncoding[O1]]  extends x86Instruction {
+  abstract class _1[-O1, OpEn]  extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     
@@ -107,7 +107,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     }
   }
   
-  abstract class _2[-O1, -O2, OpEn <: TwoOperandEncoding[O1, O2]]  extends x86Instruction {
+  abstract class _2[-O1, -O2, OpEn]  extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     

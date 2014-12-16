@@ -4,17 +4,14 @@ import java.io._
 import com.scalaAsm.assembler.Assembler
 import com.scalaAsm.linker.Linker
 import com.scalaAsm.coff.Coff
-import scala.xml.XML
-import scala.xml.NodeSeq
-import scala.xml.Elem
+import scala.xml._
 
 object ScalaBasic {
 
   case class x86InstructionDef(opcode: Int,
                                mnemonic: String,
                                operands: Seq[OperandDef],
-                               opcodeEx: Option[Int],
-                               details: x86InstructionDetails) {
+                               mode: String) {
     override def toString = {
       val first = if (operands.size == 2)
         "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._2[" + operands(0) + ", " + operands(1) + "] {\n"
@@ -29,10 +26,22 @@ object ScalaBasic {
       second + third + "}"
     }
   }
-                               
+
+  case class x86Opcode(opcode: Int,
+                       entries: Seq[x86Entry])
+
+  case class x86Entry(mode: Option[String],
+                      syntax: Seq[SyntaxDef],
+                      opcodeEx: Option[Int],
+                      details: x86InstructionDetails)
+
   case class x86InstructionDetails(opsize: Option[Boolean], direction: Option[Boolean])
 
-  case class OperandDef(name: Option[String],
+  case class SyntaxDef(mnemonic: String,
+                       operands: Seq[OperandDef])
+
+  case class OperandDef(srcOrDst: String,
+                        name: Option[String],
                         operandType: Option[OperandType],
                         addressingMethod: Option[AddressingMethod]) {
     override def toString = {
@@ -127,7 +136,7 @@ object ScalaBasic {
   object WordOrDoublewordExtendedToStack extends OperandType("16/32", true, false)
   object Word extends OperandType("16", false, false)
   object WordInteger extends OperandType("16int", false, false)
-  
+
   object WordOrDoublewordBasedOnAddressSize extends OperandType("", false, false) // REP + LOOP
   object DoublewordOrQuadwordBasedOnAddressSize extends OperandType("", false, false) // REP + LOOP
   object WordBasedOnAddressSize extends OperandType("", false, false) // JCXZ
@@ -215,13 +224,13 @@ object ScalaBasic {
       case "wi"  => WordInteger
       case "va"  => WordOrDoublewordBasedOnAddressSize
       case "dqa" => DoublewordOrQuadwordBasedOnAddressSize
-      case "wa" => WordBasedOnAddressSize
-      case "wo" => WordBasedOnOperandSize
-      case "ws" => WordBasedOnStackSize
-      case "da" => DoublewordBasedOnAddressSize
-      case "do" => DoublewordBasedOnOperandSize
-      case "qa" => QuadwordBasedOnAddressSize
-      case "qs" => QuadwordBasedOnOperandSize
+      case "wa"  => WordBasedOnAddressSize
+      case "wo"  => WordBasedOnOperandSize
+      case "ws"  => WordBasedOnStackSize
+      case "da"  => DoublewordBasedOnAddressSize
+      case "do"  => DoublewordBasedOnOperandSize
+      case "qa"  => QuadwordBasedOnAddressSize
+      case "qs"  => QuadwordBasedOnOperandSize
     }
   }
 
@@ -237,14 +246,13 @@ object ScalaBasic {
     if (!node.isEmpty) Some(node.text) else None
   }
 
-  def parseEntry(opcode: Int, entry: NodeSeq): x86InstructionDef = {
-    val mnemonic = (entry \ "syntax" \ "mnem").text
-        val opcodeEx = getOptionalInt(entry \ "opcd_ext")
-        val opSize = getOptionalBoolean(entry \ "@opsize")
-        val direction = getOptionalBoolean(entry \ "@direction")
-        val operands = (entry \ "syntax").flatMap{x => x \ "dst" ++ x \ "src"}
-        
-        val operandDefs = operands.map{ operand =>
+  def parseSyntax(entry: NodeSeq): Seq[SyntaxDef] = {
+    (entry \ "syntax").map { syntax =>
+      val mnemonic = (syntax \ "mnem").text
+      val operands = syntax.flatMap { x => List(("dst", x \ "dst")) ++ List(("src", x \ "src")) }
+
+      val ops = operands.map {
+        case (srcOrDst, operand) =>
           val hasDetails = !(operand \ "a").isEmpty
           val name = if (!hasDetails) Some(operand.text) else None
           val opType =
@@ -254,44 +262,70 @@ object ScalaBasic {
               Some(decodeOperandType((operand \ "@type").text.trim))
             else
               None
-    
+
           val opAddressing =
             if (!(operand \ "a").isEmpty)
               Some(decodeAddressingMethod((operand \ "a").text.trim, entry))
             else
               None
-              
-          OperandDef(name, opType, opAddressing)
-        }
-        
-        val details = x86InstructionDetails(opSize, direction)
-        x86InstructionDef(opcode, mnemonic, operandDefs, opcodeEx, details)
+
+          OperandDef(srcOrDst, name, opType, opAddressing)
+      }
+
+      SyntaxDef(mnemonic, ops)
+    }
   }
-  
+
+  def parseEntry(entry: NodeSeq): x86Entry = {
+    val mode = getOptionalString(entry \ "@mode")
+    val opcodeEx = getOptionalInt(entry \ "opcd_ext")
+    val opSize = getOptionalBoolean(entry \ "@opsize")
+    val direction = getOptionalBoolean(entry \ "@direction")
+
+    val operandDefs = parseSyntax(entry)
+
+    val details = x86InstructionDetails(opSize, direction)
+    x86Entry(mode, operandDefs, opcodeEx, details)
+  }
+
   def loadXML() = {
 
     val xml = XML.loadFile("x86reference.xml")
     val pri_opcodes = (xml \\ "pri_opcd")
-    
-    val defs = pri_opcodes.flatMap { pri_opcode =>
-      val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
 
-      (pri_opcode \ "entry").filter{x => (x \ "syntax" \ "mnem").text == "ADD"}.map { entry =>
-        parseEntry(opcode, entry)
+    val opcodes = for {
+      pri_opcode <- pri_opcodes
+      opcode = Integer.parseInt(pri_opcode \@ "value", 16)
+      entry <- (pri_opcode \ "entry")
+    } yield x86Opcode(opcode, entry.map(parseEntry))
+
+    val insts = opcodes.flatMap { op =>
+      op.entries match {
+        case (x @ x86Entry(None, _, _, _)) :: (y @ x86Entry(Some("e"), _, _, _)) :: _ =>
+          x.syntax.map { syntax =>
+            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, x.mode.getOrElse("ALL?"))
+          } ++
+            y.syntax.map { syntax =>
+              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, "e")
+            }
+        case (x @ x86Entry(None, _, _, _)) :: _ => x.syntax.map { syntax =>
+          x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, x.mode.getOrElse("ALL?"))
+        }
       }
     }
-    defs.foreach { x =>
-      if (x.operands.size == 2) {
-        x.operands(0).addressingMethod match {
-          case Some(ModRMByteRegisterOrMemory(r)) => println(r)
-          case _ => 
-        }
-        x.operands(1).addressingMethod match {
-          case Some(ModRMByteRegisterOrMemory(r)) => println(r)
-          case _ => 
-        }
-      }
-    }
+
+//    entries.foreach { x =>
+//      if (x.operands.size == 2) {
+//        x.operands(0).addressingMethod match {
+//          case Some(ModRMByteRegisterOrMemory(r)) => println(r)
+//          case _                                  =>
+//        }
+//        x.operands(1).addressingMethod match {
+//          case Some(ModRMByteRegisterOrMemory(r)) => println(r)
+//          case _                                  =>
+//        }
+//      }
+//    }
   }
 
   def main(args: Array[String]): Unit = {

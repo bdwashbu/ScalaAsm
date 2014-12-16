@@ -61,7 +61,7 @@ object ScalaBasic {
   object MemoryAddressedbyDS extends AddressingMethod("m", false)
   object RegFieldSelectsControlRegister extends AddressingMethod("CRn", true)
   object RegFieldSelectsDebugRegister extends AddressingMethod("DRn", true)
-  object ModRMByteRegisterOrMemory extends AddressingMethod("r/m", true)
+  case class ModRMByteRegisterOrMemory(val isReg: Boolean) extends AddressingMethod("r/m", true)
   object ModRMByteX87StackOrMemory extends AddressingMethod("STi/m", true)
   object ModRMByteX87StackRegister extends AddressingMethod("STi", true)
   object FlagsRegister extends AddressingMethod("-", false)
@@ -138,7 +138,7 @@ object ScalaBasic {
   object QuadwordBasedOnAddressSize extends OperandType("", false, false) // JRCXZ
   object QuadwordBasedOnOperandSize extends OperandType("", false, false) // PUSHFQ + POPFQ
 
-  def decodeAddressingMethod(a: String): AddressingMethod = {
+  def decodeAddressingMethod(a: String, entry: NodeSeq): AddressingMethod = {
     a match {
       case "A"   => DirectAddress
       case "BA"  => MemoryAddressedbyAX
@@ -146,7 +146,7 @@ object ScalaBasic {
       case "BD"  => MemoryAddressedbyDS
       case "C"   => RegFieldSelectsControlRegister
       case "D"   => RegFieldSelectsDebugRegister
-      case "E"   => ModRMByteRegisterOrMemory
+      case "E"   => ModRMByteRegisterOrMemory((entry \@ "r") == "yes")
       case "ES"  => ModRMByteX87StackOrMemory
       case "EST" => ModRMByteX87StackRegister
       case "F"   => FlagsRegister
@@ -237,16 +237,8 @@ object ScalaBasic {
     if (!node.isEmpty) Some(node.text) else None
   }
 
-  def loadXML() = {
-
-    val xml = XML.loadFile("x86reference.xml")
-    val pri_opcodes = (xml \\ "pri_opcd")
-    
-    val defs = pri_opcodes.flatMap { pri_opcode =>
-      val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
-
-      (pri_opcode \ "entry").filter{x => (x \ "syntax" \ "mnem").text == "ADD"}.map { entry =>
-        val mnemonic = (entry \ "syntax" \ "mnem").text
+  def parseEntry(opcode: Int, entry: NodeSeq): x86InstructionDef = {
+    val mnemonic = (entry \ "syntax" \ "mnem").text
         val opcodeEx = getOptionalInt(entry \ "opcd_ext")
         val opSize = getOptionalBoolean(entry \ "@opsize")
         val direction = getOptionalBoolean(entry \ "@direction")
@@ -265,7 +257,7 @@ object ScalaBasic {
     
           val opAddressing =
             if (!(operand \ "a").isEmpty)
-              Some(decodeAddressingMethod((operand \ "a").text.trim))
+              Some(decodeAddressingMethod((operand \ "a").text.trim, entry))
             else
               None
               
@@ -274,9 +266,32 @@ object ScalaBasic {
         
         val details = x86InstructionDetails(opSize, direction)
         x86InstructionDef(opcode, mnemonic, operandDefs, opcodeEx, details)
+  }
+  
+  def loadXML() = {
+
+    val xml = XML.loadFile("x86reference.xml")
+    val pri_opcodes = (xml \\ "pri_opcd")
+    
+    val defs = pri_opcodes.flatMap { pri_opcode =>
+      val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
+
+      (pri_opcode \ "entry").filter{x => (x \ "syntax" \ "mnem").text == "ADD"}.map { entry =>
+        parseEntry(opcode, entry)
       }
     }
-    defs.foreach(println)
+    defs.foreach { x =>
+      if (x.operands.size == 2) {
+        x.operands(0).addressingMethod match {
+          case Some(ModRMByteRegisterOrMemory(r)) => println(r)
+          case _ => 
+        }
+        x.operands(1).addressingMethod match {
+          case Some(ModRMByteRegisterOrMemory(r)) => println(r)
+          case _ => 
+        }
+      }
+    }
   }
 
   def main(args: Array[String]): Unit = {

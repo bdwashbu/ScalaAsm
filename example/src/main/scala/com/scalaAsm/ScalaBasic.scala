@@ -11,8 +11,8 @@ object ScalaBasic {
   case class x86InstructionDef(opcode: Int,
                                mnemonic: String,
                                operands: Seq[OperandDef],
-                               mode: String) {
-    override def toString = {
+                               modes: Seq[x86Entry]) {
+    def getIntel = {
       val first = if (operands.size == 2)
         "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._2[" + operands(0) + ", " + operands(1) + "] {\n"
       else if (operands.size == 1)
@@ -33,9 +33,8 @@ object ScalaBasic {
   case class x86Entry(mode: Option[String],
                       syntax: Seq[SyntaxDef],
                       opcodeEx: Option[Int],
-                      details: x86InstructionDetails)
-
-  case class x86InstructionDetails(opsize: Option[Boolean], direction: Option[Boolean])
+                      opsize: Option[Boolean],
+                      direction: Option[Boolean])
 
   case class SyntaxDef(mnemonic: String,
                        operands: Seq[OperandDef])
@@ -249,12 +248,13 @@ object ScalaBasic {
   def parseSyntax(entry: NodeSeq): Seq[SyntaxDef] = {
     (entry \ "syntax").map { syntax =>
       val mnemonic = (syntax \ "mnem").text
-      val operands = syntax.flatMap { x => List(("dst", x \ "dst")) ++ List(("src", x \ "src")) }
+      val operandMap = Map("dst" -> syntax \ "src", "dst" -> syntax \ "dst")
 
-      val ops = operands.map {
-        case (srcOrDst, operand) =>
+      val ops = operandMap.flatMap {
+        case (description, operands) => operands map { operand =>
           val hasDetails = !(operand \ "a").isEmpty
           val name = if (!hasDetails) Some(operand.text) else None
+          println(mnemonic)
           val opType =
             if (!(operand \ "t").isEmpty)
               Some(decodeOperandType((operand \ "t").text.trim))
@@ -269,10 +269,11 @@ object ScalaBasic {
             else
               None
 
-          OperandDef(srcOrDst, name, opType, opAddressing)
+          OperandDef(description, name, opType, opAddressing)
+        }
       }
 
-      SyntaxDef(mnemonic, ops)
+      SyntaxDef(mnemonic, ops.toSeq)
     }
   }
 
@@ -284,8 +285,7 @@ object ScalaBasic {
 
     val operandDefs = parseSyntax(entry)
 
-    val details = x86InstructionDetails(opSize, direction)
-    x86Entry(mode, operandDefs, opcodeEx, details)
+    x86Entry(mode, operandDefs, opcodeEx, opSize, direction)
   }
 
   def loadXML() = {
@@ -299,20 +299,27 @@ object ScalaBasic {
       entry <- (pri_opcode \ "entry")
     } yield x86Opcode(opcode, entry.map(parseEntry))
 
+    var lastEntry: x86Entry = null
     val insts = opcodes.flatMap { op =>
-      op.entries match {
-        case (x @ x86Entry(None, _, _, _)) :: (y @ x86Entry(Some("e"), _, _, _)) :: _ =>
-          x.syntax.map { syntax =>
-            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, x.mode.getOrElse("ALL?"))
-          } ++
-            y.syntax.map { syntax =>
-              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, "e")
-            }
-        case (x @ x86Entry(None, _, _, _)) :: _ => x.syntax.map { syntax =>
-          x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, x.mode.getOrElse("ALL?"))
-        }
+      op.entries.flatMap { entry => 
+          val result = if (lastEntry != null && entry.mode == Some("e") && lastEntry.mode == None) {
+            for {
+              syntax <- lastEntry.syntax
+            } yield Some(x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq(entry)))
+          } else if (lastEntry != null){
+            for {
+              syntax <- lastEntry.syntax
+            } yield Some(x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq()))
+          } else
+            Seq(None)
+          lastEntry = entry
+          result
       }
-    }
+    }.flatten
+    
+    //opcodes.foreach{opcode => opcode.entries.foreach(println)}
+    
+    insts.filter{ case x86InstructionDef(_,_,_,Seq(x)) => true; case _ => false}.foreach(println)
 
 //    entries.foreach { x =>
 //      if (x.operands.size == 2) {

@@ -5,6 +5,7 @@ import com.scalaAsm.assembler.Assembler
 import com.scalaAsm.linker.Linker
 import com.scalaAsm.coff.Coff
 import scala.xml._
+import java.io.PrintWriter
 
 object ScalaBasic {
 
@@ -12,18 +13,19 @@ object ScalaBasic {
                                mnemonic: String,
                                operands: Seq[OperandDef],
                                modes: Seq[x86Entry]) {
-    def getIntel = {
+    def getIntel(numSpaces: Int) = {
+      val spaces = (1 to numSpaces) map(x => " ") mkString
       val first = if (operands.size == 2)
-        "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._2[" + operands(0) + ", " + operands(1) + "] {\n"
+        spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._2[" + operands(0) + ", " + operands(1) + "] {\n"
       else if (operands.size == 1)
-        "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._1[" + operands(0) + "] {\n"
+        spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._1[" + operands(0) + "] {\n"
       else
-        "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._0 {\n"
-      val second = first + "  def opcode = 0x" + opcode + "\n"
+        spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._0 {\n"
+      val second = first + spaces + "  def opcode = 0x" + opcode + "\n"
       val third = if (operands.map(_.operandType.map(_.promotedByRex).getOrElse(false)).contains(true)) {
-        "  override def prefix = REX.W(true)\n"
+        spaces + "  override def prefix = REX.W(true)\n"
       } else ""
-      second + third + "}"
+      second + third + spaces + "}"
     }
   }
 
@@ -44,7 +46,7 @@ object ScalaBasic {
                         operandType: Option[OperandType],
                         addressingMethod: Option[AddressingMethod]) {
     override def toString = {
-      name getOrElse addressingMethod.get.toString + operandType.toString
+      name getOrElse addressingMethod.get.toString + operandType.get.toString
     }
   }
 
@@ -288,7 +290,7 @@ object ScalaBasic {
     x86Entry(mode, operandDefs, opcodeEx, opSize, direction)
   }
 
-  def loadXML() = {
+  def loadXML(): Seq[x86InstructionDef] = {
 
     val xml = XML.loadFile("x86reference.xml")
     val pri_opcodes = (xml \\ "pri_opcd")
@@ -300,45 +302,45 @@ object ScalaBasic {
     } yield x86Opcode(opcode, entry.map(parseEntry))
 
     var lastEntry: x86Entry = null
-    val insts = opcodes.flatMap { op =>
+    
+    opcodes.flatMap { op =>
       op.entries.flatMap { entry => 
           val result = if (lastEntry != null && entry.mode == Some("e") && lastEntry.mode == None) {
-            for {
-              syntax <- lastEntry.syntax
-            } yield Some(x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq(entry)))
+            lastEntry.syntax.map{syntax => Some(x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq(entry)))}
           } else if (lastEntry != null){
-            for {
-              syntax <- lastEntry.syntax
-            } yield Some(x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq()))
+            lastEntry.syntax.map{syntax => Some(x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq()))}
           } else
             Seq(None)
           lastEntry = entry
           result
       }
     }.flatten
-    
-    //opcodes.foreach{opcode => opcode.entries.foreach(println)}
-    
-    insts.filter{ case x86InstructionDef(_,_,_,Seq(x)) => true; case _ => false}.foreach(println)
+  }
+  
+  def outputInstructionFile(mnemonic: String, instructions: Seq[x86InstructionDef]) = {
+    val writer = new PrintWriter(mnemonic + ".scala", "UTF-8");
 
-//    entries.foreach { x =>
-//      if (x.operands.size == 2) {
-//        x.operands(0).addressingMethod match {
-//          case Some(ModRMByteRegisterOrMemory(r)) => println(r)
-//          case _                                  =>
-//        }
-//        x.operands(1).addressingMethod match {
-//          case Some(ModRMByteRegisterOrMemory(r)) => println(r)
-//          case _                                  =>
-//        }
-//      }
-//    }
+    writer.println("package com.scalaAsm.x86");
+    writer.println("package Instructions");
+    writer.println("package Standard");
+    writer.println("")
+    writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition[OneOpcode](\"" + mnemonic + "\") with AddLow")
+    writer.println("")
+    writer.println("trait AddLow {")
+    for (inst <- instructions) {
+      writer.println(inst.getIntel(2))
+      if (inst != instructions.last)
+        writer.println("")
+    }
+    writer.println("}")
+    writer.close();
   }
 
   def main(args: Array[String]): Unit = {
     try {
 
-      loadXML()
+      val insts = loadXML()
+      outputInstructionFile("ADD", insts.filter(_.mnemonic == "ADD"))
 
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
       val assembler = new Assembler {}

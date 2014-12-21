@@ -13,7 +13,7 @@ trait AbsoluteAddress[Size] extends AddressingMode[Size] with Operand[AbsoluteAd
   def get = this
 }
 
-abstract class Relative[S: Numeric] extends RegisterOrMemory[S] with Operand[Relative[S]]{
+abstract class Relative[S: x86Size] extends RegisterOrMemory[S] with Operand[Relative[S]]{
   self =>
     def displacement: Constant[S]
     def get = this

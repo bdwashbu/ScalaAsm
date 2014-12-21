@@ -6,8 +6,8 @@ trait Registers[Mode <: x86Mode] {
 
     trait RegisterOps[X <: GeneralPurpose[_]] {
       self: Operand[X] =>
-      def -[Z: Numeric](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get.negate)
-      def +[Z: Numeric](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get)
+      def -[Z: x86Size](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get.negate)
+      def +[Z: x86Size](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get)
     }
     
     case class RegisterOperand[X <: GeneralPurpose[_]](reg: X) extends Operand[X] with RegisterOps[X] {

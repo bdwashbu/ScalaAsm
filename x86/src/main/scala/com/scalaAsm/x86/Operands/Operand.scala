@@ -26,13 +26,13 @@ case class Op[X](from: X) extends Operand[X] {
   override def toString = from.toString
 }
 
-abstract class Constant[Size: Numeric](val value: Size) extends InstructionField {
+abstract class Constant[Size: x86Size](val value: Size) extends InstructionField {
   import java.nio.{ByteBuffer, ByteOrder}
   val buffer = ByteBuffer.allocate(size)
   buffer.order(ByteOrder.LITTLE_ENDIAN)
   def negate: Constant[Size]
-  def size: Int
-  protected def getNegative = implicitly[Numeric[Size]].negate(value)
+  def size = implicitly[x86Size[Size]].size
+  protected def getNegative = implicitly[x86Size[Size]].negate(value)
   def getBytes: Array[Byte] = {
       buffer.array()
   }
@@ -43,29 +43,25 @@ abstract class Constant[Size: Numeric](val value: Size) extends InstructionField
 case class Constant8(x: Byte) extends Constant(x) {
   self =>
   buffer.put(value)
-  def size = 1
   def negate = Constant8(getNegative)
 }
 
 case class Constant16(x: Short) extends Constant(x) {
   self =>
   buffer.putShort(value)
-  def size = 2
   def negate = Constant16(getNegative)
 }
 
 case class Constant32(x: Int) extends Constant(x) {
   self =>
   buffer.putInt(value)
-  def size = 4
   def negate = Constant32(getNegative)
 }
 
 case class Constant64(x: Long) extends Constant(x) {
   self =>
   buffer.putLong(value)
-  def size = 8
   def negate = Constant64(getNegative)
 }
 
-class RegisterOrMemory[Size: Numeric]
+class RegisterOrMemory[Size: x86Size]

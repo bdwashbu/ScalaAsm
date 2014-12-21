@@ -14,12 +14,12 @@ object ScalaBasic {
                                operands: x86Operands,
                                modes: Seq[x86Entry]) {
     def getIntelForms(numSpaces: Int): Seq[String] = {
-      operands.getIntelForms.map { opString =>
+      operands.getIntelForms.zipWithIndex map { case (opString, index) =>
         val spaces = (1 to numSpaces) map(x => " ") mkString
         val first = if (operands.operands.size == 2)
-          spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._2[" + opString + "] {\n"
+          spaces + "implicit object " + mnemonic + "_" + opcode + "_" + (index+1) + " extends " + mnemonic.toUpperCase() + "._2[" + opString + "] {\n"
         else if (operands.operands.size == 1)
-          spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._1[" + operands.operands(0) + "] {\n"
+          spaces + "implicit object " + mnemonic + "_" + opcode + "_" + (index+1) + " extends " + mnemonic.toUpperCase() + "._1[" + operands.operands(0) + "] {\n"
         else
           spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._0 {\n"
         val second = first + spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
@@ -46,18 +46,55 @@ object ScalaBasic {
   case class x86Operands(operands: Seq[OperandDef]) {
     def getIntelForms: Seq[String] = {
       if (operands.size == 2) {
-        if (operands(0).operandType.get.subtypes.size == 3 &&
-            operands(1).operandType.get.subtypes.size == 3) {
-          return operands(0).operandType.get.subtypes.zip(operands(1).operandType.get.subtypes).map(x => x._1.toString + ", " + x._2.toString)
-        } else if (operands(0).operandType.get.subtypes.size == 3 &&
-            operands(1).operandType.get.subtypes.size == 1) {
+        (operands(0).operandType.get.subtypes.size,
+            operands(1).operandType.get.subtypes.size) match {
+                  
+        case (3,3) => {
+          if (operands(0).addressingMethod.isDefined &&
+              operands(1).addressingMethod.isDefined) {
+            val a1 = operands(0).addressingMethod.get.toString
+            val a2 = operands(1).addressingMethod.get.toString
+            operands(0).operandType.get.subtypes.zip(operands(1).operandType.get.subtypes).map(x => a1 + x._1.toString + ", " + a2 + x._2.toString)
+          } else {
+            Seq(operands(0).name.get)
+          }
+          } 
+        case (3,1) => {
           for {
             sub1 <- operands(0).operandType.get.subtypes
             sub2 <- operands(1).operandType.get.subtypes
-          } yield sub1.toString + ", " + sub2.toString()
-        } else {
+          } yield operands(0).addressingMethod.get.toString + sub1.toString + ", " +
+                     operands(1).addressingMethod.get.toString + sub2.toString()
+        }
+        case (1,1) => {
+          if (operands(0).addressingMethod.isDefined &&
+              operands(1).addressingMethod.isDefined) {
+            val a1 = operands(0).addressingMethod.get.toString
+            val a2 = operands(1).addressingMethod.get.toString
+            operands(0).operandType.get.subtypes.zip(operands(1).operandType.get.subtypes).map(x => a1 + x._1.toString + ", " + a2 + x._2.toString)
+          } else {
+            Seq(operands(0).name.get)
+          }
+        }
+        case (3,2) =>
+          if (operands(0).addressingMethod.isDefined &&
+              operands(1).addressingMethod.isDefined) {
+            val a1 = operands(0).addressingMethod.get.toString
+            val a2 = operands(1).addressingMethod.get.toString
+            val padded = operands(1).operandType.get.subtypes + operands(1).operandType.get.subtypes.last
+            operands(0).operandType.get.subtypes.zip(padded).map(x => a1 + x._1.toString + ", " + a2 + x._2.toString)
+          } else {
+            Seq(operands(0).name.get)
+          }
+          
+        case _ =>
+          println("HERE")
+          println(operands(0).operandType.get.subtypes.size)
+          println(operands(1).operandType.get.subtypes.size)
           Seq()
         }
+      } else if (operands.size == 1) {
+        Seq(operands(0).addressingMethod.get.toString + operands(0).operandType.get.subtypes(0).toString)
       } else {
         Seq()
       }
@@ -94,7 +131,7 @@ object ScalaBasic {
   object MemoryAddressedbyDS extends AddressingMethod("m", false)
   object RegFieldSelectsControlRegister extends AddressingMethod("CRn", true)
   object RegFieldSelectsDebugRegister extends AddressingMethod("DRn", true)
-  case class ModRMByteRegisterOrMemory(val isReg: Boolean) extends AddressingMethod("r/m", true)
+  case class ModRMByteRegisterOrMemory(val isReg: Boolean) extends AddressingMethod("rm", true)
   object ModRMByteX87StackOrMemory extends AddressingMethod("STi/m", true)
   object ModRMByteX87StackRegister extends AddressingMethod("STi", true)
   object FlagsRegister extends AddressingMethod("-", false)
@@ -154,7 +191,7 @@ object ScalaBasic {
   object X87FPUAndSIMDState extends OperandType(Seq("512"), false, true)
   object TenByteFarPointer extends OperandType(Seq("-"), false, false)
   object WordOrDoubleword extends OperandType(Seq("16","32"), false, false)
-  object WordOrDoublewordOrDoubleWordExtendedTo64 extends OperandType(Seq("16","32"), false, false)
+  object WordOrDoublewordOrDoubleWordExtendedTo64 extends OperandType(Seq("16","32","32"), false, false)
   object QuadwordOrWord extends OperandType(Seq("64","16"), false, false)
   object WordOrDoublewordOrQuadword extends OperandType(Seq("16","32","64"), true, false)
   object WordOrDoublewordExtendedToStack extends OperandType(Seq("16","32"), true, false)

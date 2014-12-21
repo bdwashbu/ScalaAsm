@@ -11,21 +11,23 @@ object ScalaBasic {
 
   case class x86InstructionDef(opcode: Int,
                                mnemonic: String,
-                               operands: Seq[OperandDef],
+                               operands: x86Operands,
                                modes: Seq[x86Entry]) {
-    def getIntel(numSpaces: Int) = {
-      val spaces = (1 to numSpaces) map(x => " ") mkString
-      val first = if (operands.size == 2)
-        spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._2[" + operands(0) + ", " + operands(1) + "] {\n"
-      else if (operands.size == 1)
-        spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._1[" + operands(0) + "] {\n"
-      else
-        spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._0 {\n"
-      val second = first + spaces + "  def opcode = 0x" + opcode + "\n"
-      val third = if (operands.map(_.operandType.map(_.promotedByRex).getOrElse(false)).contains(true)) {
-        spaces + "  override def prefix = REX.W(true)\n"
-      } else ""
-      second + third + spaces + "}"
+    def getIntelForms(numSpaces: Int): Seq[String] = {
+      operands.getIntelForms.map { opString =>
+        val spaces = (1 to numSpaces) map(x => " ") mkString
+        val first = if (operands.operands.size == 2)
+          spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._2[" + opString + "] {\n"
+        else if (operands.operands.size == 1)
+          spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._1[" + operands.operands(0) + "] {\n"
+        else
+          spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._0 {\n"
+        val second = first + spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+        val third = if (operands.operands.map(_.operandType.map(_.promotedByRex).getOrElse(false)).contains(true)) {
+          spaces + "  override def prefix = REX.W(true)\n"
+        } else ""
+        second + third + spaces + "}"
+      }
     }
   }
 
@@ -39,8 +41,29 @@ object ScalaBasic {
                       direction: Option[Boolean])
 
   case class SyntaxDef(mnemonic: String,
-                       operands: Seq[OperandDef])
+                       operands: x86Operands)
 
+  case class x86Operands(operands: Seq[OperandDef]) {
+    def getIntelForms: Seq[String] = {
+      if (operands.size == 2) {
+        if (operands(0).operandType.get.subtypes.size == 3 &&
+            operands(1).operandType.get.subtypes.size == 3) {
+          return operands(0).operandType.get.subtypes.zip(operands(1).operandType.get.subtypes).map(x => x._1.toString + ", " + x._2.toString)
+        } else if (operands(0).operandType.get.subtypes.size == 3 &&
+            operands(1).operandType.get.subtypes.size == 1) {
+          for {
+            sub1 <- operands(0).operandType.get.subtypes
+            sub2 <- operands(1).operandType.get.subtypes
+          } yield sub1.toString + ", " + sub2.toString()
+        } else {
+          Seq()
+        }
+      } else {
+        Seq()
+      }
+    }
+  }
+                       
   case class OperandDef(srcOrDst: String,
                         name: Option[String],
                         operandType: Option[OperandType],
@@ -95,58 +118,58 @@ object ScalaBasic {
   object MemoryAddressedbyDI extends AddressingMethod("m", false)
   object OpcodeSelectsRegister extends AddressingMethod("r", false)
 
-  sealed abstract class OperandType(val abbreviation: String, val promotedByRex: Boolean, val x87Only: Boolean) {
-    override def toString = abbreviation
+  sealed abstract class OperandType(val subtypes: Seq[String], val promotedByRex: Boolean, val x87Only: Boolean) {
+    override def toString = subtypes mkString
   }
-  object Two16or32ByteOperands extends OperandType("16/32&16/32", false, false)
-  object ByteOperand extends OperandType("8", false, false)
-  object PackedBCD extends OperandType("80dec", false, false)
-  object ByteSignExtendedToDstOp extends OperandType("8", false, false)
-  object ByteSignExtendedTo64 extends OperandType("-", false, false)
-  object ByteSignExtendedToStackPtr extends OperandType("8", false, false)
-  object ByteOrWord extends OperandType("c", false, false) // unused
-  object DoubleWord extends OperandType("32", false, false)
-  object DoubleWordInt extends OperandType("32int", false, false)
-  object DoubleQuadword extends OperandType("128", false, false)
-  object DoubleOrQuadword extends OperandType("32/64", true, false)
-  object DoubleReal extends OperandType("64real", false, false)
-  object DoubleWordSignExtendedTo64 extends OperandType("32", false, false)
-  object X87FPUEnvironment extends OperandType("14/28", false, false)
-  object ExtendedReal extends OperandType("80real", false, false)
-  object ThirtyTwoOr48BitPointer extends OperandType("16:16/32", false, false)
-  object QuadwordMMX extends OperandType("(64)", false, false)
-  object BitPacked128DoublePrecisionFloat extends OperandType("", false, false)
-  object BitPacked128SinglePrecisionFloat extends OperandType("(128)", false, false)
-  object BitPacked64SinglePrecisionFloat extends OperandType("64", false, false)
-  object ThirtyTwoOr48Or80BitPointer extends OperandType("16:16/32/64", true, false)
-  object QuadwordRegardless extends OperandType("64", false, false)
-  object QuadwordInteger extends OperandType("64int", false, false)
-  object QuadwordPromoted extends OperandType("64int", true, false)
-  object PseudoDescriptor extends OperandType("", false, false)
-  object ScalarPackedDoublePrecisionFloat extends OperandType("-", false, false)
-  object DoubleWordIntegerRegister extends OperandType("?", false, false) // unused
-  object SingleReal extends OperandType("32real", false, true)
-  object ScalarPackedSinglePrecisionFloat extends OperandType("-", false, false)
-  object X87FPUState extends OperandType("94/108", false, true)
-  object X87FPUAndSIMDState extends OperandType("512", false, true)
-  object TenByteFarPointer extends OperandType("-", false, false)
-  object WordOrDoubleword extends OperandType("16/32", false, false)
-  object WordOrDoublewordOrDoubleWordExtendedTo64 extends OperandType("16/32", false, false)
-  object QuadwordOrWord extends OperandType("64/16", false, false)
-  object WordOrDoublewordOrQuadword extends OperandType("16/32/64", true, false)
-  object WordOrDoublewordExtendedToStack extends OperandType("16/32", true, false)
-  object Word extends OperandType("16", false, false)
-  object WordInteger extends OperandType("16int", false, false)
+  object Two16or32ByteOperands extends OperandType(Seq("16/16", "32/32"), false, false)
+  object ByteOperand extends OperandType(Seq("8"), false, false)
+  object PackedBCD extends OperandType(Seq("80dec"), false, false)
+  object ByteSignExtendedToDstOp extends OperandType(Seq("8"), false, false)
+  object ByteSignExtendedTo64 extends OperandType(Seq("-"), false, false)
+  object ByteSignExtendedToStackPtr extends OperandType(Seq("8"), false, false)
+  object ByteOrWord extends OperandType(Seq("c"), false, false) // unused
+  object DoubleWord extends OperandType(Seq("32"), false, false)
+  object DoubleWordInt extends OperandType(Seq("32int"), false, false)
+  object DoubleQuadword extends OperandType(Seq("128"), false, false)
+  object DoubleOrQuadword extends OperandType(Seq("32", "64"), true, false)
+  object DoubleReal extends OperandType(Seq("64real"), false, false)
+  object DoubleWordSignExtendedTo64 extends OperandType(Seq("32"), false, false)
+  object X87FPUEnvironment extends OperandType(Seq("14/28"), false, false)
+  object ExtendedReal extends OperandType(Seq("80real"), false, false)
+  object ThirtyTwoOr48BitPointer extends OperandType(Seq("16:16", "16/32"), false, false)
+  object QuadwordMMX extends OperandType(Seq("(64)"), false, false)
+  object BitPacked128DoublePrecisionFloat extends OperandType(Seq(""), false, false)
+  object BitPacked128SinglePrecisionFloat extends OperandType(Seq("(128)"), false, false)
+  object BitPacked64SinglePrecisionFloat extends OperandType(Seq("64"), false, false)
+  object ThirtyTwoOr48Or80BitPointer extends OperandType(Seq("16:16", "16:32", "16:64"), true, false)
+  object QuadwordRegardless extends OperandType(Seq("64"), false, false)
+  object QuadwordInteger extends OperandType(Seq("64int"), false, false)
+  object QuadwordPromoted extends OperandType(Seq("64int"), true, false)
+  object PseudoDescriptor extends OperandType(Seq(""), false, false)
+  object ScalarPackedDoublePrecisionFloat extends OperandType(Seq("-"), false, false)
+  object DoubleWordIntegerRegister extends OperandType(Seq("?"), false, false) // unused
+  object SingleReal extends OperandType(Seq("32real"), false, true)
+  object ScalarPackedSinglePrecisionFloat extends OperandType(Seq("-"), false, false)
+  object X87FPUState extends OperandType(Seq("94", "108"), false, true)
+  object X87FPUAndSIMDState extends OperandType(Seq("512"), false, true)
+  object TenByteFarPointer extends OperandType(Seq("-"), false, false)
+  object WordOrDoubleword extends OperandType(Seq("16","32"), false, false)
+  object WordOrDoublewordOrDoubleWordExtendedTo64 extends OperandType(Seq("16","32"), false, false)
+  object QuadwordOrWord extends OperandType(Seq("64","16"), false, false)
+  object WordOrDoublewordOrQuadword extends OperandType(Seq("16","32","64"), true, false)
+  object WordOrDoublewordExtendedToStack extends OperandType(Seq("16","32"), true, false)
+  object Word extends OperandType(Seq("16"), false, false)
+  object WordInteger extends OperandType(Seq("16int"), false, false)
 
-  object WordOrDoublewordBasedOnAddressSize extends OperandType("", false, false) // REP + LOOP
-  object DoublewordOrQuadwordBasedOnAddressSize extends OperandType("", false, false) // REP + LOOP
-  object WordBasedOnAddressSize extends OperandType("", false, false) // JCXZ
-  object WordBasedOnOperandSize extends OperandType("", false, false) // MOVSW
-  object WordBasedOnStackSize extends OperandType("", false, false) // PUSHF + POPF 64-bit
-  object DoublewordBasedOnAddressSize extends OperandType("", false, false) // JECXZ
-  object DoublewordBasedOnOperandSize extends OperandType("", false, false) // MOVSD
-  object QuadwordBasedOnAddressSize extends OperandType("", false, false) // JRCXZ
-  object QuadwordBasedOnOperandSize extends OperandType("", false, false) // PUSHFQ + POPFQ
+  object WordOrDoublewordBasedOnAddressSize extends OperandType(Seq(""), false, false) // REP + LOOP
+  object DoublewordOrQuadwordBasedOnAddressSize extends OperandType(Seq(""), false, false) // REP + LOOP
+  object WordBasedOnAddressSize extends OperandType(Seq(""), false, false) // JCXZ
+  object WordBasedOnOperandSize extends OperandType(Seq(""), false, false) // MOVSW
+  object WordBasedOnStackSize extends OperandType(Seq(""), false, false) // PUSHF + POPF 64-bit
+  object DoublewordBasedOnAddressSize extends OperandType(Seq(""), false, false) // JECXZ
+  object DoublewordBasedOnOperandSize extends OperandType(Seq(""), false, false) // MOVSD
+  object QuadwordBasedOnAddressSize extends OperandType(Seq(""), false, false) // JRCXZ
+  object QuadwordBasedOnOperandSize extends OperandType(Seq(""), false, false) // PUSHFQ + POPFQ
 
   def decodeAddressingMethod(a: String, entry: NodeSeq): AddressingMethod = {
     a match {
@@ -250,13 +273,11 @@ object ScalaBasic {
   def parseSyntax(entry: NodeSeq): Seq[SyntaxDef] = {
     (entry \ "syntax").map { syntax =>
       val mnemonic = (syntax \ "mnem").text
-      val operandMap = Map("dst" -> syntax \ "src", "dst" -> syntax \ "dst")
+      val operands = (syntax \ "_").filter{node => node.label != "mnem"}
 
-      val ops = operandMap.flatMap {
-        case (description, operands) => operands map { operand =>
+      val ops = x86Operands(operands map { operand =>
           val hasDetails = !(operand \ "a").isEmpty
           val name = if (!hasDetails) Some(operand.text) else None
-          println(mnemonic)
           val opType =
             if (!(operand \ "t").isEmpty)
               Some(decodeOperandType((operand \ "t").text.trim))
@@ -271,11 +292,10 @@ object ScalaBasic {
             else
               None
 
-          OperandDef(description, name, opType, opAddressing)
-        }
-      }
+          OperandDef(operand.label, name, opType, opAddressing)
+      })
 
-      SyntaxDef(mnemonic, ops.toSeq)
+      SyntaxDef(mnemonic, ops)
     }
   }
 
@@ -295,26 +315,43 @@ object ScalaBasic {
     val xml = XML.loadFile("x86reference.xml")
     val pri_opcodes = (xml \\ "pri_opcd")
 
-    val opcodes = for {
-      pri_opcode <- pri_opcodes
-      opcode = Integer.parseInt(pri_opcode \@ "value", 16)
-      entry <- (pri_opcode \ "entry")
-    } yield x86Opcode(opcode, entry.map(parseEntry))
+//    val opcodes = for {
+//      pri_opcode <- pri_opcodes
+//      opcode = Integer.parseInt(pri_opcode \@ "value", 16)
+//      entry <- (pri_opcode \ "entry").filter{entry => (entry \ "@alias").size == 0}
+//    } yield x86Opcode(opcode, entry.map(parseEntry))
+    
+    val opcodes = pri_opcodes.flatMap { pri_opcode =>
+      val nonAliasedEntries = (pri_opcode \ "entry").filter{entry => (entry \ "@alias").size == 0}
+      val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
+      nonAliasedEntries.map{entry =>
+        x86Opcode(opcode, entry.map(parseEntry))
+      }
+    }
 
     var lastEntry: x86Entry = null
     
     opcodes.flatMap { op =>
-      op.entries.flatMap { entry => 
-          val result = if (lastEntry != null && entry.mode == Some("e") && lastEntry.mode == None) {
-            lastEntry.syntax.map{syntax => Some(x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq(entry)))}
-          } else if (lastEntry != null){
-            lastEntry.syntax.map{syntax => Some(x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq()))}
-          } else
-            Seq(None)
-          lastEntry = entry
+      op.entries.sliding(2).flatMap { entry => 
+        
+          val result = if (entry.size == 2 && entry(1).mode == Some("e") && entry(0).mode == None) {
+            entry(0).syntax.map{syntax => 
+              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq(entry(1)))
+            }
+          } else if (entry.size == 2 && entry(1).mode == None && entry(0).mode == None) {
+            entry(0).syntax.map{syntax =>
+              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq())
+            }
+          } else if (entry.size == 1) {
+            entry(0).syntax.map{syntax =>
+              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq())
+            }
+          } else {
+            Seq()
+          }
           result
       }
-    }.flatten
+    }
   }
   
   def outputInstructionFile(mnemonic: String, instructions: Seq[x86InstructionDef]) = {
@@ -328,9 +365,12 @@ object ScalaBasic {
     writer.println("")
     writer.println("trait AddLow {")
     for (inst <- instructions) {
-      writer.println(inst.getIntel(2))
-      if (inst != instructions.last)
-        writer.println("")
+      for (intel <- inst.getIntelForms(2)) {
+        writer.println(intel)
+        if (inst != instructions.last)
+          writer.println("")
+      }
+      
     }
     writer.println("}")
     writer.close();

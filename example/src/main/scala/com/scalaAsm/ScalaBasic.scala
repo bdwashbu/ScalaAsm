@@ -9,26 +9,58 @@ import java.io.PrintWriter
 
 object ScalaBasic {
 
+  trait InstructionInstance {
+    def generateClass(numSpaces: Int): String
+    val mnemonic: String
+  }
+  
+  case class x86OneOperandInstruction(name: String,
+                                      opcode: Int,
+                                      mnemonic: String,
+                                      operand1: OperandInstance) extends InstructionInstance {
+    
+    override def generateClass(numSpaces: Int) = {
+      val spaces = (1 to numSpaces) map (x => " ") mkString
+      val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand1 + "] {\n"
+      
+      val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+      val prefix = if (operand1.operandType.promotedByRex && operand1.operandSize.size == 64) {
+        spaces + "  override def prefix = REX.W(true)\n"
+      } else ""
+      header + opcodeString + prefix
+    }
+  }
+  
+  case class x86TwoOperandInstruction(name: String,
+                                      opcode: Int,
+                                      mnemonic: String,
+                                      operands: TwoOperandInstance) extends InstructionInstance {
+    
+    override def generateClass(numSpaces: Int) = {
+      val spaces = (1 to numSpaces) map (x => " ") mkString
+      val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2[" + operands._1 + ", " + operands._2 + "] {\n"
+      
+      val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+      val prefix = if (operands._1.operandType.promotedByRex && operands._1.operandSize.size == 64) {
+        spaces + "  override def prefix = REX.W(true)\n"
+      } else ""
+      header + opcodeString + prefix
+    }
+  }
+  
   case class x86InstructionDef(opcode: Int,
                                mnemonic: String,
-                               operands: x86Operands,
+                               operands: Seq[OperandDef],
                                modes: Seq[x86Entry]) {
-    def getIntelForms(numSpaces: Int): Seq[String] = {
-      operands.getIntelForms.zipWithIndex map { case (opString, index) =>
-        val spaces = (1 to numSpaces) map(x => " ") mkString
-        val first = if (operands.operands.size == 2)
-          spaces + "implicit object " + mnemonic + "_" + opcode + "_" + (index+1) + " extends " + mnemonic.toUpperCase() + "._2[" + opString + "] {\n"
-        else if (operands.operands.size == 1)
-          spaces + "implicit object " + mnemonic + "_" + opcode + "_" + (index+1) + " extends " + mnemonic.toUpperCase() + "._1[" + operands.operands(0) + "] {\n"
-        else
-          spaces + "implicit object " + mnemonic + "_" + opcode + " extends " + mnemonic.toUpperCase() + "._0 {\n"
-        val second = first + spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
-        val third = if (operands.operands.map(_.operandType.map(_.promotedByRex).getOrElse(false)).contains(true)) {
-          spaces + "  override def prefix = REX.W(true)\n"
-        } else ""
-        second + third + spaces + "}"
+    def getInstances: Seq[InstructionInstance] = {
+      if (operands.size == 2) {
+        val ops = TwoOperandDef(operands(0), operands(1))
+        ops.getInstances.map{inst => x86TwoOperandInstruction("name", opcode, mnemonic, inst)}
+      } else {
+        Nil
       }
     }
+
   }
 
   case class x86Opcode(opcode: Int,
@@ -41,62 +73,79 @@ object ScalaBasic {
                       direction: Option[Boolean])
 
   case class SyntaxDef(mnemonic: String,
-                       operands: x86Operands)
+                       operands: Seq[OperandDef])
 
-  case class x86Operands(operands: Seq[OperandDef]) {
-    def getIntelForms: Seq[String] = {
-      if (operands.size == 2) {
-        (operands(0).operandType.get.subtypes.size,
-            operands(1).operandType.get.subtypes.size) match {
-                  
-        case (3,3) => {
-          if (operands(0).addressingMethod.isDefined &&
-              operands(1).addressingMethod.isDefined) {
-            val a1 = operands(0).addressingMethod.get.toString
-            val a2 = operands(1).addressingMethod.get.toString
-            operands(0).operandType.get.subtypes.zip(operands(1).operandType.get.subtypes).map(x => a1 + x._1.toString + ", " + a2 + x._2.toString)
-          } else {
-            Seq(operands(0).name.get)
+  case class TwoOperandDef(operand1: OperandDef, operand2: OperandDef) {
+    
+    def zipSizes(op1Sizes: Seq[OperandSize], op2Sizes: Seq[OperandSize]): Seq[TwoOperandInstance] = {
+      op1Sizes.zip(op2Sizes).map{ x =>
+        val op1 = OperandInstance(operand1.name,
+                   operand1.addressingMethod.get,
+                   operand1.operandType.get,
+                   x._1)
+        val op2 = OperandInstance(operand2.name,
+                   operand2.addressingMethod.get,
+                   operand2.operandType.get,
+                   x._2)
+        TwoOperandInstance(op1, op2)
+      }
+    }
+    
+    def getInstances: Seq[TwoOperandInstance] = {
+      if (operand1.operandType.isDefined && operand2.operandType.isDefined) {
+        (operand1.operandType.get.sizes.length,
+          operand2.operandType.get.sizes.length) match {
+
+            case (3, 3) => {
+              if (operand1.addressingMethod.isDefined &&
+                operand2.addressingMethod.isDefined) {
+                zipSizes(operand1.operandType.get.sizes, operand2.operandType.get.sizes) 
+              } else {
+                Seq()
+              }
+            }
+            case (3, 1) => {
+              for {
+                size1 <- operand1.operandType.get.sizes
+                size2 <- operand2.operandType.get.sizes
+              } yield {
+                val op1 = OperandInstance(operand1.name,
+                   operand1.addressingMethod.getOrElse(null),
+                   operand1.operandType.get,
+                   size1)
+                val op2 = OperandInstance(operand2.name,
+                   operand2.addressingMethod.getOrElse(null),
+                   operand2.operandType.get,
+                   size2)
+                TwoOperandInstance(op1, op2)
+              }
+            }
+            case (1, 1) => {
+              if (operand1.addressingMethod.isDefined &&
+                operand2.addressingMethod.isDefined) {
+                zipSizes(operand1.operandType.get.sizes, operand2.operandType.get.sizes) 
+              } else {
+                Seq()
+              }
+            }
+            case (3, 2) =>
+              if (operand1.addressingMethod.isDefined &&
+                operand2.addressingMethod.isDefined) {
+                val padded = operand2.operandType.get.sizes :+ operand2.operandType.get.sizes.last
+                zipSizes(operand1.operandType.get.sizes, padded) 
+              } else {
+                Seq()
+              }
+
+            case _ =>
+              println("HERE")
+              println(operand1.operandType.get.sizes.length)
+              println(operand2.operandType.get.sizes.length)
+              Seq()
           }
-          } 
-        case (3,1) => {
-          for {
-            sub1 <- operands(0).operandType.get.subtypes
-            sub2 <- operands(1).operandType.get.subtypes
-          } yield operands(0).addressingMethod.get.toString + sub1.toString + ", " +
-                     operands(1).addressingMethod.get.toString + sub2.toString()
-        }
-        case (1,1) => {
-          if (operands(0).addressingMethod.isDefined &&
-              operands(1).addressingMethod.isDefined) {
-            val a1 = operands(0).addressingMethod.get.toString
-            val a2 = operands(1).addressingMethod.get.toString
-            operands(0).operandType.get.subtypes.zip(operands(1).operandType.get.subtypes).map(x => a1 + x._1.toString + ", " + a2 + x._2.toString)
-          } else {
-            Seq(operands(0).name.get)
-          }
-        }
-        case (3,2) =>
-          if (operands(0).addressingMethod.isDefined &&
-              operands(1).addressingMethod.isDefined) {
-            val a1 = operands(0).addressingMethod.get.toString
-            val a2 = operands(1).addressingMethod.get.toString
-            val padded = operands(1).operandType.get.subtypes + operands(1).operandType.get.subtypes.last
-            operands(0).operandType.get.subtypes.zip(padded).map(x => a1 + x._1.toString + ", " + a2 + x._2.toString)
-          } else {
-            Seq(operands(0).name.get)
-          }
-          
-        case _ =>
-          println("HERE")
-          println(operands(0).operandType.get.subtypes.size)
-          println(operands(1).operandType.get.subtypes.size)
-          Seq()
-        }
-      } else if (operands.size == 1) {
-        Seq(operands(0).addressingMethod.get.toString + operands(0).operandType.get.subtypes(0).toString)
+        
       } else {
-        Seq()
+         Nil
       }
     }
   }
@@ -109,18 +158,31 @@ object ScalaBasic {
       name getOrElse addressingMethod.get.toString + operandType.get.toString
     }
   }
+  
+  case class OperandInstance(name: Option[String],
+                             addressingMethod: AddressingMethod,
+                             operandType: OperandType,
+                             operandSize: OperandSize) {
+    override def toString = {
+      name getOrElse addressingMethod.toString + operandSize.toString
+    }
+  }
+  
+  case class TwoOperandInstance(_1: OperandInstance, _2: OperandInstance)
 
-  trait IntelOperand
-  object r8 extends IntelOperand
-  object r16 extends IntelOperand
-  object r32 extends IntelOperand
-  object r64NoRex extends IntelOperand
-  object r64WithRexW extends IntelOperand
-  object rm8 extends IntelOperand
-  object rm16 extends IntelOperand
-  object rm32 extends IntelOperand
-  object rm64NoRex extends IntelOperand
-  object rm64WithRexW extends IntelOperand
+  trait OperandSize {
+    def size: Int
+    override def toString = size.toString
+  }
+  object _8 extends OperandSize { def size = 8 }
+  object _16 extends OperandSize { def size = 16 }
+  object _32 extends OperandSize { def size = 32 }
+  object _64 extends OperandSize { def size = 64 }
+  object _128 extends OperandSize { def size = 128 }
+  object _8_8 extends OperandSize { def size = 16 }
+  object _16_16 extends OperandSize { def size = 32 }
+  object _32_32 extends OperandSize { def size = 64 }
+  object _64_64 extends OperandSize { def size = 128 }
 
   sealed abstract class AddressingMethod(val abbreviation: String, val hasRMByte: Boolean) {
     override def toString = abbreviation
@@ -155,58 +217,58 @@ object ScalaBasic {
   object MemoryAddressedbyDI extends AddressingMethod("m", false)
   object OpcodeSelectsRegister extends AddressingMethod("r", false)
 
-  sealed abstract class OperandType(val subtypes: Seq[String], val promotedByRex: Boolean, val x87Only: Boolean) {
-    override def toString = subtypes mkString
+  sealed abstract class OperandType(val sizes: Seq[OperandSize], val promotedByRex: Boolean, val x87Only: Boolean) {
+    override def toString = sizes mkString
   }
-  object Two16or32ByteOperands extends OperandType(Seq("16/16", "32/32"), false, false)
-  object ByteOperand extends OperandType(Seq("8"), false, false)
-  object PackedBCD extends OperandType(Seq("80dec"), false, false)
-  object ByteSignExtendedToDstOp extends OperandType(Seq("8"), false, false)
-  object ByteSignExtendedTo64 extends OperandType(Seq("-"), false, false)
-  object ByteSignExtendedToStackPtr extends OperandType(Seq("8"), false, false)
-  object ByteOrWord extends OperandType(Seq("c"), false, false) // unused
-  object DoubleWord extends OperandType(Seq("32"), false, false)
-  object DoubleWordInt extends OperandType(Seq("32int"), false, false)
-  object DoubleQuadword extends OperandType(Seq("128"), false, false)
-  object DoubleOrQuadword extends OperandType(Seq("32", "64"), true, false)
-  object DoubleReal extends OperandType(Seq("64real"), false, false)
-  object DoubleWordSignExtendedTo64 extends OperandType(Seq("32"), false, false)
-  object X87FPUEnvironment extends OperandType(Seq("14/28"), false, false)
-  object ExtendedReal extends OperandType(Seq("80real"), false, false)
-  object ThirtyTwoOr48BitPointer extends OperandType(Seq("16:16", "16/32"), false, false)
-  object QuadwordMMX extends OperandType(Seq("(64)"), false, false)
-  object BitPacked128DoublePrecisionFloat extends OperandType(Seq(""), false, false)
-  object BitPacked128SinglePrecisionFloat extends OperandType(Seq("(128)"), false, false)
-  object BitPacked64SinglePrecisionFloat extends OperandType(Seq("64"), false, false)
-  object ThirtyTwoOr48Or80BitPointer extends OperandType(Seq("16:16", "16:32", "16:64"), true, false)
-  object QuadwordRegardless extends OperandType(Seq("64"), false, false)
-  object QuadwordInteger extends OperandType(Seq("64int"), false, false)
-  object QuadwordPromoted extends OperandType(Seq("64int"), true, false)
-  object PseudoDescriptor extends OperandType(Seq(""), false, false)
-  object ScalarPackedDoublePrecisionFloat extends OperandType(Seq("-"), false, false)
-  object DoubleWordIntegerRegister extends OperandType(Seq("?"), false, false) // unused
-  object SingleReal extends OperandType(Seq("32real"), false, true)
-  object ScalarPackedSinglePrecisionFloat extends OperandType(Seq("-"), false, false)
-  object X87FPUState extends OperandType(Seq("94", "108"), false, true)
-  object X87FPUAndSIMDState extends OperandType(Seq("512"), false, true)
-  object TenByteFarPointer extends OperandType(Seq("-"), false, false)
-  object WordOrDoubleword extends OperandType(Seq("16","32"), false, false)
-  object WordOrDoublewordOrDoubleWordExtendedTo64 extends OperandType(Seq("16","32","32"), false, false)
-  object QuadwordOrWord extends OperandType(Seq("64","16"), false, false)
-  object WordOrDoublewordOrQuadword extends OperandType(Seq("16","32","64"), true, false)
-  object WordOrDoublewordExtendedToStack extends OperandType(Seq("16","32"), true, false)
-  object Word extends OperandType(Seq("16"), false, false)
-  object WordInteger extends OperandType(Seq("16int"), false, false)
+  object Two16or32ByteOperands extends OperandType(Seq(_16_16, _32_32), false, false)
+  object ByteOperand extends OperandType(Seq(_8), false, false)
+  object PackedBCD extends OperandType(Seq(), false, false) //80dec
+  object ByteSignExtendedToDstOp extends OperandType(Seq(_8), false, false)
+  object ByteSignExtendedTo64 extends OperandType(Seq(), false, false) //-
+  object ByteSignExtendedToStackPtr extends OperandType(Seq(_8), false, false)
+  object ByteOrWord extends OperandType(Seq(), false, false) // unused c
+  object DoubleWord extends OperandType(Seq(_32), false, false)
+  object DoubleWordInt extends OperandType(Seq(), false, false) //32int
+  object DoubleQuadword extends OperandType(Seq(_128), false, false)
+  object DoubleOrQuadword extends OperandType(Seq(_32, _64), true, false)
+  object DoubleReal extends OperandType(Seq(), false, false) //64real
+  object DoubleWordSignExtendedTo64 extends OperandType(Seq(_32), false, false)
+  object X87FPUEnvironment extends OperandType(Seq(), false, false) //14/28
+  object ExtendedReal extends OperandType(Seq(), false, false) //80real
+  object ThirtyTwoOr48BitPointer extends OperandType(Seq(), false, false) //"16:16", "16/32"
+  object QuadwordMMX extends OperandType(Seq(), false, false) //(64)
+  object BitPacked128DoublePrecisionFloat extends OperandType(Seq(), false, false)
+  object BitPacked128SinglePrecisionFloat extends OperandType(Seq(), false, false) //(128)
+  object BitPacked64SinglePrecisionFloat extends OperandType(Seq(_64), false, false)
+  object ThirtyTwoOr48Or80BitPointer extends OperandType(Seq(), true, false) //"16:16", "16:32", "16:64"
+  object QuadwordRegardless extends OperandType(Seq(_64), false, false)
+  object QuadwordInteger extends OperandType(Seq(), false, false) //64int
+  object QuadwordPromoted extends OperandType(Seq(), true, false) //64int
+  object PseudoDescriptor extends OperandType(Seq(), false, false)
+  object ScalarPackedDoublePrecisionFloat extends OperandType(Seq(), false, false) //-
+  object DoubleWordIntegerRegister extends OperandType(Seq(), false, false) // unused ?
+  object SingleReal extends OperandType(Seq(), false, true) //32real
+  object ScalarPackedSinglePrecisionFloat extends OperandType(Seq(), false, false) //-
+  object X87FPUState extends OperandType(Seq(), false, true) //94 108
+  object X87FPUAndSIMDState extends OperandType(Seq(), false, true) //512
+  object TenByteFarPointer extends OperandType(Seq(), false, false) //-
+  object WordOrDoubleword extends OperandType(Seq(_16, _32), false, false)
+  object WordOrDoublewordOrDoubleWordExtendedTo64 extends OperandType(Seq(_16, _32, _32), false, false)
+  object QuadwordOrWord extends OperandType(Seq(_64, _16), false, false)
+  object WordOrDoublewordOrQuadword extends OperandType(Seq(_16, _32, _64), true, false)
+  object WordOrDoublewordExtendedToStack extends OperandType(Seq(_16, _32), true, false)
+  object Word extends OperandType(Seq(_16), false, false)
+  object WordInteger extends OperandType(Seq(), false, false) //16int
 
-  object WordOrDoublewordBasedOnAddressSize extends OperandType(Seq(""), false, false) // REP + LOOP
-  object DoublewordOrQuadwordBasedOnAddressSize extends OperandType(Seq(""), false, false) // REP + LOOP
-  object WordBasedOnAddressSize extends OperandType(Seq(""), false, false) // JCXZ
-  object WordBasedOnOperandSize extends OperandType(Seq(""), false, false) // MOVSW
-  object WordBasedOnStackSize extends OperandType(Seq(""), false, false) // PUSHF + POPF 64-bit
-  object DoublewordBasedOnAddressSize extends OperandType(Seq(""), false, false) // JECXZ
-  object DoublewordBasedOnOperandSize extends OperandType(Seq(""), false, false) // MOVSD
-  object QuadwordBasedOnAddressSize extends OperandType(Seq(""), false, false) // JRCXZ
-  object QuadwordBasedOnOperandSize extends OperandType(Seq(""), false, false) // PUSHFQ + POPFQ
+  object WordOrDoublewordBasedOnAddressSize extends OperandType(Seq(), false, false) // REP + LOOP
+  object DoublewordOrQuadwordBasedOnAddressSize extends OperandType(Seq(), false, false) // REP + LOOP
+  object WordBasedOnAddressSize extends OperandType(Seq(), false, false) // JCXZ
+  object WordBasedOnOperandSize extends OperandType(Seq(), false, false) // MOVSW
+  object WordBasedOnStackSize extends OperandType(Seq(), false, false) // PUSHF + POPF 64-bit
+  object DoublewordBasedOnAddressSize extends OperandType(Seq(), false, false) // JECXZ
+  object DoublewordBasedOnOperandSize extends OperandType(Seq(), false, false) // MOVSD
+  object QuadwordBasedOnAddressSize extends OperandType(Seq(), false, false) // JRCXZ
+  object QuadwordBasedOnOperandSize extends OperandType(Seq(), false, false) // PUSHFQ + POPFQ
 
   def decodeAddressingMethod(a: String, entry: NodeSeq): AddressingMethod = {
     a match {
@@ -310,27 +372,27 @@ object ScalaBasic {
   def parseSyntax(entry: NodeSeq): Seq[SyntaxDef] = {
     (entry \ "syntax").map { syntax =>
       val mnemonic = (syntax \ "mnem").text
-      val operands = (syntax \ "_").filter{node => node.label != "mnem"}
+      val operands = (syntax \ "_").filter { node => node.label != "mnem" }
 
-      val ops = x86Operands(operands map { operand =>
-          val hasDetails = !(operand \ "a").isEmpty
-          val name = if (!hasDetails) Some(operand.text) else None
-          val opType =
-            if (!(operand \ "t").isEmpty)
-              Some(decodeOperandType((operand \ "t").text.trim))
-            else if (!(operand \ "@type").isEmpty)
-              Some(decodeOperandType((operand \ "@type").text.trim))
-            else
-              None
+      val ops = operands map { operand =>
+        val hasDetails = !(operand \ "a").isEmpty
+        val name = if (!hasDetails) Some(operand.text) else None
+        val opType =
+          if (!(operand \ "t").isEmpty)
+            Some(decodeOperandType((operand \ "t").text.trim))
+          else if (!(operand \ "@type").isEmpty)
+            Some(decodeOperandType((operand \ "@type").text.trim))
+          else
+            None
 
-          val opAddressing =
-            if (!(operand \ "a").isEmpty)
-              Some(decodeAddressingMethod((operand \ "a").text.trim, entry))
-            else
-              None
+        val opAddressing =
+          if (!(operand \ "a").isEmpty)
+            Some(decodeAddressingMethod((operand \ "a").text.trim, entry))
+          else
+            None
 
-          OperandDef(operand.label, name, opType, opAddressing)
-      })
+        OperandDef(operand.label, name, opType, opAddressing)
+      }
 
       SyntaxDef(mnemonic, ops)
     }
@@ -352,46 +414,46 @@ object ScalaBasic {
     val xml = XML.loadFile("x86reference.xml")
     val pri_opcodes = (xml \\ "pri_opcd")
 
-//    val opcodes = for {
-//      pri_opcode <- pri_opcodes
-//      opcode = Integer.parseInt(pri_opcode \@ "value", 16)
-//      entry <- (pri_opcode \ "entry").filter{entry => (entry \ "@alias").size == 0}
-//    } yield x86Opcode(opcode, entry.map(parseEntry))
-    
+    //    val opcodes = for {
+    //      pri_opcode <- pri_opcodes
+    //      opcode = Integer.parseInt(pri_opcode \@ "value", 16)
+    //      entry <- (pri_opcode \ "entry").filter{entry => (entry \ "@alias").size == 0}
+    //    } yield x86Opcode(opcode, entry.map(parseEntry))
+
     val opcodes = pri_opcodes.flatMap { pri_opcode =>
-      val nonAliasedEntries = (pri_opcode \ "entry").filter{entry => (entry \ "@alias").size == 0}
+      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 }
       val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
-      nonAliasedEntries.map{entry =>
+      nonAliasedEntries.map { entry =>
         x86Opcode(opcode, entry.map(parseEntry))
       }
     }
 
     var lastEntry: x86Entry = null
-    
+
     opcodes.flatMap { op =>
-      op.entries.sliding(2).flatMap { entry => 
-        
-          val result = if (entry.size == 2 && entry(1).mode == Some("e") && entry(0).mode == None) {
-            entry(0).syntax.map{syntax => 
-              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq(entry(1)))
-            }
-          } else if (entry.size == 2 && entry(1).mode == None && entry(0).mode == None) {
-            entry(0).syntax.map{syntax =>
-              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq())
-            }
-          } else if (entry.size == 1) {
-            entry(0).syntax.map{syntax =>
-              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq())
-            }
-          } else {
-            Seq()
+      op.entries.sliding(2).flatMap { entry =>
+
+        val result = if (entry.size == 2 && entry(1).mode == Some("e") && entry(0).mode == None) {
+          entry(0).syntax.map { syntax =>
+            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq(entry(1)))
           }
-          result
+        } else if (entry.size == 2 && entry(1).mode == None && entry(0).mode == None) {
+          entry(0).syntax.map { syntax =>
+            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq())
+          }
+        } else if (entry.size == 1) {
+          entry(0).syntax.map { syntax =>
+            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq())
+          }
+        } else {
+          Seq()
+        }
+        result
       }
     }
   }
-  
-  def outputInstructionFile(mnemonic: String, instructions: Seq[x86InstructionDef]) = {
+
+  def outputInstructionFile(mnemonic: String, instructions: Seq[InstructionInstance]) = {
     val writer = new PrintWriter(mnemonic + ".scala", "UTF-8");
 
     writer.println("package com.scalaAsm.x86");
@@ -402,12 +464,9 @@ object ScalaBasic {
     writer.println("")
     writer.println("trait AddLow {")
     for (inst <- instructions) {
-      for (intel <- inst.getIntelForms(2)) {
-        writer.println(intel)
-        if (inst != instructions.last)
-          writer.println("")
-      }
-      
+      writer.println(inst.generateClass(2))
+      if (inst != instructions.last)
+        writer.println("")
     }
     writer.println("}")
     writer.close();
@@ -416,7 +475,7 @@ object ScalaBasic {
   def main(args: Array[String]): Unit = {
     try {
 
-      val insts = loadXML()
+      val insts = loadXML().flatMap{x => x.getInstances}
       outputInstructionFile("ADD", insts.filter(_.mnemonic == "ADD"))
 
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));

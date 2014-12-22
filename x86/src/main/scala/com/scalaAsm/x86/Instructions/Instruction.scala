@@ -9,6 +9,7 @@ import com.scalaAsm.x86.Operands.Constant
 import com.scalaAsm.x86.Operands.Memory.Relative
 import com.scalaAsm.x86.OpcodePlus
 import com.scalaAsm.x86.Operands.Memory.ModRM
+import Memory._
 
 trait InstructionField {
   def getBytes: Array[Byte]
@@ -61,10 +62,10 @@ case class OneMachineCode[O1, OpEn](
 case class TwoMachineCode[O1, O2, OpEn](
     operand: Operand[O1],
     operand2: Operand[O2],
-    format: TwoOperandFormat[O1, O2, OpEn],
+    format: InstructionFormat,
     prefixAndOpcode: Array[Byte],
     mnemonic: String,
-    opcodeExtension: Byte) extends InstructionResult {
+    size: Int) extends InstructionResult {
   
   override def toString = {
     val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
@@ -72,11 +73,11 @@ case class TwoMachineCode[O1, O2, OpEn](
   }
 
   def getSize: Int = {
-    prefixAndOpcode.size + format.size
+    prefixAndOpcode.size + format.getBytes.size
   }
 
   def getBytes: Array[Byte] = {
-    prefixAndOpcode ++: format.getAddressingForm(operand.get, operand2.get, opcodeExtension).getBytes
+    prefixAndOpcode ++: format.getBytes
   }
 }
 
@@ -118,10 +119,32 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
         opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
         val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
-        TwoMachineCode(p1, p2, format, opcodeBytes, mnemonic, opEx)
+        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx), opcodeBytes, mnemonic, format.size)
       } else {
         val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
-        TwoMachineCode(p1, p2, format, opcodeBytes, mnemonic, opEx)
+        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx), opcodeBytes, mnemonic, format.size)
+      }
+    }
+  }
+  
+   abstract class _2_new[-O1, -O2]  extends x86Instruction {
+    val mnemonic = InstructionDefinition.this.mnemonic
+    def opcode: Opcode
+    val addressingForm: InstructionFormat
+    val size: Int
+    val prefix2: Array[Byte]
+    
+    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y]) = {
+      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
+      
+      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
+        val opcodePlus = opcode.asInstanceOf[OpcodePlus]
+        opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
+        val opcodeBytes = prefix2 ++: opcodePlus.get
+        TwoMachineCode(p1, p2, addressingForm, opcodeBytes, mnemonic, size)
+      } else {
+        val opcodeBytes = prefix2 ++: opcode.get
+        TwoMachineCode(p1, p2, addressingForm, opcodeBytes, mnemonic, size)
       }
     }
   }

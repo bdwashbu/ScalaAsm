@@ -38,13 +38,14 @@ object ScalaBasic {
     
     override def generateClass(numSpaces: Int) = {
       val spaces = (1 to numSpaces) map (x => " ") mkString
-      val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2[" + operands._1 + ", " + operands._2 + "] {\n"
+      val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2_new[" + operands._1 + ", " + operands._2 + "] {\n"
       
       val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
       val prefix = if (operands._1.operandType.promotedByRex && operands._1.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
       } else ""
-      header + opcodeString + prefix
+        val footer = "  }"
+      header + opcodeString + prefix + footer
     }
   }
   
@@ -55,7 +56,7 @@ object ScalaBasic {
     def getInstances: Seq[InstructionInstance] = {
       if (operands.size == 2) {
         val ops = TwoOperandDef(operands(0), operands(1))
-        ops.getInstances.map{inst => x86TwoOperandInstruction("name", opcode, mnemonic, inst)}
+        ops.getInstances.map{instance => x86TwoOperandInstruction(mnemonic + "_" + opcode + "_" + instance._1 + "_" + instance._2, opcode, mnemonic, instance)}
       } else {
         Nil
       }

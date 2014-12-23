@@ -80,12 +80,12 @@ object ScalaBasic {
     
     def zipSizes(op1Sizes: Seq[OperandSize], op2Sizes: Seq[OperandSize]): Seq[TwoOperandInstance] = {
       op1Sizes.zip(op2Sizes).map{ x =>
-        val op1 = OperandInstance(operand1.name,
-                   operand1.addressingMethod.get,
+        val op1 = OperandInstance(
+                   operand1.addressingMethod,
                    operand1.operandType.get,
                    x._1)
-        val op2 = OperandInstance(operand2.name,
-                   operand2.addressingMethod.get,
+        val op2 = OperandInstance(
+                   operand2.addressingMethod,
                    operand2.operandType.get,
                    x._2)
         TwoOperandInstance(op1, op2)
@@ -98,46 +98,46 @@ object ScalaBasic {
           operand2.operandType.get.sizes.length) match {
 
             case (3, 3) => {
-              if (operand1.addressingMethod.isDefined &&
-                operand2.addressingMethod.isDefined) {
                 zipSizes(operand1.operandType.get.sizes, operand2.operandType.get.sizes) 
-              } else {
-                Seq()
-              }
             }
-            case (3, 1) => {
+            case (_, 1) => {
               for {
                 size1 <- operand1.operandType.get.sizes
                 size2 <- operand2.operandType.get.sizes
               } yield {
-                val op1 = OperandInstance(operand1.name,
-                   operand1.addressingMethod.getOrElse(null),
+                val op1 = OperandInstance(
+                   operand1.addressingMethod,
                    operand1.operandType.get,
                    size1)
-                val op2 = OperandInstance(operand2.name,
-                   operand2.addressingMethod.getOrElse(null),
+                val op2 = OperandInstance(
+                   operand2.addressingMethod,
                    operand2.operandType.get,
                    size2)
                 TwoOperandInstance(op1, op2)
               }
             }
-            case (1, 1) => {
-              if (operand1.addressingMethod.isDefined &&
-                operand2.addressingMethod.isDefined) {
-                zipSizes(operand1.operandType.get.sizes, operand2.operandType.get.sizes) 
-              } else {
-                Seq()
+            case (1, _) => {
+              for {
+                size1 <- operand1.operandType.get.sizes
+                size2 <- operand2.operandType.get.sizes
+              } yield {
+                val op1 = OperandInstance(
+                   operand1.addressingMethod,
+                   operand1.operandType.get,
+                   size1)
+                val op2 = OperandInstance(
+                   operand2.addressingMethod,
+                   operand2.operandType.get,
+                   size2)
+                TwoOperandInstance(op1, op2)
               }
             }
             case (3, 2) =>
-              if (operand1.addressingMethod.isDefined &&
-                operand2.addressingMethod.isDefined) {
-                val padded = operand2.operandType.get.sizes :+ operand2.operandType.get.sizes.last
-                zipSizes(operand1.operandType.get.sizes, padded) 
-              } else {
-                Seq()
-              }
-
+              val padded = operand2.operandType.get.sizes :+ operand2.operandType.get.sizes.last
+              zipSizes(operand1.operandType.get.sizes, padded) 
+            case (2, 3) =>
+              val padded = operand1.operandType.get.sizes :+ operand1.operandType.get.sizes.last
+              zipSizes(padded, operand2.operandType.get.sizes) 
             case _ =>
               println("HERE")
               println(operand1.operandType.get.sizes.length)
@@ -152,20 +152,21 @@ object ScalaBasic {
   }
                        
   case class OperandDef(srcOrDst: String,
-                        name: Option[String],
                         operandType: Option[OperandType],
                         addressingMethod: Option[AddressingMethod]) {
     override def toString = {
-      name getOrElse addressingMethod.get.toString + operandType.get.toString
+      addressingMethod.get.toString + operandType.get.toString
     }
   }
   
-  case class OperandInstance(name: Option[String],
-                             addressingMethod: AddressingMethod,
+  case class OperandInstance(addressingMethod: Option[AddressingMethod],
                              operandType: OperandType,
                              operandSize: OperandSize) {
     override def toString = {
-      name getOrElse addressingMethod.toString + operandSize.toString
+      if (addressingMethod.isDefined)
+        addressingMethod.get.toString + operandSize.toString
+      else
+        operandSize.toString
     }
   }
   
@@ -173,7 +174,13 @@ object ScalaBasic {
 
   trait OperandSize {
     def size: Int
-    override def toString = size.toString
+    def name: String = null
+    override def toString = {
+      if (name == null)
+        size.toString
+      else
+        name
+    }
   }
   object _8 extends OperandSize { def size = 8 }
   object _16 extends OperandSize { def size = 16 }
@@ -184,6 +191,11 @@ object ScalaBasic {
   object _16_16 extends OperandSize { def size = 32 }
   object _32_32 extends OperandSize { def size = 64 }
   object _64_64 extends OperandSize { def size = 128 }
+  
+  object rAX extends OperandSize { override def name = "RAX"; def size = 64}
+  object eAX extends OperandSize { override def name = "EAX"; def size = 32}
+  object AX extends OperandSize { override def name = "AX"; def size = 16}
+  object AL extends OperandSize { override def name = "AL"; def size = 8}
 
   sealed abstract class AddressingMethod(val abbreviation: String, val hasRMByte: Boolean) {
     override def toString = abbreviation
@@ -218,6 +230,7 @@ object ScalaBasic {
   object MemoryAddressedbyDI extends AddressingMethod("m", false)
   object OpcodeSelectsRegister extends AddressingMethod("r", false)
 
+  // sizes must always be ascending in size
   sealed abstract class OperandType(val sizes: Seq[OperandSize], val promotedByRex: Boolean, val x87Only: Boolean) {
     override def toString = sizes mkString
   }
@@ -260,6 +273,9 @@ object ScalaBasic {
   object WordOrDoublewordExtendedToStack extends OperandType(Seq(_16, _32), true, false)
   object Word extends OperandType(Seq(_16), false, false)
   object WordInteger extends OperandType(Seq(), false, false) //16int
+  
+  object Register64 extends OperandType(Seq(AX,eAX,rAX), false, false)
+  object Register8 extends OperandType(Seq(AL), false, false)
 
   object WordOrDoublewordBasedOnAddressSize extends OperandType(Seq(), false, false) // REP + LOOP
   object DoublewordOrQuadwordBasedOnAddressSize extends OperandType(Seq(), false, false) // REP + LOOP
@@ -270,6 +286,8 @@ object ScalaBasic {
   object DoublewordBasedOnOperandSize extends OperandType(Seq(), false, false) // MOVSD
   object QuadwordBasedOnAddressSize extends OperandType(Seq(), false, false) // JRCXZ
   object QuadwordBasedOnOperandSize extends OperandType(Seq(), false, false) // PUSHFQ + POPFQ
+  
+  
 
   def decodeAddressingMethod(a: String, entry: NodeSeq): AddressingMethod = {
     a match {
@@ -377,9 +395,13 @@ object ScalaBasic {
 
       val ops = operands map { operand =>
         val hasDetails = !(operand \ "a").isEmpty
-        val name = if (!hasDetails) Some(operand.text) else None
+        //val name = if (!hasDetails) Some(operand.text) else None
         val opType =
-          if (!(operand \ "t").isEmpty)
+          if (operand.text == "rAX") {
+            Some(Register64)
+          } else if (operand.text == "AL") {
+            Some(Register8)
+          } else if (!(operand \ "t").isEmpty)
             Some(decodeOperandType((operand \ "t").text.trim))
           else if (!(operand \ "@type").isEmpty)
             Some(decodeOperandType((operand \ "@type").text.trim))
@@ -392,7 +414,7 @@ object ScalaBasic {
           else
             None
 
-        OperandDef(operand.label, name, opType, opAddressing)
+        OperandDef(operand.label, opType, opAddressing)
       }
 
       SyntaxDef(mnemonic, ops)

@@ -483,6 +483,8 @@ object ScalaBasic {
     writer.println("package Instructions");
     writer.println("package Standard");
     writer.println("")
+    writer.println("import com.scalaAsm.x86.Operands._")
+    writer.println("")
     writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition[OneOpcode](\"" + mnemonic + "\") with AddLow")
     writer.println("")
     writer.println("trait AddLow {")

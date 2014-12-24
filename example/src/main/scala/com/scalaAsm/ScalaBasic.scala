@@ -17,13 +17,15 @@ object ScalaBasic {
   case class x86OneOperandInstruction(name: String,
                                       opcode: Int,
                                       mnemonic: String,
-                                      operand1: OperandInstance) extends InstructionInstance {
+                                      operand1: OperandInstance,
+                                      entry: x86Entry) extends InstructionInstance {
     
     override def generateClass(numSpaces: Int) = {
       val spaces = (1 to numSpaces) map (x => " ") mkString
       val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand1 + "] {\n"
       
-      val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+      val isRegister = if (entry.isRegister) " + r" else ""
+      val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + isRegister + "\n"
       val prefix = if (operand1.operandType.promotedByRex && operand1.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
       } else ""
@@ -34,13 +36,15 @@ object ScalaBasic {
   case class x86TwoOperandInstruction(name: String,
                                       opcode: Int,
                                       mnemonic: String,
-                                      operands: TwoOperandInstance) extends InstructionInstance {
+                                      operands: TwoOperandInstance,
+                                      entry: x86Entry) extends InstructionInstance {
     
     override def generateClass(numSpaces: Int) = {
       val spaces = (1 to numSpaces) map (x => " ") mkString
       val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2_new[" + operands._1 + ", " + operands._2 + "] {\n"
       
-      val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+      val isRegister = if (entry.isRegister) " + r" else ""
+      val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + isRegister + "\n"
       val prefix = if (operands._1.operandType.promotedByRex && operands._1.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
       } else ""
@@ -52,11 +56,12 @@ object ScalaBasic {
   case class x86InstructionDef(opcode: Int,
                                mnemonic: String,
                                operands: Seq[OperandDef],
+                               entry: x86Entry,
                                modes: Seq[x86Entry]) {
     def getInstances: Seq[InstructionInstance] = {
       if (operands.size == 2) {
         val ops = TwoOperandDef(operands(0), operands(1))
-        ops.getInstances.map{instance => x86TwoOperandInstruction(mnemonic + "_" + opcode + "_" + instance._1 + "_" + instance._2, opcode, mnemonic, instance)}
+        ops.getInstances.map{instance => x86TwoOperandInstruction(mnemonic + "_" + opcode + "_" + instance._1 + "_" + instance._2, opcode, mnemonic, instance, entry)}
       } else {
         Nil
       }
@@ -71,7 +76,8 @@ object ScalaBasic {
                       syntax: Seq[SyntaxDef],
                       opcodeEx: Option[Int],
                       opsize: Option[Boolean],
-                      direction: Option[Boolean])
+                      direction: Option[Boolean],
+                      isRegister: Boolean)
 
   case class SyntaxDef(mnemonic: String,
                        operands: Seq[OperandDef])
@@ -427,10 +433,11 @@ object ScalaBasic {
     val opcodeEx = getOptionalInt(entry \ "opcd_ext")
     val opSize = getOptionalBoolean(entry \ "@opsize")
     val direction = getOptionalBoolean(entry \ "@direction")
+    val isRegister = (entry \@ "r") == "yes"
 
     val operandDefs = parseSyntax(entry)
 
-    x86Entry(mode, operandDefs, opcodeEx, opSize, direction)
+    x86Entry(mode, operandDefs, opcodeEx, opSize, direction, isRegister)
   }
 
   def loadXML(): Seq[x86InstructionDef] = {
@@ -459,15 +466,15 @@ object ScalaBasic {
 
         val result = if (entry.size == 2 && entry(1).mode == Some("e") && entry(0).mode == None) {
           entry(0).syntax.map { syntax =>
-            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq(entry(1)))
+            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry(0), Seq(entry(1)))
           }
         } else if (entry.size == 2 && entry(1).mode == None && entry(0).mode == None) {
           entry(0).syntax.map { syntax =>
-            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq())
+            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry(0), Seq())
           }
         } else if (entry.size == 1) {
           entry(0).syntax.map { syntax =>
-            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, Seq())
+            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry(0), Seq())
           }
         } else {
           Seq()

@@ -12,6 +12,7 @@ sealed trait OpcodeFormat {
 }
 
 sealed trait RegType
+case object r extends RegType
 case object rw extends RegType
 case object rd extends RegType
 case object rb extends RegType

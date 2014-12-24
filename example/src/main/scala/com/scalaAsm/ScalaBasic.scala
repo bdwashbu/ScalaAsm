@@ -4,6 +4,9 @@ import java.io._
 import com.scalaAsm.assembler.Assembler
 import com.scalaAsm.linker.Linker
 import com.scalaAsm.coff.Coff
+import com.scalaAsm.x86.OperandTypes._
+import com.scalaAsm.x86.OperandTypes.Register64
+import com.scalaAsm.x86.AddressingMethods._
 import scala.xml._
 import java.io.PrintWriter
 
@@ -77,7 +80,8 @@ object ScalaBasic {
                       opcodeEx: Option[Int],
                       opsize: Option[Boolean],
                       direction: Option[Boolean],
-                      isRegister: Boolean)
+                      isRegister: Boolean,
+                      hasModRMByte: Boolean)
 
   case class SyntaxDef(mnemonic: String,
                        operands: Seq[OperandDef])
@@ -178,125 +182,14 @@ object ScalaBasic {
   }
   
   case class TwoOperandInstance(_1: OperandInstance, _2: OperandInstance)
-
-  trait OperandSize {
-    def size: Int
-    def name: String = null
-    override def toString = {
-      if (name == null)
-        size.toString
-      else
-        name
+  
+  def getOperandSize(opType: OperandType) = {
+    opType match {
+      case FixedOperandType(_, size, _, _, _) => null
     }
   }
-  object _8 extends OperandSize { def size = 8 }
-  object _16 extends OperandSize { def size = 16 }
-  object _32 extends OperandSize { def size = 32 }
-  object _64 extends OperandSize { def size = 64 }
-  object _128 extends OperandSize { def size = 128 }
-  object _8_8 extends OperandSize { def size = 16 }
-  object _16_16 extends OperandSize { def size = 32 }
-  object _32_32 extends OperandSize { def size = 64 }
-  object _64_64 extends OperandSize { def size = 128 }
-  
-  object rAX extends OperandSize { override def name = "RAX"; def size = 64}
-  object eAX extends OperandSize { override def name = "EAX"; def size = 32}
-  object AX extends OperandSize { override def name = "AX"; def size = 16}
-  object AL extends OperandSize { override def name = "AL"; def size = 8}
 
-  sealed abstract class AddressingMethod(val abbreviation: String, val hasRMByte: Boolean) {
-    override def toString = abbreviation
-  }
-  object DirectAddress extends AddressingMethod("ptr", false)
-  object MemoryAddressedbyAX extends AddressingMethod("m", false)
-  object MemoryAddressedbyAXPlusAL extends AddressingMethod("m", false)
-  object MemoryAddressedbyDS extends AddressingMethod("m", false)
-  object RegFieldSelectsControlRegister extends AddressingMethod("CRn", true)
-  object RegFieldSelectsDebugRegister extends AddressingMethod("DRn", true)
-  case class ModRMByteRegisterOrMemory(val isReg: Boolean) extends AddressingMethod("rm", true)
-  object ModRMByteX87StackOrMemory extends AddressingMethod("STi/m", true)
-  object ModRMByteX87StackRegister extends AddressingMethod("STi", true)
-  object FlagsRegister extends AddressingMethod("-", false)
-  object RegFieldRegister extends AddressingMethod("r", true)
-  object RMFieldRegisterAlways extends AddressingMethod("r", true)
-  object ImmediateData extends AddressingMethod("imm", false)
-  object RelativeOffset extends AddressingMethod("rel", false)
-  object ModRMByteMemoryOnly extends AddressingMethod("m", true)
-  object RMFieldMMXRegister extends AddressingMethod("mm", true)
-  object NoModRMByteOrSIBWithOffset extends AddressingMethod("moffs", false)
-  object RegFieldMMXRegister extends AddressingMethod("mm", true)
-  object ModRMByteMMXRegOrMemory extends AddressingMethod("mm/m64", true)
-  object ModFieldRegister extends AddressingMethod("r", true)
-  object RegFieldSegmentRegister extends AddressingMethod("Sreg", true)
-  object StackOperand extends AddressingMethod("-", false)
-  object RegFieldTestRegister extends AddressingMethod("TRn", true)
-  object RMField128XMM extends AddressingMethod("xmm", true)
-  object RegField128XMM extends AddressingMethod("xmm", true)
-  object ModRMByte128XXMOrMemory extends AddressingMethod("xmm/m", true)
-  object MemoryAddressedbySI extends AddressingMethod("m", false)
-  object MemoryAddressedbyDI extends AddressingMethod("m", false)
-  object OpcodeSelectsRegister extends AddressingMethod("r", false)
-
-  // sizes must always be ascending in size
-  sealed abstract class OperandType(val sizes: Seq[OperandSize], val promotedByRex: Boolean, val x87Only: Boolean) {
-    override def toString = sizes mkString
-  }
-  object Two16or32ByteOperands extends OperandType(Seq(_16_16, _32_32), false, false)
-  object ByteOperand extends OperandType(Seq(_8), false, false)
-  object PackedBCD extends OperandType(Seq(), false, false) //80dec
-  object ByteSignExtendedToDstOp extends OperandType(Seq(_8), false, false)
-  object ByteSignExtendedTo64 extends OperandType(Seq(), false, false) //-
-  object ByteSignExtendedToStackPtr extends OperandType(Seq(_8), false, false)
-  object ByteOrWord extends OperandType(Seq(), false, false) // unused c
-  object DoubleWord extends OperandType(Seq(_32), false, false)
-  object DoubleWordInt extends OperandType(Seq(), false, false) //32int
-  object DoubleQuadword extends OperandType(Seq(_128), false, false)
-  object DoubleOrQuadword extends OperandType(Seq(_32, _64), true, false)
-  object DoubleReal extends OperandType(Seq(), false, false) //64real
-  object DoubleWordSignExtendedTo64 extends OperandType(Seq(_32), false, false)
-  object X87FPUEnvironment extends OperandType(Seq(), false, false) //14/28
-  object ExtendedReal extends OperandType(Seq(), false, false) //80real
-  object ThirtyTwoOr48BitPointer extends OperandType(Seq(), false, false) //"16:16", "16/32"
-  object QuadwordMMX extends OperandType(Seq(), false, false) //(64)
-  object BitPacked128DoublePrecisionFloat extends OperandType(Seq(), false, false)
-  object BitPacked128SinglePrecisionFloat extends OperandType(Seq(), false, false) //(128)
-  object BitPacked64SinglePrecisionFloat extends OperandType(Seq(_64), false, false)
-  object ThirtyTwoOr48Or80BitPointer extends OperandType(Seq(), true, false) //"16:16", "16:32", "16:64"
-  object QuadwordRegardless extends OperandType(Seq(_64), false, false)
-  object QuadwordInteger extends OperandType(Seq(), false, false) //64int
-  object QuadwordPromoted extends OperandType(Seq(), true, false) //64int
-  object PseudoDescriptor extends OperandType(Seq(), false, false)
-  object ScalarPackedDoublePrecisionFloat extends OperandType(Seq(), false, false) //-
-  object DoubleWordIntegerRegister extends OperandType(Seq(), false, false) // unused ?
-  object SingleReal extends OperandType(Seq(), false, true) //32real
-  object ScalarPackedSinglePrecisionFloat extends OperandType(Seq(), false, false) //-
-  object X87FPUState extends OperandType(Seq(), false, true) //94 108
-  object X87FPUAndSIMDState extends OperandType(Seq(), false, true) //512
-  object TenByteFarPointer extends OperandType(Seq(), false, false) //-
-  object WordOrDoubleword extends OperandType(Seq(_16, _32), false, false)
-  object WordOrDoublewordOrDoubleWordExtendedTo64 extends OperandType(Seq(_16, _32, _32), false, false)
-  object QuadwordOrWord extends OperandType(Seq(_64, _16), false, false)
-  object WordOrDoublewordOrQuadword extends OperandType(Seq(_16, _32, _64), true, false)
-  object WordOrDoublewordExtendedToStack extends OperandType(Seq(_16, _32), true, false)
-  object Word extends OperandType(Seq(_16), false, false)
-  object WordInteger extends OperandType(Seq(), false, false) //16int
-  
-  object Register64 extends OperandType(Seq(AX,eAX,rAX), false, false)
-  object Register8 extends OperandType(Seq(AL), false, false)
-
-  object WordOrDoublewordBasedOnAddressSize extends OperandType(Seq(), false, false) // REP + LOOP
-  object DoublewordOrQuadwordBasedOnAddressSize extends OperandType(Seq(), false, false) // REP + LOOP
-  object WordBasedOnAddressSize extends OperandType(Seq(), false, false) // JCXZ
-  object WordBasedOnOperandSize extends OperandType(Seq(), false, false) // MOVSW
-  object WordBasedOnStackSize extends OperandType(Seq(), false, false) // PUSHF + POPF 64-bit
-  object DoublewordBasedOnAddressSize extends OperandType(Seq(), false, false) // JECXZ
-  object DoublewordBasedOnOperandSize extends OperandType(Seq(), false, false) // MOVSD
-  object QuadwordBasedOnAddressSize extends OperandType(Seq(), false, false) // JRCXZ
-  object QuadwordBasedOnOperandSize extends OperandType(Seq(), false, false) // PUSHFQ + POPFQ
-  
-  
-
-  def decodeAddressingMethod(a: String, entry: NodeSeq): AddressingMethod = {
+  def decodeAddressingMethod(a: String): AddressingMethod = {
     a match {
       case "A"   => DirectAddress
       case "BA"  => MemoryAddressedbyAX
@@ -304,7 +197,7 @@ object ScalaBasic {
       case "BD"  => MemoryAddressedbyDS
       case "C"   => RegFieldSelectsControlRegister
       case "D"   => RegFieldSelectsDebugRegister
-      case "E"   => ModRMByteRegisterOrMemory((entry \@ "r") == "yes")
+      case "E"   => ModRMByteRegisterOrMemory
       case "ES"  => ModRMByteX87StackOrMemory
       case "EST" => ModRMByteX87StackRegister
       case "F"   => FlagsRegister
@@ -330,58 +223,7 @@ object ScalaBasic {
     }
   }
 
-  def decodeOperandType(t: String): OperandType = {
-    t match {
-      case "a"   => Two16or32ByteOperands
-      case "b"   => ByteOperand
-      case "bcd" => PackedBCD
-      case "bs"  => ByteSignExtendedToDstOp
-      case "bsq" => ByteSignExtendedTo64
-      case "bss" => ByteSignExtendedToStackPtr
-      case "c"   => ByteOrWord
-      case "d"   => DoubleWord
-      case "di"  => DoubleWordInt
-      case "dq"  => DoubleQuadword
-      case "dqp" => DoubleOrQuadword
-      case "dr"  => DoubleReal
-      case "ds"  => DoubleWordSignExtendedTo64
-      case "e"   => X87FPUEnvironment
-      case "er"  => ExtendedReal
-      case "p"   => ThirtyTwoOr48BitPointer
-      case "pi"  => QuadwordMMX
-      case "pd"  => BitPacked128DoublePrecisionFloat
-      case "ps"  => BitPacked128SinglePrecisionFloat
-      case "psq" => BitPacked64SinglePrecisionFloat
-      case "ptp" => ThirtyTwoOr48Or80BitPointer
-      case "q"   => QuadwordRegardless
-      case "qi"  => QuadwordInteger
-      case "qp"  => QuadwordPromoted
-      case "s"   => PseudoDescriptor
-      case "sd"  => ScalarPackedDoublePrecisionFloat
-      case "si"  => DoubleWordIntegerRegister
-      case "sr"  => SingleReal
-      case "ss"  => ScalarPackedSinglePrecisionFloat
-      case "st"  => X87FPUState
-      case "stx" => X87FPUAndSIMDState
-      case "t"   => TenByteFarPointer
-      case "v"   => WordOrDoubleword
-      case "vds" => WordOrDoublewordOrDoubleWordExtendedTo64
-      case "vq"  => QuadwordOrWord
-      case "vqp" => WordOrDoublewordOrQuadword
-      case "vs"  => WordOrDoublewordExtendedToStack
-      case "w"   => Word
-      case "wi"  => WordInteger
-      case "va"  => WordOrDoublewordBasedOnAddressSize
-      case "dqa" => DoublewordOrQuadwordBasedOnAddressSize
-      case "wa"  => WordBasedOnAddressSize
-      case "wo"  => WordBasedOnOperandSize
-      case "ws"  => WordBasedOnStackSize
-      case "da"  => DoublewordBasedOnAddressSize
-      case "do"  => DoublewordBasedOnOperandSize
-      case "qa"  => QuadwordBasedOnAddressSize
-      case "qs"  => QuadwordBasedOnOperandSize
-    }
-  }
+  
 
   def getOptionalBoolean(node: NodeSeq): Option[Boolean] = {
     if (!node.isEmpty) Some(if (node.text == "0") false else true) else None
@@ -408,16 +250,16 @@ object ScalaBasic {
             Some(Register64)
           } else if (operand.text == "AL") {
             Some(Register8)
-          } else if (!(operand \ "t").isEmpty)
-            Some(decodeOperandType((operand \ "t").text.trim))
+          } else if (!(operand \ "t").isEmpty && (operand \ "t").text.trim != "")
+            Some(OperandType.decodeOperandType(entry)((operand \ "t").text.trim))
           else if (!(operand \ "@type").isEmpty)
-            Some(decodeOperandType((operand \ "@type").text.trim))
+            Some(OperandType.decodeOperandType(entry)((operand \ "@type").text.trim))
           else
             None
 
         val opAddressing =
           if (!(operand \ "a").isEmpty)
-            Some(decodeAddressingMethod((operand \ "a").text.trim, entry))
+            Some(decodeAddressingMethod((operand \ "a").text.trim))
           else
             None
 
@@ -436,8 +278,11 @@ object ScalaBasic {
     val isRegister = (entry \@ "r") == "yes"
 
     val operandDefs = parseSyntax(entry)
+    
+    // seems to be pretty simple
+    val hasModRMByte = isRegister || opcodeEx.isDefined
 
-    x86Entry(mode, operandDefs, opcodeEx, opSize, direction, isRegister)
+    x86Entry(mode, operandDefs, opcodeEx, opSize, direction, isRegister, hasModRMByte)
   }
 
   def loadXML(): Seq[x86InstructionDef] = {

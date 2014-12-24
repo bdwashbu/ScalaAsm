@@ -64,7 +64,7 @@ class HelloWorldTest64 extends FlatSpec with ShouldMatchers {
     outputStream.write(exe.get)
     println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
     outputStream.close
-
+    
     val child = Runtime.getRuntime().exec(executableName);
     val in = new BufferedReader(
       new InputStreamReader(child.getInputStream()));

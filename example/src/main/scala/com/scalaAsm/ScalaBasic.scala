@@ -97,9 +97,7 @@ object ScalaBasic {
         (operand1.operandType.get.sizes.length,
           operand2.operandType.get.sizes.length) match {
 
-            case (3, 3) => {
-                zipSizes(operand1.operandType.get.sizes, operand2.operandType.get.sizes) 
-            }
+            
             case (_, 1) => {
               for {
                 size1 <- operand1.operandType.get.sizes
@@ -131,6 +129,9 @@ object ScalaBasic {
                    size2)
                 TwoOperandInstance(op1, op2)
               }
+            }
+            case (x, y) if x == y => {
+                zipSizes(operand1.operandType.get.sizes, operand2.operandType.get.sizes) 
             }
             case (3, 2) =>
               val padded = operand2.operandType.get.sizes :+ operand2.operandType.get.sizes.last

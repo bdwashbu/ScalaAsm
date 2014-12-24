@@ -118,10 +118,10 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
       if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
         opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
-        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
+        val opcodeBytes = format.getPrefix(prefix) ++: opcodePlus.get
         TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx), opcodeBytes, mnemonic, format.size)
       } else {
-        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
+        val opcodeBytes = format.getPrefix(prefix) ++: opcode.get
         TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx), opcodeBytes, mnemonic, format.size)
       }
     }
@@ -132,7 +132,6 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def opcode: Opcode
     val addressingForm: InstructionFormat
     val size: Int
-    val prefix2: Array[Byte]
     
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y]) = {
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
@@ -140,10 +139,10 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
       if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
         opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
-        val opcodeBytes = prefix2 ++: opcodePlus.get
+        val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
         TwoMachineCode(p1, p2, addressingForm, opcodeBytes, mnemonic, size)
       } else {
-        val opcodeBytes = prefix2 ++: opcode.get
+        val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
         TwoMachineCode(p1, p2, addressingForm, opcodeBytes, mnemonic, size)
       }
     }

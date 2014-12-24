@@ -37,9 +37,11 @@ object HelloWorld extends AsmProgram[x86_32] {
 
 class HelloWorldTest extends FlatSpec with ShouldMatchers {
 
+  val executableName = "test_HelloWorldTest.exe"
+  
   "A simple 32-bit Hello world" should "print 'Hello World'" in {
     val name = System.nanoTime
-    val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
+    val outputStream = new DataOutputStream(new FileOutputStream(executableName));
     val assembler = new Assembler {}
     val linker = new Linker {}
 
@@ -52,7 +54,7 @@ class HelloWorldTest extends FlatSpec with ShouldMatchers {
     println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
     outputStream.close
 
-    val child = Runtime.getRuntime().exec("test.exe");
+    val child = Runtime.getRuntime().exec(executableName);
     val in = new BufferedReader(
       new InputStreamReader(child.getInputStream()));
 
@@ -60,7 +62,7 @@ class HelloWorldTest extends FlatSpec with ShouldMatchers {
 
     child.waitFor()
 
-    new File("test.exe").delete()
+    new File(executableName).delete()
 
     output should equal("Hello World!")
   }

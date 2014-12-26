@@ -1,7 +1,5 @@
 package com.scalaAsm.x86.AddressingMethods
 
-
-
 sealed abstract class AddressingMethod(val abbreviation: String, val hasRMByte: Boolean) {
   override def toString = abbreviation
 }
@@ -34,3 +32,39 @@ object ModRMByte128XXMOrMemory extends AddressingMethod("xmm/m", true)
 object MemoryAddressedbySI extends AddressingMethod("m", false)
 object MemoryAddressedbyDI extends AddressingMethod("m", false)
 object OpcodeSelectsRegister extends AddressingMethod("r", false)
+
+object AddressingMethod {
+  def decodeAddressingMethod(a: String): AddressingMethod = {
+    a match {
+      case "A"   => DirectAddress
+      case "BA"  => MemoryAddressedbyAX
+      case "BB"  => MemoryAddressedbyAXPlusAL
+      case "BD"  => MemoryAddressedbyDS
+      case "C"   => RegFieldSelectsControlRegister
+      case "D"   => RegFieldSelectsDebugRegister
+      case "E"   => ModRMByteRegisterOrMemory
+      case "ES"  => ModRMByteX87StackOrMemory
+      case "EST" => ModRMByteX87StackRegister
+      case "F"   => FlagsRegister
+      case "G"   => RegFieldRegister
+      case "H"   => RMFieldRegisterAlways
+      case "I"   => ImmediateData
+      case "J"   => RelativeOffset
+      case "M"   => ModRMByteMemoryOnly
+      case "N"   => RMFieldMMXRegister
+      case "O"   => NoModRMByteOrSIBWithOffset
+      case "P"   => RegFieldMMXRegister
+      case "Q"   => ModRMByteMMXRegOrMemory
+      case "R"   => ModFieldRegister
+      case "S"   => RegFieldSegmentRegister
+      case "SC"  => StackOperand
+      case "T"   => RegFieldTestRegister
+      case "U"   => RMField128XMM
+      case "V"   => RegField128XMM
+      case "W"   => ModRMByte128XXMOrMemory
+      case "X"   => MemoryAddressedbySI
+      case "Y"   => MemoryAddressedbyDI
+      case "Z"   => OpcodeSelectsRegister
+    }
+  }
+}

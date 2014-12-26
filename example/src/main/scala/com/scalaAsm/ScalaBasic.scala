@@ -7,6 +7,8 @@ import com.scalaAsm.coff.Coff
 import com.scalaAsm.x86.OperandTypes._
 import com.scalaAsm.x86.OperandTypes.Register64
 import com.scalaAsm.x86.AddressingMethods._
+import com.scalaAsm.x86.AddressingMethods.AddressingMethod
+import com.scalaAsm.x86.OperandTypes.OperandSize
 import scala.xml._
 import java.io.PrintWriter
 
@@ -189,39 +191,7 @@ object ScalaBasic {
     }
   }
 
-  def decodeAddressingMethod(a: String): AddressingMethod = {
-    a match {
-      case "A"   => DirectAddress
-      case "BA"  => MemoryAddressedbyAX
-      case "BB"  => MemoryAddressedbyAXPlusAL
-      case "BD"  => MemoryAddressedbyDS
-      case "C"   => RegFieldSelectsControlRegister
-      case "D"   => RegFieldSelectsDebugRegister
-      case "E"   => ModRMByteRegisterOrMemory
-      case "ES"  => ModRMByteX87StackOrMemory
-      case "EST" => ModRMByteX87StackRegister
-      case "F"   => FlagsRegister
-      case "G"   => RegFieldRegister
-      case "H"   => RMFieldRegisterAlways
-      case "I"   => ImmediateData
-      case "J"   => RelativeOffset
-      case "M"   => ModRMByteMemoryOnly
-      case "N"   => RMFieldMMXRegister
-      case "O"   => NoModRMByteOrSIBWithOffset
-      case "P"   => RegFieldMMXRegister
-      case "Q"   => ModRMByteMMXRegOrMemory
-      case "R"   => ModFieldRegister
-      case "S"   => RegFieldSegmentRegister
-      case "SC"  => StackOperand
-      case "T"   => RegFieldTestRegister
-      case "U"   => RMField128XMM
-      case "V"   => RegField128XMM
-      case "W"   => ModRMByte128XXMOrMemory
-      case "X"   => MemoryAddressedbySI
-      case "Y"   => MemoryAddressedbyDI
-      case "Z"   => OpcodeSelectsRegister
-    }
-  }
+  
 
   
 
@@ -259,7 +229,7 @@ object ScalaBasic {
 
         val opAddressing =
           if (!(operand \ "a").isEmpty)
-            Some(decodeAddressingMethod((operand \ "a").text.trim))
+            Some(AddressingMethod.decodeAddressingMethod((operand \ "a").text.trim))
           else
             None
 

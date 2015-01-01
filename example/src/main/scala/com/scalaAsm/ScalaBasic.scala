@@ -17,6 +17,7 @@ object ScalaBasic {
   trait InstructionInstance {
     def generateClass(numSpaces: Int): String
     val mnemonic: String
+    def getSize: Int
   }
   
   case class x86OneOperandInstruction(name: String,
@@ -36,6 +37,11 @@ object ScalaBasic {
       } else ""
       header + opcodeString + prefix
     }
+    
+    def getSize: Int = {
+      val modSize = if (entry.hasModRMByte) 1 else 0
+      1 + modSize + operand1.operandSize.size / 8
+    }
   }
   
   case class x86TwoOperandInstruction(name: String,
@@ -52,9 +58,17 @@ object ScalaBasic {
       val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + isRegister + "\n"
       val prefix = if (operands._1.operandType.promotedByRex && operands._1.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
-      } else ""
-        val footer = "  }"
-      header + opcodeString + prefix + footer
+      } else {
+        ""
+      }
+      val size = spaces + "  val size = " + getSize + "\n"
+      val footer = "  }"
+      header + opcodeString + prefix + size + footer
+    }
+    
+    def getSize: Int = {
+      val modSize = if (entry.hasModRMByte) 1 else 0
+      1 + modSize + operands._1.operandSize.size / 8
     }
   }
   
@@ -184,16 +198,6 @@ object ScalaBasic {
   }
   
   case class TwoOperandInstance(_1: OperandInstance, _2: OperandInstance)
-  
-  def getOperandSize(opType: OperandType) = {
-    opType match {
-      case FixedOperandType(_, size, _, _, _) => null
-    }
-  }
-
-  
-
-  
 
   def getOptionalBoolean(node: NodeSeq): Option[Boolean] = {
     if (!node.isEmpty) Some(if (node.text == "0") false else true) else None

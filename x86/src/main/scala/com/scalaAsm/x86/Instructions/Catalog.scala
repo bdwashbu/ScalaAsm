@@ -6,7 +6,7 @@ import com.scalaAsm.x86.Instructions.Standard._
  object Catalog {
     trait Standard {
       object callNear extends OneOperand[CALL.type]
-      object add extends TwoOperands[ADD.type]
+      object add extends NewTwoOperands[ADD.type]
       object or extends TwoOperands[OR.type]
       object sub extends TwoOperands[SUB.type]
       object mul extends OneOperand[MUL.type]

@@ -43,7 +43,7 @@ class HelloWorldTest extends FlatSpec with ShouldMatchers {
     val name = System.nanoTime
     val outputStream = new DataOutputStream(new FileOutputStream(executableName));
     val assembler = new Assembler {}
-    val linker = new Linker {}
+    val linker = new Linker {}  
 
     var beginTime = System.nanoTime()
     val helloWorld = assembler.assemble(HelloWorld).addIcon("scala.ico")

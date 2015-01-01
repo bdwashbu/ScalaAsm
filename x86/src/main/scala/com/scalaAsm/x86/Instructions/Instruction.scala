@@ -132,19 +132,17 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def opcode: Opcode
     val size: Int
     
-    def getBytes(p1: O1, p2: O2): InstructionFormat
-    
-    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y]) = {
+    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: NewTwoOperandFormat[X, Y]) = {
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
       
       if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
         opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
         val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
-        TwoMachineCode(p1, p2, getBytes(p1.get, p2.get).getBytes, opcodeBytes, mnemonic, size)
+        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic, size)
       } else {
         val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
-        TwoMachineCode(p1, p2, getBytes(p1.get, p2.get).getBytes, opcodeBytes, mnemonic, size)
+        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic, size)
       }
     }
   }

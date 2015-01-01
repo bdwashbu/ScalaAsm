@@ -38,6 +38,10 @@ package object Instructions {
     def apply[O1, O2, OpEn <: TwoOperandEncoding[O1,O2], Opcode](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2[O1, O2, OpEn], format: TwoOperandFormat[O1, O2, OpEn]) = ev(p1,p2, format, ev.prefix)
   }
   
+  trait NewTwoOperands[X <: InstructionDefinition[_]] {
+    def apply[O1, O2, OpEn <: TwoOperandEncoding[O1,O2], Opcode](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2_new[O1, O2], format: NewTwoOperandFormat[O1, O2]) = ev(p1,p2, format)
+  }
+  
   class ZeroOperands[X <: InstructionDefinition[_]] {
     def apply(ignored: Unit)(implicit ev: X#_0) = ev.get
   }

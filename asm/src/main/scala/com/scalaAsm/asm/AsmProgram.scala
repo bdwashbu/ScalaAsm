@@ -3,7 +3,7 @@ package com.scalaAsm.asm
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.Tokens.Token
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.x86.Instructions.{Standard, Formats}
+import com.scalaAsm.x86.Instructions.{Standard, Formats, NewFormats}
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.InstructionResult
@@ -24,7 +24,7 @@ trait AsmProgram[Mode <: x86Mode] {
 
   val sections = new ListBuffer[AsmSection]()
 
-  trait CodeSection extends Registers[Mode] with Catalog.Standard with Formats with Addressing with AsmSection {
+  trait CodeSection extends Registers[Mode] with Catalog.Standard with Formats with NewFormats with Addressing with AsmSection {
 
     val builder = new ListBuffer[InstructionResult]()
     

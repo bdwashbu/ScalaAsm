@@ -20,8 +20,6 @@ trait NewLowPriorityFormats {
               immediate = None
             )
       }
-      
-       def size = 4
   }
   
   implicit object New_MFormat64 extends NewOneOperandFormat[rel64] {
@@ -32,8 +30,6 @@ trait NewLowPriorityFormats {
               immediate = None
             )
       }
-      
-       def size = 8
   }
   
   trait MFormatIGeneric[X <: GeneralPurpose[_32]#Indirect] extends NewOneOperandFormat[X] {
@@ -44,8 +40,6 @@ trait NewLowPriorityFormats {
               immediate = None
             )
       }
-      
-       def size = 1
   }
   
   implicit object New_MFormatIGeneric1 extends MFormatIGeneric[EAX#Indirect]
@@ -64,8 +58,6 @@ trait NewLowPriorityFormats {
               immediate = None
             )
       }
-      
-       def size = 1
   }
   
   implicit object New_MFormatB2 extends NewOneOperandFormat[r + _8] {
@@ -76,8 +68,6 @@ trait NewLowPriorityFormats {
               immediate = None
             )
       }
-      
-       def size = 1 + 1
   }
   
   implicit object New_MFormat4 extends NewOneOperandFormat[ModRM.reg] {
@@ -88,18 +78,14 @@ trait NewLowPriorityFormats {
               immediate = None
             )
       }
-      
-       def size = 1
   }
 
   implicit object New_DSFormat extends NewOneOperandFormat[DS] {
       def getAddressingForm(op1: DS, opcodeExtension: Byte) = NoAddressingForm
-      def size = 0
   }
 
   implicit object New_CSFormat extends NewOneOperandFormat[CS] {
       def getAddressingForm(op1: CS, opcodeExtension: Byte) = NoAddressingForm
-      def size = 0
   }
 
   // abbreviated  reg/imm format, used with common instrctions like 'add(eax, byte(8))'
@@ -116,8 +102,6 @@ trait NewLowPriorityFormats {
           immediate = Some(operand)
         )
       }
-      
-      def size = 1
   }
   
   implicit object New_IFormat16 extends NewOneOperandFormat[imm16] {
@@ -128,8 +112,6 @@ trait NewLowPriorityFormats {
           immediate = Some(operand)
         )
       }
-      
-      def size = 2
   }
   
   implicit object New_IFormat32 extends NewOneOperandFormat[imm32] {
@@ -140,8 +122,6 @@ trait NewLowPriorityFormats {
           immediate = Some(operand)
         )
       }
-      
-      def size = 4
   }
   
   implicit object New_IFormat64 extends NewOneOperandFormat[imm64] {
@@ -152,8 +132,6 @@ trait NewLowPriorityFormats {
           immediate = Some(operand)
         )
       }
-      
-      def size = 8
   }
 
   implicit object New_OffsetFormat extends NewOneOperandFormat[r64 + _] {
@@ -164,8 +142,6 @@ trait NewLowPriorityFormats {
           immediate = None
         )
       }
-      
-      def size = 2
   }
   
   implicit object New_OffsetFormat2 extends NewOneOperandFormat[r + _8] {
@@ -176,8 +152,6 @@ trait NewLowPriorityFormats {
           immediate = None
         )
       }
-      
-      def size = 1 + 1
   }
   
   implicit object New_MRFormat extends NewTwoOperandFormat[r + _8, ModRM.reg] {
@@ -185,8 +159,6 @@ trait NewLowPriorityFormats {
       def getAddressingForm(op1: r + _8, op2: ModRM.reg, opcodeExtension: Byte) = {
         New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
       }
-  
-      def size = New_RMFormat.size
   }
   
   implicit object New_RMFormat extends NewTwoOperandFormat[ModRM.reg, r + _8] {
@@ -197,8 +169,6 @@ trait NewLowPriorityFormats {
             immediate = None
         )
       }
-  
-      def size = 1 + 1
   }
   
   implicit object New_MIFormat8 extends NewTwoOperandFormat[ModRM.reg, imm8] {
@@ -209,8 +179,6 @@ trait NewLowPriorityFormats {
             immediate = Some(op2)
           )
       }
-  
-      def size = 1 + 1
   }
   
   implicit object New_MIFormat16 extends NewTwoOperandFormat[ModRM.reg, imm16] {
@@ -221,8 +189,6 @@ trait NewLowPriorityFormats {
             immediate = Some(op2)
           )
       }
-  
-      def size = 1 + 2
   }
   
   implicit object New_MIFormat32 extends NewTwoOperandFormat[ModRM.reg, imm32] {
@@ -241,8 +207,6 @@ trait NewLowPriorityFormats {
           Array[Byte]()
         }
       }
-  
-      def size = 1 + 4
   }
   
   implicit object New_MIFormat64 extends NewTwoOperandFormat[ModRM.reg, imm64] {
@@ -253,8 +217,6 @@ trait NewLowPriorityFormats {
             immediate = Some(op2)
           )
       }
-  
-      def size = 1 + 8
   }
   
   implicit object New_OIFormat64 extends NewTwoOperandFormat[ModRM.plusRd, imm64] {
@@ -265,8 +227,6 @@ trait NewLowPriorityFormats {
           immediate = Some(op2)
         )
       }
-  
-      def size = 8
   }
   
   implicit object New_OIFormat32 extends NewTwoOperandFormat[ModRM.plusRd, imm32] {
@@ -277,8 +237,6 @@ trait NewLowPriorityFormats {
           immediate = Some(op2)
         )
       }
-  
-      def size = 4
   }
   
   implicit object New_OIFormat16 extends NewTwoOperandFormat[ModRM.plusRd, imm16] {
@@ -289,8 +247,6 @@ trait NewLowPriorityFormats {
           immediate = Some(op2)
         )
       }
-  
-      def size = 2
   }
   
 //  implicit object New_OIFormat8 extends NewTwoOperandFormat[ModRM.plusRd, imm8] {
@@ -321,8 +277,6 @@ trait NewLowPriorityFormats {
           Array[Byte]()
         }
       }
-  
-      def size = 1 + 4
   }
 }
 
@@ -336,8 +290,6 @@ trait NewFormats extends NewLowPriorityFormats {
           immediate = None
         )
       }
-      
-      def size = 2
   }
   
   implicit object New_OFormat extends NewOneOperandFormat[ModRM.plusRd] {
@@ -347,8 +299,6 @@ trait NewFormats extends NewLowPriorityFormats {
           immediate = None
         )
       }
-      
-      def size = 0
   }
   
   implicit object New_MFormatB1 extends NewOneOperandFormat[r64 + _] {
@@ -359,8 +309,7 @@ trait NewFormats extends NewLowPriorityFormats {
               immediate = None
             )
       }
-      
-       def size = 2
+
   }
   
   implicit object New_RMFormatB1 extends NewTwoOperandFormat[ModRM.reg, StackPointer[_] + _8] {
@@ -370,8 +319,6 @@ trait NewFormats extends NewLowPriorityFormats {
             immediate = None
         )
       }
-  
-      def size = 2 + 1
   }
   
   implicit object New_RMFormatB2 extends NewTwoOperandFormat[ModRM.reg, r + _32] {
@@ -382,8 +329,6 @@ trait NewFormats extends NewLowPriorityFormats {
             immediate = None
         )
       }
-  
-      def size = 1 + 4
   }
   
   implicit object New_RMFormat6 extends NewTwoOperandFormat[ModRM.reg, ModRM.reg] {
@@ -395,8 +340,6 @@ trait NewFormats extends NewLowPriorityFormats {
           immediate = None
         )
       }
-  
-      def size = 1
   }
   
   implicit object New_MFormat5 extends NewOneOperandFormat[AbsoluteAddress[_32]] {
@@ -407,8 +350,6 @@ trait NewFormats extends NewLowPriorityFormats {
               immediate = None
             )
       }
-      
-       def size = 1 + 4
   }
   
     implicit object New_AbsoluteAddress32 extends AbsoluteAddress[_32] {
@@ -449,8 +390,6 @@ trait NewFormats extends NewLowPriorityFormats {
           Array[Byte]()
         }
       }
-  
-      def size = 1 + 4
   }
   
   implicit object New_RMFormat3 extends NewTwoOperandFormat[ModRM.reg, r32#Indirect] {
@@ -461,8 +400,6 @@ trait NewFormats extends NewLowPriorityFormats {
           immediate = None
         )
       }
-  
-      def size = 1
   }
   
   implicit object New_MRFormat2 extends NewTwoOperandFormat[ModRM.reg, ModRM.reg] {
@@ -470,27 +407,21 @@ trait NewFormats extends NewLowPriorityFormats {
       def getAddressingForm(op1: ModRM.reg, op2: ModRM.reg, opcodeExtension: Byte) = {
         New_RMFormat6.getAddressingForm(op2, op1, opcodeExtension)
       }
-  
-      def size = New_RMFormat6.size
   }
 
   implicit object New_M1Format extends NewTwoOperandFormat[rel32, One] with Formats {
       def getAddressingForm(op1: rel32,  op2: One, opcodeExtension: Byte) = MFormat32.getAddressingForm(op1, opcodeExtension)
-      def size = MFormat32.size
   }
   
   implicit object New_M1Format2 extends NewTwoOperandFormat[r32#Indirect, One] with Formats {
       def getAddressingForm(op1: r32#Indirect,  op2: One, opcodeExtension: Byte) = new MFormatIGeneric[r32#Indirect]{}.getAddressingForm(op1, opcodeExtension)
-      def size = new MFormatIGeneric[r32#Indirect]{}.size
   }
   
   implicit object New_M1Format3 extends NewTwoOperandFormat[r64 + _, One] with Formats {
       def getAddressingForm(op1: r64+_,  op2: One, opcodeExtension: Byte) = MFormatB1.getAddressingForm(op1, opcodeExtension)
-      def size = MFormatB1.size
   }
   
   implicit object New_M1Format4 extends NewTwoOperandFormat[ModRM.reg, One] with Formats {
       def getAddressingForm(op1: ModRM.reg,  op2: One, opcodeExtension: Byte) = MFormat4.getAddressingForm(op1, opcodeExtension)
-      def size = MFormat4.size
   }
 }

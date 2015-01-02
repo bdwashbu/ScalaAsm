@@ -186,9 +186,9 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
           case InstructionToken(inst) => inst match {
             case OneMachineCode(addr(name), _, _, _, _) =>
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(addr(name), _, _, _, _, _) =>
+            case TwoMachineCode(addr(name), _, _, _, _) =>
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(_, addr(name), _, _, _, _) =>
+            case TwoMachineCode(_, addr(name), _, _, _) =>
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case _ =>
           }

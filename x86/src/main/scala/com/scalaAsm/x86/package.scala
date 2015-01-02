@@ -27,7 +27,7 @@ package object x86 {
   type _32 = Int
   type _64 = Long
   
-  type r = GPR
+  type reg = GPR
   type r8 = GeneralPurpose[_8]
   type r16 = GeneralPurpose[_16]
   type r32 = GeneralPurpose[_32]

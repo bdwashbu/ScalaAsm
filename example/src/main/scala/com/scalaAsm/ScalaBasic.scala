@@ -61,14 +61,13 @@ object ScalaBasic {
       } else {
         ""
       }
-      val size = spaces + "  val size = " + getSize + "\n"
       val footer = "  }"
-      header + opcodeString + prefix + size + footer
+      header + opcodeString + prefix + footer
     }
     
     def getSize: Int = {
       val modSize = if (entry.hasModRMByte) 1 else 0
-      1 + modSize + operands._1.operandSize.size / 8
+      1 + modSize + operands._2.operandSize.size / 8
     }
   }
   

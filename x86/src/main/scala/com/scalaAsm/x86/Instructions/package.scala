@@ -20,10 +20,10 @@ package object Instructions {
   trait D extends OneOperandEncoding[rel]
   trait Offset extends OneOperandEncoding[rm] // is this different than O?
 
-  trait I2 extends TwoOperandEncoding[r, imm]
-  trait MR extends TwoOperandEncoding[rm, r]
+  trait I2 extends TwoOperandEncoding[reg, imm]
+  trait MR extends TwoOperandEncoding[rm, reg]
   trait OI extends TwoOperandEncoding[rm, imm] // can we define this better
-  trait RM extends TwoOperandEncoding[r, rm]
+  trait RM extends TwoOperandEncoding[reg, rm]
   trait M1 extends TwoOperandEncoding[rm, One]
   trait MI extends TwoOperandEncoding[rm, imm]
   

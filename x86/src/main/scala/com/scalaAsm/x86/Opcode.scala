@@ -28,7 +28,7 @@ case class OneOpcode(operand: Byte, prefix: Seq[Prefix]) extends OpcodeFormat {
 }
 
 class OpcodePlus(opcode: Byte, prefix: Seq[Prefix]) extends OneOpcode(opcode, prefix) {
-    var reg: ModRM.reg = _
+    var reg: reg = _
 	  override def get = Array((opcode + reg.ID).toByte)
 	  override val size = 1
 	  override val opcodeExtension: Option[Byte] = None

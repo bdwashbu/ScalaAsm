@@ -64,8 +64,7 @@ case class TwoMachineCode[O1, O2, OpEn](
     operand2: Operand[O2],
     instBytes: Array[Byte],
     prefixAndOpcode: Array[Byte],
-    mnemonic: String,
-    size: Int) extends InstructionResult {
+    mnemonic: String) extends InstructionResult {
   
   override def toString = {
     val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
@@ -96,9 +95,9 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def apply[X <: O1](p1: Operand[X], format: OneOperandFormat[X, OpEn], prefix: Seq[Prefix]) = {  
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
       
-      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
+      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
-        opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg] 
+        opcodePlus.reg = p1.get.asInstanceOf[reg] 
         val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
         OneMachineCode(p1, format, opcodeBytes, mnemonic, opEx)
       } else {
@@ -115,14 +114,14 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: TwoOperandFormat[X, Y, OpEn], prefix: Seq[Prefix]) = {
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
       
-      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
+      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
-        opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
+        opcodePlus.reg = p1.get.asInstanceOf[reg]
         val opcodeBytes = format.getPrefix(prefix) ++: opcodePlus.get
-        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic, format.size)
+        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic)
       } else {
         val opcodeBytes = format.getPrefix(prefix) ++: opcode.get
-        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic, format.size)
+        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic)
       }
     }
   }
@@ -130,19 +129,18 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
    abstract class _2_new[-O1, -O2]  extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
-    val size: Int
     
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: NewTwoOperandFormat[X, Y]) = {
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
       
-      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[ModRM.reg]) { // this is hacky as hell!
+      if (opcode.isInstanceOf[OpcodePlus] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodePlus]
-        opcodePlus.reg = p1.get.asInstanceOf[ModRM.reg]
+        opcodePlus.reg = p1.get.asInstanceOf[reg]
         val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
-        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic, size)
+        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic)
       } else {
         val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
-        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic, size)
+        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic)
       }
     }
   }

@@ -91,6 +91,8 @@ object ScalaBasic {
       if (operands.size == 2) {
         val ops = TwoOperandDef(operands(0), operands(1))
         ops.getInstances.map{instance => x86TwoOperandInstruction(mnemonic + "_" + opcode + "_" + instance._1 + "_" + instance._2, opcode, mnemonic, instance, entry)}
+      } else if (operands.size == 1) {
+        operands(0).getInstances.map{instance => x86OneOperandInstruction(mnemonic + "_" + opcode + "_" + instance, opcode, mnemonic, instance, entry)}
       } else {
         Nil
       }
@@ -194,6 +196,23 @@ object ScalaBasic {
     override def toString = {
       addressingMethod.get.toString + operandType.get.toString
     }
+    
+    def getInstances: Seq[OperandInstance] = {
+      if (operandType.isDefined && operandType.isDefined) {
+        
+          for {
+            size1 <- operandType.get.sizes
+          } yield {
+            OperandInstance(
+               addressingMethod,
+               operandType.get,
+               size1)
+          }
+        
+      } else {
+         Nil
+      }
+    }
   }
   
   case class OperandInstance(addressingMethod: Option[AddressingMethod],
@@ -273,12 +292,6 @@ object ScalaBasic {
 
     val xml = XML.loadFile("x86reference.xml")
     val pri_opcodes = (xml \\ "pri_opcd")
-
-    //    val opcodes = for {
-    //      pri_opcode <- pri_opcodes
-    //      opcode = Integer.parseInt(pri_opcode \@ "value", 16)
-    //      entry <- (pri_opcode \ "entry").filter{entry => (entry \ "@alias").size == 0}
-    //    } yield x86Opcode(opcode, entry.map(parseEntry))
 
     val opcodes = pri_opcodes.flatMap { pri_opcode =>
       val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 }
@@ -373,6 +386,7 @@ object ScalaBasic {
       val insts = loadXML().flatMap{x => x.getInstances}
       outputInstructionFile("ADD", insts.filter(_.mnemonic == "ADD"))
       outputInstructionFile("AND", insts.filter(_.mnemonic == "AND"))
+      outputInstructionFile("DEC", insts.filter(_.mnemonic == "DEC"))
 
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
       val assembler = new Assembler {}

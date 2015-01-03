@@ -2,57 +2,90 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-import com.scalaAsm.x86.Operands.UniformByteRegister
+import com.scalaAsm.x86.Operands._
 
-object AND extends InstructionDefinition[OneOpcode]("AND") with andHigh
-  
+object AND extends InstructionDefinition[OneOpcode]("AND") with ANDImpl
+
 trait ANDLow {
- 
-  implicit object and1 extends AND._2[r32, rm32, RM] {
-      def opcode = 0x23
-  } 
-  
-  implicit object and3 extends AND._2[rm8, imm8, MI] {
-      def opcode = 0x80 /+ 4
+  implicit object AND_35_r16_rm16 extends AND._2_new[r16, rm16] {
+    def opcode = 0x23 / r
+  }
+
+  implicit object AND_35_r32_rm32 extends AND._2_new[r32, rm32] {
+    def opcode = 0x23 / r
+  }
+
+  implicit object AND_35_r64_rm64 extends AND._2_new[r64, rm64] {
+    def opcode = 0x23 / r
+    override def prefix = REX.W(true)
   }
 }
 
-trait andHigh extends ANDLow {
+trait ANDImpl extends ANDLow {
+  implicit object AND_32_rm8_r8 extends AND._2_new[rm8, r8] {
+    def opcode = 0x20 / r
+  }
 
-  implicit object and2 extends AND._2[r16, rm16, RM] {
-      def opcode = 0x23
+  implicit object AND_33_rm16_r16 extends AND._2_new[rm16, r16] {
+    def opcode = 0x21 / r
   }
-  
-  implicit object and13 extends AND._2[UniformByteRegister[_8], imm8, MI] {
+
+  implicit object AND_33_rm32_r32 extends AND._2_new[rm32, r32] {
+    def opcode = 0x21 / r
+  }
+
+  implicit object AND_33_rm64_r64 extends AND._2_new[rm64, r64] {
+    def opcode = 0x21 / r
+    override def prefix = REX.W(true)
+  }
+
+  implicit object AND_34_r8_rm8 extends AND._2_new[r8, rm8] {
+    def opcode = 0x22 / r
+  }
+
+  implicit object AND_36_AL_imm8 extends AND._2_new[AL, imm8] {
+    def opcode = 0x24
+  }
+
+  implicit object AND_37_AX_imm16 extends AND._2_new[AX, imm16] {
+    def opcode = 0x25
+  }
+
+  implicit object AND_37_EAX_imm32 extends AND._2_new[EAX, imm32] {
+    def opcode = 0x25
+  }
+
+  implicit object AND_37_RAX_imm32 extends AND._2_new[RAX, imm32] {
+    def opcode = 0x25
+  }
+
+  implicit object AND_128_rm8_imm8 extends AND._2_new[rm8, imm8] {
     def opcode = 0x80 /+ 4
-    override def prefix = REX(false, false, false, false)
   }
-  
-  implicit object and4 extends AND._2[rm16, imm16, MI] {
-      def opcode = 0x81 /+ 4
+
+  implicit object AND_129_rm16_imm16 extends AND._2_new[rm16, imm16] {
+    def opcode = 0x81 /+ 4
   }
-  
-  implicit object and5 extends AND._2[rm32, imm32, MI] {
-      def opcode = 0x81 /+ 4
+
+  implicit object AND_129_rm32_imm32 extends AND._2_new[rm32, imm32] {
+    def opcode = 0x81 /+ 4
   }
-  
-  implicit object and6 extends AND._2[rm16, imm8, MI] {
-      def opcode = 0x83 /+ 4
+
+  implicit object AND_129_rm64_imm32 extends AND._2_new[rm64, imm32] {
+    def opcode = 0x81 /+ 4
+    override def prefix = REX.W(true)
   }
-  
-  implicit object and7 extends AND._2[rm32, imm8, MI] {
-      def opcode = 0x83 /+ 4
+
+  implicit object AND_131_rm16_imm8 extends AND._2_new[rm16, imm8] {
+    def opcode = 0x83 /+ 4
   }
-  
-  implicit object and9 extends AND._2[rm16, r16, MR] {
-      def opcode = 0x21
+
+  implicit object AND_131_rm32_imm8 extends AND._2_new[rm32, imm8] {
+    def opcode = 0x83 /+ 4
   }
-  
-  implicit object and10 extends AND._2[rm32, r32, MR] {
-      def opcode = 0x21
-  }
-  
-  implicit object and11 extends AND._2[r8, rm8, RM] {
-      def opcode = 0x22
+
+  implicit object AND_131_rm64_imm8 extends AND._2_new[rm64, imm8] {
+    def opcode = 0x83 /+ 4
+    override def prefix = REX.W(true)
   }
 }

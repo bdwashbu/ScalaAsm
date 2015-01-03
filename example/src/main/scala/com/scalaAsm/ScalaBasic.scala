@@ -27,13 +27,13 @@ object ScalaBasic {
                                       entry: x86Entry) extends InstructionInstance {
     
     override def generateClass(numSpaces: Int) = {
+      
       val spaces = (1 to numSpaces) map (x => " ") mkString
       val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand1 + "] {\n"
       
-      val opcodeString = if (entry.isRegister) {
-        spaces + "  def opcode = 0x" + opcode.toHexString + " + r\n"
+      val opcodeString = if (entry.hasRegisterInModRM) {
+        spaces + "  def opcode = 0x" + opcode.toHexString + " / r\n"
       } else if (entry.opcodeEx.isDefined) {
-        println("HERE!")
         spaces + "  def opcode = 0x" + opcode.toHexString + " /+ " + entry.opcodeEx.get + "\n"
       } else {
         spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
@@ -59,9 +59,9 @@ object ScalaBasic {
     override def generateClass(numSpaces: Int) = {
       val spaces = (1 to numSpaces) map (x => " ") mkString
       val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2_new[" + operands._1 + ", " + operands._2 + "] {\n"
-      println("opcodeex: " + entry.opcodeEx)
-      val opcodeString = if (entry.isRegister) {
-        spaces + "  def opcode = 0x" + opcode.toHexString + " + r\n"
+
+      val opcodeString = if (entry.hasRegisterInModRM) {
+        spaces + "  def opcode = 0x" + opcode.toHexString + " / r\n"
       } else if (entry.opcodeEx.isDefined) {
         spaces + "  def opcode = 0x" + opcode.toHexString + " /+ " + entry.opcodeEx.get + "\n"
       } else {
@@ -106,7 +106,7 @@ object ScalaBasic {
                       opcodeEx: Option[Int],
                       opsize: Option[Boolean],
                       direction: Option[Boolean],
-                      isRegister: Boolean,
+                      hasRegisterInModRM: Boolean,
                       hasModRMByte: Boolean)
 
   case class SyntaxDef(mnemonic: String,
@@ -319,12 +319,12 @@ object ScalaBasic {
     // must do this to resolve (rm, r) (r, rm) ambiguous implicit resolution.  A little hacky
     val (low, high) = instructions.partition { inst => inst match {
       case x86TwoOperandInstruction(_,_,_,operands,_) if operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined =>
-        val is64 = operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _64 &&
-            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _64
-        val is32 = operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _32 &&
-            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _32
-        val is16 = operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _16 &&
-            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _16
+        val is64 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _64 &&
+            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _64
+        val is32 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _32 &&
+            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _32
+        val is16 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _16 &&
+            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _16
         is64 || is32 || is16
       case _ => false
        }

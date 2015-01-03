@@ -332,7 +332,7 @@ trait NewFormats {
     def getAddressingForm(op1: reg, op2: reg, opcodeExtension: Byte) = {
 
       InstructionFormat(
-        OnlyModRM(ModRMReg(TwoRegisters, op1, op2)),
+        OnlyModRM(ModRMReg(TwoRegisters, op2, op1)),
         immediate = None)
     }
   }

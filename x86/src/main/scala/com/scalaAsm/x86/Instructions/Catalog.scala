@@ -22,7 +22,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object jz extends OneOperand[JZ.type]
       object int extends OneOperand[INT.type]
       object rdrand extends OneOperand[RDRAND]
-      object and extends TwoOperands[AND.type]
+      object and extends NewTwoOperands[AND.type]
       object lea extends TwoOperands[LEA.type]
       object mov extends TwoOperands[MOV.type]
       object shr extends TwoOperands[SHR.type]

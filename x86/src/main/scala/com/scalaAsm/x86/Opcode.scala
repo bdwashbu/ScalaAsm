@@ -11,23 +11,27 @@ sealed trait OpcodeFormat {
   def prefix: Seq[Prefix]
 }
 
-sealed trait RegType
-case object r extends RegType
-case object rw extends RegType
-case object rd extends RegType
-case object rb extends RegType
-case object ro extends RegType
+sealed trait RegInOpcode
+sealed trait RegInModRM
+
+case object r extends RegInModRM
+
+case object rw extends RegInOpcode
+case object rd extends RegInOpcode
+case object rb extends RegInOpcode
+case object ro extends RegInOpcode
 
 case class OneOpcode(operand: Byte, prefix: Seq[Prefix]) extends OpcodeFormat {
   def get = Array(operand)
   val size = 1
   val opcodeExtension: Option[Byte] = None
   def /+(x: Byte) = new OneOpcode(operand, prefix) { override val opcodeExtension = Some(x) }
-  def +(reg: RegType) = new OpcodePlus(operand, prefix)
+  def /(x: RegInModRM) = this
+  def +(reg: RegInOpcode) = new OpcodeWithReg(operand, prefix)
   def isOpcodePlus = false
 }
 
-class OpcodePlus(opcode: Byte, prefix: Seq[Prefix]) extends OneOpcode(opcode, prefix) {
+class OpcodeWithReg(opcode: Byte, prefix: Seq[Prefix]) extends OneOpcode(opcode, prefix) {
     var reg: reg = _
 	  override def get = Array((opcode + reg.ID).toByte)
 	  override val size = 1

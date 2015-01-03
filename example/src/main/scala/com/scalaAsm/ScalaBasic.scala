@@ -30,8 +30,14 @@ object ScalaBasic {
       val spaces = (1 to numSpaces) map (x => " ") mkString
       val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand1 + "] {\n"
       
-      val isRegister = if (entry.isRegister) " + r" else ""
-      val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + isRegister + "\n"
+      val opcodeString = if (entry.isRegister) {
+        spaces + "  def opcode = 0x" + opcode.toHexString + " + r\n"
+      } else if (entry.opcodeEx.isDefined) {
+        println("HERE!")
+        spaces + "  def opcode = 0x" + opcode.toHexString + " /+ " + entry.opcodeEx.get + "\n"
+      } else {
+        spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+      }
       val prefix = if (operand1.operandType.promotedByRex && operand1.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
       } else ""
@@ -53,9 +59,14 @@ object ScalaBasic {
     override def generateClass(numSpaces: Int) = {
       val spaces = (1 to numSpaces) map (x => " ") mkString
       val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2_new[" + operands._1 + ", " + operands._2 + "] {\n"
-      
-      val isRegister = if (entry.isRegister) " + r" else ""
-      val opcodeString = spaces + "  def opcode = 0x" + opcode.toHexString + isRegister + "\n"
+      println("opcodeex: " + entry.opcodeEx)
+      val opcodeString = if (entry.isRegister) {
+        spaces + "  def opcode = 0x" + opcode.toHexString + " + r\n"
+      } else if (entry.opcodeEx.isDefined) {
+        spaces + "  def opcode = 0x" + opcode.toHexString + " /+ " + entry.opcodeEx.get + "\n"
+      } else {
+        spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+      }
       val prefix = if (operands._1.operandType.promotedByRex && operands._1.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
       } else {
@@ -304,6 +315,20 @@ object ScalaBasic {
 
   def outputInstructionFile(mnemonic: String, instructions: Seq[InstructionInstance]) = {
     val writer = new PrintWriter(mnemonic + ".scala", "UTF-8");
+    
+    // must do this to resolve (rm, r) (r, rm) ambiguous implicit resolution.  A little hacky
+    val (low, high) = instructions.partition { inst => inst match {
+      case x86TwoOperandInstruction(_,_,_,operands,_) if operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined =>
+        val is64 = operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _64 &&
+            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _64
+        val is32 = operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _32 &&
+            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _32
+        val is16 = operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _16 &&
+            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _16
+        is64 || is32 || is16
+      case _ => false
+       }
+    }
 
     writer.println("package com.scalaAsm.x86");
     writer.println("package Instructions");
@@ -311,15 +336,34 @@ object ScalaBasic {
     writer.println("")
     writer.println("import com.scalaAsm.x86.Operands._")
     writer.println("")
-    writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition[OneOpcode](\"" + mnemonic + "\") with AddLow")
+    writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition[OneOpcode](\"" + mnemonic + "\") with " + mnemonic.toUpperCase() + "Impl")
     writer.println("")
-    writer.println("trait AddLow {")
-    for (inst <- instructions) {
-      writer.println(inst.generateClass(2))
-      if (inst != instructions.last)
-        writer.println("")
+    
+    if (!low.isEmpty && !high.isEmpty) {
+      writer.println("trait " + mnemonic.toUpperCase() + "Low {")
+      for (inst <- low) {
+        writer.println(inst.generateClass(2))
+        if (inst != low.last)
+          writer.println("")
+      }
+      writer.println("}\n")
+      
+      writer.println("trait " + mnemonic.toUpperCase() + "Impl extends " + mnemonic.toUpperCase() + "Low {")
+      for (inst <- high) {
+        writer.println(inst.generateClass(2))
+        if (inst != high.last)
+          writer.println("")
+      }
+      writer.println("}")
+    } else {
+      writer.println("trait " + mnemonic.toUpperCase() + "Impl {")
+      for (inst <- instructions) {
+        writer.println(inst.generateClass(2))
+        if (inst != instructions.last)
+          writer.println("")
+      }
+      writer.println("}")
     }
-    writer.println("}")
     writer.close();
   }
 
@@ -328,6 +372,7 @@ object ScalaBasic {
 
       val insts = loadXML().flatMap{x => x.getInstances}
       outputInstructionFile("ADD", insts.filter(_.mnemonic == "ADD"))
+      outputInstructionFile("AND", insts.filter(_.mnemonic == "AND"))
 
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
       val assembler = new Assembler {}

@@ -141,14 +141,25 @@ object ScalaBasic {
     
     def getInstances: Seq[TwoOperandInstance] = {
       if (operand1.operandType.isDefined && operand2.operandType.isDefined) {
-        (operand1.operandType.get.sizes.length,
-          operand2.operandType.get.sizes.length) match {
+        val op1Sizes = operand1.operandType match {
+          case Some(CompositeOperandType(_,_,sizes,_,_)) => sizes
+          case Some(FixedOperandType(_,_,size,_,_)) => Seq(size)
+          case _ => Seq()
+        }
+        val op2Sizes = operand2.operandType match {
+          case Some(CompositeOperandType(_,_,sizes,_,_)) => sizes
+          case Some(FixedOperandType(_,_,size,_,_)) => Seq(size)
+          case _ => Seq()
+        }
+        
+        (op1Sizes.length,
+          op2Sizes.length) match {
 
             
             case (_, 1) => {
               for {
-                size1 <- operand1.operandType.get.sizes
-                size2 <- operand2.operandType.get.sizes
+                size1 <- op1Sizes
+                size2 <- op2Sizes
               } yield {
                 val op1 = OperandInstance(
                    operand1.addressingMethod,
@@ -163,8 +174,8 @@ object ScalaBasic {
             }
             case (1, _) => {
               for {
-                size1 <- operand1.operandType.get.sizes
-                size2 <- operand2.operandType.get.sizes
+                size1 <- op1Sizes
+                size2 <- op2Sizes
               } yield {
                 val op1 = OperandInstance(
                    operand1.addressingMethod,
@@ -178,18 +189,18 @@ object ScalaBasic {
               }
             }
             case (x, y) if x == y => {
-                zipSizes(operand1.operandType.get.sizes, operand2.operandType.get.sizes) 
+                zipSizes(op1Sizes, op2Sizes) 
             }
             case (3, 2) =>
-              val padded = operand2.operandType.get.sizes :+ operand2.operandType.get.sizes.last
-              zipSizes(operand1.operandType.get.sizes, padded) 
+              val padded = op2Sizes :+ op2Sizes.last
+              zipSizes(op1Sizes, padded) 
             case (2, 3) =>
-              val padded = operand1.operandType.get.sizes :+ operand1.operandType.get.sizes.last
-              zipSizes(padded, operand2.operandType.get.sizes) 
+              val padded = op1Sizes :+ op1Sizes.last
+              zipSizes(padded, op2Sizes) 
             case _ =>
               println("HERE")
-              println(operand1.operandType.get.sizes.length)
-              println(operand2.operandType.get.sizes.length)
+              println(op1Sizes.length)
+              println(op2Sizes.length)
               Seq()
           }
         
@@ -208,9 +219,13 @@ object ScalaBasic {
     
     def getInstances: Seq[OperandInstance] = {
       if (operandType.isDefined && operandType.isDefined) {
-        
+        val opSizes = operandType match {
+          case Some(CompositeOperandType(_,_,sizes,_,_)) => sizes
+          case Some(FixedOperandType(_,_,size,_,_)) => Seq(size)
+          case _ => Seq()
+        }
           for {
-            size1 <- operandType.get.sizes
+            size1 <- opSizes
           } yield {
             OperandInstance(
                addressingMethod,

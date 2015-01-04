@@ -23,30 +23,39 @@ object ScalaBasic {
   case class x86OneOperandInstruction(name: String,
                                       opcode: Int,
                                       mnemonic: String,
-                                      operand1: OperandInstance,
+                                      operand: OperandInstance,
                                       entry: x86Entry) extends InstructionInstance {
     
     override def generateClass(numSpaces: Int) = {
       
       val spaces = (1 to numSpaces) map (x => " ") mkString
-      val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand1 + "] {\n"
+      val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1_new[" + operand + "] {\n"
       
-      val opcodeString = if (entry.hasRegisterInModRM) {
-        spaces + "  def opcode = 0x" + opcode.toHexString + " / r\n"
-      } else if (entry.opcodeEx.isDefined) {
-        spaces + "  def opcode = 0x" + opcode.toHexString + " /+ " + entry.opcodeEx.get + "\n"
-      } else {
-        spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+      val opcodeString = operand.addressingMethod match {
+        case Some(OpcodeSelectsRegister) => operand.operandSize.size match {
+          case 8 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rb\n"
+          case 16 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rw\n"
+          case 32 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rd\n"
+        }
+        case _ =>
+          if (entry.hasRegisterInModRM) {
+            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " / r\n"
+          } else if (entry.opcodeEx.isDefined) {
+            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " /+ " + entry.opcodeEx.get + "\n"
+          } else {
+            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + "\n"
+          }
       }
-      val prefix = if (operand1.operandType.promotedByRex && operand1.operandSize.size == 64) {
+      val prefix = if (operand.operandType.promotedByRex && operand.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
       } else ""
-      header + opcodeString + prefix
+        val footer = "  }"
+      header + opcodeString + prefix + footer
     }
     
     def getSize: Int = {
       val modSize = if (entry.hasModRMByte) 1 else 0
-      1 + modSize + operand1.operandSize.size / 8
+      1 + modSize + operand.operandSize.size / 8
     }
   }
   
@@ -61,11 +70,11 @@ object ScalaBasic {
       val header = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2_new[" + operands._1 + ", " + operands._2 + "] {\n"
 
       val opcodeString = if (entry.hasRegisterInModRM) {
-        spaces + "  def opcode = 0x" + opcode.toHexString + " / r\n"
+        spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " / r\n"
       } else if (entry.opcodeEx.isDefined) {
-        spaces + "  def opcode = 0x" + opcode.toHexString + " /+ " + entry.opcodeEx.get + "\n"
+        spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " /+ " + entry.opcodeEx.get + "\n"
       } else {
-        spaces + "  def opcode = 0x" + opcode.toHexString + "\n"
+        spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + "\n"
       }
       val prefix = if (operands._1.operandType.promotedByRex && operands._1.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"

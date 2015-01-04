@@ -14,11 +14,11 @@ trait OperandSize {
   }
 }
 
-object _8 extends OperandSize { def size = 8 }
-object _16 extends OperandSize { def size = 16 }
-object _32 extends OperandSize { def size = 32 }
-object _64 extends OperandSize { def size = 64 }
-object _128 extends OperandSize { def size = 128 }
+case object _8 extends OperandSize { def size = 8 }
+case object _16 extends OperandSize { def size = 16 }
+case object _32 extends OperandSize { def size = 32 }
+case object _64 extends OperandSize { def size = 64 }
+case object _128 extends OperandSize { def size = 128 }
 object _8_8 extends OperandSize { def size = 16 }
 object _16_16 extends OperandSize { def size = 32 }
 object _32_32 extends OperandSize { def size = 64 }

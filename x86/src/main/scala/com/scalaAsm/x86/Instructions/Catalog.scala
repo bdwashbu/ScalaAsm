@@ -15,7 +15,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object push extends OneOperand[PUSH.type]
       object pushf extends ZeroOperands[PUSHF.type]
       object pop extends OneOperand[POP.type]
-      object dec extends OneOperand[DEC.type]
+      object dec extends NewOneOperand[DEC.type]
       object not extends OneOperand[NOT.type]
       object jmp extends OneOperand[JMP.type]
       object jnz extends OneOperand[JNZ.type]

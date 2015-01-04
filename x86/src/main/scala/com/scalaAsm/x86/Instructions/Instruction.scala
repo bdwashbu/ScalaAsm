@@ -40,7 +40,7 @@ case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mn
 
 case class OneMachineCode[O1, OpEn](
     operand: Operand[O1],
-    format: OneOperandFormat[O1, OpEn],
+    instBytes: Array[Byte],
     prefixAndOpcode: Array[Byte],
     mnemonic: String,
     opcodeExtension: Byte) extends InstructionResult {
@@ -51,11 +51,11 @@ case class OneMachineCode[O1, OpEn](
   }
 
   def getSize: Int = {
-    prefixAndOpcode.size + format.size
+    prefixAndOpcode.size + instBytes.size
   }
 
   def getBytes: Array[Byte] = {
-      prefixAndOpcode ++: format.getAddressingForm(operand.get, opcodeExtension).getBytes
+      prefixAndOpcode ++: instBytes
   }
 }
 
@@ -99,10 +99,29 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
         val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
         opcodePlus.reg = p1.get.asInstanceOf[reg] 
         val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
-        OneMachineCode(p1, format, opcodeBytes, mnemonic, opEx)
+        OneMachineCode(p1, format.getAddressingForm(p1.get, opEx).getBytes, opcodeBytes, mnemonic, opEx)
       } else {
         val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
-        OneMachineCode(p1, format, opcodeBytes, mnemonic, opEx)
+        OneMachineCode(p1, format.getAddressingForm(p1.get, opEx).getBytes, opcodeBytes, mnemonic, opEx)
+      }
+    }
+  }
+  
+  abstract class _1_new[-O1]  extends x86Instruction {
+    val mnemonic = InstructionDefinition.this.mnemonic
+    def opcode: Opcode
+    
+    def apply[X <: O1](p1: Operand[X], format: NewOneOperandFormat[X], prefix: Seq[Prefix]) = {  
+      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
+      
+      if (opcode.isInstanceOf[OpcodeWithReg] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
+        val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
+        opcodePlus.reg = p1.get.asInstanceOf[reg] 
+        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
+        OneMachineCode(p1, format.getAddressingForm(p1.get, opEx).getBytes, opcodeBytes, mnemonic, opEx)
+      } else {
+        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
+        OneMachineCode(p1, format.getAddressingForm(p1.get, opEx).getBytes, opcodeBytes, mnemonic, opEx)
       }
     }
   }

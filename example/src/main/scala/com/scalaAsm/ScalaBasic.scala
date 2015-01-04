@@ -263,9 +263,9 @@ object ScalaBasic {
           } else if (operand.text == "AL") {
             Some(Register8)
           } else if (!(operand \ "t").isEmpty && (operand \ "t").text.trim != "")
-            Some(OperandType.decodeOperandType(entry)((operand \ "t").text.trim))
+            Some(OperandType.decodeOperandType(entry).find{ optype => optype.code == ((operand \ "t").text.trim)}.get)
           else if (!(operand \ "@type").isEmpty)
-            Some(OperandType.decodeOperandType(entry)((operand \ "@type").text.trim))
+            Some(OperandType.decodeOperandType(entry).find{ optype => optype.code == ((operand \ "@type").text.trim)}.get)
           else
             None
 

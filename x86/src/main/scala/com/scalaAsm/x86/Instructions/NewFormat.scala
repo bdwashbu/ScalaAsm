@@ -65,14 +65,7 @@ trait NewFormats {
     }
   }
 
-  implicit object New_MFormat4 extends NewOneOperandFormat[reg] {
-
-    def getAddressingForm(operand: reg, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, operand)), ///reg.encode(opcode.opcodeExtension),
-        immediate = None)
-    }
-  }
+  
 
   implicit object New_DSFormat extends NewOneOperandFormat[DS] {
     def getAddressingForm(op1: DS, opcodeExtension: Byte) = NoAddressingForm
@@ -250,10 +243,13 @@ trait NewFormats {
     }
   }
 
-  implicit object New_OFormat extends NewOneOperandFormat[rm] {
-    def getAddressingForm(operand: rm, opcodeExtension: Byte) = {
+
+  
+  implicit object New_MFormat4 extends NewOneOperandFormat[reg] {
+
+    def getAddressingForm(operand: reg, opcodeExtension: Byte) = {
       InstructionFormat(
-        addressingForm = NoModRM(),
+        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, operand)), ///reg.encode(opcode.opcodeExtension),
         immediate = None)
     }
   }

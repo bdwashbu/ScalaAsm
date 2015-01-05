@@ -46,7 +46,7 @@ object ScalaBasic {
             spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + "\n"
           }
       }
-      val prefix = if (operand.operandType.promotedByRex && operand.operandSize.size == 64) {
+      val prefix = if (operand.operandType.isInstanceOf[FixedOperandType] && operand.operandType.asInstanceOf[FixedOperandType].promotedByRex && operand.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
       } else ""
         val footer = "  }"
@@ -76,7 +76,7 @@ object ScalaBasic {
       } else {
         spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + "\n"
       }
-      val prefix = if (operands._1.operandType.promotedByRex && operands._1.operandSize.size == 64) {
+      val prefix = if (operands._1.operandType.isInstanceOf[FixedOperandType] && operands._1.operandType.asInstanceOf[FixedOperandType].promotedByRex && operands._1.operandSize.size == 64) {
         spaces + "  override def prefix = REX.W(true)\n"
       } else {
         ""
@@ -125,30 +125,30 @@ object ScalaBasic {
 
   case class TwoOperandDef(operand1: OperandDef, operand2: OperandDef) {
     
-    def zipSizes(op1Sizes: Seq[OperandSize], op2Sizes: Seq[OperandSize]): Seq[TwoOperandInstance] = {
+    def zipSizes(op1Sizes: Seq[(OperandType, OperandSize)], op2Sizes: Seq[(OperandType, OperandSize)]): Seq[TwoOperandInstance] = {
       op1Sizes.zip(op2Sizes).map{ x =>
         val op1 = OperandInstance(
                    operand1.addressingMethod,
-                   operand1.operandType.get,
-                   x._1)
+                   x._1._1,
+                   x._1._2)
         val op2 = OperandInstance(
                    operand2.addressingMethod,
-                   operand2.operandType.get,
-                   x._2)
+                   x._2._1,
+                   x._2._2)
         TwoOperandInstance(op1, op2)
       }
     }
     
     def getInstances: Seq[TwoOperandInstance] = {
       if (operand1.operandType.isDefined && operand2.operandType.isDefined) {
-        val op1Sizes = operand1.operandType match {
-          case Some(CompositeOperandType(_,_,sizes,_,_)) => sizes
-          case Some(FixedOperandType(_,_,size,_,_)) => Seq(size)
+        val op1Sizes: Seq[(OperandType, OperandSize)] = operand1.operandType match {
+          case Some(CompositeOperandType(_,_,components,_)) => components map{ size => (OperandType.decodeOperandType(size), OperandType.decodeOperandType(size).asInstanceOf[FixedOperandType].size)}
+          case Some(FixedOperandType(_,_,size,_,_)) => Seq((operand1.operandType.get, size))
           case _ => Seq()
         }
-        val op2Sizes = operand2.operandType match {
-          case Some(CompositeOperandType(_,_,sizes,_,_)) => sizes
-          case Some(FixedOperandType(_,_,size,_,_)) => Seq(size)
+        val op2Sizes: Seq[(OperandType, OperandSize)] = operand2.operandType match {
+          case Some(CompositeOperandType(_,_,components,_)) => components map{ size => (OperandType.decodeOperandType(size), OperandType.decodeOperandType(size).asInstanceOf[FixedOperandType].size)}
+          case Some(FixedOperandType(_,_,size,_,_)) => Seq((operand2.operandType.get, size))
           case _ => Seq()
         }
         
@@ -158,32 +158,32 @@ object ScalaBasic {
             
             case (_, 1) => {
               for {
-                size1 <- op1Sizes
-                size2 <- op2Sizes
+                (opType, size1) <- op1Sizes
+                (opType2, size2) <- op2Sizes
               } yield {
                 val op1 = OperandInstance(
                    operand1.addressingMethod,
-                   operand1.operandType.get,
+                   opType,
                    size1)
                 val op2 = OperandInstance(
                    operand2.addressingMethod,
-                   operand2.operandType.get,
+                   opType2,
                    size2)
                 TwoOperandInstance(op1, op2)
               }
             }
             case (1, _) => {
               for {
-                size1 <- op1Sizes
-                size2 <- op2Sizes
+                (opType, size1) <- op1Sizes
+                (opType2, size2) <- op2Sizes
               } yield {
                 val op1 = OperandInstance(
                    operand1.addressingMethod,
-                   operand1.operandType.get,
+                   opType,
                    size1)
                 val op2 = OperandInstance(
                    operand2.addressingMethod,
-                   operand2.operandType.get,
+                   opType2,
                    size2)
                 TwoOperandInstance(op1, op2)
               }
@@ -219,18 +219,18 @@ object ScalaBasic {
     
     def getInstances: Seq[OperandInstance] = {
       if (operandType.isDefined && operandType.isDefined) {
-        val opSizes = operandType match {
-          case Some(CompositeOperandType(_,_,sizes,_,_)) => sizes
-          case Some(FixedOperandType(_,_,size,_,_)) => Seq(size)
+        val opSizes: Seq[(OperandType, OperandSize)] = operandType match {
+          case Some(CompositeOperandType(_,_,sizes,_)) => sizes map{ size => (OperandType.decodeOperandType(size), OperandType.decodeOperandType(size).asInstanceOf[FixedOperandType].size)}
+          case Some(FixedOperandType(_,_,size,_,_)) => Seq((operandType.get, size))
           case _ => Seq()
         }
           for {
-            size1 <- opSizes
+            (optype, size) <- opSizes
           } yield {
             OperandInstance(
                addressingMethod,
-               operandType.get,
-               size1)
+               optype,
+               size)
           }
         
       } else {
@@ -246,7 +246,7 @@ object ScalaBasic {
       if (addressingMethod.isDefined)
         addressingMethod.get.toString + operandSize.toString
       else
-        operandSize.toString
+        operandType.toString
     }
   }
   
@@ -278,9 +278,9 @@ object ScalaBasic {
           } else if (operand.text == "AL") {
             Some(Register8)
           } else if (!(operand \ "t").isEmpty && (operand \ "t").text.trim != "")
-            Some(OperandType.decodeOperandType(entry).find{ optype => optype.code == ((operand \ "t").text.trim)}.get)
+            Some(OperandType.decodeOperandType((operand \ "t").text.trim))
           else if (!(operand \ "@type").isEmpty)
-            Some(OperandType.decodeOperandType(entry).find{ optype => optype.code == ((operand \ "@type").text.trim)}.get)
+            Some(OperandType.decodeOperandType((operand \ "@type").text.trim))
           else
             None
 
@@ -411,6 +411,7 @@ object ScalaBasic {
       outputInstructionFile("ADD", insts.filter(_.mnemonic == "ADD"))
       outputInstructionFile("AND", insts.filter(_.mnemonic == "AND"))
       outputInstructionFile("DEC", insts.filter(_.mnemonic == "DEC"))
+      outputInstructionFile("MOV", insts.filter(_.mnemonic == "MOV"))
 
       val outputStream = new DataOutputStream(new FileOutputStream("test.exe"));
       val assembler = new Assembler {}

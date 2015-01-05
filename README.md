@@ -112,6 +112,9 @@ References:
 A huge shoutout to Jeremy Gordon and Wayne Radburn for GoAsm, the best 64-bit windows assembler!
 http://www.godevtool.com/
 
+The best x86 reference site!  The master x86 XML comes from here.
+http://ref.x86asm.net/
+
 Intel® 64 and IA-32 Architectures Software Developer Manuals: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
 
 Microsoft PE format spec:
@@ -128,6 +131,12 @@ http://ref.x86asm.net/index.html
 
 Encoding x86 instructions:
 http://www.c-jump.com/CIS77/CPU/x86/lecture.html#X77_0240_prefix
+
+Interesting Articles:
+========
+
+Redundancy within x86:
+http://www.strchr.com/machine_code_redundancy
 
 How to run:
 ========

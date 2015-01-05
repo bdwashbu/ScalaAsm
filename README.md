@@ -109,33 +109,33 @@ outputStream.close
 References:
 ========
 
-A huge shoutout to Jeremy Gordon and Wayne Radburn for GoAsm, the best 64-bit windows assembler!
+A huge shoutout to Jeremy Gordon and Wayne Radburn for GoAsm, the best 64-bit windows assembler!  
 http://www.godevtool.com/
 
-The best x86 reference site!  The master x86 XML comes from here.
+The best x86 reference site!  The master x86 XML comes from here.  
 http://ref.x86asm.net/
 
-Intel® 64 and IA-32 Architectures Software Developer Manuals: http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
+Intel® 64 and IA-32 Architectures Software Developer Manuals:   http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
 
-Microsoft PE format spec:
+Microsoft PE format spec:  
 http://msdn.microsoft.com/en-us/library/windows/desktop/ms680547(v=vs.85).aspx
 
-The Portable Executable format from top to bottom:
+The Portable Executable format from top to bottom:  
 http://www.csn.ul.ie/~caolan/publink/winresdump/winresdump/doc/pefile2.html
 
-A Tour of the Win32 Portable Executable File Format:
+A Tour of the Win32 Portable Executable File Format:  
 http://msdn.microsoft.com/en-us/library/ms809762.aspx
 
-X86 Opcode and Instruction Reference:
+X86 Opcode and Instruction Reference:  
 http://ref.x86asm.net/index.html
 
-Encoding x86 instructions:
+Encoding x86 instructions:  
 http://www.c-jump.com/CIS77/CPU/x86/lecture.html#X77_0240_prefix
 
 Interesting Articles:
 ========
 
-Redundancy within x86:
+Redundancy within x86:  
 http://www.strchr.com/machine_code_redundancy
 
 How to run:

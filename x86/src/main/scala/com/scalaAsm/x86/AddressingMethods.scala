@@ -32,6 +32,9 @@ object ModRMByte128XXMOrMemory extends AddressingMethod("xmm/m", true)
 object MemoryAddressedbySI extends AddressingMethod("m", false)
 object MemoryAddressedbyDI extends AddressingMethod("m", false)
 case object OpcodeSelectsRegister extends AddressingMethod("r", false)
+object S2 extends AddressingMethod("S2", false)
+object S30 extends AddressingMethod("S30", false)
+object S33 extends AddressingMethod("S33", false)
 
 object AddressingMethod {
   def decodeAddressingMethod(a: String): AddressingMethod = {
@@ -65,6 +68,9 @@ object AddressingMethod {
       case "X"   => MemoryAddressedbySI
       case "Y"   => MemoryAddressedbyDI
       case "Z"   => OpcodeSelectsRegister
+      case "S2"   => S2
+      case "S30"   => S30
+      case "S33"   => S33
     }
   }
 }

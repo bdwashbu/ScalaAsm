@@ -110,6 +110,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
   abstract class _1_new[-O1]  extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
+    def hasImplicateOperand: Boolean = false
     
     def apply[X <: O1](p1: Operand[X], format: NewOneOperandFormat[X], prefix: Seq[Prefix]) = {  
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
@@ -148,6 +149,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
    abstract class _2_new[-O1, -O2]  extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
+    def hasImplicateOperand: Boolean = false
     
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: NewTwoOperandFormat[X, Y]) = {
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0

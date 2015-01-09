@@ -39,14 +39,9 @@ implicit object push4 extends PUSH._1[imm16] {
 
 [See more instructions](/x86/src/main/scala/com/scalaAsm/x86/Instructions/Standard "More instructions")
 
-Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. The "Op/En" field is very important here. As seen in the code above, Op/En along with only the opcode sometimes gives us enough information to completely define the instruction!
+Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. As seen in the code above, sometimes just the opcode is enough information to completely define the instruction!
 
 ![Alt text](/example/push.png "PUSH examples")
-
-The "Op/En" field is an abbreviation for the type of expected operands e.g "I" means either imm8, imm16, or imm32.
-
-![Alt text](/example/pushOpEncoding.png "PUSH examples")
-
 
 Assuming those are the only versions of PUSH available, if you tried calling:
 

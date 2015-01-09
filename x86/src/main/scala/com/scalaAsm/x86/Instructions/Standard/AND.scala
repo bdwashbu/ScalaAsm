@@ -75,17 +75,4 @@ trait ANDImpl extends ANDLow {
     def opcode = 0x81 /+ 4
     override def prefix = REX.W(true)
   }
-
-  implicit object AND_131_rm16_imm8 extends AND._2_new[rm16, imm8] {
-    def opcode = 0x83 /+ 4
-  }
-
-  implicit object AND_131_rm32_imm8 extends AND._2_new[rm32, imm8] {
-    def opcode = 0x83 /+ 4
-  }
-
-  implicit object AND_131_rm64_imm8 extends AND._2_new[rm64, imm8] {
-    def opcode = 0x83 /+ 4
-    override def prefix = REX.W(true)
-  }
 }

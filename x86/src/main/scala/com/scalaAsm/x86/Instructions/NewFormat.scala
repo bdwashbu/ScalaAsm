@@ -204,14 +204,14 @@ trait NewFormats {
     }
   }
 
-  implicit object New_OIFormat32 extends NewTwoOperandFormat[rm, imm32] {
-
-    def getAddressingForm(op1: rm, op2: imm32, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoModRM(),
-        immediate = Some(op2))
-    }
-  }
+//  implicit object New_OIFormat32 extends NewTwoOperandFormat[rm, imm32] {
+//
+//    def getAddressingForm(op1: rm, op2: imm32, opcodeExtension: Byte) = {
+//      InstructionFormat(
+//        addressingForm = NoModRM(),
+//        immediate = Some(op2))
+//    }
+//  }
 
   implicit object New_OIFormat16 extends NewTwoOperandFormat[rm, imm16] {
 

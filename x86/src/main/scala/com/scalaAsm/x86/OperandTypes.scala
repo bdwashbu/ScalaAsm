@@ -82,7 +82,7 @@ object OperandType {
         "stx" -> StandandOperandType("stx", "X87 FPU And SIMD State", false, true),
         "t" -> StandandOperandType("t", "Ten Byte Far Pointer", false, false),
         "v" -> CompositeOperandType("v", "Word Or Doubleword", Seq("w", "d"), false),
-        "vds" -> CompositeOperandType("vds", "Word Or Doubleword or Doubleword Extended To 64", Seq("w", "d", "ds"), false),
+        "vds" -> CompositeOperandType("vds", "Word Or Doubleword or Doubleword Extended To 64", Seq("w", "d"), false), // TODO: Also include ds
         "vq" -> CompositeOperandType("vq", "Quadword Or Word", Seq("q", "w"), false),
         "vqp" -> CompositeOperandType("vqp", "Word Or Doubleword Or Quadword", Seq("w", "d", "q"), false),
         "vs" -> CompositeOperandType("vs", "Word Or Doubleword Extended To Stack", Seq("w", "d"), false),

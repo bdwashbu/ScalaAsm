@@ -370,7 +370,7 @@ object GenerateInst {
     val pri_opcodes = (xml \\ "pri_opcd")
 
     val opcodes = pri_opcodes.map { pri_opcode =>
-      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 }
+      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 && (entry \ "proc_start").size == 0}
       val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
       x86Opcode(opcode, nonAliasedEntries.map(parseEntry))
     }
@@ -468,7 +468,7 @@ object GenerateInst {
     try {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap{x => x.getInstances}
-      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR")) { // LEA, MUL doesnt work
+      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST")) { // LEA, MUL doesnt work
         outputInstructionFile(mnem, insts.filter(_.mnemonic == mnem))
       }
       println("Done generating instructions!")

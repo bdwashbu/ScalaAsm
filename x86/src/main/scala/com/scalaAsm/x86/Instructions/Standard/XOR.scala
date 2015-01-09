@@ -75,17 +75,4 @@ trait XORImpl extends XORLow {
     def opcode = 0x81 /+ 6
     override def prefix = REX.W(true)
   }
-
-  implicit object XOR_131_rm16_imm8 extends XOR._2_new[rm16, imm8] {
-    def opcode = 0x83 /+ 6
-  }
-
-  implicit object XOR_131_rm32_imm8 extends XOR._2_new[rm32, imm8] {
-    def opcode = 0x83 /+ 6
-  }
-
-  implicit object XOR_131_rm64_imm8 extends XOR._2_new[rm64, imm8] {
-    def opcode = 0x83 /+ 6
-    override def prefix = REX.W(true)
-  }
 }

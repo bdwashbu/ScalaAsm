@@ -88,6 +88,13 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
   }
   
+  abstract class _0_new extends x86Instruction {
+    def opcode: Opcode
+    val mnemonic = InstructionDefinition.this.mnemonic
+    def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
+    def hasImplicateOperand: Boolean = false
+  }
+  
   abstract class _1[-O1, OpEn]  extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode

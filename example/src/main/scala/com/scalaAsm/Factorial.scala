@@ -23,7 +23,7 @@ object Factorial extends AsmProgram[x86_32] {
       cmp(ebx, byte(1)),
       //jl(end),
       mul(ebx),
-      dec(ebx),
+      //dec(ebx),
       //jmp("start"),
       label("end"),
       pop(ebp),

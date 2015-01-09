@@ -11,9 +11,9 @@ ScalaAsm is a simple low-level assembly API.  It uses the lower level libraries 
 
 Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set.  There are around 700 instructions and each one could have up to 35 different types of inputs!  To put this into programming terms - most instructions are overloaded at least a couple times.  There are around 1300 instructions needing to be implemented if you want to be thorough.  The Intel x86 spec is 3300 pages, after all.
 
-For the implementers, Scala x86 strives to make the process of defining instructions as easy and simple as possible.  It was designed for this.  It resembles the Intel specification at all times.  When you have thousands of definitions like this, strong type safety and consise notation really help reduce the chance of errors.  Scala x86 provides this, which is useful because there are still thousands of instructions that have yet to be implemented.
+There are far too many x86 instructions to maintain the code behind them manually.  It would be very difficult to make changes.  To get around this, Scala x86 uses auto-generated instruction code definitions which comes from a master x86 XML file.  The source XML can be found in references below.
 
-For the users, Scala x86 offers compile-time safety.  If bad operand types are passed into an instruction the Scala compiler will see this and flag an error, using type classes. 
+All the auto-generated objects are members of a type class.  This was a far better method than function overloading, mainly because we can specify the priority scheme of the definitions.  The end result is great compile time safety and readable code if you want to look at the definitions.
 
 ##### Instructions
 

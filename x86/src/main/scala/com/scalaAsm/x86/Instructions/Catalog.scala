@@ -9,7 +9,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object add extends NewTwoOperands[ADD.type]
       object or extends NewTwoOperands[OR.type]
       object sub extends NewTwoOperands[SUB.type]
-      object mul extends OneOperand[MUL.type]
+      object mul extends NewOneOperand[MUL.type]
       object cmp extends NewTwoOperands[CMP.type]
       
       object push extends OneOperand[PUSH.type]

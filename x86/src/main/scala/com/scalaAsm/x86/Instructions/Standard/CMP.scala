@@ -57,6 +57,7 @@ trait CMPImpl extends CMPLow {
 
   implicit object CMP_61_RAX_imm32 extends CMP._2_new[RAX, imm32] {
     def opcode = 0x3D
+    override def prefix = REX.W(true)
   }
 
   implicit object CMP_128_rm8_imm8 extends CMP._2_new[rm8, imm8] {

@@ -57,6 +57,7 @@ trait ADDImpl extends ADDLow {
 
   implicit object ADD_5_RAX_imm32 extends ADD._2_new[RAX, imm32] {
     def opcode = 0x5
+    override def prefix = REX.W(true)
   }
 
   implicit object ADD_128_rm8_imm8 extends ADD._2_new[rm8, imm8] {

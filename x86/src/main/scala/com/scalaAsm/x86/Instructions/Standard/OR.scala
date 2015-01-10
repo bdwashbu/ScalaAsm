@@ -57,6 +57,7 @@ trait ORImpl extends ORLow {
 
   implicit object OR_13_RAX_imm32 extends OR._2_new[RAX, imm32] {
     def opcode = 0xD
+    override def prefix = REX.W(true)
   }
 
   implicit object OR_128_rm8_imm8 extends OR._2_new[rm8, imm8] {

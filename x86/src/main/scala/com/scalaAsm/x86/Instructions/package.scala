@@ -35,7 +35,7 @@ package object Instructions {
   }
   
   trait NewOneOperand[X <: InstructionDefinition[_]] {
-    def apply[O1, OpEn <: OneOperandEncoding[O1], Opcode](p1: Operand[O1])(implicit ev: X#_1_new[O1], format: NewOneOperandFormat[O1]) = ev(p1, format, ev.prefix)
+    def apply[O1](p1: Operand[O1])(implicit ev: X#_1_new[O1], format: NewOneOperandFormat[O1]) = ev(p1, format, ev.prefix)
   }
   
   trait TwoOperands[X <: InstructionDefinition[_]] {
@@ -43,7 +43,7 @@ package object Instructions {
   }
   
   trait NewTwoOperands[X <: InstructionDefinition[_]] {
-    def apply[O1, O2, OpEn <: TwoOperandEncoding[O1,O2], Opcode](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2_new[O1, O2], format: NewTwoOperandFormat[O1, O2]) = ev(p1,p2, format)
+    def apply[O1, O2](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2_new[O1, O2], format: NewTwoOperandFormat[O1, O2]) = ev(p1,p2, format)
   }
   
   class NewZeroOperands[X <: InstructionDefinition[_]] {

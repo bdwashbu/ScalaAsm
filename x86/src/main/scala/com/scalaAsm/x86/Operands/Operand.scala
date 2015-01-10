@@ -40,25 +40,25 @@ abstract class Constant[Size: x86Size](val value: Size) extends InstructionField
   override def toString = value.toString
 }
 
-case class Constant8(x: Byte) extends Constant(x) {
+case class Constant8(x: Byte) extends Constant[_8](x) {
   self =>
   buffer.put(value)
   def negate = Constant8(getNegative)
 }
 
-case class Constant16(x: Short) extends Constant(x) {
+case class Constant16(x: Short) extends Constant[_16](x) {
   self =>
   buffer.putShort(value)
   def negate = Constant16(getNegative)
 }
 
-case class Constant32(x: Int) extends Constant(x) {
+case class Constant32(x: Int) extends Constant[_32](x) {
   self =>
   buffer.putInt(value)
   def negate = Constant32(getNegative)
 }
 
-case class Constant64(x: Long) extends Constant(x) {
+case class Constant64(x: Long) extends Constant[_64](x) {
   self =>
   buffer.putLong(value)
   def negate = Constant64(getNegative)

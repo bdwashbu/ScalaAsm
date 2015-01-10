@@ -57,6 +57,7 @@ trait SUBImpl extends SUBLow {
 
   implicit object SUB_45_RAX_imm32 extends SUB._2_new[RAX, imm32] {
     def opcode = 0x2D
+    override def prefix = REX.W(true)
   }
 
   implicit object SUB_128_rm8_imm8 extends SUB._2_new[rm8, imm8] {

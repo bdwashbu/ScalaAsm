@@ -38,6 +38,7 @@ trait TESTImpl {
 
   implicit object TEST_169_RAX_imm32 extends TEST._2_new[RAX, imm32] {
     def opcode = 0xA9
+    override def prefix = REX.W(true)
   }
 
   implicit object TEST_246_rm8_imm8 extends TEST._2_new[rm8, imm8] {

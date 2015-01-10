@@ -51,7 +51,7 @@ object GenerateInst {
 
       val prefix = getOperand.map { op =>
         op match {
-          case OperandInstance(address, operandType, size) =>
+          case OperandInstance(address, operandType, size, _) =>
             if (operandType.isInstanceOf[FixedOperandType] && operandType.asInstanceOf[FixedOperandType].promotedByRex && op.operandSize.size == 64) {
               spaces + "  override def prefix = REX.W(true)\n"
             } else {
@@ -183,11 +183,13 @@ object GenerateInst {
         val op1 = OperandInstance(
           operand1.addressingMethod,
           x._1._1,
-          x._1._2)
+          x._1._2,
+          operand1.explicitOperandName)
         val op2 = OperandInstance(
           operand2.addressingMethod,
           x._2._1,
-          x._2._2)
+          x._2._2,
+          operand2.explicitOperandName)
         TwoOperandInstance(op1, op2)
       }
     }
@@ -216,11 +218,13 @@ object GenerateInst {
                 val op1 = OperandInstance(
                   operand1.addressingMethod,
                   opType,
-                  size1)
+                  size1,
+                  operand1.explicitOperandName)
                 val op2 = OperandInstance(
                   operand2.addressingMethod,
                   opType2,
-                  size2)
+                  size2,
+                  operand2.explicitOperandName)
                 TwoOperandInstance(op1, op2)
               }
             }
@@ -232,11 +236,13 @@ object GenerateInst {
                 val op1 = OperandInstance(
                   operand1.addressingMethod,
                   opType,
-                  size1)
+                  size1,
+                  operand1.explicitOperandName)
                 val op2 = OperandInstance(
                   operand2.addressingMethod,
                   opType2,
-                  size2)
+                  size2,
+                  operand2.explicitOperandName)
                 TwoOperandInstance(op1, op2)
               }
             }
@@ -261,10 +267,8 @@ object GenerateInst {
 
   case class OperandDef(srcOrDst: String,
                         operandType: Option[OperandType],
-                        addressingMethod: Option[AddressingMethod]) {
-    override def toString = {
-      addressingMethod.map { optype => optype.toString }.getOrElse("") + operandType.map { optype => optype.toString }.getOrElse("")
-    }
+                        addressingMethod: Option[AddressingMethod],
+                        explicitOperandName: Option[String]) {
 
     def getInstances: Seq[OperandInstance] = {
       if (operandType.isDefined) {
@@ -279,7 +283,8 @@ object GenerateInst {
           OperandInstance(
             addressingMethod,
             optype,
-            size)
+            size,
+            explicitOperandName)
         }
 
       } else {
@@ -290,12 +295,21 @@ object GenerateInst {
 
   case class OperandInstance(addressingMethod: Option[AddressingMethod],
                              operandType: OperandType,
-                             operandSize: OperandSize) {
+                             operandSize: OperandSize,
+                             explicitOperandName: Option[String]) {
     override def toString = {
-      if (addressingMethod.isDefined)
-        addressingMethod.get.toString + operandSize.toString
-      else
-        operandType.toString
+      explicitOperandName.map { name => 
+        if (name == "rAX") {
+          operandSize.size match {
+            case 16 => "AX"
+            case 32 => "EAX"
+            case 64 => "RAX"
+            case _ => "ERROR"
+          }
+        } else {
+          name
+        }
+      }.getOrElse(addressingMethod.map { addy => addy.toString }.getOrElse("") + operandSize.toString)
     }
     def isImplicate = false
   }
@@ -313,26 +327,33 @@ object GenerateInst {
   def getOptionalString(node: NodeSeq): Option[String] = {
     if (!node.isEmpty) Some(node.text) else None
   }
+  
+  def isImplicate(node: Node): Boolean = {
+    val isDisplayed = if (!(node \ "@displayed").isEmpty) (node \@ "displayed") == "yes" else true
+    val hasNoInfo = (node \ "@type").isEmpty && (node \ "@group").isEmpty && (node \ "a").isEmpty && (node \ "t").isEmpty
+    !isDisplayed || hasNoInfo
+  }
 
   def parseSyntax(entry: NodeSeq): Seq[SyntaxDef] = {
     (entry \ "syntax").map { syntax =>
       val mnemonic = (syntax \ "mnem").text
       val operands = (syntax \ "_").filter { node => node.label != "mnem" }
       var hasImplicate = false
-
-      val ops = operands.filter { node => !(node \ "a").isEmpty || (!(node \ "@type").isEmpty && (
-          if (!(node \ "@displayed").isEmpty) (node \@ "displayed") == "yes" else true)
-        )} map { operand =>
+      val explicitOperands = operands filter{node => !isImplicate(node)}
+      
+      
+      val ops = explicitOperands map { operand =>
         val hasDetails = !(operand \ "a").isEmpty
         //val name = if (!hasDetails) Some(operand.text) else None
         val opType =
-          if (operand.text == "rAX") {
-            Some(Register64)
-          } else if (operand.text == "AL") {
-            Some(OperandType.decodeOperandType("AL"))
-          } else if (operand.text == "CL") {
-            Some(OperandType.decodeOperandType("CL"))
-          } else if (!(operand \ "t").isEmpty && (operand \ "t").text.trim != "")
+//          if (operand.text == "rAX") {
+//            Some(Register64)
+//          } else if (operand.text == "AL") {
+//            Some(OperandType.decodeOperandType("AL"))
+//          } else if (operand.text == "CL") {
+//            Some(OperandType.decodeOperandType("CL"))
+//          } else 
+          if (!(operand \ "t").isEmpty && (operand \ "t").text.trim != "")
             Some(OperandType.decodeOperandType((operand \ "t").text.trim))
           else if (!(operand \ "@type").isEmpty)
             Some(OperandType.decodeOperandType((operand \ "@type").text.trim))
@@ -347,10 +368,18 @@ object GenerateInst {
           else
             None
 
-        OperandDef(operand.label, opType, opAddressing)
+        val opName = if (!(operand \ "@type").isEmpty || !(operand \ "@address").isEmpty) {
+          Some(operand.text)
+        } else {
+          None
+        }
+            
+        OperandDef(operand.label, opType, opAddressing, opName)
       }
 
-      SyntaxDef(mnemonic, ops, operands.exists { operand => !(operand \ "@address").isEmpty })
+      val hasImplicateOperand = explicitOperands.size != operands.size
+      
+      SyntaxDef(mnemonic, ops, hasImplicateOperand)
     }
   }
 
@@ -375,7 +404,7 @@ object GenerateInst {
     val pri_opcodes = (xml \\ "pri_opcd")
 
     val opcodes = pri_opcodes.map { pri_opcode =>
-      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 && (entry \ "proc_start").size == 0 }
+      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 && ((entry \ "proc_start").size == 0 || (entry \ "proc_start")(0).text == "01")}
       val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
       x86Opcode(opcode, nonAliasedEntries.map(parseEntry))
     }
@@ -429,6 +458,11 @@ object GenerateInst {
           val is16 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _16 &&
             operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _16
           is64 || is32 || is16
+        case x86OneOperandInstruction(_, _, _, operand, _) if operand.addressingMethod.isDefined && operand.addressingMethod.isDefined =>
+          val is64 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _64
+          val is32 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _32
+          val is16 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _16
+          is64 || is32 || is16
         case _ => false
       }
     }
@@ -447,7 +481,7 @@ object GenerateInst {
       for (inst <- low) {
         writer.println(inst.generateClass(2))
         if (inst != low.last)
-          writer.println("")
+          writer.println("") 
       }
       writer.println("}\n")
 
@@ -474,7 +508,8 @@ object GenerateInst {
     try {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
-      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL")) { // LEA doesnt work
+      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF")) { // LEA doesnt work
+      //for (mnem <- List("PUSH")) { // LEA doesnt work
         outputInstructionFile(mnem, insts.filter(_.mnemonic == mnem))
       }
       println("Done generating instructions!")

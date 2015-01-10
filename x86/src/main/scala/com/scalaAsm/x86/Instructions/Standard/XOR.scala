@@ -57,6 +57,7 @@ trait XORImpl extends XORLow {
 
   implicit object XOR_53_RAX_imm32 extends XOR._2_new[RAX, imm32] {
     def opcode = 0x35
+    override def prefix = REX.W(true)
   }
 
   implicit object XOR_128_rm8_imm8 extends XOR._2_new[rm8, imm8] {

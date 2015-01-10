@@ -56,14 +56,7 @@ trait NewFormats {
     }
   }
 
-  implicit object New_MFormatB2 extends NewOneOperandFormat[reg + _8] {
-
-    def getAddressingForm(operand: reg + _8, opcodeExtension: Byte) = {
-      InstructionFormat(
-        NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, operand.base), operand.displacement),
-        immediate = None)
-    }
-  }
+  
 
   
 
@@ -125,7 +118,7 @@ trait NewFormats {
         immediate = None)
     }
   }
-
+  
   implicit object New_OffsetFormat2 extends NewOneOperandFormat[reg + _8] {
 
     def getAddressingForm(operand: reg + _8, opcodeExtension: Byte) = {
@@ -292,27 +285,27 @@ trait NewFormats {
     }
   }
 
-  implicit object New_AbsoluteAddress32 extends AbsoluteAddress[_32] {
-    selff =>
-    var offset = 0
-    def displacement = Constant32(offset)
-
-    def getRelative = new Relative[_32] {
-      def displacement = Constant32(offset)
-      def size = 4
-    }
-  }
-
-  implicit object New_AbsoluteAddress64 extends AbsoluteAddress[_64] {
-    selff =>
-    var offset: Long = 0
-    def displacement = Constant64(offset)
-
-    def getRelative = new Relative[_64] {
-      def displacement = Constant64(offset)
-      def size = 4
-    }
-  }
+//  implicit object New_AbsoluteAddress32 extends AbsoluteAddress[_32] {
+//    selff =>
+//    var offset = 0
+//    def displacement = Constant32(offset)
+//
+//    def getRelative = new Relative[_32] {
+//      def displacement = Constant32(offset)
+//      def size = 4
+//    }
+//  }
+//
+//  implicit object New_AbsoluteAddress64 extends AbsoluteAddress[_64] {
+//    selff =>
+//    var offset: Long = 0
+//    def displacement = Constant64(offset)
+//
+//    def getRelative = new Relative[_64] {
+//      def displacement = Constant64(offset)
+//      def size = 4
+//    }
+//  }
 
   implicit object New_RMFormat3 extends NewTwoOperandFormat[reg, r32#Indirect] {
 

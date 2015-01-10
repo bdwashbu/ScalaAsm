@@ -6,7 +6,25 @@ import com.scalaAsm.x86.Operands._
 
 object SHR extends InstructionDefinition[OneOpcode]("SHR") with SHRImpl
 
-trait SHRImpl {
+trait SHRLow {
+  implicit object SHR_209_rm16 extends SHR._1_new[rm16] {
+    def opcode = 0xD1 /+ 5
+    override def hasImplicateOperand = true
+  }
+
+  implicit object SHR_209_rm32 extends SHR._1_new[rm32] {
+    def opcode = 0xD1 /+ 5
+    override def hasImplicateOperand = true
+  }
+
+  implicit object SHR_209_rm64 extends SHR._1_new[rm64] {
+    def opcode = 0xD1 /+ 5
+    override def prefix = REX.W(true)
+    override def hasImplicateOperand = true
+  }
+}
+
+trait SHRImpl extends SHRLow {
   implicit object SHR_192_rm8_imm8 extends SHR._2_new[rm8, imm8] {
     def opcode = 0xC0 /+ 5
   }
@@ -26,22 +44,6 @@ trait SHRImpl {
 
   implicit object SHR_208_rm8 extends SHR._1_new[rm8] {
     def opcode = 0xD0 /+ 5
-    override def hasImplicateOperand = true
-  }
-
-  implicit object SHR_209_rm16 extends SHR._1_new[rm16] {
-    def opcode = 0xD1 /+ 5
-    override def hasImplicateOperand = true
-  }
-
-  implicit object SHR_209_rm32 extends SHR._1_new[rm32] {
-    def opcode = 0xD1 /+ 5
-    override def hasImplicateOperand = true
-  }
-
-  implicit object SHR_209_rm64 extends SHR._1_new[rm64] {
-    def opcode = 0xD1 /+ 5
-    override def prefix = REX.W(true)
     override def hasImplicateOperand = true
   }
 

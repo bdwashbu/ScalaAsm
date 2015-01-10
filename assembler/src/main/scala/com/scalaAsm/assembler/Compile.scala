@@ -2,19 +2,17 @@ package com.scalaAsm
 package assembler
 
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.x86.Instructions.Standard.CALL
-import com.scalaAsm.x86.Operands.Constant32
-import com.scalaAsm.x86.Operands.Constant8
+import com.scalaAsm.x86.Instructions.Standard._
+import com.scalaAsm.x86.Operands._
 import com.scalaAsm.asm.Registers
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.Standard
 import com.scalaAsm.x86.Instructions.Formats
+import com.scalaAsm.x86.Instructions.NewFormats
 import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Instructions.OneMachineCode
-import com.scalaAsm.x86.Operands.addr
 import com.scalaAsm.x86.Instructions.TwoMachineCode
-import com.scalaAsm.x86.Operands.Op
 import com.scalaAsm.asm.AsmProgram
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.x86Mode
@@ -28,7 +26,7 @@ import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
 import com.scalaAsm.coff.{ IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION }
 
-class Assembler extends Catalog.Standard with Formats with Addressing {
+class Assembler extends Catalog.Standard with Formats with NewFormats with Addressing {
   self =>
   import scala.language.postfixOps
   

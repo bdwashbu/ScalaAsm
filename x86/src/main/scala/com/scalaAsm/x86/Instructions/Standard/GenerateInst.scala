@@ -8,6 +8,7 @@ import com.scalaAsm.x86.AddressingMethods.AddressingMethod
 import com.scalaAsm.x86.OperandTypes.OperandSize
 import scala.xml._
 import java.io.PrintWriter
+import scala.collection.mutable.HashSet
 
 object GenerateInst {
 
@@ -19,6 +20,19 @@ object GenerateInst {
     def opcode: Int
     def entry: x86Entry
     def getOperand: Option[OperandInstance]
+    
+    override def equals(x: Object) = {
+      if (x.isInstanceOf[InstructionInstance]) {
+        val otherInstance = x.asInstanceOf[InstructionInstance]
+        opcode == otherInstance.opcode && getOperand == otherInstance.getOperand
+      } else {
+        false
+      }
+    }
+    
+    override def hashCode(): Int = {
+      opcode.hashCode + getOperand.hashCode
+    }
 
     def generateClass(numSpaces: Int) = {
 
@@ -37,13 +51,10 @@ object GenerateInst {
 
       val opcodeString = getOperand.map { op =>
         op.addressingMethod match {
-          case Some(OpcodeSelectsRegister) => //getOperand.operandSize.size match {
-            //case 8 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rb\n"
-            //case 16 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rw\n"
-            //case 32 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rd\n"
-            //case 32 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rq\n"
-            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + op.operandType.code + "\n" +
-            spaces + "  override def explicitFormat = Some(InstructionFormat(addressingForm = None, immediate = None))\n"
+          case Some(OpcodeSelectsRegister) =>
+            val regCode = if (op.operandType.code == "q") "o" else op.operandType.code // for some reason the code for 64-bit is "ro"
+            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + regCode + "\n" +
+            spaces + "  override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))\n"
           case _ => getOpcodeString
           //}
 
@@ -139,8 +150,7 @@ object GenerateInst {
   case class x86InstructionDef(opcode: Int,
                                mnemonic: String,
                                operands: Seq[OperandDef],
-                               entry: x86Entry,
-                               modes: Seq[x86Entry]) {
+                               entry: x86Entry) {
     def getInstances: Seq[InstructionInstance] = {
       if (operands.size == 2) {
         //if (operands(0).operandType.isDefined &&
@@ -405,7 +415,7 @@ object GenerateInst {
     val pri_opcodes = (xml \\ "pri_opcd")
 
     val opcodes = pri_opcodes.map { pri_opcode =>
-      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 && ((entry \ "proc_start").size == 0 || (entry \ "proc_start")(0).text == "01")}
+      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 && ((entry \ "proc_start").size == 0 || (entry \ "proc_start")(0).text == "01" || (entry \ "proc_start")(0).text == "10")}
       val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
       x86Opcode(opcode, nonAliasedEntries.map(parseEntry))
     }
@@ -415,37 +425,46 @@ object GenerateInst {
     println("Loading XML..." + opcodes.size + " opcodes read")
 
     opcodes.flatMap { op =>
-      //println("generating " + op.opcode + ", " + op.entries.size)
-      val pairs = op.entries.sliding(2).toList
-
-      if (pairs.size == 1 && pairs(0).size == 1) {
-        pairs(0)(0).syntax.map { syntax =>
-          x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, pairs(0)(0), Seq())
+      op.entries.flatMap { entry =>
+        entry.syntax.map { syntax =>
+          if (syntax.mnemonic == "PUSH") {
+            println(op.opcode)
+            println(syntax.operands.size)
+          }
+          x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry)
         }
-      } else {
-        pairs.flatMap { entry =>
-
-          if (entry(0).mode == None) {
-            val _64Version = if (entry(1).mode == Some("e")) Seq(entry(1)) else Seq()
-            entry(0).syntax.map { syntax =>
-              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry(0), _64Version)
-            }
-          } else {
-            Seq()
-          }
-
-        } ++ (if (!op.entries.isEmpty && op.entries.last.mode == None) {
-          op.entries.last.syntax.map { syntax =>
-            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, op.entries.last, Seq())
-          }
-        } else {
-          Seq()
-        })
       }
+      //println("generating " + op.opcode + ", " + op.entries.size)
+      //val pairs = op.entries.sliding(2).toList
+
+//      if (pairs.size == 1 && pairs(0).size == 1) {
+//        pairs(0)(0).syntax.map { syntax =>
+//          x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, pairs(0)(0), Seq())
+//        }
+//      } else {
+//        pairs.flatMap { entry =>
+//
+//          if (entry(0).mode == None) {
+//            val _64Version = if (entry(1).mode == Some("e")) Seq(entry(1)) else Seq()
+//            entry(0).syntax.map { syntax =>
+//              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry(0), _64Version)
+//            }
+//          } else {
+//            Seq()
+//          }
+//
+//        } ++ (if (!op.entries.isEmpty && op.entries.last.mode == None) {
+//          op.entries.last.syntax.map { syntax =>
+//            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, op.entries.last, Seq())
+//          }
+//        } else {
+//          Seq()
+//        })
+//      }
     }
   }
 
-  def outputInstructionFile(mnemonic: String, instructions: Seq[InstructionInstance]) = {
+  def outputInstructionFile(mnemonic: String, instructions: HashSet[InstructionInstance]) = {
     val writer = new PrintWriter("src/main/scala/com/scalaAsm/x86/Instructions/Standard/" + mnemonic + ".scala", "UTF-8");
 
     // must do this to resolve (rm, r) (r, rm) ambiguous implicit resolution.  A little hacky
@@ -473,6 +492,7 @@ object GenerateInst {
     writer.println("package Standard");
     writer.println("")
     writer.println("import com.scalaAsm.x86.Operands._")
+    writer.println("import com.scalaAsm.x86.Operands.Memory._")
     writer.println("")
     writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition[OneOpcode](\"" + mnemonic + "\") with " + mnemonic.toUpperCase() + "Impl")
     writer.println("")
@@ -509,9 +529,10 @@ object GenerateInst {
     try {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
-      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH")) { // LEA doesnt work
-      //for (mnem <- List("PUSH")) { // LEA doesnt work
-        outputInstructionFile(mnem, insts.filter(_.mnemonic == mnem))
+      //for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH")) { // LEA doesnt work
+      for (mnem <- List("PUSH")) { // LEA doesnt work
+        val uniqueInst = HashSet(insts.filter(_.mnemonic == mnem):_*)
+        outputInstructionFile(mnem, uniqueInst)
       }
       println("Done generating instructions!")
     } catch {

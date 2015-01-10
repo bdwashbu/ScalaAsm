@@ -118,18 +118,21 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     def hasImplicateOperand: Boolean = false
+    def explicitFormat: Option[InstructionFormat] = None
     
-    def apply[X <: O1](p1: Operand[X], format: NewOneOperandFormat[X], prefix: Seq[Prefix]) = {  
+    def apply[X <: O1](p1: Operand[X], implicitFormat: NewOneOperandFormat[X], prefix: Seq[Prefix]) = {  
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
+      
+      val addressForm = explicitFormat getOrElse implicitFormat.getAddressingForm(p1.get, opEx)
       
       if (opcode.isInstanceOf[OpcodeWithReg] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
         opcodePlus.reg = p1.get.asInstanceOf[reg] 
-        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
-        OneMachineCode(p1, format.getAddressingForm(p1.get, opEx).getBytes, opcodeBytes, mnemonic, opEx)
+        val opcodeBytes = implicitFormat.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
+        OneMachineCode(p1, addressForm.getBytes, opcodeBytes, mnemonic, opEx)
       } else {
-        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
-        OneMachineCode(p1, format.getAddressingForm(p1.get, opEx).getBytes, opcodeBytes, mnemonic, opEx)
+        val opcodeBytes = implicitFormat.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
+        OneMachineCode(p1, addressForm.getBytes, opcodeBytes, mnemonic, opEx)
       }
     }
   }

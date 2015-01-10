@@ -12,7 +12,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object mul extends NewOneOperand[MUL.type]
       object cmp extends NewTwoOperands[CMP.type]
       
-      object push extends OneOperand[PUSH.type]
+      object push extends NewOneOperand[PUSH.type]
       object pushf extends NewZeroOperands[PUSHF.type]
       object pop extends OneOperand[POP.type]
       object dec extends NewOneOperand[DEC.type]

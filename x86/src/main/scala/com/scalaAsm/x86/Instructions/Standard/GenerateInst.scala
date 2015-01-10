@@ -42,7 +42,8 @@ object GenerateInst {
             //case 16 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rw\n"
             //case 32 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rd\n"
             //case 32 => spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + rq\n"
-            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + op.operandType.code + "\n"
+            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + op.operandType.code + "\n" +
+            spaces + "  override def explicitFormat = Some(InstructionFormat(addressingForm = None, immediate = None))\n"
           case _ => getOpcodeString
           //}
 
@@ -508,7 +509,7 @@ object GenerateInst {
     try {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
-      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF")) { // LEA doesnt work
+      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH")) { // LEA doesnt work
       //for (mnem <- List("PUSH")) { // LEA doesnt work
         outputInstructionFile(mnem, insts.filter(_.mnemonic == mnem))
       }

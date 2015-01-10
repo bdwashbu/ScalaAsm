@@ -47,14 +47,7 @@ trait NewFormats {
   implicit object New_MFormatIGeneric7 extends MFormatIGeneric[EDI#Indirect]
   // There is no [EBP], its slot is used by 32-disp only mode
 
-  implicit object New_MFormat2R2 extends NewOneOperandFormat[GeneralPurpose[_64]#Indirect] {
-
-    def getAddressingForm(operand: GeneralPurpose[_64]#Indirect, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base)), //mem.encode(opcode.opcodeExtension),
-        immediate = None)
-    }
-  }
+ 
 
   
 
@@ -227,6 +220,15 @@ trait NewFormats {
   //      def size = 1
   //  }
 
+//   implicit object New_MFormat2R2 extends NewOneOperandFormat[GeneralPurpose[_64]#Indirect] {
+//
+//    def getAddressingForm(operand: GeneralPurpose[_64]#Indirect, opcodeExtension: Byte) = {
+//      InstructionFormat(
+//        addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base)), //mem.encode(opcode.opcodeExtension),
+//        immediate = None)
+//    }
+//  }
+  
   implicit object New_MFormat2R3 extends NewOneOperandFormat[RSP#Indirect] {
 
     def getAddressingForm(operand: RSP#Indirect, opcodeExtension: Byte) = {

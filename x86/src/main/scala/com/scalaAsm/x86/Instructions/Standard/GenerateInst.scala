@@ -2,13 +2,14 @@ package com.scalaAsm.x86.Instructions
 
 import java.io._
 import com.scalaAsm.x86.OperandTypes._
-import com.scalaAsm.x86.OperandTypes.Register64
 import com.scalaAsm.x86.AddressingMethods._
 import com.scalaAsm.x86.AddressingMethods.AddressingMethod
 import com.scalaAsm.x86.OperandTypes.OperandSize
+import com.scalaAsm.x86.AddressingMethods.ModRMByteMemoryOnly
 import scala.xml._
 import java.io.PrintWriter
-import scala.collection.mutable.HashSet
+import scala.collection.mutable.LinkedHashSet
+import com.scalaAsm.x86.OperandTypes.{_8, _16, _32}
 
 object GenerateInst {
 
@@ -206,16 +207,30 @@ object GenerateInst {
     }
 
     def getInstances: Seq[TwoOperandInstance] = {
-      if (operand1.operandType.isDefined && operand2.operandType.isDefined) {
+      //if (operand1.operandType.isDefined && operand2.operandType.isDefined) {
         val op1Sizes: Seq[(OperandType, OperandSize)] = operand1.operandType match {
           case Some(CompositeOperandType(_, _, components, _)) => components map { size => (OperandType.decodeOperandType(size), OperandType.decodeOperandType(size).asInstanceOf[FixedOperandType].size) }
           case Some(FixedOperandType(_, _, size, _, _)) => Seq((operand1.operandType.get, size))
-          case _ => Seq()
+          case _ => {
+            operand1.addressingMethod match {
+              case Some(ModRMByteMemoryOnly) =>
+                Seq((null, NoSize))
+                
+              case _ => Seq()
+            }
+          }
         }
         val op2Sizes: Seq[(OperandType, OperandSize)] = operand2.operandType match {
           case Some(CompositeOperandType(_, _, components, _)) => components map { size => (OperandType.decodeOperandType(size), OperandType.decodeOperandType(size).asInstanceOf[FixedOperandType].size) }
           case Some(FixedOperandType(_, _, size, _, _)) => Seq((operand2.operandType.get, size))
-          case _ => Seq()
+          case _ => {
+            operand2.addressingMethod match {
+              case Some(ModRMByteMemoryOnly) =>
+                Seq((null, NoSize))
+                
+              case _ => Seq()
+            }
+          }
         }
 
         (op1Sizes.length,
@@ -268,10 +283,6 @@ object GenerateInst {
               zipSizes(padded, op2Sizes)
             case _ =>
               Seq()
-          }
-
-      } else {
-        Nil
       }
     }
   }
@@ -299,7 +310,15 @@ object GenerateInst {
         }
 
       } else {
-        Nil
+        addressingMethod match {
+          case Some(ModRMByteMemoryOnly) =>
+            Seq(OperandInstance(
+              addressingMethod,
+              null,
+              NoSize,
+              explicitOperandName))
+          case _ => Seq()
+        }
       }
     }
   }
@@ -351,25 +370,18 @@ object GenerateInst {
       val operands = (syntax \ "_").filter { node => node.label != "mnem" }
       var hasImplicate = false
       val explicitOperands = operands filter{node => !isImplicate(node)}
-      
-      
+         
       val ops = explicitOperands map { operand =>
         val hasDetails = !(operand \ "a").isEmpty
-        //val name = if (!hasDetails) Some(operand.text) else None
+
         val opType =
-//          if (operand.text == "rAX") {
-//            Some(Register64)
-//          } else if (operand.text == "AL") {
-//            Some(OperandType.decodeOperandType("AL"))
-//          } else if (operand.text == "CL") {
-//            Some(OperandType.decodeOperandType("CL"))
-//          } else 
           if (!(operand \ "t").isEmpty && (operand \ "t").text.trim != "")
             Some(OperandType.decodeOperandType((operand \ "t").text.trim))
           else if (!(operand \ "@type").isEmpty)
             Some(OperandType.decodeOperandType((operand \ "@type").text.trim))
-          else
+          else {
             None
+          }
 
         val opAddressing =
           if (!(operand \ "a").isEmpty)
@@ -427,10 +439,6 @@ object GenerateInst {
     opcodes.flatMap { op =>
       op.entries.flatMap { entry =>
         entry.syntax.map { syntax =>
-          if (syntax.mnemonic == "PUSH") {
-            println(op.opcode)
-            println(syntax.operands.size)
-          }
           x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry)
         }
       }
@@ -464,7 +472,7 @@ object GenerateInst {
     }
   }
 
-  def outputInstructionFile(mnemonic: String, instructions: HashSet[InstructionInstance]) = {
+  def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance]) = {
     val writer = new PrintWriter("src/main/scala/com/scalaAsm/x86/Instructions/Standard/" + mnemonic + ".scala", "UTF-8");
 
     // must do this to resolve (rm, r) (r, rm) ambiguous implicit resolution.  A little hacky
@@ -529,9 +537,10 @@ object GenerateInst {
     try {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
-      //for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH")) { // LEA doesnt work
-      for (mnem <- List("PUSH")) { // LEA doesnt work
-        val uniqueInst = HashSet(insts.filter(_.mnemonic == mnem):_*)
+      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH", "LEA")) { // LEA doesnt work
+      //for (mnem <- List("PUSH")) { // LEA doesnt work
+        val uniqueInst = LinkedHashSet[InstructionInstance]()
+        insts.filter(_.mnemonic == mnem).foreach{x => uniqueInst += x}
         outputInstructionFile(mnem, uniqueInst)
       }
       println("Done generating instructions!")

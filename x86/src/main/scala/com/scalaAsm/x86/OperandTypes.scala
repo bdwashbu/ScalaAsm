@@ -7,14 +7,17 @@ trait OperandSize {
   def size: Int
   def name: String = null
   override def toString = {
-    if (name == null)
-      size.toString
-    else
+    if (name == null) {
+      if (size == 0)
+        ""
+      else
+        size.toString
+    } else
       name
   }
 }
 
-case object _0 extends OperandSize { def size = 0 }
+case object NoSize extends OperandSize { def size = 0 }
 case object _8 extends OperandSize { def size = 8 }
 case object _16 extends OperandSize { def size = 16 }
 case object _32 extends OperandSize { def size = 32 }
@@ -96,15 +99,6 @@ object OperandType {
         "da" -> StandandOperandType("da", "Doubleword Based On Address Size", false, false),
         "do" -> StandandOperandType("do", "Doubleword Based On Operand Size", false, false),
         "qa" -> StandandOperandType("qa", "Quadword Based On Address Size", false, false),
-        "qs" -> StandandOperandType("qs", "Quadword Based On Operand Size", false, false),
-        "AX" -> FixedOperandType("AX", "AX Register", _16, false, false),
-        "AL" -> FixedOperandType("AL", "AL Register", _16, false, false),
-        "CL" -> FixedOperandType("CL", "CL Register", _16, false, false),
-        "eAX" -> FixedOperandType("EAX", "EAX Register", _32, false, false),
-        "rAX" -> FixedOperandType("RAX", "RAX Register", _64, false, false),
-        "1" -> FixedOperandType("1", "ImplicitOne", _8, false, false))
+        "qs" -> StandandOperandType("qs", "Quadword Based On Operand Size", false, false))
   }
 }
-
-object Register64 extends CompositeOperandType("r64", "Regiser64", Seq("AX", "eAX", "rAX"), false)
-object Register8 extends CompositeOperandType("r8", "Regiser8", Seq("AL"), false)

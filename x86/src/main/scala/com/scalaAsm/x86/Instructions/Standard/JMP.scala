@@ -3,6 +3,7 @@ package Instructions
 package Standard
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory._
 
 object JMP extends InstructionDefinition[OneOpcode]("JMP") with JMPImpl
 
@@ -13,6 +14,11 @@ trait JMPLow {
 
   implicit object JMP_255_rm32 extends JMP._1_new[rm32] {
     def opcode = 0xFF /+ 4
+  }
+
+  implicit object JMP_255_rm64 extends JMP._1_new[rm64] {
+    def opcode = 0xFF /+ 4
+    override def prefix = REX.W(true)
   }
 }
 

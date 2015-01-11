@@ -5,7 +5,6 @@ import com.scalaAsm.assembler.Assembler
 import com.scalaAsm.linker.Linker
 import com.scalaAsm.coff.Coff
 import com.scalaAsm.x86.OperandTypes._
-import com.scalaAsm.x86.OperandTypes.Register64
 import com.scalaAsm.x86.AddressingMethods._
 import com.scalaAsm.x86.AddressingMethods.AddressingMethod
 import com.scalaAsm.x86.OperandTypes.OperandSize

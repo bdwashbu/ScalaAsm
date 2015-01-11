@@ -3,6 +3,7 @@ package Instructions
 package Standard
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory._
 
 object SHR extends InstructionDefinition[OneOpcode]("SHR") with SHRImpl
 

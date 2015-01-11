@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
 package Operands
 
-import com.scalaAsm.x86.Operands.Memory.AddressingMode
+import com.scalaAsm.x86.Operands.Memory.Memory
 
 abstract class Register[S: x86Size](val name: String) extends RegisterOrMemory[S] {
   override def toString = name.toLowerCase()
@@ -16,12 +16,12 @@ abstract class GeneralPurpose[S: x86Size](name: String) extends Register[S](name
     
   val ID: Int
   
-  abstract class BaseIndex[Y: x86Size](val displacement: Constant[Y]) extends AddressingMode[S] {
+  abstract class BaseIndex[Y: x86Size](val displacement: Constant[Y]) extends Memory[S] {
     def base: GeneralPurpose[S] = self
     def get: BaseIndex[Y] = this
   }
   
-  abstract class Indirect extends AddressingMode[S] {
+  abstract class Indirect extends Memory[S] {
     def base: GeneralPurpose[S] = self
     def get: Indirect = this
   }

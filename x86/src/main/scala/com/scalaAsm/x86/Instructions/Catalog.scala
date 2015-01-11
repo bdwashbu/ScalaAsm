@@ -14,7 +14,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       
       object push extends NewOneOperand[PUSH.type]
       object pushf extends NewZeroOperands[PUSHF.type]
-      object pop extends OneOperand[POP.type]
+      object pop extends NewOneOperand[POP.type]
       object dec extends NewOneOperand[DEC.type]
       object not extends NewOneOperand[NOT.type]
       object jmp extends NewOneOperand[JMP.type]
@@ -23,7 +23,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object int extends NewOneOperand[INT.type]
       object rdrand extends OneOperand[RDRAND]
       object and extends NewTwoOperands[AND.type]
-      object lea extends TwoOperands[LEA.type]
+      object lea extends NewTwoOperands[LEA.type]
       object mov extends TwoOperands[MOV.type]
       object shr extends NewTwoOperands[SHR.type]
       object shl extends NewTwoOperands[SHL.type] with NewOneOperand[SHL.type]

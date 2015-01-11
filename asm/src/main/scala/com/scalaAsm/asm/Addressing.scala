@@ -2,7 +2,6 @@ package com.scalaAsm.asm
 
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
-import com.scalaAsm.x86.Operands.Memory.AddressingMode
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 
 trait Addressing {

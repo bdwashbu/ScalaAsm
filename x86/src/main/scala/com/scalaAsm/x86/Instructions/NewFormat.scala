@@ -10,7 +10,18 @@ import com.scalaAsm.x86.TwoOpcodes
 import scala.language.implicitConversions
 import com.scalaAsm.x86.Operands._
 
-trait NewFormats {
+trait Low {
+   implicit object New_RMFormat extends NewTwoOperandFormat[reg, reg + _8] {
+
+    def getAddressingForm(op1: reg, op2: reg + _8, opcodeExtension: Byte) = {
+      InstructionFormat(
+        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement),
+        immediate = None)
+    }
+  }
+}
+
+trait NewFormats extends Low {
 
   implicit object New_MFormat32 extends NewOneOperandFormat[rel32] {
 
@@ -121,21 +132,24 @@ trait NewFormats {
     }
   }
 
+  
+  
   implicit object New_MRFormat extends NewTwoOperandFormat[reg + _8, reg] {
 
     def getAddressingForm(op1: reg + _8, op2: reg, opcodeExtension: Byte) = {
       New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
     }
   }
-
-  implicit object New_RMFormat extends NewTwoOperandFormat[reg, reg + _8] {
-
-    def getAddressingForm(op1: reg, op2: reg + _8, opcodeExtension: Byte) = {
+  
+  implicit object New_RMFormatB1 extends NewTwoOperandFormat[reg, StackPointer[_] + _8] {
+    def getAddressingForm(op1: reg, op2: StackPointer[_] + _8, opcodeExtension: Byte) = {
       InstructionFormat(
-        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement),
+        WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement),
         immediate = None)
     }
   }
+  
+ 
 
   implicit object New_MIFormat8 extends NewTwoOperandFormat[reg, imm8] {
 
@@ -259,13 +273,7 @@ trait NewFormats {
 
   }
 
-  implicit object New_RMFormatB1 extends NewTwoOperandFormat[reg, StackPointer[_] + _8] {
-    def getAddressingForm(op1: reg, op2: StackPointer[_] + _8, opcodeExtension: Byte) = {
-      InstructionFormat(
-        WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement),
-        immediate = None)
-    }
-  }
+  
 
   implicit object New_RMFormatB2 extends NewTwoOperandFormat[reg, reg + _32] {
 

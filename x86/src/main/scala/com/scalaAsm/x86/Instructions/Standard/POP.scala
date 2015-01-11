@@ -3,20 +3,60 @@ package Instructions
 package Standard
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory._
 
-object POP extends InstructionDefinition[OneOpcode]("POP") with popLow
- 
-trait popLow {
+object POP extends InstructionDefinition[OneOpcode]("POP") with POPImpl
 
-  implicit object pop1 extends POP._1[r32, O] {
-    def opcode = 0x58 + rd
+trait POPLow {
+  implicit object POP_143_rm16 extends POP._1_new[rm16] {
+    def opcode = 0x8F /+ 0
+    override def hasImplicateOperand = true
   }
 
-  implicit object pop3 extends POP._1[r64, O] {
-    def opcode = 0x58 + rd
+  implicit object POP_143_rm32 extends POP._1_new[rm32] {
+    def opcode = 0x8F /+ 0
+    override def hasImplicateOperand = true
   }
 
-  implicit object pop2 extends POP._1[DS, DSFormat] {
+  implicit object POP_143_rm64 extends POP._1_new[rm64] {
+    def opcode = 0x8F /+ 0
+    override def prefix = REX.W(true)
+    override def hasImplicateOperand = true
+  }
+}
+
+trait POPImpl extends POPLow {
+  implicit object POP_7_ES extends POP._1_new[ES] {
+    def opcode = 0x7
+    override def hasImplicateOperand = true
+  }
+
+  implicit object POP_23_SS extends POP._1_new[SS] {
+    def opcode = 0x17
+    override def hasImplicateOperand = true
+  }
+
+  implicit object POP_31_DS extends POP._1_new[DS] {
     def opcode = 0x1F
+    override def hasImplicateOperand = true
+  }
+
+  implicit object POP_88_r16 extends POP._1_new[r16] {
+    def opcode = 0x58 + rw
+    override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
+    override def hasImplicateOperand = true
+  }
+
+  implicit object POP_88_r32 extends POP._1_new[r32] {
+    def opcode = 0x58 + rd
+    override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
+    override def hasImplicateOperand = true
+  }
+
+  implicit object POP_88_r64 extends POP._1_new[r64] {
+    def opcode = 0x58 + ro
+    override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
+    override def prefix = REX.W(true)
+    override def hasImplicateOperand = true
   }
 }

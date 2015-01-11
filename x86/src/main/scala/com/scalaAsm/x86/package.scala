@@ -2,6 +2,7 @@ package com.scalaAsm
 
 import com.scalaAsm.x86.Operands.Memory.Relative
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
+import com.scalaAsm.x86.Operands.Memory.Memory
 
 package object x86 {
   
@@ -21,6 +22,12 @@ package object x86 {
   type rm16 = RegisterOrMemory[_16]
   type rm32 = RegisterOrMemory[_32]
   type rm64 = RegisterOrMemory[_64]
+  
+  type m = Memory[_]
+  type m8 = Memory[_8]
+  type m16 = Memory[_16]
+  type m32 = Memory[_32]
+  type m64 = Memory[_64]
 
   type _8 = Byte
   type _16 = Short

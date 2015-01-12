@@ -31,7 +31,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object test extends NewTwoOperands[TEST.type]
       object xor extends NewTwoOperands[XOR.type]
       
-      object retn extends ZeroOperands[RET.type] with OneOperand[RETN.type]
-      object leave extends ZeroOperands[LEAVE.type]
+      object retn extends NewZeroOperands[RETN.type] with NewOneOperand[RETN.type]
+      object leave extends NewZeroOperands[LEAVE.type]
     }
   }

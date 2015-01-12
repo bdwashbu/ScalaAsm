@@ -23,20 +23,20 @@ trait Low {
 
 trait NewFormats extends Low {
 
-  implicit object New_MFormat32 extends NewOneOperandFormat[rel32] {
+  implicit object New_IFormat32 extends NewOneOperandFormat[imm32] {
 
-    def getAddressingForm(operand: rel32, opcodeExtension: Byte) = {
+    def getAddressingForm(operand: imm32, opcodeExtension: Byte) = {
       InstructionFormat(
-        addressingForm = OnlyDisplacement(operand.displacement),
-        immediate = None)
+        addressingForm = NoModRM(),
+        immediate = Some(operand))
     }
   }
-
+  
   implicit object New_MFormat64 extends NewOneOperandFormat[rel64] {
 
     def getAddressingForm(operand: rel64, opcodeExtension: Byte) = {
       InstructionFormat(
-        addressingForm = OnlyDisplacement(operand.displacement),
+        addressingForm = OnlyDisplacement(operand),
         immediate = None)
     }
   }
@@ -96,14 +96,7 @@ trait NewFormats extends Low {
     }
   }
 
-  implicit object New_IFormat32 extends NewOneOperandFormat[imm32] {
-
-    def getAddressingForm(operand: imm32, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoModRM(),
-        immediate = Some(operand))
-    }
-  }
+  
 
   implicit object New_IFormat64 extends NewOneOperandFormat[imm64] {
 

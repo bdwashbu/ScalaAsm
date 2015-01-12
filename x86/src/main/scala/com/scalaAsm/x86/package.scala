@@ -1,13 +1,11 @@
 package com.scalaAsm
 
-import com.scalaAsm.x86.Operands.Memory.Relative
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.Operands.Memory.Memory
 
 package object x86 {
   
   import Operands._
-  import Operands.Memory.Relative
 
   // These can be found in section 3.1.1.3 of the Intel x86 manual
   
@@ -40,11 +38,11 @@ package object x86 {
   type r32 = GeneralPurpose[_32]
   type r64 = GeneralPurpose[_64]
   
-  type rel = Relative[_]
-  type rel8 = Relative[_8]
-  type rel16 = Relative[_16]
-  type rel32 = Relative[_32]
-  type rel64 = Relative[_64]
+  type rel = Constant[_]
+  type rel8 = Constant[_8]
+  type rel16 = Constant[_16]
+  type rel32 = Constant[_32]
+  type rel64 = Constant[_64]
   
   type +[Reg <: GeneralPurpose[_], Y] = Reg#BaseIndex[Y]
 }

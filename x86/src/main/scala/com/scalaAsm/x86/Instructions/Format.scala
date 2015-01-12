@@ -16,7 +16,7 @@ trait LowPriorityFormats {
 
       def getAddressingForm(operand: rel32, opcodeExtension: Byte) = {
             InstructionFormat (
-              addressingForm = OnlyDisplacement(operand.displacement),
+              addressingForm = OnlyDisplacement(operand),
               immediate = None
             )
       }
@@ -28,7 +28,7 @@ trait LowPriorityFormats {
 
       def getAddressingForm(operand: rel64, opcodeExtension: Byte) = {
             InstructionFormat (
-              addressingForm = OnlyDisplacement(operand.displacement),
+              addressingForm = OnlyDisplacement(operand),
               immediate = None
             )
       }
@@ -416,10 +416,7 @@ trait Formats extends LowPriorityFormats {
         var offset = 0
       def displacement = Constant32(offset)
         
-      def getRelative = new Relative[_32] {
-        def displacement = Constant32(offset)
-        def size = 4
-      }
+      def getRelative = Constant32(offset)
     }
   
   implicit object AbsoluteAddress64 extends AbsoluteAddress[_64] {
@@ -427,10 +424,7 @@ trait Formats extends LowPriorityFormats {
       var offset:Long = 0
       def displacement = Constant64(offset)
         
-      def getRelative = new Relative[_64] {
-        def displacement = Constant64(offset)
-        def size = 4
-      }
+      def getRelative = Constant64(offset)
   }
 
   implicit object RMFormat264 extends TwoOperandFormat[Extra64Reg, AbsoluteAddress[_32], RM] {

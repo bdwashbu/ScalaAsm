@@ -82,7 +82,7 @@ class Assembler extends Catalog.Standard with Formats with NewFormats with Addre
       val prettyPass = onePass flatMap { token =>
         token match {
           case InstructionToken(inst) => Some(inst)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(callNear(*(Constant32(0)).get.getRelative))
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(callNear(Op(Constant32(0))))
           case VarRef(_) => Some(push(Op(Constant32(0))))
           case LabelRef(_, inst, format) => Some(inst(Op(new Constant8(0)), format, Seq()))
           case _ => None
@@ -109,7 +109,7 @@ class Assembler extends Catalog.Standard with Formats with NewFormats with Addre
         val result = token match {
           case InstructionToken(inst) => inst.getBytes
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => callNear(*(Constant32(0)).get.getRelative).getBytes
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => callNear(Op(Constant32(0))).getBytes
           case VarRef(_) => push(Op(Constant32(0))).getBytes
           case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
           case _ => Array[Byte]()

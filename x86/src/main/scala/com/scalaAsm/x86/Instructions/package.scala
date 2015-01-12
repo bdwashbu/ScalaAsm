@@ -1,7 +1,6 @@
 package com.scalaAsm.x86
 
 import com.scalaAsm.x86.Operands.GeneralPurpose
-import com.scalaAsm.x86.Operands.Memory.Relative
 import com.scalaAsm.x86.Operands.Constant
 import com.scalaAsm.x86.Operands._
 import scala.language.higherKinds

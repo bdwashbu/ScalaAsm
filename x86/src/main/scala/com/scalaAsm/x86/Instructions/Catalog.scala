@@ -5,7 +5,7 @@ import com.scalaAsm.x86.Instructions.Standard._
 
  object Catalog {
     trait Standard {
-      object callNear extends OneOperand[CALL.type]
+      object callNear extends NewOneOperand[CALL.type]
       object add extends NewTwoOperands[ADD.type]
       object or extends NewTwoOperands[OR.type]
       object sub extends NewTwoOperands[SUB.type]
@@ -18,8 +18,8 @@ import com.scalaAsm.x86.Instructions.Standard._
       object dec extends NewOneOperand[DEC.type]
       object not extends NewOneOperand[NOT.type]
       object jmp extends NewOneOperand[JMP.type]
-      object jnz extends OneOperand[JNZ.type]
-      object jz extends OneOperand[JZ.type]
+      object jnz extends NewOneOperand[JNZ.type]
+      object jz extends NewOneOperand[JZ.type]
       object int extends NewOneOperand[INT.type]
       object rdrand extends OneOperand[RDRAND]
       object and extends NewTwoOperands[AND.type]

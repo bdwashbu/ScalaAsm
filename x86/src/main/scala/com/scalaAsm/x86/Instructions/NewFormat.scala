@@ -179,14 +179,14 @@ trait NewFormats extends Low {
     }
   }
 
-  implicit object New_MIFormat64 extends NewTwoOperandFormat[reg, imm64] {
-
-    def getAddressingForm(op1: reg, op2: imm64, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
-        immediate = Some(op2))
-    }
-  }
+//  implicit object New_MIFormat64 extends NewTwoOperandFormat[reg, imm64] {
+//
+//    def getAddressingForm(op1: reg, op2: imm64, opcodeExtension: Byte) = {
+//      InstructionFormat(
+//        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
+//        immediate = Some(op2))
+//    }
+//  }
 
   implicit object New_OIFormat64 extends NewTwoOperandFormat[rm, imm64] {
 

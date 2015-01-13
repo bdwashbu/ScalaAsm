@@ -2,21 +2,36 @@ package com.scalaAsm.x86
 package Instructions
 package Standard
 
-object CALL extends InstructionDefinition[OneOpcode]("CALL") with CALLHigh
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory._
 
-  trait CALLLow {
-    implicit object call2 extends CALL._1_new[rm32] {
-      def opcode = 0xFF /+ 2
-    }
+object CALL extends InstructionDefinition[OneOpcode]("CALL") with CALLImpl
+
+trait CALLLow {
+  implicit object CALL_255_rm16 extends CALL._1_new[rm16] {
+    def opcode = 0xFF /+ 2
+    override def hasImplicateOperand = true
   }
-  
-  trait CALLHigh extends CALLLow {
-  
-    implicit object call3 extends CALL._1_new[rel32] {
-      def opcode = 0xE8
-    }
-  
-    implicit object call1 extends CALL._1_new[rm16] {
-      def opcode = 0xFF /+ 2
-    }
+
+  implicit object CALL_255_rm32 extends CALL._1_new[rm32] {
+    def opcode = 0xFF /+ 2
+    override def hasImplicateOperand = true
   }
+
+  implicit object CALL_255_rm64 extends CALL._1_new[rm64] {
+    def opcode = 0xFF /+ 2
+    override def hasImplicateOperand = true
+  }
+}
+
+trait CALLImpl extends CALLLow {
+  implicit object CALL_232_rel16 extends CALL._1_new[rel16] {
+    def opcode = 0xE8
+    override def hasImplicateOperand = true
+  }
+
+  implicit object CALL_232_rel32 extends CALL._1_new[rel32] {
+    def opcode = 0xE8
+    override def hasImplicateOperand = true
+  }
+}

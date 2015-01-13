@@ -20,7 +20,6 @@ trait POPLow {
 
   implicit object POP_143_rm64 extends POP._1_new[rm64] {
     def opcode = 0x8F /+ 0
-    override def prefix = REX.W(true)
     override def hasImplicateOperand = true
   }
 }
@@ -56,7 +55,6 @@ trait POPImpl extends POPLow {
   implicit object POP_88_r64 extends POP._1_new[r64] {
     def opcode = 0x58 + ro
     override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
-    override def prefix = REX.W(true)
     override def hasImplicateOperand = true
   }
 }

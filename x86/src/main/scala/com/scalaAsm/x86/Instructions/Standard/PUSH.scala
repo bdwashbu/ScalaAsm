@@ -20,7 +20,6 @@ trait PUSHLow {
 
   implicit object PUSH_255_rm64 extends PUSH._1_new[rm64] {
     def opcode = 0xFF /+ 6
-    override def prefix = REX.W(true)
     override def hasImplicateOperand = true
   }
 }
@@ -61,7 +60,6 @@ trait PUSHImpl extends PUSHLow {
   implicit object PUSH_80_r64 extends PUSH._1_new[r64] {
     def opcode = 0x50 + ro
     override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
-    override def prefix = REX.W(true)
     override def hasImplicateOperand = true
   }
 

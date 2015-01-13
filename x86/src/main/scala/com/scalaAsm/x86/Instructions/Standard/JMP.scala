@@ -18,7 +18,6 @@ trait JMPLow {
 
   implicit object JMP_255_rm64 extends JMP._1_new[rm64] {
     def opcode = 0xFF /+ 4
-    override def prefix = REX.W(true)
   }
 }
 

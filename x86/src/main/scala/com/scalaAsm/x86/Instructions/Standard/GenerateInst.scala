@@ -25,14 +25,15 @@ object GenerateInst {
     override def equals(x: Object) = {
       if (x.isInstanceOf[InstructionInstance]) {
         val otherInstance = x.asInstanceOf[InstructionInstance]
-        opcode == otherInstance.opcode && getOperand == otherInstance.getOperand
+        //opcode == otherInstance.opcode && getOperand == otherInstance.getOperand
+        generateClass(0) == otherInstance.generateClass(0)
       } else {
         false
       }
     }
     
     override def hashCode(): Int = {
-      opcode.hashCode + getOperand.hashCode
+      generateClass(0).hashCode
     }
 
     def generateClass(numSpaces: Int) = {
@@ -537,7 +538,7 @@ object GenerateInst {
     try {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
-      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH", "LEA", "POP", "LEAVE", "RETN", "JZ")) {
+      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH", "LEA", "POP", "LEAVE", "RETN", "JZ", "CALL")) {
       //for (mnem <- List("PUSH")) { // LEA doesnt work
         val uniqueInst = LinkedHashSet[InstructionInstance]()
         insts.filter(_.mnemonic == mnem).foreach{x => uniqueInst += x}

@@ -73,9 +73,9 @@ object OperandType {
         "ps" -> FixedOperandType("ps", "Bit Packed 128 Single Precision Float", _16, false, false),
         "psq" -> FixedOperandType("psq", "Bit Packed 64 Single Precision Float", _8, false, false),
         "ptp" -> StandandOperandType("ptp", "Thirty Two Or 48 Or80BitPointer", true, false),
-        "q" -> FixedOperandType("q", "Quadword Regardless", _64, true, false),
+        "q" -> FixedOperandType("q", "Quadword Regardless", _64, false, false),
         "qi" -> StandandOperandType("qi", "Quadword Integer", false, false),
-        "qp" -> StandandOperandType("qp", "Quadword Promoted", true, false),
+        "qp" -> FixedOperandType("qp", "Quadword Promoted", _64, true, false),
         "s" -> StandandOperandType("s", "Pseudo Descriptor", false, false),
         "sd" -> StandandOperandType("sd", "Scalar Packed Double Precision Float", false, false),
         "si" -> StandandOperandType("si", "Double Word Integer Register", false, false),
@@ -85,9 +85,9 @@ object OperandType {
         "stx" -> StandandOperandType("stx", "X87 FPU And SIMD State", false, true),
         "t" -> StandandOperandType("t", "Ten Byte Far Pointer", false, false),
         "v" -> CompositeOperandType("v", "Word Or Doubleword", Seq("w", "d"), false),
-        "vds" -> CompositeOperandType("vds", "Word Or Doubleword or Doubleword Extended To 64", Seq("w", "d"), false), // TODO: Also include ds
+        "vds" -> CompositeOperandType("vds", "Word Or Doubleword or Doubleword Extended To 64", Seq("w", "d", "ds"), false), // TODO: Also include ds
         "vq" -> CompositeOperandType("vq", "Quadword Or Word", Seq("q", "w"), false),
-        "vqp" -> CompositeOperandType("vqp", "Word Or Doubleword Or Quadword", Seq("w", "d", "q"), false),
+        "vqp" -> CompositeOperandType("vqp", "Word Or Doubleword Or Quadword", Seq("w", "d", "qp"), false),
         "vs" -> CompositeOperandType("vs", "Word Or Doubleword Extended To Stack", Seq("w", "d"), false),
         "w" -> FixedOperandType("w", "Word", _16, false, false),
         "wi" -> FixedOperandType("wi", "Word Integer", _16, false, false),

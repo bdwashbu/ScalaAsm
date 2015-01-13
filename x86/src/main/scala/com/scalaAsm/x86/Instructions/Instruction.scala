@@ -159,18 +159,21 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     def hasImplicateOperand: Boolean = false
+    def explicitFormat: Option[InstructionFormat] = None
     
-    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: NewTwoOperandFormat[X, Y]) = {
+    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], implicitFormat: NewTwoOperandFormat[X, Y]) = {
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
+      
+       val addressForm = explicitFormat getOrElse implicitFormat.getAddressingForm(p1.get, p2.get, opEx)
       
       if (opcode.isInstanceOf[OpcodeWithReg] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
         opcodePlus.reg = p1.get.asInstanceOf[reg]
         val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
-        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic)
+        TwoMachineCode(p1, p2, addressForm.getBytes, opcodeBytes, mnemonic)
       } else {
         val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
-        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic)
+        TwoMachineCode(p1, p2, addressForm.getBytes, opcodeBytes, mnemonic)
       }
     }
   }

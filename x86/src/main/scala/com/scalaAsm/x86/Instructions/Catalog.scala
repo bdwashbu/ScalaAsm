@@ -24,7 +24,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object rdrand extends OneOperand[RDRAND]
       object and extends NewTwoOperands[AND.type]
       object lea extends NewTwoOperands[LEA.type]
-      object mov extends TwoOperands[MOV.type]
+      object mov extends NewTwoOperands[MOV.type]
       object shr extends NewTwoOperands[SHR.type]
       object shl extends NewTwoOperands[SHL.type] with NewOneOperand[SHL.type]
       object sbb extends NewTwoOperands[SBB.type]

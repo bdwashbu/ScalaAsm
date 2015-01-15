@@ -16,6 +16,7 @@ object GenerateInst {
   trait InstructionInstance {
     protected def getClassHeader(numSpaces: Int): String
     protected def hasImplicateOperand: Boolean
+    protected def getExplicitFormat: String
     val mnemonic: String
     def getSize: Int
     def opcode: Int
@@ -55,13 +56,14 @@ object GenerateInst {
         op.addressingMethod match {
           case Some(OpcodeSelectsRegister) =>
             val regCode = if (op.operandType.code == "q") "o" else op.operandType.code // for some reason the code for 64-bit is "ro"
-            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + regCode + "\n" +
-            spaces + "  override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))\n"
+            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + regCode + "\n"
           case _ => getOpcodeString
           //}
 
         }
       }.getOrElse(getOpcodeString)
+      
+      
 
       val prefix = getOperand.map { op =>
         op match {
@@ -81,7 +83,8 @@ object GenerateInst {
         ""
       }
       val footer = "  }"
-      header + opcodeString + prefix + implicate + footer
+      val format = if (getExplicitFormat != "") spaces + getExplicitFormat else ""
+      header + opcodeString + prefix + format + implicate + footer
     }
   }
 
@@ -99,6 +102,7 @@ object GenerateInst {
     }
 
     def hasImplicateOperand: Boolean = false
+    def getExplicitFormat = ""
 
     def getSize: Int = 0
   }
@@ -119,6 +123,14 @@ object GenerateInst {
 
     def hasImplicateOperand: Boolean = {
       operand.isImplicate
+    }
+    
+    def getExplicitFormat = {
+        operand.addressingMethod match {
+          case Some(OpcodeSelectsRegister) =>
+            "  override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))\n"
+          case _ => ""
+        }
     }
 
     def getSize: Int = {
@@ -142,6 +154,27 @@ object GenerateInst {
     def getOperand = Some(operands._1)
 
     def hasImplicateOperand = false
+    
+    def getExplicitFormat = {
+      if (operands._2.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _32 &&
+            operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _32) {
+        "  override def explicitFormat(op1: r32, op2: rm32) = {\n" +
+        "     if (op2.isInstanceOf[reg]) {\n" +
+        "        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))\n" +
+        "     } else None\n" +
+        "   }\n"
+      } else if (operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _32 &&
+            operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _32) {
+        "  override def explicitFormat(op1: rm32, op2: r32) = {\n" +
+        "     if (op1.isInstanceOf[reg]) {\n" +
+        "        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))\n" +
+        "     } else None\n" +
+        "   }\n"
+      } else {
+        ""
+      }
+      
+    }
 
     def getSize: Int = {
       val modSize = if (entry.hasModRMByte) 1 else 0

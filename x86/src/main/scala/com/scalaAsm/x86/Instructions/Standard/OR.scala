@@ -14,6 +14,11 @@ trait ORLow {
 
   implicit object OR_11_r32_rm32 extends OR._2_new[r32, rm32] {
     def opcode = 0xB /r
+    override def explicitFormat(op1: r32, op2: rm32) = {
+     if (op2.isInstanceOf[reg]) {
+        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))
+     } else None
+   }
   }
 
   implicit object OR_11_r64_rm64 extends OR._2_new[r64, rm64] {
@@ -33,6 +38,11 @@ trait ORImpl extends ORLow {
 
   implicit object OR_9_rm32_r32 extends OR._2_new[rm32, r32] {
     def opcode = 0x9 /r
+    override def explicitFormat(op1: rm32, op2: r32) = {
+     if (op1.isInstanceOf[reg]) {
+        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))
+     } else None
+   }
   }
 
   implicit object OR_9_rm64_r64 extends OR._2_new[rm64, r64] {

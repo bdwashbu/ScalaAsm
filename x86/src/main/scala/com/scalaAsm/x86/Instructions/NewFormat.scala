@@ -19,6 +19,15 @@ trait Low {
         immediate = None)
     }
   }
+   
+    implicit object New_OIFormat32 extends NewTwoOperandFormat[rm, imm32] {
+
+    def getAddressingForm(op1: rm, op2: imm32, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoModRM(),
+        immediate = Some(op2))
+    }
+  }
 }
 
 trait NewFormats extends Low {
@@ -165,8 +174,13 @@ trait NewFormats extends Low {
   implicit object New_MIFormat32 extends NewTwoOperandFormat[reg, imm32] {
 
     def getAddressingForm(op1: reg, op2: imm32, opcodeExtension: Byte) = {
-      InstructionFormat(
+      if (opcodeExtension != -1) {
+        InstructionFormat(
         addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
+        immediate = Some(op2))
+      } else
+      InstructionFormat(
+        addressingForm = NoModRM(),
         immediate = Some(op2))
     }
 
@@ -197,14 +211,7 @@ trait NewFormats extends Low {
     }
   }
 
-//  implicit object New_OIFormat32 extends NewTwoOperandFormat[rm, imm32] {
-//
-//    def getAddressingForm(op1: rm, op2: imm32, opcodeExtension: Byte) = {
-//      InstructionFormat(
-//        addressingForm = NoModRM(),
-//        immediate = Some(op2))
-//    }
-//  }
+ 
 
   implicit object New_OIFormat16 extends NewTwoOperandFormat[rm, imm16] {
 

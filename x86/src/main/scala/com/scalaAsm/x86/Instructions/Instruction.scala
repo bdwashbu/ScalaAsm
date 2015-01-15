@@ -120,7 +120,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def explicitFormat: Option[InstructionFormat] = None
     
     def apply[X <: O1](p1: Operand[X], implicitFormat: NewOneOperandFormat[X], prefix: Seq[Prefix]) = {  
-      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
+      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
       
       val addressForm = explicitFormat getOrElse implicitFormat.getAddressingForm(p1.get, opEx)
       
@@ -141,7 +141,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def opcode: Opcode
     
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: TwoOperandFormat[X, Y, OpEn], prefix: Seq[Prefix]) = {
-      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
+      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
       
       if (opcode.isInstanceOf[OpcodeWithReg] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
@@ -159,12 +159,12 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     def hasImplicateOperand: Boolean = false
-    def explicitFormat: Option[InstructionFormat] = None
+    def explicitFormat(p1: O1, p2: O2): Option[InstructionFormat] = None
     
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], implicitFormat: NewTwoOperandFormat[X, Y]) = {
-      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
+      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
       
-       val addressForm = explicitFormat getOrElse implicitFormat.getAddressingForm(p1.get, p2.get, opEx)
+       val addressForm = explicitFormat(p1.get, p2.get) getOrElse implicitFormat.getAddressingForm(p1.get, p2.get, opEx)
       
       if (opcode.isInstanceOf[OpcodeWithReg] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
         val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]

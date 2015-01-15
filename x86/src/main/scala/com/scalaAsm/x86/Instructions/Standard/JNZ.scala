@@ -6,7 +6,7 @@ object JNZ extends InstructionDefinition[OneOpcode]("JNZ") with jnzLow
  
 trait jnzLow {
   
-  implicit object jnz1 extends JNZ._1_new[imm8] {
+  implicit object jnz1 extends JNZ._1[imm8] {
       def opcode = 0x75
   }
 }

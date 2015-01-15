@@ -34,7 +34,7 @@ object Tokens {
     def getSize = 0
     def getBytes = Array()
   }
-  case class LabelRef(labelRef: String, inst:InstructionDefinition[OneOpcode]#_1_new[Constant8], format: NewOneOperandFormat[Constant8]) extends CodeToken with InstructionResult {
+  case class LabelRef(labelRef: String, inst:InstructionDefinition[OneOpcode]#_1[Constant8], format: NewOneOperandFormat[Constant8]) extends CodeToken with InstructionResult {
     def mnemonic = ""
     def getSize = 0
     def getBytes = Array()

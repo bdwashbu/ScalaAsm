@@ -97,7 +97,7 @@ object GenerateInst {
 
     def getClassHeader(numSpaces: Int): String = {
       val spaces = (1 to numSpaces) map (x => " ") mkString
-      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._0_new {\n"
+      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._0 {\n"
       result
     }
 
@@ -117,7 +117,7 @@ object GenerateInst {
 
     def getClassHeader(numSpaces: Int): String = {
       val spaces = (1 to numSpaces) map (x => " ") mkString
-      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1_new[" + operand + "] {\n"
+      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand + "] {\n"
       result
     }
 
@@ -147,7 +147,7 @@ object GenerateInst {
 
     def getClassHeader(numSpaces: Int): String = {
       val spaces = (1 to numSpaces) map (x => " ") mkString
-      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2_new[" + operands._1 + ", " + operands._2 + "] {\n"
+      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2[" + operands._1 + ", " + operands._2 + "] {\n"
       result
     }
 

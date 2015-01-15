@@ -81,39 +81,16 @@ case class TwoMachineCode[O1, O2, OpEn](
 
 abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: String) {
 
-  abstract class _0 extends x86Instruction {
-    def opcode: Opcode
-    val mnemonic = InstructionDefinition.this.mnemonic
-    def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
-  }
   
-  abstract class _0_new extends x86Instruction {
+  abstract class _0 extends x86Instruction {
     def opcode: Opcode
     val mnemonic = InstructionDefinition.this.mnemonic
     def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
     def hasImplicateOperand: Boolean = false
   }
+ 
   
-  abstract class _1[-O1, OpEn]  extends x86Instruction {
-    val mnemonic = InstructionDefinition.this.mnemonic
-    def opcode: Opcode
-    
-    def apply[X <: O1](p1: Operand[X], format: OneOperandFormat[X, OpEn], prefix: Seq[Prefix]) = {  
-      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else 0
-      
-      if (opcode.isInstanceOf[OpcodeWithReg] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
-        val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
-        opcodePlus.reg = p1.get.asInstanceOf[reg] 
-        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcodePlus.get
-        OneMachineCode(p1, format.getAddressingForm(p1.get, opEx).getBytes, opcodeBytes, mnemonic, opEx)
-      } else {
-        val opcodeBytes = format.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()){ _ ++ _ } ++: opcode.get
-        OneMachineCode(p1, format.getAddressingForm(p1.get, opEx).getBytes, opcodeBytes, mnemonic, opEx)
-      }
-    }
-  }
-  
-  abstract class _1_new[-O1]  extends x86Instruction {
+  abstract class _1[-O1]  extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     def hasImplicateOperand: Boolean = false
@@ -135,27 +112,8 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
       }
     }
   }
-  
-  abstract class _2[-O1, -O2, OpEn]  extends x86Instruction {
-    val mnemonic = InstructionDefinition.this.mnemonic
-    def opcode: Opcode
-    
-    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], format: TwoOperandFormat[X, Y, OpEn], prefix: Seq[Prefix]) = {
-      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
-      
-      if (opcode.isInstanceOf[OpcodeWithReg] && p1.get.isInstanceOf[reg]) { // this is hacky as hell!
-        val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
-        opcodePlus.reg = p1.get.asInstanceOf[reg]
-        val opcodeBytes = format.getPrefix(prefix) ++: opcodePlus.get
-        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic)
-      } else {
-        val opcodeBytes = format.getPrefix(prefix) ++: opcode.get
-        TwoMachineCode(p1, p2, format.getAddressingForm(p1.get, p2.get, opEx).getBytes, opcodeBytes, mnemonic)
-      }
-    }
-  }
-  
-   abstract class _2_new[-O1, -O2]  extends x86Instruction {
+ 
+   abstract class _2[-O1, -O2]  extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
     def hasImplicateOperand: Boolean = false

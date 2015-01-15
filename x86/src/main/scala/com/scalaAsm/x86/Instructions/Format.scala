@@ -10,481 +10,326 @@ import com.scalaAsm.x86.TwoOpcodes
 import scala.language.implicitConversions
 import com.scalaAsm.x86.Operands._
 
-trait LowPriorityFormats {
+trait Low {
+  implicit object New_RMFormat extends NewTwoOperandFormat[reg, reg + _8] {
 
-  implicit object MFormat32 extends OneOperandFormat[rel32, M] {
-
-      def getAddressingForm(operand: rel32, opcodeExtension: Byte) = {
-            InstructionFormat (
-              addressingForm = OnlyDisplacement(operand),
-              immediate = None
-            )
-      }
-      
-       def size = 4
-  }
-  
-  implicit object MFormat64 extends OneOperandFormat[rel64, M] {
-
-      def getAddressingForm(operand: rel64, opcodeExtension: Byte) = {
-            InstructionFormat (
-              addressingForm = OnlyDisplacement(operand),
-              immediate = None
-            )
-      }
-      
-       def size = 8
-  }
-  
-  trait MFormatIGeneric[X <: GeneralPurpose[_32]#Indirect] extends OneOperandFormat[X, M] {
-
-      def getAddressingForm(operand: X, opcodeExtension: Byte) = {
-            InstructionFormat (
-              addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base)),
-              immediate = None
-            )
-      }
-      
-       def size = 1
-  }
-  
-  implicit object MFormatIGeneric1 extends MFormatIGeneric[EAX#Indirect]
-  implicit object MFormatIGeneric2 extends MFormatIGeneric[ECX#Indirect]
-  implicit object MFormatIGeneric3 extends MFormatIGeneric[EDX#Indirect]
-  implicit object MFormatIGeneric4 extends MFormatIGeneric[EBX#Indirect]
-  implicit object MFormatIGeneric6 extends MFormatIGeneric[ESI#Indirect]
-  implicit object MFormatIGeneric7 extends MFormatIGeneric[EDI#Indirect]
-  // There is no [EBP], its slot is used by 32-disp only mode
-  
-  implicit object MFormat2R2 extends OneOperandFormat[GeneralPurpose[_64]#Indirect, M] {
-
-      def getAddressingForm(operand: GeneralPurpose[_64]#Indirect, opcodeExtension: Byte) = {
-            InstructionFormat (
-              addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base)), //mem.encode(opcode.opcodeExtension),
-              immediate = None
-            )
-      }
-      
-       def size = 1
-  }
-  
-  implicit object MFormatB2 extends OneOperandFormat[reg + _8, M] {
-
-      def getAddressingForm(operand: reg + _8, opcodeExtension: Byte) = {
-            InstructionFormat (
-              NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, operand.base), operand.displacement),
-              immediate = None
-            )
-      }
-      
-       def size = 1 + 1
-  }
-  
-  implicit object MFormat4 extends OneOperandFormat[reg, M] {
-
-      def getAddressingForm(operand: reg, opcodeExtension: Byte) = {
-            InstructionFormat (
-              addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, operand)),///reg.encode(opcode.opcodeExtension),
-              immediate = None
-            )
-      }
-      
-       def size = 1
+    def getAddressingForm(op1: reg, op2: reg + _8, opcodeExtension: Byte) = {
+      InstructionFormat(
+        NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement),
+        immediate = None)
+    }
   }
 
-  implicit object DSFormat extends OneOperandFormat[DS, DSFormat] {
-      def getAddressingForm(op1: DS, opcodeExtension: Byte) = NoAddressingForm
-      def size = 0
-  }
+  implicit object New_OIFormat32 extends NewTwoOperandFormat[rm, imm32] {
 
-  implicit object CSFormat extends OneOperandFormat[CS, CSFormat] {
-      def getAddressingForm(op1: CS, opcodeExtension: Byte) = NoAddressingForm
-      def size = 0
-  }
-
-  // abbreviated  reg/imm format, used with common instrctions like 'add(eax, byte(8))'
-  implicit object I2Format extends TwoOperandFormat[reg, imm, I2] {
-      def getAddressingForm(op1: reg, op2: imm, opcodeExtension: Byte) = InstructionFormat (NoModRM(), Some(op2))
-      def size = 1
-  }
-
-  implicit object IFormat8 extends OneOperandFormat[imm8, I] {
-
-      def getAddressingForm(operand: imm8, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(operand)
-        )
-      }
-      
-      def size = 1
-  }
-  
-  implicit object IFormat16 extends OneOperandFormat[imm16, I] {
-
-      def getAddressingForm(operand: imm16, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(operand)
-        )
-      }
-      
-      def size = 2
-  }
-  
-  implicit object IFormat32 extends OneOperandFormat[imm32, I] {
-
-      def getAddressingForm(operand: imm32, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(operand)
-        )
-      }
-      
-      def size = 4
-  }
-  
-  implicit object IFormat64 extends OneOperandFormat[imm64, I] {
-
-      def getAddressingForm(operand: imm64, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(operand)
-        )
-      }
-      
-      def size = 8
-  }
-
-  implicit object OffsetFormat extends OneOperandFormat[r64 + _, Offset] {
-
-      def getAddressingForm(operand: r64 + _, opcodeExtension: Byte) = {
-        InstructionFormat (
-          WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
-          immediate = None
-        )
-      }
-      
-      def size = 2
-  }
-  
-  implicit object OffsetFormat2 extends OneOperandFormat[reg + _8, Offset] {
-
-      def getAddressingForm(operand: reg + _8, opcodeExtension: Byte) = {
-        InstructionFormat (
-          NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, operand.base), operand.displacement),
-          immediate = None
-        )
-      }
-      
-      def size = 1 + 1
-  }
-  
-  implicit object MRFormat extends TwoOperandFormat[reg + _8, reg, MR] {
-
-      def getAddressingForm(op1: reg + _8, op2: reg, opcodeExtension: Byte) = {
-        RMFormat.getAddressingForm(op2, op1, opcodeExtension)
-      }
-  
-      def size = RMFormat.size
-  }
-  
-  implicit object RMFormat extends TwoOperandFormat[reg, reg + _8, RM] {
-    
-      def getAddressingForm(op1: reg, op2: reg + _8, opcodeExtension: Byte) = {
-        InstructionFormat (
-            NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement),
-            immediate = None
-        )
-      }
-  
-      def size = 1 + 1
-  }
-  
-  implicit object MIFormat8 extends TwoOperandFormat[reg, imm8, MI] {
-
-      def getAddressingForm(op1: reg, op2: imm8, opcodeExtension: Byte) = {
-          InstructionFormat (
-            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
-            immediate = Some(op2)
-          )
-      }
-  
-      def size = 1 + 1
-  }
-  
-  implicit object MIFormat16 extends TwoOperandFormat[reg, imm16, MI] {
-
-      def getAddressingForm(op1: reg, op2: imm16, opcodeExtension: Byte) = {
-          InstructionFormat (
-            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
-            immediate = Some(op2)
-          )
-      }
-  
-      def size = 1 + 2
-  }
-  
-  implicit object MIFormat32 extends TwoOperandFormat[reg, imm32, MI] {
-
-      def getAddressingForm(op1: reg, op2: imm32, opcodeExtension: Byte) = {
-          InstructionFormat (
-            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
-            immediate = Some(op2)
-          )
-      }
-      
-      override def getPrefix(prefix: Seq[Prefix]) = { 
-        if (prefix.exists(_.isInstanceOf[REX])) {
-          REX(true, false, false, true).get
-        } else {
-          Array[Byte]()
-        }
-      }
-  
-      def size = 1 + 4
-  }
-  
-  implicit object MIFormat64 extends TwoOperandFormat[reg, imm64, MI] {
-
-      def getAddressingForm(op1: reg, op2: imm64, opcodeExtension: Byte) = {
-          InstructionFormat (
-            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
-            immediate = Some(op2)
-          )
-      }
-  
-      def size = 1 + 8
-  }
-  
-  implicit object OIFormat64 extends TwoOperandFormat[rm, imm64, OI] {
-
-      def getAddressingForm(op1: rm, op2: imm64, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(op2)
-        )
-      }
-  
-      def size = 8
-  }
-  
-  implicit object OIFormat32 extends TwoOperandFormat[rm, imm32, OI] {
-
-      def getAddressingForm(op1: rm, op2: imm32, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(op2)
-        )
-      }
-  
-      def size = 4
-  }
-  
-  implicit object OIFormat16 extends TwoOperandFormat[rm, imm16, OI] {
-
-      def getAddressingForm(op1: rm, op2: imm16, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(op2)
-        )
-      }
-  
-      def size = 2
-  }
-  
-  implicit object OIFormat8 extends TwoOperandFormat[rm, imm8, OI] {
-
-      def getAddressingForm(op1: rm, op2: imm8, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = Some(op2)
-        )
-      }
-  
-      def size = 1
-  }
-  
-  implicit object RMFormat2 extends TwoOperandFormat[reg, AbsoluteAddress[_32], RM] {
-
-      def getAddressingForm(op1: reg, op2: AbsoluteAddress[_32], opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.displacement),
-          immediate = None
-        )
-      }
-      
-      override def getPrefix(prefix: Seq[Prefix]) = {
-        if (prefix.exists(_.isInstanceOf[REX])) {
-          REX(true, false, false, false).get
-        } else {
-          Array[Byte]()
-        }
-      }
-  
-      def size = 1 + 4
+    def getAddressingForm(op1: rm, op2: imm32, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoModRM(),
+        immediate = Some(op2))
+    }
   }
 }
 
-trait Formats extends LowPriorityFormats {
-  
-  implicit object MFormat2R3 extends OneOperandFormat[RSP#Indirect, M] {
+trait Formats extends Low {
 
-      def getAddressingForm(operand: RSP#Indirect, opcodeExtension: Byte) = {
-        InstructionFormat (
-          WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
-          immediate = None
-        )
-      }
-      
-      def size = 2
-  }
-  
-  implicit object OFormat extends OneOperandFormat[rm, O] {
-      def getAddressingForm(operand: rm, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoModRM(),
-          immediate = None
-        )
-      }
-      
-      def size = 0
-  }
-  
-  implicit object MFormatB1 extends OneOperandFormat[r64 + _, M] {
+  implicit object New_IFormat32 extends NewOneOperandFormat[imm32] {
 
-      def getAddressingForm(operand: r64 + _, opcodeExtension: Byte) = {
-            InstructionFormat (
-              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
-              immediate = None
-            )
-      }
-      
-       def size = 2
-  }
-  
-  implicit object RMFormatB1 extends TwoOperandFormat[reg, StackPointer[_] + _8, RM] {
-      def getAddressingForm(op1: reg, op2: StackPointer[_] + _8, opcodeExtension: Byte) = {
-        InstructionFormat (
-      	    WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement),
-            immediate = None
-        )
-      }
-  
-      def size = 2 + 1
-  }
-  
-  implicit object RMFormatB2 extends TwoOperandFormat[reg, reg + _32, RM] {
-
-      def getAddressingForm(op1: reg, op2: reg + _32, opcodeExtension: Byte) = {
-        InstructionFormat (
-      	    NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = op2.base), op2.displacement),  
-            immediate = None
-        )
-      }
-  
-      def size = 1 + 4
-  }
-  
-  implicit object RMFormat6 extends TwoOperandFormat[reg, reg, RM] {
-
-      def getAddressingForm(op1: reg, op2: reg, opcodeExtension: Byte) = {
-  
-        InstructionFormat (
-          OnlyModRM(ModRMReg(TwoRegisters, op1, op2)),
-          immediate = None
-        )
-      }
-  
-      def size = 1
-  }
-  
-  implicit object MFormat5 extends OneOperandFormat[AbsoluteAddress[_32], M] {
-
-      def getAddressingForm(operand: AbsoluteAddress[_32], opcodeExtension: Byte) = {
-            InstructionFormat (
-              addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), operand.displacement), //mem.encode(opcode.opcodeExtension),
-              immediate = None
-            )
-      }
-      
-       def size = 1 + 4
-  }
-  
-    implicit object AbsoluteAddress32 extends AbsoluteAddress[_32] {
-      selff =>
-        var offset = 0
-      def displacement = Constant32(offset)
-        
-      def getRelative = Constant32(offset)
+    def getAddressingForm(operand: imm32, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoModRM(),
+        immediate = Some(operand))
     }
-  
-  implicit object AbsoluteAddress64 extends AbsoluteAddress[_64] {
-    selff =>
-      var offset:Long = 0
-      def displacement = Constant64(offset)
-        
-      def getRelative = Constant64(offset)
   }
 
-  implicit object RMFormat264 extends TwoOperandFormat[Extra64Reg, AbsoluteAddress[_32], RM] {
+  implicit object New_MFormat64 extends NewOneOperandFormat[rel64] {
 
-      def getAddressingForm(op1: Extra64Reg, op2: AbsoluteAddress[_32], opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.displacement),
-          immediate = None
-        )
+    def getAddressingForm(operand: rel64, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = OnlyDisplacement(operand),
+        immediate = None)
+    }
+  }
+
+  trait MFormatIGeneric[X <: GeneralPurpose[_32]#Indirect] extends NewOneOperandFormat[X] {
+
+    def getAddressingForm(operand: X, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base)),
+        immediate = None)
+    }
+  }
+
+  implicit object New_MFormatIGeneric1 extends MFormatIGeneric[EAX#Indirect]
+  implicit object New_MFormatIGeneric2 extends MFormatIGeneric[ECX#Indirect]
+  implicit object New_MFormatIGeneric3 extends MFormatIGeneric[EDX#Indirect]
+  implicit object New_MFormatIGeneric4 extends MFormatIGeneric[EBX#Indirect]
+  implicit object New_MFormatIGeneric6 extends MFormatIGeneric[ESI#Indirect]
+  implicit object New_MFormatIGeneric7 extends MFormatIGeneric[EDI#Indirect]
+  // There is no [EBP], its slot is used by 32-disp only mode
+
+  implicit object New_DSFormat extends NewOneOperandFormat[DS] {
+    def getAddressingForm(op1: DS, opcodeExtension: Byte) = NoAddressingForm
+  }
+
+  implicit object New_CSFormat extends NewOneOperandFormat[CS] {
+    def getAddressingForm(op1: CS, opcodeExtension: Byte) = NoAddressingForm
+  }
+
+  // abbreviated  reg/imm format, used with common instrctions like 'add(eax, byte(8))'
+  // implicit object New_I2Format extends NewTwoOperandFormat[reg, imm] {
+  //    def getAddressingForm(op1: reg, op2: imm, opcodeExtension: Byte) = InstructionFormat (NoModRM(), Some(op2))
+  //    def size = 1
+  //}
+
+  implicit object New_IFormat8 extends NewOneOperandFormat[imm8] {
+
+    def getAddressingForm(operand: imm8, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoModRM(),
+        immediate = Some(operand))
+    }
+  }
+
+  implicit object New_IFormat16 extends NewOneOperandFormat[imm16] {
+
+    def getAddressingForm(operand: imm16, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoModRM(),
+        immediate = Some(operand))
+    }
+  }
+
+  implicit object New_IFormat64 extends NewOneOperandFormat[imm64] {
+
+    def getAddressingForm(operand: imm64, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoModRM(),
+        immediate = Some(operand))
+    }
+  }
+
+  implicit object New_OffsetFormat extends NewOneOperandFormat[r64 + _] {
+
+    def getAddressingForm(operand: r64 + _, opcodeExtension: Byte) = {
+      InstructionFormat(
+        WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
+        immediate = None)
+    }
+  }
+
+  implicit object New_OffsetFormat2 extends NewOneOperandFormat[reg + _8] {
+
+    def getAddressingForm(operand: reg + _8, opcodeExtension: Byte) = {
+      InstructionFormat(
+        NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, operand.base), operand.displacement),
+        immediate = None)
+    }
+  }
+
+  implicit object New_MRFormat extends NewTwoOperandFormat[reg + _8, reg] {
+
+    def getAddressingForm(op1: reg + _8, op2: reg, opcodeExtension: Byte) = {
+      New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
+    }
+  }
+
+  implicit object New_RMFormatB1 extends NewTwoOperandFormat[reg, StackPointer[_] + _8] {
+    def getAddressingForm(op1: reg, op2: StackPointer[_] + _8, opcodeExtension: Byte) = {
+      InstructionFormat(
+        WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement),
+        immediate = None)
+    }
+  }
+
+  implicit object New_MIFormat8 extends NewTwoOperandFormat[reg, imm8] {
+
+    def getAddressingForm(op1: reg, op2: imm8, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
+        immediate = Some(op2))
+    }
+  }
+
+  implicit object New_MIFormat16 extends NewTwoOperandFormat[reg, imm16] {
+
+    def getAddressingForm(op1: reg, op2: imm16, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
+        immediate = Some(op2))
+    }
+  }
+
+  implicit object New_MIFormat32 extends NewTwoOperandFormat[reg, imm32] {
+
+    def getAddressingForm(op1: reg, op2: imm32, opcodeExtension: Byte) = {
+      if (opcodeExtension != -1) {
+        InstructionFormat(
+          addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
+          immediate = Some(op2))
+      } else
+        InstructionFormat(
+          addressingForm = NoModRM(),
+          immediate = Some(op2))
+    }
+
+    override def getPrefix(prefix: Seq[Prefix]) = {
+      if (prefix.exists(_.isInstanceOf[REX])) {
+        REX(true, false, false, true).get
+      } else {
+        Array[Byte]()
       }
-      
-      override def getPrefix(prefix: Seq[Prefix]) = {
-        if (prefix.exists(_.isInstanceOf[REX])) {
-          REX(true, true, false, false).get
-        } else {
-          Array[Byte]()
-        }
-      }
-  
-      def size = 1 + 4
-  }
-  
-  implicit object RMFormat3 extends TwoOperandFormat[reg, r32#Indirect, RM] {
-
-      def getAddressingForm(op1: reg, op2: r32#Indirect, opcodeExtension: Byte) = {
-        InstructionFormat (
-          addressingForm = OnlyModRM(ModRMReg(NoDisplacement, op1, rm = op2.base)),
-          immediate = None
-        )
-      }
-  
-      def size = 1
-  }
-  
-  implicit object MRFormat2 extends TwoOperandFormat[reg, reg, MR] {
-
-      def getAddressingForm(op1: reg, op2: reg, opcodeExtension: Byte) = {
-        RMFormat6.getAddressingForm(op2, op1, opcodeExtension)
-      }
-  
-      def size = RMFormat6.size
+    }
   }
 
-  implicit object M1Format extends TwoOperandFormat[rel32, One, M1] with Formats {
-      def getAddressingForm(op1: rel32,  op2: One, opcodeExtension: Byte) = MFormat32.getAddressingForm(op1, opcodeExtension)
-      def size = MFormat32.size
+  //  implicit object New_MIFormat64 extends NewTwoOperandFormat[reg, imm64] {
+  //
+  //    def getAddressingForm(op1: reg, op2: imm64, opcodeExtension: Byte) = {
+  //      InstructionFormat(
+  //        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
+  //        immediate = Some(op2))
+  //    }
+  //  }
+
+  implicit object New_OIFormat64 extends NewTwoOperandFormat[rm, imm64] {
+
+    def getAddressingForm(op1: rm, op2: imm64, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoModRM(),
+        immediate = Some(op2))
+    }
   }
-  
-  implicit object M1Format2 extends TwoOperandFormat[r32#Indirect, One, M1] with Formats {
-      def getAddressingForm(op1: r32#Indirect,  op2: One, opcodeExtension: Byte) = new MFormatIGeneric[r32#Indirect]{}.getAddressingForm(op1, opcodeExtension)
-      def size = new MFormatIGeneric[r32#Indirect]{}.size
+
+  implicit object New_OIFormat16 extends NewTwoOperandFormat[rm, imm16] {
+
+    def getAddressingForm(op1: rm, op2: imm16, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoModRM(),
+        immediate = Some(op2))
+    }
   }
-  
-  implicit object M1Format3 extends TwoOperandFormat[r64 + _, One, M1] with Formats {
-      def getAddressingForm(op1: r64+_,  op2: One, opcodeExtension: Byte) = MFormatB1.getAddressingForm(op1, opcodeExtension)
-      def size = MFormatB1.size
+
+  //  implicit object New_OIFormat8 extends NewTwoOperandFormat[rm, imm8] {
+  //
+  //      def getAddressingForm(op1: rm, op2: imm8, opcodeExtension: Byte) = {
+  //        InstructionFormat (
+  //          addressingForm = NoModRM(),
+  //          immediate = Some(op2)
+  //        )
+  //      }
+  //  
+  //      def size = 1
+  //  }
+
+  //   implicit object New_MFormat2R2 extends NewOneOperandFormat[GeneralPurpose[_64]#Indirect] {
+  //
+  //    def getAddressingForm(operand: GeneralPurpose[_64]#Indirect, opcodeExtension: Byte) = {
+  //      InstructionFormat(
+  //        addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base)), //mem.encode(opcode.opcodeExtension),
+  //        immediate = None)
+  //    }
+  //  }
+
+  implicit object New_MFormat2R3 extends NewOneOperandFormat[RSP#Indirect] {
+
+    def getAddressingForm(operand: RSP#Indirect, opcodeExtension: Byte) = {
+      InstructionFormat(
+        WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
+        immediate = None)
+    }
   }
-  
-  implicit object M1Format4 extends TwoOperandFormat[reg, One, M1] with Formats {
-      def getAddressingForm(op1: reg,  op2: One, opcodeExtension: Byte) = MFormat4.getAddressingForm(op1, opcodeExtension)
-      def size = MFormat4.size
+
+  implicit object New_MFormat4 extends NewOneOperandFormat[reg] {
+
+    def getAddressingForm(operand: reg, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, operand)), ///reg.encode(opcode.opcodeExtension),
+        immediate = None)
+    }
+  }
+
+  implicit object New_MFormatB1 extends NewOneOperandFormat[r64 + _] {
+
+    def getAddressingForm(operand: r64 + _, opcodeExtension: Byte) = {
+      InstructionFormat(
+        WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
+        immediate = None)
+    }
+
+  }
+
+  implicit object New_RMFormatB2 extends NewTwoOperandFormat[reg, reg + _32] {
+
+    def getAddressingForm(op1: reg, op2: reg + _32, opcodeExtension: Byte) = {
+      InstructionFormat(
+        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = op2.base), op2.displacement),
+        immediate = None)
+    }
+  }
+
+  implicit object New_MFormat5 extends NewOneOperandFormat[AbsoluteAddress[_32]] {
+
+    def getAddressingForm(operand: AbsoluteAddress[_32], opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), operand.displacement), //mem.encode(opcode.opcodeExtension),
+        immediate = None)
+    }
+  }
+
+  //  implicit object New_AbsoluteAddress32 extends AbsoluteAddress[_32] {
+  //    selff =>
+  //    var offset = 0
+  //    def displacement = Constant32(offset)
+  //
+  //    def getRelative = new Relative[_32] {
+  //      def displacement = Constant32(offset)
+  //      def size = 4
+  //    }
+  //  }
+  //
+  //  implicit object New_AbsoluteAddress64 extends AbsoluteAddress[_64] {
+  //    selff =>
+  //    var offset: Long = 0
+  //    def displacement = Constant64(offset)
+  //
+  //    def getRelative = new Relative[_64] {
+  //      def displacement = Constant64(offset)
+  //      def size = 4
+  //    }
+  //  }
+
+  implicit object New_RMFormat3 extends NewTwoOperandFormat[reg, r32#Indirect] {
+
+    def getAddressingForm(op1: reg, op2: r32#Indirect, opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = OnlyModRM(ModRMReg(NoDisplacement, op1, rm = op2.base)),
+        immediate = None)
+    }
+  }
+
+  implicit object New_RMFormat6 extends NewTwoOperandFormat[reg, reg] {
+
+    def getAddressingForm(op1: reg, op2: reg, opcodeExtension: Byte) = {
+
+      InstructionFormat(
+        OnlyModRM(ModRMReg(TwoRegisters, op2, op1)),
+        immediate = None)
+    }
+  }
+
+  implicit object New_RMFormat2 extends NewTwoOperandFormat[reg, AbsoluteAddress[_32]] {
+
+    def getAddressingForm(op1: reg, op2: AbsoluteAddress[_32], opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.displacement),
+        immediate = None)
+    }
+
+    override def getPrefix(prefix: Seq[Prefix]) = {
+      if (prefix.exists(_.isInstanceOf[REX])) {
+        REX(true, false, false, false).get
+      } else {
+        Array[Byte]()
+      }
+    }
   }
 }

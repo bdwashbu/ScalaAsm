@@ -96,7 +96,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def hasImplicateOperand: Boolean = false
     def explicitFormat: Option[InstructionFormat] = None
     
-    def apply[X <: O1](p1: Operand[X], implicitFormat: NewOneOperandFormat[X], prefix: Seq[Prefix]) = {  
+    def apply[X <: O1](p1: Operand[X], implicitFormat: OneOperandFormat[X], prefix: Seq[Prefix]) = {  
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
       
       val addressForm = explicitFormat getOrElse implicitFormat.getAddressingForm(p1.get, opEx)
@@ -119,7 +119,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def hasImplicateOperand: Boolean = false
     def explicitFormat(p1: O1, p2: O2): Option[InstructionFormat] = None
     
-    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], implicitFormat: NewTwoOperandFormat[X, Y]) = {
+    def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], implicitFormat: TwoOperandFormat[X, Y]) = {
       val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
       
        val addressForm = explicitFormat(p1.get, p2.get) getOrElse implicitFormat.getAddressingForm(p1.get, p2.get, opEx)

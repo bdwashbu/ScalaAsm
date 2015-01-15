@@ -11,7 +11,7 @@ import scala.language.implicitConversions
 import com.scalaAsm.x86.Operands._
 
 trait Low {
-  implicit object New_RMFormat extends NewTwoOperandFormat[reg, reg + _8] {
+  implicit object New_RMFormat extends TwoOperandFormat[reg, reg + _8] {
 
     def getAddressingForm(op1: reg, op2: reg + _8, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -20,7 +20,7 @@ trait Low {
     }
   }
 
-  implicit object New_OIFormat32 extends NewTwoOperandFormat[rm, imm32] {
+  implicit object New_OIFormat32 extends TwoOperandFormat[rm, imm32] {
 
     def getAddressingForm(op1: rm, op2: imm32, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -32,7 +32,7 @@ trait Low {
 
 trait Formats extends Low {
 
-  implicit object New_IFormat32 extends NewOneOperandFormat[imm32] {
+  implicit object New_IFormat32 extends OneOperandFormat[imm32] {
 
     def getAddressingForm(operand: imm32, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -41,7 +41,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MFormat64 extends NewOneOperandFormat[rel64] {
+  implicit object New_MFormat64 extends OneOperandFormat[rel64] {
 
     def getAddressingForm(operand: rel64, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -50,7 +50,7 @@ trait Formats extends Low {
     }
   }
 
-  trait MFormatIGeneric[X <: GeneralPurpose[_32]#Indirect] extends NewOneOperandFormat[X] {
+  trait MFormatIGeneric[X <: GeneralPurpose[_32]#Indirect] extends OneOperandFormat[X] {
 
     def getAddressingForm(operand: X, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -67,21 +67,21 @@ trait Formats extends Low {
   implicit object New_MFormatIGeneric7 extends MFormatIGeneric[EDI#Indirect]
   // There is no [EBP], its slot is used by 32-disp only mode
 
-  implicit object New_DSFormat extends NewOneOperandFormat[DS] {
+  implicit object New_DSFormat extends OneOperandFormat[DS] {
     def getAddressingForm(op1: DS, opcodeExtension: Byte) = NoAddressingForm
   }
 
-  implicit object New_CSFormat extends NewOneOperandFormat[CS] {
+  implicit object New_CSFormat extends OneOperandFormat[CS] {
     def getAddressingForm(op1: CS, opcodeExtension: Byte) = NoAddressingForm
   }
 
   // abbreviated  reg/imm format, used with common instrctions like 'add(eax, byte(8))'
-  // implicit object New_I2Format extends NewTwoOperandFormat[reg, imm] {
+  // implicit object New_I2Format extends TwoOperandFormat[reg, imm] {
   //    def getAddressingForm(op1: reg, op2: imm, opcodeExtension: Byte) = InstructionFormat (NoModRM(), Some(op2))
   //    def size = 1
   //}
 
-  implicit object New_IFormat8 extends NewOneOperandFormat[imm8] {
+  implicit object New_IFormat8 extends OneOperandFormat[imm8] {
 
     def getAddressingForm(operand: imm8, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -90,7 +90,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_IFormat16 extends NewOneOperandFormat[imm16] {
+  implicit object New_IFormat16 extends OneOperandFormat[imm16] {
 
     def getAddressingForm(operand: imm16, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -99,7 +99,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_IFormat64 extends NewOneOperandFormat[imm64] {
+  implicit object New_IFormat64 extends OneOperandFormat[imm64] {
 
     def getAddressingForm(operand: imm64, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -108,7 +108,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_OffsetFormat extends NewOneOperandFormat[r64 + _] {
+  implicit object New_OffsetFormat extends OneOperandFormat[r64 + _] {
 
     def getAddressingForm(operand: r64 + _, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -117,7 +117,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_OffsetFormat2 extends NewOneOperandFormat[reg + _8] {
+  implicit object New_OffsetFormat2 extends OneOperandFormat[reg + _8] {
 
     def getAddressingForm(operand: reg + _8, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -126,14 +126,14 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MRFormat extends NewTwoOperandFormat[reg + _8, reg] {
+  implicit object New_MRFormat extends TwoOperandFormat[reg + _8, reg] {
 
     def getAddressingForm(op1: reg + _8, op2: reg, opcodeExtension: Byte) = {
       New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
     }
   }
 
-  implicit object New_RMFormatB1 extends NewTwoOperandFormat[reg, StackPointer[_] + _8] {
+  implicit object New_RMFormatB1 extends TwoOperandFormat[reg, StackPointer[_] + _8] {
     def getAddressingForm(op1: reg, op2: StackPointer[_] + _8, opcodeExtension: Byte) = {
       InstructionFormat(
         WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement),
@@ -141,7 +141,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MIFormat8 extends NewTwoOperandFormat[reg, imm8] {
+  implicit object New_MIFormat8 extends TwoOperandFormat[reg, imm8] {
 
     def getAddressingForm(op1: reg, op2: imm8, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -150,7 +150,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MIFormat16 extends NewTwoOperandFormat[reg, imm16] {
+  implicit object New_MIFormat16 extends TwoOperandFormat[reg, imm16] {
 
     def getAddressingForm(op1: reg, op2: imm16, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -159,7 +159,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MIFormat32 extends NewTwoOperandFormat[reg, imm32] {
+  implicit object New_MIFormat32 extends TwoOperandFormat[reg, imm32] {
 
     def getAddressingForm(op1: reg, op2: imm32, opcodeExtension: Byte) = {
       if (opcodeExtension != -1) {
@@ -181,7 +181,7 @@ trait Formats extends Low {
     }
   }
 
-  //  implicit object New_MIFormat64 extends NewTwoOperandFormat[reg, imm64] {
+  //  implicit object New_MIFormat64 extends TwoOperandFormat[reg, imm64] {
   //
   //    def getAddressingForm(op1: reg, op2: imm64, opcodeExtension: Byte) = {
   //      InstructionFormat(
@@ -190,7 +190,7 @@ trait Formats extends Low {
   //    }
   //  }
 
-  implicit object New_OIFormat64 extends NewTwoOperandFormat[rm, imm64] {
+  implicit object New_OIFormat64 extends TwoOperandFormat[rm, imm64] {
 
     def getAddressingForm(op1: rm, op2: imm64, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -199,7 +199,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_OIFormat16 extends NewTwoOperandFormat[rm, imm16] {
+  implicit object New_OIFormat16 extends TwoOperandFormat[rm, imm16] {
 
     def getAddressingForm(op1: rm, op2: imm16, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -208,7 +208,7 @@ trait Formats extends Low {
     }
   }
 
-  //  implicit object New_OIFormat8 extends NewTwoOperandFormat[rm, imm8] {
+  //  implicit object New_OIFormat8 extends TwoOperandFormat[rm, imm8] {
   //
   //      def getAddressingForm(op1: rm, op2: imm8, opcodeExtension: Byte) = {
   //        InstructionFormat (
@@ -220,7 +220,7 @@ trait Formats extends Low {
   //      def size = 1
   //  }
 
-  //   implicit object New_MFormat2R2 extends NewOneOperandFormat[GeneralPurpose[_64]#Indirect] {
+  //   implicit object New_MFormat2R2 extends OneOperandFormat[GeneralPurpose[_64]#Indirect] {
   //
   //    def getAddressingForm(operand: GeneralPurpose[_64]#Indirect, opcodeExtension: Byte) = {
   //      InstructionFormat(
@@ -229,7 +229,7 @@ trait Formats extends Low {
   //    }
   //  }
 
-  implicit object New_MFormat2R3 extends NewOneOperandFormat[RSP#Indirect] {
+  implicit object New_MFormat2R3 extends OneOperandFormat[RSP#Indirect] {
 
     def getAddressingForm(operand: RSP#Indirect, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -238,7 +238,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MFormat4 extends NewOneOperandFormat[reg] {
+  implicit object New_MFormat4 extends OneOperandFormat[reg] {
 
     def getAddressingForm(operand: reg, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -247,7 +247,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MFormatB1 extends NewOneOperandFormat[r64 + _] {
+  implicit object New_MFormatB1 extends OneOperandFormat[r64 + _] {
 
     def getAddressingForm(operand: r64 + _, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -257,7 +257,7 @@ trait Formats extends Low {
 
   }
 
-  implicit object New_RMFormatB2 extends NewTwoOperandFormat[reg, reg + _32] {
+  implicit object New_RMFormatB2 extends TwoOperandFormat[reg, reg + _32] {
 
     def getAddressingForm(op1: reg, op2: reg + _32, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -266,7 +266,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MFormat5 extends NewOneOperandFormat[AbsoluteAddress[_32]] {
+  implicit object New_MFormat5 extends OneOperandFormat[AbsoluteAddress[_32]] {
 
     def getAddressingForm(operand: AbsoluteAddress[_32], opcodeExtension: Byte) = {
       InstructionFormat(
@@ -297,7 +297,7 @@ trait Formats extends Low {
   //    }
   //  }
 
-  implicit object New_RMFormat3 extends NewTwoOperandFormat[reg, r32#Indirect] {
+  implicit object New_RMFormat3 extends TwoOperandFormat[reg, r32#Indirect] {
 
     def getAddressingForm(op1: reg, op2: r32#Indirect, opcodeExtension: Byte) = {
       InstructionFormat(
@@ -306,7 +306,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_RMFormat6 extends NewTwoOperandFormat[reg, reg] {
+  implicit object New_RMFormat6 extends TwoOperandFormat[reg, reg] {
 
     def getAddressingForm(op1: reg, op2: reg, opcodeExtension: Byte) = {
 
@@ -316,7 +316,7 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_RMFormat2 extends NewTwoOperandFormat[reg, AbsoluteAddress[_32]] {
+  implicit object New_RMFormat2 extends TwoOperandFormat[reg, AbsoluteAddress[_32]] {
 
     def getAddressingForm(op1: reg, op2: AbsoluteAddress[_32], opcodeExtension: Byte) = {
       InstructionFormat(

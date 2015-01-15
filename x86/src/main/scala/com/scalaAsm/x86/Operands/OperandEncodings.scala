@@ -3,8 +3,6 @@ package Operands
 
 import Memory._
 import com.scalaAsm.x86.OpcodeFormat
-import com.scalaAsm.x86.Instructions.`package`.TwoOperandEncoding
-import com.scalaAsm.x86.Instructions.`package`.OneOperandEncoding
 
 object NoOperand
 
@@ -17,24 +15,12 @@ class NoOperandFormat extends ResolvedZeroOperand(null, Seq()) {
 }
 
 
-abstract class TwoOperandFormat[-X, -Y, -OpEn] {
-  def getAddressingForm(op1: X, op2: Y, opcodeExtension: Byte): InstructionFormat
-  def getPrefix(prefix: Seq[Prefix]): Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
-  def size: Int
-}
-
-abstract class NewTwoOperandFormat[-X, -Y] {
+abstract class TwoOperandFormat[-X, -Y] {
   def getAddressingForm(op1: X, op2: Y, opcodeExtension: Byte): InstructionFormat
   def getPrefix(prefix: Seq[Prefix]): Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
 }
 
-abstract class OneOperandFormat[-X, -OpEn] {
-  def getAddressingForm(op1: X, opcodeExtension: Byte): InstructionFormat
-  def getPrefix(prefix: Seq[Prefix]): Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
-  def size: Int
-}
-
-abstract class NewOneOperandFormat[-X] {
+abstract class OneOperandFormat[-X] {
   def getAddressingForm(op1: X, opcodeExtension: Byte): InstructionFormat
   def getPrefix(prefix: Seq[Prefix]): Array[Byte] = prefix.map(_.get).foldLeft(Array[Byte]()){ _ ++ _ }
 }

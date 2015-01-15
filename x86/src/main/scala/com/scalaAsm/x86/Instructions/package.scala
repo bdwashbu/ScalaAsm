@@ -1,41 +1,15 @@
 package com.scalaAsm.x86
 
-import com.scalaAsm.x86.Operands.GeneralPurpose
-import com.scalaAsm.x86.Operands.Constant
 import com.scalaAsm.x86.Operands._
-import scala.language.higherKinds
-import scala.language.existentials
 
 package object Instructions {
 
-  trait TwoOperandEncoding[-O1, -O2]
-  trait OneOperandEncoding[-O1]
-  
-  trait NP
-
-  trait M extends OneOperandEncoding[rm]
-  trait O extends OneOperandEncoding[rm] // can we define this better?
-  trait I extends OneOperandEncoding[imm]
-  trait D extends OneOperandEncoding[rel]
-  trait Offset extends OneOperandEncoding[rm] // is this different than O?
-
-  trait I2 extends TwoOperandEncoding[reg, imm]
-  trait MR extends TwoOperandEncoding[rm, reg]
-  trait OI extends TwoOperandEncoding[rm, imm] // can we define this better
-  trait RM extends TwoOperandEncoding[reg, rm]
-  trait M1 extends TwoOperandEncoding[rm, One]
-  trait MI extends TwoOperandEncoding[rm, imm]
-  
-  trait CSFormat extends OneOperandEncoding[CS]
-  trait DSFormat extends OneOperandEncoding[DS]
- 
-  
   trait OneOperand[X <: InstructionDefinition[_]] {
-    def apply[O1](p1: Operand[O1])(implicit ev: X#_1[O1], format: NewOneOperandFormat[O1]) = ev(p1, format, ev.prefix)
+    def apply[O1](p1: Operand[O1])(implicit ev: X#_1[O1], format: OneOperandFormat[O1]) = ev(p1, format, ev.prefix)
   }
  
   trait TwoOperands[X <: InstructionDefinition[_]] {
-    def apply[O1, O2](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2[O1, O2], format: NewTwoOperandFormat[O1, O2]) = ev(p1,p2, format)
+    def apply[O1, O2](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2[O1, O2], format: TwoOperandFormat[O1, O2]) = ev(p1,p2, format)
   }
   
   class ZeroOperands[X <: InstructionDefinition[_]] {

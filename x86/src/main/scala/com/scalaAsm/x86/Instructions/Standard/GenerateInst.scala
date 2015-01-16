@@ -16,7 +16,7 @@ object GenerateInst {
   trait InstructionInstance {
     protected def getClassHeader: String
     protected def hasImplicateOperand: Boolean
-    protected def getExplicitFormat: String
+    protected def getExplicitFormat: Seq[String]
     val mnemonic: String
     def getSize: Int
     def opcode: Int
@@ -38,26 +38,25 @@ object GenerateInst {
       generateClass(0).hashCode
     }
 
-    def generateClass(numSpaces: Int) = {
+    def generateClass: Seq[String] = {
 
-      val spaces = (1 to numSpaces) map (x => " ") mkString
       val header = getClassHeader
 
       def getOpcodeString = {
         if (entry.hasRegisterInModRM) {
-          spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " /r\n"
+          Seq("def opcode = 0x" + opcode.toHexString.toUpperCase() + " /r\n")
         } else if (entry.opcodeEx.isDefined) {
-          spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " /+ " + entry.opcodeEx.get + "\n"
+          Seq("def opcode = 0x" + opcode.toHexString.toUpperCase() + " /+ " + entry.opcodeEx.get + "\n")
         } else {
-          spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + "\n"
+          Seq("def opcode = 0x" + opcode.toHexString.toUpperCase() + "\n")
         }
       }
 
-      val opcodeString = getOperand.map { op =>
+      val opcodeString: Seq[String] = getOperand.map { op =>
         op.addressingMethod match {
           case Some(OpcodeSelectsRegister) =>
             val regCode = if (op.operandType.code == "q") "o" else op.operandType.code // for some reason the code for 64-bit is "ro"
-            spaces + "  def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + regCode + "\n"
+            Seq("def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + regCode + "\n")
           case _ => getOpcodeString
           //}
 
@@ -66,26 +65,25 @@ object GenerateInst {
       
       
 
-      val prefix = getOperand.map { op =>
+      val prefix: Seq[String] = getOperand.map { op =>
         op match {
           case OperandInstance(address, operandType, size, _) =>
             if (operandType.isInstanceOf[FixedOperandType] && operandType.asInstanceOf[FixedOperandType].promotedByRex && op.operandSize.size == 64) {
-              spaces + "  override def prefix = REX.W(true)\n"
+              Seq("override def prefix = REX.W(true)\n")
             } else {
-              ""
+              Nil
             }
-          case _ => ""
+          case _ => Nil
         }
-      }.getOrElse("")
+      }.getOrElse(Nil)
 
-      val implicate = if (entry.syntax.exists { syn => syn.hasImplicate }) {
-        spaces + "  override def hasImplicateOperand = true\n"
+      val implicate: Seq[String] = if (entry.syntax.exists { syn => syn.hasImplicate }) {
+        Seq("override def hasImplicateOperand = true\n")
       } else {
-        ""
+        Nil
       }
-      val footer = "  }"
-      val format = if (getExplicitFormat != "") spaces + getExplicitFormat else ""
-      "  " + header + opcodeString + prefix + format + implicate + footer
+      val footer = "}"
+      header +: (Seq(opcodeString, prefix, getExplicitFormat, implicate).flatten.map(x => "  " + x) :+ footer)
     }
   }
 
@@ -102,7 +100,7 @@ object GenerateInst {
     }
 
     def hasImplicateOperand: Boolean = false
-    def getExplicitFormat = ""
+    def getExplicitFormat = Nil
 
     def getSize: Int = 0
   }
@@ -127,8 +125,8 @@ object GenerateInst {
     def getExplicitFormat = {
         operand.addressingMethod match {
           case Some(OpcodeSelectsRegister) =>
-            "  override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))\n"
-          case _ => ""
+            Seq("override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))\n")
+          case _ => Nil
         }
     }
 
@@ -156,20 +154,20 @@ object GenerateInst {
     def getExplicitFormat = {
       if (operands._2.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _32 &&
             operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _32) {
-        "  override def explicitFormat(op1: r32, op2: rm32) = {\n" +
-        "     if (op2.isInstanceOf[reg]) {\n" +
-        "        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))\n" +
-        "     } else None\n" +
-        "   }\n"
+        Seq("override def explicitFormat(op1: r32, op2: rm32) = {\n",
+             "  if (op2.isInstanceOf[reg]) {\n",
+             "    Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))\n",
+             "  } else None\n",
+             "}\n")
       } else if (operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._1.addressingMethod.get.abbreviation == "rm" && operands._1.operandSize == _32 &&
             operands._2.addressingMethod.get.abbreviation == "r" && operands._2.operandSize == _32) {
-        "  override def explicitFormat(op1: rm32, op2: r32) = {\n" +
-        "     if (op1.isInstanceOf[reg]) {\n" +
-        "        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))\n" +
-        "     } else None\n" +
-        "   }\n"
+        Seq("override def explicitFormat(op1: rm32, op2: r32) = {\n",
+             "  if (op1.isInstanceOf[reg]) {\n",
+             "     Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))\n",
+             "  } else None\n",
+             "}\n")
       } else {
-        ""
+        Nil
       }
       
     }
@@ -527,7 +525,7 @@ object GenerateInst {
       writer.println("trait " + mnemonic.toUpperCase() + "Low {")
       val descriptions = Set[String]()
       for (inst <- low) {
-        writer.println(inst.generateClass(2))
+        writer.println(inst.generateClass.map(x => "  " + x).mkString)
         if (inst != low.last)
           writer.println("") 
       }
@@ -535,7 +533,7 @@ object GenerateInst {
 
       writer.println("trait " + mnemonic.toUpperCase() + "Impl extends " + mnemonic.toUpperCase() + "Low {")
       for (inst <- high) {
-        writer.println(inst.generateClass(2))
+        writer.println(inst.generateClass.map(x => "  " + x).mkString)
         if (inst != high.last)
           writer.println("")
       }
@@ -543,7 +541,7 @@ object GenerateInst {
     } else {
       writer.println("trait " + mnemonic.toUpperCase() + "Impl {")
       for (inst <- instructions) {
-        writer.println(inst.generateClass(2))
+        writer.println(inst.generateClass.map(x => "  " + x).mkString)
         if (inst != instructions.last)
           writer.println("")
       }

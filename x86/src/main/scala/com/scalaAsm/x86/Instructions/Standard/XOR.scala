@@ -17,10 +17,10 @@ trait XORLow {
   implicit object XOR_51_r32_rm32 extends XOR._2[r32, rm32] {
     def opcode = 0x33 /r
     override def explicitFormat(op1: r32, op2: rm32) = {
-     if (op2.isInstanceOf[reg]) {
+      if (op2.isInstanceOf[reg]) {
         Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))
-     } else None
-   }
+      } else None
+    }
   }
 
   implicit object XOR_51_r64_rm64 extends XOR._2[r64, rm64] {
@@ -41,10 +41,10 @@ trait XORImpl extends XORLow {
   implicit object XOR_49_rm32_r32 extends XOR._2[rm32, r32] {
     def opcode = 0x31 /r
     override def explicitFormat(op1: rm32, op2: r32) = {
-     if (op1.isInstanceOf[reg]) {
-        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))
-     } else None
-   }
+      if (op1.isInstanceOf[reg]) {
+         Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))
+      } else None
+    }
   }
 
   implicit object XOR_49_rm64_r64 extends XOR._2[rm64, r64] {

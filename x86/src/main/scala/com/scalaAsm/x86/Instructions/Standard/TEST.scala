@@ -21,10 +21,10 @@ trait TESTImpl {
   implicit object TEST_133_rm32_r32 extends TEST._2[rm32, r32] {
     def opcode = 0x85 /r
     override def explicitFormat(op1: rm32, op2: r32) = {
-     if (op1.isInstanceOf[reg]) {
-        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))
-     } else None
-   }
+      if (op1.isInstanceOf[reg]) {
+         Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))
+      } else None
+    }
   }
 
   implicit object TEST_133_rm64_r64 extends TEST._2[rm64, r64] {

@@ -17,10 +17,10 @@ trait ADDLow {
   implicit object ADD_3_r32_rm32 extends ADD._2[r32, rm32] {
     def opcode = 0x3 /r
     override def explicitFormat(op1: r32, op2: rm32) = {
-     if (op2.isInstanceOf[reg]) {
+      if (op2.isInstanceOf[reg]) {
         Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))
-     } else None
-   }
+      } else None
+    }
   }
 
   implicit object ADD_3_r64_rm64 extends ADD._2[r64, rm64] {
@@ -41,10 +41,10 @@ trait ADDImpl extends ADDLow {
   implicit object ADD_1_rm32_r32 extends ADD._2[rm32, r32] {
     def opcode = 0x1 /r
     override def explicitFormat(op1: rm32, op2: r32) = {
-     if (op1.isInstanceOf[reg]) {
-        Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))
-     } else None
-   }
+      if (op1.isInstanceOf[reg]) {
+         Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op2, op1.asInstanceOf[reg])), immediate = None))
+      } else None
+    }
   }
 
   implicit object ADD_1_rm64_r64 extends ADD._2[rm64, r64] {

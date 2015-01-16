@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object LEA extends InstructionDefinition[OneOpcode]("LEA") with LEAImpl
 
+// Load Effective Address
+
 trait LEAImpl {
   implicit object LEA_141_r16_m extends LEA._2[r16, m] {
     def opcode = 0x8D /r

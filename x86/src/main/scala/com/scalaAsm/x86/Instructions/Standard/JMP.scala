@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object JMP extends InstructionDefinition[OneOpcode]("JMP") with JMPImpl
 
+// Jump
+
 trait JMPLow {
   implicit object JMP_255_rm16 extends JMP._1[rm16] {
     def opcode = 0xFF /+ 4

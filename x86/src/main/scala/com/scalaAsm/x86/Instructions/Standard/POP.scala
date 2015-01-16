@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object POP extends InstructionDefinition[OneOpcode]("POP") with POPImpl
 
+// Pop a Value from the Stack
+
 trait POPLow {
   implicit object POP_143_rm16 extends POP._1[rm16] {
     def opcode = 0x8F /+ 0

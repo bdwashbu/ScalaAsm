@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object SHL extends InstructionDefinition[OneOpcode]("SHL") with SHLImpl
 
+// Shift
+
 trait SHLLow {
   implicit object SHL_209_rm16 extends SHL._1[rm16] {
     def opcode = 0xD1 /+ 4

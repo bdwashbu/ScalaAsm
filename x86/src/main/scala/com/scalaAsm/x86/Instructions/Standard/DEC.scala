@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object DEC extends InstructionDefinition[OneOpcode]("DEC") with DECImpl
 
+// Decrement by 1
+
 trait DECLow {
   implicit object DEC_255_rm16 extends DEC._1[rm16] {
     def opcode = 0xFF /+ 1

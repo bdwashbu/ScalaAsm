@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object CMP extends InstructionDefinition[OneOpcode]("CMP") with CMPImpl
 
+// Compare Two Operands
+
 trait CMPLow {
   implicit object CMP_59_r16_rm16 extends CMP._2[r16, rm16] {
     def opcode = 0x3B /r

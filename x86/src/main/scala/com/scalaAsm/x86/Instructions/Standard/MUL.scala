@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object MUL extends InstructionDefinition[OneOpcode]("MUL") with MULImpl
 
+// Unsigned Multiply
+
 trait MULLow {
   implicit object MUL_247_rm16 extends MUL._1[rm16] {
     def opcode = 0xF7 /+ 4

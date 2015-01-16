@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object PUSH extends InstructionDefinition[OneOpcode]("PUSH") with PUSHImpl
 
+// Push Word, Doubleword or Quadword Onto the Stack
+
 trait PUSHLow {
   implicit object PUSH_255_rm16 extends PUSH._1[rm16] {
     def opcode = 0xFF /+ 6

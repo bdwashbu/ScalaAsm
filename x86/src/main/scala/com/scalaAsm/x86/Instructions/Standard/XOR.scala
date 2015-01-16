@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object XOR extends InstructionDefinition[OneOpcode]("XOR") with XORImpl
 
+// Logical Exclusive OR
+
 trait XORLow {
   implicit object XOR_51_r16_rm16 extends XOR._2[r16, rm16] {
     def opcode = 0x33 /r

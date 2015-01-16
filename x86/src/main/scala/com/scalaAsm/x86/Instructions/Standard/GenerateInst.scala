@@ -14,7 +14,7 @@ import com.scalaAsm.x86.OperandTypes.{_8, _16, _32}
 object GenerateInst {
 
   trait InstructionInstance {
-    protected def getClassHeader(numSpaces: Int): String
+    protected def getClassHeader: String
     protected def hasImplicateOperand: Boolean
     protected def getExplicitFormat: String
     val mnemonic: String
@@ -22,6 +22,7 @@ object GenerateInst {
     def opcode: Int
     def entry: x86Entry
     def getOperand: Option[OperandInstance]
+    def description = entry.brief
     
     override def equals(x: Object) = {
       if (x.isInstanceOf[InstructionInstance]) {
@@ -40,7 +41,7 @@ object GenerateInst {
     def generateClass(numSpaces: Int) = {
 
       val spaces = (1 to numSpaces) map (x => " ") mkString
-      val header = getClassHeader(numSpaces)
+      val header = getClassHeader
 
       def getOpcodeString = {
         if (entry.hasRegisterInModRM) {
@@ -84,7 +85,7 @@ object GenerateInst {
       }
       val footer = "  }"
       val format = if (getExplicitFormat != "") spaces + getExplicitFormat else ""
-      header + opcodeString + prefix + format + implicate + footer
+      "  " + header + opcodeString + prefix + format + implicate + footer
     }
   }
 
@@ -95,9 +96,8 @@ object GenerateInst {
 
     def getOperand = None
 
-    def getClassHeader(numSpaces: Int): String = {
-      val spaces = (1 to numSpaces) map (x => " ") mkString
-      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._0 {\n"
+    def getClassHeader: String = {
+      val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._0 {\n"
       result
     }
 
@@ -115,9 +115,8 @@ object GenerateInst {
 
     def getOperand = Some(operand)
 
-    def getClassHeader(numSpaces: Int): String = {
-      val spaces = (1 to numSpaces) map (x => " ") mkString
-      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand + "] {\n"
+    def getClassHeader: String = {
+      val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand + "] {\n"
       result
     }
 
@@ -145,9 +144,8 @@ object GenerateInst {
                                       operands: TwoOperandInstance,
                                       entry: x86Entry) extends InstructionInstance {
 
-    def getClassHeader(numSpaces: Int): String = {
-      val spaces = (1 to numSpaces) map (x => " ") mkString
-      val result = spaces + "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2[" + operands._1 + ", " + operands._2 + "] {\n"
+    def getClassHeader: String = {
+      val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2[" + operands._1 + ", " + operands._2 + "] {\n"
       result
     }
 
@@ -216,7 +214,8 @@ object GenerateInst {
                       opsize: Option[Boolean],
                       direction: Option[Boolean],
                       hasRegisterInModRM: Boolean,
-                      hasModRMByte: Boolean)
+                      hasModRMByte: Boolean,
+                      brief: String)
 
   case class SyntaxDef(mnemonic: String,
                        operands: Seq[OperandDef],
@@ -446,13 +445,15 @@ object GenerateInst {
     val opSize = getOptionalBoolean(entry \ "@opsize")
     val direction = getOptionalBoolean(entry \ "@direction")
     val isRegister = (entry \@ "r") == "yes"
+    val note = (entry \ "note" \ "brief")
+    val brief = if (note.isEmpty) "" else note.text
 
     val operandDefs = parseSyntax(entry)
 
     // seems to be pretty simple
     val hasModRMByte = isRegister || opcodeEx.isDefined
 
-    x86Entry(mode, operandDefs, opcodeEx, opSize, direction, isRegister, hasModRMByte)
+    x86Entry(mode, operandDefs, opcodeEx, opSize, direction, isRegister, hasModRMByte, brief)
   }
 
   def loadXML(): Seq[x86InstructionDef] = {
@@ -468,42 +469,19 @@ object GenerateInst {
 
     var lastEntry: x86Entry = null
 
-    println("Loading XML..." + opcodes.size + " opcodes read")
-
-    opcodes.flatMap { op =>
+    val result = opcodes.flatMap { op =>
       op.entries.flatMap { entry =>
         entry.syntax.map { syntax =>
           x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry)
         }
       }
-      //println("generating " + op.opcode + ", " + op.entries.size)
-      //val pairs = op.entries.sliding(2).toList
-
-//      if (pairs.size == 1 && pairs(0).size == 1) {
-//        pairs(0)(0).syntax.map { syntax =>
-//          x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, pairs(0)(0), Seq())
-//        }
-//      } else {
-//        pairs.flatMap { entry =>
-//
-//          if (entry(0).mode == None) {
-//            val _64Version = if (entry(1).mode == Some("e")) Seq(entry(1)) else Seq()
-//            entry(0).syntax.map { syntax =>
-//              x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, entry(0), _64Version)
-//            }
-//          } else {
-//            Seq()
-//          }
-//
-//        } ++ (if (!op.entries.isEmpty && op.entries.last.mode == None) {
-//          op.entries.last.syntax.map { syntax =>
-//            x86InstructionDef(op.opcode, syntax.mnemonic, syntax.operands, op.entries.last, Seq())
-//          }
-//        } else {
-//          Seq()
-//        })
-//      }
     }
+    
+    val mnemonicMap = result.groupBy { x => x.mnemonic }
+    
+    println("Loading XML..." + opcodes.size + " opcodes read..." + mnemonicMap.size + " mnemonics read...")
+    
+    result
   }
 
   def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance]) = {
@@ -529,6 +507,8 @@ object GenerateInst {
       }
     }
 
+    val briefs = instructions.map(inst => inst.entry.brief).toSet.reduce(_ + ", " + _)
+    
     writer.println("package com.scalaAsm.x86");
     writer.println("package Instructions");
     writer.println("package Standard");
@@ -538,9 +518,14 @@ object GenerateInst {
     writer.println("")
     writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition[OneOpcode](\"" + mnemonic + "\") with " + mnemonic.toUpperCase() + "Impl")
     writer.println("")
+    
+    if (briefs != "") {
+      writer.println("// " + briefs + "\n")
+    }
 
     if (!low.isEmpty && !high.isEmpty) {
       writer.println("trait " + mnemonic.toUpperCase() + "Low {")
+      val descriptions = Set[String]()
       for (inst <- low) {
         writer.println(inst.generateClass(2))
         if (inst != low.last)
@@ -571,8 +556,8 @@ object GenerateInst {
     try {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
+      println(insts.size + " instruction instances generated!")
       for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH", "LEA", "POP", "LEAVE", "RETN", "JZ", "CALL")) {
-      //for (mnem <- List("PUSH")) { // LEA doesnt work
         val uniqueInst = LinkedHashSet[InstructionInstance]()
         insts.filter(_.mnemonic == mnem).foreach{x => uniqueInst += x}
         outputInstructionFile(mnem, uniqueInst)

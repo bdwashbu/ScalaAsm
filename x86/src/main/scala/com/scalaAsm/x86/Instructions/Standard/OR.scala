@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object OR extends InstructionDefinition[OneOpcode]("OR") with ORImpl
 
+// Logical Inclusive OR
+
 trait ORLow {
   implicit object OR_11_r16_rm16 extends OR._2[r16, rm16] {
     def opcode = 0xB /r

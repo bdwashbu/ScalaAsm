@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object CALL extends InstructionDefinition[OneOpcode]("CALL") with CALLImpl
 
+// Call Procedure
+
 trait CALLLow {
   implicit object CALL_255_rm16 extends CALL._1[rm16] {
     def opcode = 0xFF /+ 2

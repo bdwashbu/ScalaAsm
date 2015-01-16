@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object LEAVE extends InstructionDefinition[OneOpcode]("LEAVE") with LEAVEImpl
 
+// High Level Procedure Exit
+
 trait LEAVEImpl {
   implicit object LEAVE_201 extends LEAVE._0 {
     def opcode = 0xC9

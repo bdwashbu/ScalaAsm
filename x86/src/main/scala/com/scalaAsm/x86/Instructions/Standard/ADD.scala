@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object ADD extends InstructionDefinition[OneOpcode]("ADD") with ADDImpl
 
+// Add
+
 trait ADDLow {
   implicit object ADD_3_r16_rm16 extends ADD._2[r16, rm16] {
     def opcode = 0x3 /r

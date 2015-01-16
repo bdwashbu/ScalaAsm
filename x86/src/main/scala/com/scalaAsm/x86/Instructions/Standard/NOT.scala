@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object NOT extends InstructionDefinition[OneOpcode]("NOT") with NOTImpl
 
+// One's Complement Negation
+
 trait NOTLow {
   implicit object NOT_247_rm16 extends NOT._1[rm16] {
     def opcode = 0xF7 /+ 2

@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object SUB extends InstructionDefinition[OneOpcode]("SUB") with SUBImpl
 
+// Subtract
+
 trait SUBLow {
   implicit object SUB_43_r16_rm16 extends SUB._2[r16, rm16] {
     def opcode = 0x2B /r

@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object TEST extends InstructionDefinition[OneOpcode]("TEST") with TESTImpl
 
+// Logical Compare
+
 trait TESTImpl {
   implicit object TEST_132_rm8_r8 extends TEST._2[rm8, r8] {
     def opcode = 0x84 /r

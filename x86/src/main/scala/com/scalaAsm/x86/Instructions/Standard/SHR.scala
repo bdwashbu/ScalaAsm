@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object SHR extends InstructionDefinition[OneOpcode]("SHR") with SHRImpl
 
+// Shift
+
 trait SHRLow {
   implicit object SHR_209_rm16 extends SHR._1[rm16] {
     def opcode = 0xD1 /+ 5

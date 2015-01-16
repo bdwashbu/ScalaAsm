@@ -7,6 +7,8 @@ import com.scalaAsm.x86.Operands.Memory._
 
 object AND extends InstructionDefinition[OneOpcode]("AND") with ANDImpl
 
+// Logical AND
+
 trait ANDLow {
   implicit object AND_35_r16_rm16 extends AND._2[r16, rm16] {
     def opcode = 0x23 /r

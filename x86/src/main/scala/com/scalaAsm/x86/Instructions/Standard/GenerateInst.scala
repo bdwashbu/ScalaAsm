@@ -554,7 +554,7 @@ object GenerateInst {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
       println(insts.size + " instruction instances generated!")
-      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH", "LEA", "POP", "LEAVE", "RETN", "JZ", "CALL")) {
+      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "SBB", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH", "LEA", "POP", "LEAVE", "RETN", "JZ", "CALL")) {
         val uniqueInst = LinkedHashSet[InstructionInstance]()
         insts.filter(_.mnemonic == mnem).foreach{x => uniqueInst += x}
         outputInstructionFile(mnem, uniqueInst)

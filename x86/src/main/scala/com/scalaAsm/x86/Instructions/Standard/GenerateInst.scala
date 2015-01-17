@@ -208,7 +208,10 @@ object GenerateInst {
                       direction: Option[Boolean],
                       hasRegisterInModRM: Boolean,
                       hasModRMByte: Boolean,
-                      brief: String)
+                      brief: String,
+                      group1: Option[String],
+                      group2: Option[String],
+                      group3: Option[String])
 
   case class SyntaxDef(mnemonic: String,
                        operands: Seq[OperandDef],
@@ -437,6 +440,9 @@ object GenerateInst {
     val opcodeEx = getOptionalInt(entry \ "opcd_ext")
     val opSize = getOptionalBoolean(entry \ "@opsize")
     val direction = getOptionalBoolean(entry \ "@direction")
+    val grp1 = getOptionalString(entry \ "grp1")
+    val grp2 = getOptionalString(entry \ "grp2")
+    val grp3 = getOptionalString(entry \ "grp3")
     val isRegister = (entry \@ "r") == "yes"
     val note = (entry \ "note" \ "brief")
     val brief = if (note.isEmpty) "" else note.text
@@ -446,7 +452,7 @@ object GenerateInst {
     // seems to be pretty simple
     val hasModRMByte = isRegister || opcodeEx.isDefined
 
-    x86Entry(mode, operandDefs, opcodeEx, opSize, direction, isRegister, hasModRMByte, brief)
+    x86Entry(mode, operandDefs, opcodeEx, opSize, direction, isRegister, hasModRMByte, brief, grp1, grp2, grp3)
   }
 
   def loadXML(): Seq[x86InstructionDef] = {
@@ -477,8 +483,10 @@ object GenerateInst {
     result
   }
 
-  def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance]) = {
-    val writer = new PrintWriter("src/main/scala/com/scalaAsm/x86/Instructions/Standard/" + mnemonic + ".scala", "UTF-8");
+  def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance], folder: String) = {
+    val newFolder = new File("src/main/scala/com/scalaAsm/x86/Instructions/" + folder)
+    if (!newFolder.exists()) newFolder.mkdir();
+    val writer = new PrintWriter("src/main/scala/com/scalaAsm/x86/Instructions/" + folder + "/" + mnemonic + ".scala", "UTF-8");
 
 
     // must do this to resolve (rm, r) (r, rm) ambiguous implicit resolution.  A little hacky
@@ -508,7 +516,7 @@ object GenerateInst {
     
     writer.println("package com.scalaAsm.x86");
     writer.println("package Instructions");
-    writer.println("package Standard");
+    writer.println("package " + folder);
     writer.println("")
     writer.println("import com.scalaAsm.x86.Operands._")
     writer.println("import com.scalaAsm.x86.Operands.Memory._")
@@ -554,11 +562,14 @@ object GenerateInst {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
       println(insts.size + " instruction instances generated!")
-      for (mnem <- List("ADD", "AND", "DEC", "NOT", "OR", "XOR", "CMP", "SUB", "SHL", "SHR", "SBB", "INT", "JMP", "TEST", "MUL", "PUSHF", "PUSH", "LEA", "POP", "LEAVE", "RETN", "JZ", "CALL")) {
-        val uniqueInst = LinkedHashSet[InstructionInstance]()
-        insts.filter(_.mnemonic == mnem).foreach{x => uniqueInst += x}
-        outputInstructionFile(mnem, uniqueInst)
-      }
+        insts.filter(inst => inst.entry.group1.getOrElse("") == "gen").groupBy { x => x.mnemonic }.foreach{ 
+             case (mnem, insts) => {
+               val uniqueInst = LinkedHashSet[InstructionInstance]()
+               uniqueInst ++= insts
+               outputInstructionFile(mnem, uniqueInst, insts.flatMap{x => x.entry.group2}.head)
+             }
+           }
+      //}
       println("Done generating instructions!")
     } catch {
       case e: Exception => e.printStackTrace()

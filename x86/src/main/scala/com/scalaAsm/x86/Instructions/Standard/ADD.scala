@@ -10,11 +10,11 @@ object ADD extends InstructionDefinition[OneOpcode]("ADD") with ADDImpl
 // Add
 
 trait ADDLow {
-  implicit object ADD_3_r16_rm16 extends ADD._2[r16, rm16] {
+  implicit object ADD_0 extends ADD._2[r16, rm16] {
     def opcode = 0x3 /r
   }
 
-  implicit object ADD_3_r32_rm32 extends ADD._2[r32, rm32] {
+  implicit object ADD_1 extends ADD._2[r32, rm32] {
     def opcode = 0x3 /r
     override def explicitFormat(op1: r32, op2: rm32) = {
       if (op2.isInstanceOf[reg]) {
@@ -23,22 +23,22 @@ trait ADDLow {
     }
   }
 
-  implicit object ADD_3_r64_rm64 extends ADD._2[r64, rm64] {
+  implicit object ADD_2 extends ADD._2[r64, rm64] {
     def opcode = 0x3 /r
     override def prefix = REX.W(true)
   }
 }
 
 trait ADDImpl extends ADDLow {
-  implicit object ADD_0_rm8_r8 extends ADD._2[rm8, r8] {
+  implicit object ADD_3 extends ADD._2[rm8, r8] {
     def opcode = 0x0 /r
   }
 
-  implicit object ADD_1_rm16_r16 extends ADD._2[rm16, r16] {
+  implicit object ADD_4 extends ADD._2[rm16, r16] {
     def opcode = 0x1 /r
   }
 
-  implicit object ADD_1_rm32_r32 extends ADD._2[rm32, r32] {
+  implicit object ADD_5 extends ADD._2[rm32, r32] {
     def opcode = 0x1 /r
     override def explicitFormat(op1: rm32, op2: r32) = {
       if (op1.isInstanceOf[reg]) {
@@ -47,58 +47,58 @@ trait ADDImpl extends ADDLow {
     }
   }
 
-  implicit object ADD_1_rm64_r64 extends ADD._2[rm64, r64] {
+  implicit object ADD_6 extends ADD._2[rm64, r64] {
     def opcode = 0x1 /r
     override def prefix = REX.W(true)
   }
 
-  implicit object ADD_2_r8_rm8 extends ADD._2[r8, rm8] {
+  implicit object ADD_7 extends ADD._2[r8, rm8] {
     def opcode = 0x2 /r
   }
 
-  implicit object ADD_4_AL_imm8 extends ADD._2[AL, imm8] {
+  implicit object ADD_8 extends ADD._2[AL, imm8] {
     def opcode = 0x4
   }
 
-  implicit object ADD_5_AX_imm16 extends ADD._2[AX, imm16] {
+  implicit object ADD_9 extends ADD._2[AX, imm16] {
     def opcode = 0x5
   }
 
-  implicit object ADD_5_EAX_imm32 extends ADD._2[EAX, imm32] {
+  implicit object ADD_10 extends ADD._2[EAX, imm32] {
     def opcode = 0x5
   }
 
-  implicit object ADD_5_RAX_imm32 extends ADD._2[RAX, imm32] {
+  implicit object ADD_11 extends ADD._2[RAX, imm32] {
     def opcode = 0x5
     override def prefix = REX.W(true)
   }
 
-  implicit object ADD_128_rm8_imm8 extends ADD._2[rm8, imm8] {
+  implicit object ADD_12 extends ADD._2[rm8, imm8] {
     def opcode = 0x80 /+ 0
   }
 
-  implicit object ADD_129_rm16_imm16 extends ADD._2[rm16, imm16] {
+  implicit object ADD_13 extends ADD._2[rm16, imm16] {
     def opcode = 0x81 /+ 0
   }
 
-  implicit object ADD_129_rm32_imm32 extends ADD._2[rm32, imm32] {
+  implicit object ADD_14 extends ADD._2[rm32, imm32] {
     def opcode = 0x81 /+ 0
   }
 
-  implicit object ADD_129_rm64_imm32 extends ADD._2[rm64, imm32] {
+  implicit object ADD_15 extends ADD._2[rm64, imm32] {
     def opcode = 0x81 /+ 0
     override def prefix = REX.W(true)
   }
 
-  implicit object ADD_131_rm16_imm8 extends ADD._2[rm16, imm8] {
+  implicit object ADD_16 extends ADD._2[rm16, imm8] {
     def opcode = 0x83 /+ 0
   }
 
-  implicit object ADD_131_rm32_imm8 extends ADD._2[rm32, imm8] {
+  implicit object ADD_17 extends ADD._2[rm32, imm8] {
     def opcode = 0x83 /+ 0
   }
 
-  implicit object ADD_131_rm64_imm8 extends ADD._2[rm64, imm8] {
+  implicit object ADD_18 extends ADD._2[rm64, imm8] {
     def opcode = 0x83 /+ 0
     override def prefix = REX.W(true)
   }

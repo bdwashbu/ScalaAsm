@@ -10,17 +10,17 @@ object SHR extends InstructionDefinition[OneOpcode]("SHR") with SHRImpl
 // Shift
 
 trait SHRLow {
-  implicit object SHR_209_rm16 extends SHR._1[rm16] {
+  implicit object SHR_0 extends SHR._1[rm16] {
     def opcode = 0xD1 /+ 5
     override def hasImplicateOperand = true
   }
 
-  implicit object SHR_209_rm32 extends SHR._1[rm32] {
+  implicit object SHR_1 extends SHR._1[rm32] {
     def opcode = 0xD1 /+ 5
     override def hasImplicateOperand = true
   }
 
-  implicit object SHR_209_rm64 extends SHR._1[rm64] {
+  implicit object SHR_2 extends SHR._1[rm64] {
     def opcode = 0xD1 /+ 5
     override def prefix = REX.W(true)
     override def hasImplicateOperand = true
@@ -28,41 +28,41 @@ trait SHRLow {
 }
 
 trait SHRImpl extends SHRLow {
-  implicit object SHR_192_rm8_imm8 extends SHR._2[rm8, imm8] {
+  implicit object SHR_3 extends SHR._2[rm8, imm8] {
     def opcode = 0xC0 /+ 5
   }
 
-  implicit object SHR_193_rm16_imm8 extends SHR._2[rm16, imm8] {
+  implicit object SHR_4 extends SHR._2[rm16, imm8] {
     def opcode = 0xC1 /+ 5
   }
 
-  implicit object SHR_193_rm32_imm8 extends SHR._2[rm32, imm8] {
+  implicit object SHR_5 extends SHR._2[rm32, imm8] {
     def opcode = 0xC1 /+ 5
   }
 
-  implicit object SHR_193_rm64_imm8 extends SHR._2[rm64, imm8] {
+  implicit object SHR_6 extends SHR._2[rm64, imm8] {
     def opcode = 0xC1 /+ 5
     override def prefix = REX.W(true)
   }
 
-  implicit object SHR_208_rm8 extends SHR._1[rm8] {
+  implicit object SHR_7 extends SHR._1[rm8] {
     def opcode = 0xD0 /+ 5
     override def hasImplicateOperand = true
   }
 
-  implicit object SHR_210_rm8_CL extends SHR._2[rm8, CL] {
+  implicit object SHR_8 extends SHR._2[rm8, CL] {
     def opcode = 0xD2 /+ 5
   }
 
-  implicit object SHR_211_rm16_CL extends SHR._2[rm16, CL] {
+  implicit object SHR_9 extends SHR._2[rm16, CL] {
     def opcode = 0xD3 /+ 5
   }
 
-  implicit object SHR_211_rm32_CL extends SHR._2[rm32, CL] {
+  implicit object SHR_10 extends SHR._2[rm32, CL] {
     def opcode = 0xD3 /+ 5
   }
 
-  implicit object SHR_211_rm64_CL extends SHR._2[rm64, CL] {
+  implicit object SHR_11 extends SHR._2[rm64, CL] {
     def opcode = 0xD3 /+ 5
     override def prefix = REX.W(true)
   }

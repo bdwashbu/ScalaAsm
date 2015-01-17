@@ -10,7 +10,7 @@ object LEAVE extends InstructionDefinition[OneOpcode]("LEAVE") with LEAVEImpl
 // High Level Procedure Exit
 
 trait LEAVEImpl {
-  implicit object LEAVE_201 extends LEAVE._0 {
+  implicit object LEAVE_0 extends LEAVE._0 {
     def opcode = 0xC9
     override def hasImplicateOperand = true
   }

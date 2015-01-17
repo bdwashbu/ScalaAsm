@@ -10,7 +10,7 @@ object INT extends InstructionDefinition[OneOpcode]("INT") with INTImpl
 // Call to Interrupt Procedure
 
 trait INTImpl {
-  implicit object INT_205_imm8 extends INT._1[imm8] {
+  implicit object INT_0 extends INT._1[imm8] {
     def opcode = 0xCD
     override def hasImplicateOperand = true
   }

@@ -14,7 +14,7 @@ import com.scalaAsm.x86.OperandTypes.{_8, _16, _32}
 object GenerateInst {
 
   trait InstructionInstance {
-    protected def getClassHeader: String
+    protected def getClassHeader(name: String): String
     protected def hasImplicateOperand: Boolean
     protected def getExplicitFormat: Seq[String]
     val mnemonic: String
@@ -28,19 +28,19 @@ object GenerateInst {
       if (x.isInstanceOf[InstructionInstance]) {
         val otherInstance = x.asInstanceOf[InstructionInstance]
         //opcode == otherInstance.opcode && getOperand == otherInstance.getOperand
-        generateClass(0) == otherInstance.generateClass(0)
+        generateClass("")(0) == otherInstance.generateClass("")(0)
       } else {
         false
       }
     }
     
     override def hashCode(): Int = {
-      generateClass(0).hashCode
+      generateClass("")(0).hashCode
     }
 
-    def generateClass: Seq[String] = {
+    def generateClass(name: String): Seq[String] = {
 
-      val header = getClassHeader
+      val header = getClassHeader(name)
 
       def getOpcodeString = {
         if (entry.hasRegisterInModRM) {
@@ -62,8 +62,6 @@ object GenerateInst {
 
         }
       }.getOrElse(getOpcodeString)
-      
-      
 
       val prefix: Seq[String] = getOperand.map { op =>
         op match {
@@ -87,14 +85,13 @@ object GenerateInst {
     }
   }
 
-  case class x86ZeroOperandInstruction(name: String,
-                                       opcode: Int,
+  case class x86ZeroOperandInstruction(opcode: Int,
                                        mnemonic: String,
                                        entry: x86Entry) extends InstructionInstance {
 
     def getOperand = None
 
-    def getClassHeader: String = {
+    def getClassHeader(name: String): String = {
       val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._0 {\n"
       result
     }
@@ -105,15 +102,14 @@ object GenerateInst {
     def getSize: Int = 0
   }
 
-  case class x86OneOperandInstruction(name: String,
-                                      opcode: Int,
+  case class x86OneOperandInstruction(opcode: Int,
                                       mnemonic: String,
                                       operand: OperandInstance,
                                       entry: x86Entry) extends InstructionInstance {
 
     def getOperand = Some(operand)
 
-    def getClassHeader: String = {
+    def getClassHeader(name: String): String = {
       val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._1[" + operand + "] {\n"
       result
     }
@@ -136,13 +132,12 @@ object GenerateInst {
     }
   }
 
-  case class x86TwoOperandInstruction(name: String,
-                                      opcode: Int,
+  case class x86TwoOperandInstruction(opcode: Int,
                                       mnemonic: String,
                                       operands: TwoOperandInstance,
                                       entry: x86Entry) extends InstructionInstance {
 
-    def getClassHeader: String = {
+    def getClassHeader(name: String): String = {
       val result = "implicit object " + name + " extends " + mnemonic.toUpperCase() + "._2[" + operands._1 + ", " + operands._2 + "] {\n"
       result
     }
@@ -187,15 +182,15 @@ object GenerateInst {
         //if (operands(0).operandType.isDefined &&
         //  operands(1).operandType.isDefined) {
         val ops = TwoOperandDef(operands(0), operands(1))
-        ops.getInstances.map { instance => x86TwoOperandInstruction(mnemonic + "_" + opcode + "_" + instance._1 + "_" + instance._2, opcode, mnemonic, instance, entry) }
+        ops.getInstances.map { instance => x86TwoOperandInstruction(opcode, mnemonic, instance, entry) }
         //} else if (!operands(1).operandType.isDefined) { // implicate
         //  operands(0).getInstances.map{instance => x86OneOperandInstruction(mnemonic + "_" + opcode + "_" + instance, opcode, mnemonic, instance, entry)}
         //} else {
         //  Nil
       } else if (operands.size == 1) {
-        operands(0).getInstances.map { instance => x86OneOperandInstruction(mnemonic + "_" + opcode + "_" + instance, opcode, mnemonic, instance, entry) }
+        operands(0).getInstances.map { instance => x86OneOperandInstruction(opcode, mnemonic, instance, entry) }
       } else if (operands.isEmpty) {
-        Seq(x86ZeroOperandInstruction(mnemonic + "_" + opcode, opcode, mnemonic, entry))
+        Seq(x86ZeroOperandInstruction(opcode, mnemonic, entry))
       } else {
         Nil
       }
@@ -485,10 +480,11 @@ object GenerateInst {
   def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance]) = {
     val writer = new PrintWriter("src/main/scala/com/scalaAsm/x86/Instructions/Standard/" + mnemonic + ".scala", "UTF-8");
 
+
     // must do this to resolve (rm, r) (r, rm) ambiguous implicit resolution.  A little hacky
     val (low, high) = instructions.partition { inst =>
       inst match {
-        case x86TwoOperandInstruction(_, _, _, operands, _) if operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined =>
+        case x86TwoOperandInstruction(_, _, operands, _) if operands._1.addressingMethod.isDefined && operands._2.addressingMethod.isDefined =>
           val is64 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _64 &&
             operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _64
           val is32 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _32 &&
@@ -496,7 +492,7 @@ object GenerateInst {
           val is16 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _16 &&
             operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _16
           is64 || is32 || is16
-        case x86OneOperandInstruction(_, _, _, operand, _) if operand.addressingMethod.isDefined && operand.addressingMethod.isDefined =>
+        case x86OneOperandInstruction(_, _, operand, _) if operand.addressingMethod.isDefined && operand.addressingMethod.isDefined =>
           val is64 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _64
           val is32 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _32
           val is16 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _16
@@ -504,6 +500,9 @@ object GenerateInst {
         case _ => false
       }
     }
+    
+    val lowInst = low.zipWithIndex
+    val highInst = high.zipWithIndex.map{case(inst,index) => (inst, index + lowInst.size)}
 
     val briefs = instructions.map(inst => inst.entry.brief).toSet.reduce(_ + ", " + _)
     
@@ -524,24 +523,24 @@ object GenerateInst {
     if (!low.isEmpty && !high.isEmpty) {
       writer.println("trait " + mnemonic.toUpperCase() + "Low {")
       val descriptions = Set[String]()
-      for (inst <- low) {
-        writer.println(inst.generateClass.map(x => "  " + x).mkString)
+      for ((inst, index) <- lowInst) {
+        writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
         if (inst != low.last)
           writer.println("") 
       }
       writer.println("}\n")
 
       writer.println("trait " + mnemonic.toUpperCase() + "Impl extends " + mnemonic.toUpperCase() + "Low {")
-      for (inst <- high) {
-        writer.println(inst.generateClass.map(x => "  " + x).mkString)
+      for ((inst, index) <- highInst) {
+        writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
         if (inst != high.last)
           writer.println("")
       }
       writer.println("}")
     } else {
       writer.println("trait " + mnemonic.toUpperCase() + "Impl {")
-      for (inst <- instructions) {
-        writer.println(inst.generateClass.map(x => "  " + x).mkString)
+      for ((inst, index) <- instructions.zipWithIndex) {
+        writer.println(inst.generateClass(mnemonic + "_" + index).map(x => "  " + x).mkString)
         if (inst != instructions.last)
           writer.println("")
       }

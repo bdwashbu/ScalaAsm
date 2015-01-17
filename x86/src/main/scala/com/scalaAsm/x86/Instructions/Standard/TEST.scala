@@ -10,15 +10,15 @@ object TEST extends InstructionDefinition[OneOpcode]("TEST") with TESTImpl
 // Logical Compare
 
 trait TESTImpl {
-  implicit object TEST_132_rm8_r8 extends TEST._2[rm8, r8] {
+  implicit object TEST_0 extends TEST._2[rm8, r8] {
     def opcode = 0x84 /r
   }
 
-  implicit object TEST_133_rm16_r16 extends TEST._2[rm16, r16] {
+  implicit object TEST_1 extends TEST._2[rm16, r16] {
     def opcode = 0x85 /r
   }
 
-  implicit object TEST_133_rm32_r32 extends TEST._2[rm32, r32] {
+  implicit object TEST_2 extends TEST._2[rm32, r32] {
     def opcode = 0x85 /r
     override def explicitFormat(op1: rm32, op2: r32) = {
       if (op1.isInstanceOf[reg]) {
@@ -27,41 +27,41 @@ trait TESTImpl {
     }
   }
 
-  implicit object TEST_133_rm64_r64 extends TEST._2[rm64, r64] {
+  implicit object TEST_3 extends TEST._2[rm64, r64] {
     def opcode = 0x85 /r
     override def prefix = REX.W(true)
   }
 
-  implicit object TEST_168_AL_imm8 extends TEST._2[AL, imm8] {
+  implicit object TEST_4 extends TEST._2[AL, imm8] {
     def opcode = 0xA8
   }
 
-  implicit object TEST_169_AX_imm16 extends TEST._2[AX, imm16] {
+  implicit object TEST_5 extends TEST._2[AX, imm16] {
     def opcode = 0xA9
   }
 
-  implicit object TEST_169_EAX_imm32 extends TEST._2[EAX, imm32] {
+  implicit object TEST_6 extends TEST._2[EAX, imm32] {
     def opcode = 0xA9
   }
 
-  implicit object TEST_169_RAX_imm32 extends TEST._2[RAX, imm32] {
+  implicit object TEST_7 extends TEST._2[RAX, imm32] {
     def opcode = 0xA9
     override def prefix = REX.W(true)
   }
 
-  implicit object TEST_246_rm8_imm8 extends TEST._2[rm8, imm8] {
+  implicit object TEST_8 extends TEST._2[rm8, imm8] {
     def opcode = 0xF6 /+ 0
   }
 
-  implicit object TEST_247_rm16_imm16 extends TEST._2[rm16, imm16] {
+  implicit object TEST_9 extends TEST._2[rm16, imm16] {
     def opcode = 0xF7 /+ 0
   }
 
-  implicit object TEST_247_rm32_imm32 extends TEST._2[rm32, imm32] {
+  implicit object TEST_10 extends TEST._2[rm32, imm32] {
     def opcode = 0xF7 /+ 0
   }
 
-  implicit object TEST_247_rm64_imm64 extends TEST._2[rm64, imm64] {
+  implicit object TEST_11 extends TEST._2[rm64, imm64] {
     def opcode = 0xF7 /+ 0
     override def prefix = REX.W(true)
   }

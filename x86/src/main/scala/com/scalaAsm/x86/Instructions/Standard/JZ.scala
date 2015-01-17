@@ -10,7 +10,7 @@ object JZ extends InstructionDefinition[OneOpcode]("JZ") with JZImpl
 // Jump short if zero/equal (ZF=0)
 
 trait JZImpl {
-  implicit object JZ_116_rel8 extends JZ._1[rel8] {
+  implicit object JZ_0 extends JZ._1[rel8] {
     def opcode = 0x74
   }
 }

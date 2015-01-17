@@ -10,17 +10,17 @@ object MUL extends InstructionDefinition[OneOpcode]("MUL") with MULImpl
 // Unsigned Multiply
 
 trait MULLow {
-  implicit object MUL_247_rm16 extends MUL._1[rm16] {
+  implicit object MUL_0 extends MUL._1[rm16] {
     def opcode = 0xF7 /+ 4
     override def hasImplicateOperand = true
   }
 
-  implicit object MUL_247_rm32 extends MUL._1[rm32] {
+  implicit object MUL_1 extends MUL._1[rm32] {
     def opcode = 0xF7 /+ 4
     override def hasImplicateOperand = true
   }
 
-  implicit object MUL_247_rm64 extends MUL._1[rm64] {
+  implicit object MUL_2 extends MUL._1[rm64] {
     def opcode = 0xF7 /+ 4
     override def prefix = REX.W(true)
     override def hasImplicateOperand = true
@@ -28,7 +28,7 @@ trait MULLow {
 }
 
 trait MULImpl extends MULLow {
-  implicit object MUL_246_rm8 extends MUL._1[rm8] {
+  implicit object MUL_3 extends MUL._1[rm8] {
     def opcode = 0xF6 /+ 4
     override def hasImplicateOperand = true
   }

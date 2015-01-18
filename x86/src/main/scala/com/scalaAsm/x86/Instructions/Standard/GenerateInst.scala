@@ -55,7 +55,7 @@ object GenerateInst {
       val opcodeString: Seq[String] = getOperand.map { op =>
         op.addressingMethod match {
           case Some(OpcodeSelectsRegister) =>
-            val regCode = if (op.operandType.code == "q") "o" else op.operandType.code // for some reason the code for 64-bit is "ro"
+            val regCode = if (op.operandType.code == "qp") "o" else op.operandType.code // for some reason the code for 64-bit is "ro"
             Seq("def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + regCode + "\n")
           case _ => getOpcodeString
           //}
@@ -485,7 +485,7 @@ object GenerateInst {
 
   def outputInstructionFile(mnemonic: String, instructions: LinkedHashSet[InstructionInstance], folder: String) = {
     val newFolder = new File("src/main/scala/com/scalaAsm/x86/Instructions/" + folder)
-    if (!newFolder.exists()) newFolder.mkdir();
+    if (!newFolder.exists()) newFolder.mkdirs()
     val writer = new PrintWriter("src/main/scala/com/scalaAsm/x86/Instructions/" + folder + "/" + mnemonic + ".scala", "UTF-8");
 
 
@@ -516,7 +516,7 @@ object GenerateInst {
     
     writer.println("package com.scalaAsm.x86");
     writer.println("package Instructions");
-    writer.println("package " + folder);
+    writer.println("package " + folder.replace('/', '.'));
     writer.println("")
     writer.println("import com.scalaAsm.x86.Operands._")
     writer.println("import com.scalaAsm.x86.Operands.Memory._")
@@ -566,7 +566,8 @@ object GenerateInst {
              case (mnem, insts) => {
                val uniqueInst = LinkedHashSet[InstructionInstance]()
                uniqueInst ++= insts
-               outputInstructionFile(mnem, uniqueInst, insts.flatMap{x => x.entry.group2}.head)
+               val entry = insts(0).entry
+               outputInstructionFile(mnem, uniqueInst, "general" + entry.group2.map(grp2 => "/" + grp2 + entry.group3.map(grp3 => "/" + grp3).getOrElse("")).getOrElse(""))
              }
            }
       //}

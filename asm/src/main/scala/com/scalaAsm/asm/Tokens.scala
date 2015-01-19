@@ -22,7 +22,6 @@ object Tokens {
     def getSize = 0
     def getBytes = Array()
   }
-  case class JmpRef(name: String) extends CodeToken
 
   case class ProcedureToken(name: String, innerCode: Seq[InstructionResult]) extends CodeToken with InstructionResult {
     def mnemonic = ""
@@ -56,8 +55,7 @@ object Tokens {
   case class ProcRef(procName: String) extends SizedToken(5)
   case class VarRef(procName: String) extends SizedToken(5)
   
-  case class JmpRefResolved(varName: String) extends SizedToken(6)
-  
+
   trait DataToken extends Token
   case class Variable(name: String, val value: String) extends SizedToken(value.length) with DataToken
 
@@ -67,12 +65,13 @@ object Tokens {
   case class ImportRef(position: Int, varName: String) extends SizedToken(5) with PostToken
   case class InvokeRef(position: Int, varName: String) extends SizedToken(5) with PostToken
   case class LabelResolved(position: Int, name: String) extends PostToken
+  case class JmpResolved(position: Int, name: String) extends PostToken
   case class LabelRefResolved(position: Int, name: String, opCode: Byte) extends PostToken
   case class ByteOutputPost(bytes: Array[Byte]) extends PostToken
   case class Proc(pos: Int, name: String) extends PostToken
   case class PostVar(name: String, value: String, val position: Int) extends PostToken
   case class ProcState(pos: Int, name: String) extends PostToken
   case class VarState(name: String) extends PostToken
-  case class JmpState(name: String) extends PostToken
+  //case class JmpState(name: String) extends PostToken
   case class ImportState(name: String) extends PostToken
 }

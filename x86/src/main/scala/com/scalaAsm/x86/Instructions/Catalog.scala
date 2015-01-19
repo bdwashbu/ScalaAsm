@@ -10,6 +10,7 @@ import com.scalaAsm.x86.Instructions.Standard._
       object or extends TwoOperands[OR.type]
       object sub extends TwoOperands[SUB.type]
       object mul extends OneOperand[MUL.type]
+      object imul extends OneOperand[IMUL.type]
       object cmp extends TwoOperands[CMP.type]
       
       object push extends OneOperand[PUSH.type]
@@ -20,6 +21,8 @@ import com.scalaAsm.x86.Instructions.Standard._
       object jmp extends OneOperand[JMP.type]
       object jnz extends OneOperand[JNZ.type]
       object jz extends OneOperand[JZ.type]
+      object jl extends OneOperand[JL.type]
+      object je extends OneOperand[JE.type]
       object int extends OneOperand[INT.type]
       object rdrand extends OneOperand[RDRAND]
       object and extends TwoOperands[AND.type]

@@ -8,26 +8,34 @@ import com.scalaAsm.asm.x86_32
 object Factorial extends AsmProgram[x86_32] {
   
   import com.scalaAsm.x86.Instructions.Standard._
+  
+  sections += new DataSection (
+    Variable("test", "Test: %d\n\u0000")
+  ) {}
 
   sections += new CodeSection {
-    
-    val STD_OUTPUT_HANDLE = byte(-11)
-    val STD_INPUT_HANDLE = byte(-10)
 
     builder += Code(
-      push(ebp),
-      mov(ebp, esp),
-      mov(ebx, *(ebp+byte(8))),
-      mov(eax, dword(1)),
-      label("start"),
-      cmp(ebx, byte(1)),
-      //jl(end),
-      mul(ebx),
-      //dec(ebx),
-      //jmp("start"),
-      label("end"),
-      pop(ebp),
+      push("helloWorld"),
+      call("printf"),
+      pop(eax),
+      mov(eax,dword(5)),
+      mov(ebx,eax),
+      label("Begin"),
+      dec(ebx),
+      test(ebx,ebx),
+      je("End"),
+      imul(ebx),
+      jmp("Begin"),
+      label("End"),
+      push(eax),
+      push("test"),
+      call("printf"),
+      pop(eax),
+      pop(eax),
+      call("_getch"),
       retn(())
     )
+   
   }
 }

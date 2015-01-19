@@ -9,7 +9,8 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.InstructionResult
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
-import com.scalaAsm.x86.Instructions.Standard.{JNZ, JZ}
+import com.scalaAsm.x86.Instructions.Standard._
+
 import com.scalaAsm.x86.Instructions.Catalog
 
 trait x86Mode
@@ -18,11 +19,33 @@ trait x86_32 extends x86Mode
 
 trait AsmSection
 
+trait customFunctions {
+   def label(name: String) = Label(name)
+
+    def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
+
+    def push(param: String) = Reference(param)
+
+    def jnz(ref: String)(implicit ev: JNZ._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+
+    def jz(ref: String)(implicit ev: JZ._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+    
+    def jl(ref: String)(implicit ev: JL._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+    
+    def je(ref: String)(implicit ev: JE._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+
+    def call(refName: String) = Reference(refName)
+
+    def invoke(refName: String) = Invoke(refName)
+
+    def jmp(ref: String)(implicit ev: JMP._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+}
+
 trait AsmProgram[Mode <: x86Mode] {
 
   val sections = new ListBuffer[AsmSection]()
 
-  trait CodeSection extends Registers[Mode] with Catalog.Standard with Formats with Addressing with AsmSection {
+  trait CodeSection extends Registers[Mode] with customFunctions with Catalog.Standard with Formats with Addressing with AsmSection {
 
     val builder = new ListBuffer[InstructionResult]()
     
@@ -57,21 +80,7 @@ trait AsmProgram[Mode <: x86Mode] {
 
     private def procRef(procName: String) = ProcRef(procName)
 
-    def label(name: String) = Label(name)
-
-    def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
-
-    def push(param: String) = Reference(param)
-
-    def jnz(labelRef: String)(implicit ev: JNZ._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(labelRef, ev, format)
-
-    def jz(labelRef: String)(implicit ev: JZ._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(labelRef, ev, format)
-
-    def call(refName: String) = Reference(refName)
-
-    def invoke(refName: String) = Invoke(refName)
-
-    def jmp(ref: String) = JmpRef(ref)
+   
 
     def repeat(numTimes: Int, code: List[InstructionResult]): Code = {
       val expanded = ListBuffer[InstructionResult]()

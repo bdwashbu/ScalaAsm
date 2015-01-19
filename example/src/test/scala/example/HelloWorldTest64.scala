@@ -26,9 +26,6 @@ object HelloWorld64 extends AsmProgram[x86_64] {
   ) {}
 
   sections += new CodeSection {
-    
-    val STD_OUTPUT_HANDLE = qword(-11)
-    val STD_INPUT_HANDLE = qword(-10)
 
     procedure(name = "start",
       push(rsp),

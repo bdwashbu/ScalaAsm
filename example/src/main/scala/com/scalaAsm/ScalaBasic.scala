@@ -57,6 +57,17 @@ object ScalaBasic {
       outputStream2.write(exe2.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
       outputStream2.close
+      
+      val factorialStream = new DataOutputStream(new FileOutputStream("factorial.exe"));
+
+      val factorial = assembler.assemble(Factorial).addIcon("scala.ico")
+      val factorialExe = linker.link(factorial, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+
+      factorialStream.write(factorialExe.get)
+      println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
+      factorialStream.close
+      
+      
       //      println(coff)
 
     } catch {

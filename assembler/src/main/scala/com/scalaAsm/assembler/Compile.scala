@@ -48,7 +48,7 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         case x: SizedToken                                   => Some(x)
         case x: DynamicSizedToken                            => Some(x)
         case proc @ BeginProc(_)                             => Some(proc)
-        case JmpRef(name)                                    => Some(JmpRefResolved(name))
+        
         case Invoke(name)                                    => Some(InvokeRef(0, name))
         case Reference(name) if procNames.contains(name)     => Some(ProcRef(name))
         case Reference(name) if variableNames.contains(name) => Some(VarRef(name))
@@ -168,7 +168,7 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
           Characteristic.WRITE.id), compiledAsm.rawData)
 
     val symbols = (compiledAsm.positionPass collect {
-      case Proc(offset, name)          => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil);
+      case Proc(offset, name)          => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
       case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
       case InvokeRef(offset, name)     => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
       case ImportRef(offset, name)     => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)

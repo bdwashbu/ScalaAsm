@@ -5,7 +5,7 @@ Welcome to the best Scala source for all things [x86-64](http://en.wikipedia.org
 
 Scala x86 is a back-end for a compiler.  Its a collection of libraries that one could write a programming language with.
 
-ScalaAsm is a simple low-level assembly API.  It uses the lower level libraries to assemble code into a object file and then link it into an executable for windows 32 or 64-bit platforms.  What makes ScalaAsm special is the amount of compile time safety within the API.
+ScalaAsm is a simple low-level assembly API which uses Scala x86.  It can assemble code into a object file and then link it into an executable for windows 32 or 64-bit platforms.  What makes ScalaAsm special is the amount of compile time safety within the API.
 
 #### Implementing x86
 

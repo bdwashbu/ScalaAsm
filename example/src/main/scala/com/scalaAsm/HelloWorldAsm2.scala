@@ -3,7 +3,6 @@ package com.scalaAsm
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
-import com.scalaAsm.x86.Operands.addr
 import com.scalaAsm.asm.{x86_32, x86_64}
 
 object HelloWorld2 extends AsmProgram[x86_64] {

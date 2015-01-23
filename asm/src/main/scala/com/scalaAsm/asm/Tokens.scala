@@ -17,6 +17,13 @@ object Tokens {
     def getSize = 0
     def getBytes = Array()
   }
+  
+  case class Address(name: String) extends CodeToken with InstructionResult {
+    def mnemonic = ""
+    def getSize = 0
+    def getBytes = Array()
+  }
+  
   case class Invoke(name: String) extends CodeToken with InstructionResult {
     def mnemonic = ""
     def getSize = 0

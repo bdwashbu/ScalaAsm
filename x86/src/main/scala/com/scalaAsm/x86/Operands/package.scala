@@ -4,6 +4,8 @@ package object Operands {
 
   type GPR = GeneralPurpose[_]
   
+  type Operand[X] = Function0[X]
+  
   abstract class x86Size[T: Numeric] {
     def size: Int
     def negate(value: T) = implicitly[Numeric[T]].negate(value)

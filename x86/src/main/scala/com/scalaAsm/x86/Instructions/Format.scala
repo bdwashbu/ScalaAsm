@@ -270,7 +270,7 @@ trait Formats extends Low {
 
     def getAddressingForm(operand: AbsoluteAddress[_32], opcodeExtension: Byte) = {
       InstructionFormat(
-        addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), operand.displacement), //mem.encode(opcode.opcodeExtension),
+        addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), Constant32(operand.offset)), //mem.encode(opcode.opcodeExtension),
         immediate = None)
     }
   }
@@ -320,7 +320,7 @@ trait Formats extends Low {
 
     def getAddressingForm(op1: reg, op2: AbsoluteAddress[_32], opcodeExtension: Byte) = {
       InstructionFormat(
-        addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.displacement),
+        addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), Constant32(op2.offset)),
         immediate = None)
     }
 

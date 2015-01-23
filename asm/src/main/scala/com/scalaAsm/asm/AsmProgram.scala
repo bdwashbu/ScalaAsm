@@ -6,13 +6,16 @@ import scala.collection.mutable.ListBuffer
 import com.scalaAsm.x86.Instructions.{Standard, Formats}
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.InstructionResult
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
 import com.scalaAsm.x86.Instructions.Standard._
 
 import com.scalaAsm.x86.Instructions.Catalog
-
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86._
+  
 trait x86Mode
 trait x86_64 extends x86_32
 trait x86_32 extends x86Mode
@@ -20,6 +23,23 @@ trait x86_32 extends x86Mode
 trait AsmSection
 
 trait customFunctions {
+  import com.scalaAsm.x86.Operands._
+  import com.scalaAsm.x86._
+  
+    def Op[X](from: X) = new Operand[X] {
+      def apply = from
+      override def toString = from.toString
+    }
+  
+  def addr(varName: String) = {
+    Op(new AbsoluteAddress[_32] {
+      var offset = 0
+      def getRelative = null
+      def apply = Constant32(0)
+      val name = Some(varName)
+    })
+  }
+  
    def label(name: String) = Label(name)
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)

@@ -6,25 +6,12 @@ import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 
 trait One extends Operand[One]{
   def size = 1
-  def get = this
+  def apply = this
 }
 
-case class addr(name: String) extends Operand[AbsoluteAddress[_32]] {
-  def get = new AbsoluteAddress[_32] {
-    var offset = 0
-    def getRelative = null
-    def displacement = Constant32(0)
-  }
-}
 
-trait Operand[+To] {
-  def get: To
-}
 
-case class Op[X](from: X) extends Operand[X] {
-  def get = from
-  override def toString = from.toString
-}
+
 
 abstract class Constant[Size: x86Size](val value: Size) extends InstructionField {
   import java.nio.{ByteBuffer, ByteOrder}

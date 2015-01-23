@@ -4,6 +4,7 @@ package assembler
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Instructions.Standard._
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.asm.Registers
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
@@ -94,6 +95,10 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
     compileAssembly(variablesSymbols.map(_.name).toSeq)
   }
 
+  object IsAddress {                              
+    def unapply(addy: AbsoluteAddress[_]) = addy.name
+  }
+  
   def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Coff = {
 
     val compiledAsm = preassemble(program)
@@ -181,11 +186,13 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         var result: Option[Relocation] = None
         token match {
           case InstructionToken(inst) => inst match {
-            case OneMachineCode(addr(name), _, _, _, _) =>
+            case OneMachineCode(IsAddress(name), _, _, _, _) =>
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(addr(name), _, _, _, _) =>
+            case TwoMachineCode(IsAddress(name), _, _, _, _) =>
+              println("HERE")
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(_, addr(name), _, _, _) =>
+            case TwoMachineCode(_, IsAddress(name), _, _, _) =>
+              println("HERE2")
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case _ =>
           }

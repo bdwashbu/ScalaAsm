@@ -34,25 +34,19 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
       rawData: Array[Byte], prettyPass: Seq[InstructionResult])
   
   def preassemble[Mode <: x86Mode](program: AsmProgram[Mode]): CompiledAssembly = {
-    val codeTokens: ListBuffer[Any] = program.sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.build(seg.builder.toSeq) }
 
-    val dataTokens = program.sections.collect { case (x: DataSection) => x } flatMap { seg => seg.compile }
+    
 
-    val (rawData, variablesSymbols) = compileData(dataTokens)
+    def compileAssembly: CompiledAssembly = {
 
-    def compileAssembly(variableNames: Seq[String]): CompiledAssembly = {
-
-      lazy val procNames = codeTokens.collect { case BeginProc(name) => name }
-
-      def onePass: Seq[Token] = codeTokens flatMap {
+      def onePass: Seq[Token] = program.codeTokens flatMap {
 
         case x: SizedToken                                   => Some(x)
         case x: DynamicSizedToken                            => Some(x)
-        case proc @ BeginProc(_)                             => Some(proc)
-        
+        case proc @ BeginProc(_)                             => Some(proc) 
         case Invoke(name)                                    => Some(InvokeRef(0, name))
-        case Reference(name) if procNames.contains(name)     => Some(ProcRef(name))
-        case Reference(name) if variableNames.contains(name) => Some(VarRef(name))
+        case Reference(name) if program.procNames.contains(name)     => Some(ProcRef(name))
+        case Reference(name) if program.variableNames.contains(name) => Some(VarRef(name))
         case Reference(name)                                 => Some(ImportRef(0, name))
         case label @ Label(name)                             => Some(label)
         case labelref @ LabelRef(name, inst, format)         => Some(labelref)
@@ -82,17 +76,19 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
       val prettyPass = onePass flatMap { token =>
         token match {
           case InstructionToken(inst) => Some(inst)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(callNear(Op(Constant32(0))))
-          case VarRef(_) => Some(push(Op(Constant32(0))))
-          case LabelRef(_, inst, format) => Some(inst(Op(new Constant8(0)), format, Seq()))
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(callNear(program.Op(Constant32(0))))
+          case VarRef(_) => Some(push(program.Op(Constant32(0))))
+          case LabelRef(_, inst, format) => Some(inst(program.Op(new Constant8(0)), format, Seq()))
           case _ => None
         }
       }
 
+     val (rawData, variablesSymbols) = compileData(program.varTokens)
+      
       CompiledAssembly(onePass, positionPass, variablesSymbols, rawData, prettyPass)
     }
 
-    compileAssembly(variablesSymbols.map(_.name).toSeq)
+    compileAssembly
   }
 
   object IsAddress {                              
@@ -113,9 +109,9 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         val result = token match {
           case InstructionToken(inst) => inst.getBytes
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => callNear(Op(Constant32(0))).getBytes
-          case VarRef(_) => push(Op(Constant32(0))).getBytes
-          case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).getBytes
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => callNear(program.Op(Constant32(0))).getBytes
+          case VarRef(_) => push(program.Op(Constant32(0))).getBytes
+          case LabelRef(_, inst, format) => inst(program.Op(new Constant8(0)), format, Seq()).getBytes
           case _ => Array[Byte]()
         }
         code ++= result

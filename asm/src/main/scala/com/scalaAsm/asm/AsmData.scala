@@ -4,7 +4,7 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.HashMap
 import com.scalaAsm.asm.Tokens.Token
 
-abstract class DataSection(tokens: Token*) extends AsmSection {
+abstract class DataSection(val tokens: Token*) extends AsmSection {
   
   import Tokens._
 

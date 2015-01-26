@@ -14,45 +14,45 @@ object Tokens {
   trait CodeToken extends Token
   case class Reference(name: String) extends CodeToken with InstructionResult {
     def mnemonic = ""
-    def getBytes = Array()
+    def apply = Array()
   }
   
   case class Address(name: String) extends CodeToken with InstructionResult {
     def mnemonic = ""
-    def getBytes = Array()
+    def apply = Array()
   }
   
   case class Invoke(name: String) extends CodeToken with InstructionResult {
     def mnemonic = ""
-    def getBytes = Array()
+    def apply = Array()
   }
 
-  case class ProcedureToken(name: String, innerCode: Seq[InstructionResult]) extends CodeToken with InstructionResult {
-    def mnemonic = "" 
-    def getBytes = Array()
-  }
+  case class ProcedureToken(name: String, innerCode: Seq[() => InstructionResult]) extends CodeToken with HighLevel
   case class Label(name: String) extends CodeToken with InstructionResult {
     def mnemonic = ""  
-    def getBytes = Array()
+    def apply = Array()
   }
   case class LabelRef(labelRef: String, inst:InstructionDefinition[OneOpcode]#_1[Constant8], format: OneOperandFormat[Constant8]) extends CodeToken with InstructionResult {
     def mnemonic = ""
     
-    def getBytes = Array()
+    def apply = Array()
   } 
   case class InstructionToken(inst: InstructionResult) extends SizedToken(inst.getSize) with CodeToken
-  case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken with InstructionResult {
-    def mnemonic = ""  
-    def getBytes = Array()
+  case class Align(to: Int, filler: Byte, override val size: (Int) => Int) extends DynamicSizedToken(size) with CodeToken with HighLevel with InstructionResult {
+    def mnemonic = ""
+    def apply = Array()
   }
   
   abstract class SizedToken(val size: Int) extends Token
   case class BeginProc(name: String) extends Token with InstructionResult {
     def mnemonic = ""
-    def getBytes = Array()
+    def apply = Array()
   }
   case class Padding(to: Int, tokenSize: Int) extends SizedToken(tokenSize)
-  case class ProcRef(procName: String) extends SizedToken(5)
+  case class ProcRef(procName: String) extends SizedToken(5) with InstructionResult {
+    def mnemonic = ""
+    def apply = Array()
+  }
   case class VarRef(procName: String) extends SizedToken(5)
   
 
@@ -62,7 +62,10 @@ object Tokens {
   abstract class DynamicSizedToken(val size: (Int) => Int) extends Token
 
   sealed trait PostToken
-  case class ImportRef(position: Int, varName: String) extends SizedToken(5) with PostToken
+  case class ImportRef(position: Int, varName: String) extends SizedToken(5) with PostToken with InstructionResult {
+    def mnemonic = ""
+    def apply = Array()
+  }
   case class InvokeRef(position: Int, varName: String) extends SizedToken(5) with PostToken
   case class LabelResolved(position: Int, name: String) extends PostToken
   case class JmpResolved(position: Int, name: String) extends PostToken

@@ -21,22 +21,22 @@ trait x86Instruction {
 }
 
 trait OneOperand[X <: InstructionDefinition[_]] {
-  def apply[O1](p1: Operand[O1])(implicit ev: X#_1[O1], format: OneOperandFormat[O1]) = ev(p1, format, ev.prefix)
+  def apply[O1](p1: Operand[O1])(implicit ev: X#_1[O1], format: OneOperandFormat[O1]) = () => ev(p1, format, ev.prefix)
 }
 
 trait TwoOperands[X <: InstructionDefinition[_]] {
-  def apply[O1, O2](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2[O1, O2], format: TwoOperandFormat[O1, O2]) = ev(p1, p2, format)
+  def apply[O1, O2](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2[O1, O2], format: TwoOperandFormat[O1, O2]) = () => ev(p1, p2, format)
 }
 
 class ZeroOperands[X <: InstructionDefinition[_]] {
-  def apply(ignored: Unit)(implicit ev: X#_0) = ev.get
+  def apply(ignored: Unit)(implicit ev: X#_0) = () => ev.get
 }
 
 object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = None)
 
 case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mnemonic: String) extends InstructionResult {
 
-  def getBytes: Array[Byte] = {
+  def apply: Array[Byte] = {
     format.getPrefix ++: opcode.get
   }
 }
@@ -54,7 +54,7 @@ case class OneMachineCode[O1] (
     formattedMnemonic + " " + operand.toString
   }
 
-  def getBytes: Array[Byte] = {
+  def apply: Array[Byte] = {
     val opEx: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
     
     val prefixAndOpcode = if (opcode.isInstanceOf[OpcodeWithReg] && operand().isInstanceOf[reg]) { // this is hacky as hell!
@@ -85,7 +85,7 @@ case class TwoMachineCode[O1, O2] (
       formattedMnemonic + " " + operand.toString + ", " + operand2.toString
     }
   
-  def getBytes: Array[Byte] = {
+  def apply: Array[Byte] = {
     val opEx: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
     
     val prefixAndOpcode = if (opcode.isInstanceOf[OpcodeWithReg] && operand().isInstanceOf[reg]) { // this is hacky as hell!

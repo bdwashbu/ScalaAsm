@@ -45,9 +45,7 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         case x: DynamicSizedToken                            => Some(x)
         case proc @ BeginProc(_)                             => Some(proc) 
         case Invoke(name)                                    => Some(InvokeRef(0, name))
-        case Reference(name) if program.procNames.contains(name)     => Some(ProcRef(name))
         case Reference(name) if program.variableNames.contains(name) => Some(VarRef(name))
-        case Reference(name)                                 => Some(ImportRef(0, name))
         case label @ Label(name)                             => Some(label)
         case labelref @ LabelRef(name, inst, format)         => Some(labelref)
         case x: InstructionResult                            => Some(InstructionToken(x))
@@ -73,11 +71,11 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         }
       }
       
-      val prettyPass = onePass flatMap { token =>
+      val prettyPass: Seq[InstructionResult] = onePass flatMap { token =>
         token match {
           case InstructionToken(inst) => Some(inst)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(callNear(program.Op(Constant32(0))))
-          case VarRef(_) => Some(push(program.Op(Constant32(0))))
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(callNear(program.Op(Constant32(0))).apply)
+          case VarRef(_) => Some(push(program.Op(Constant32(0))).apply)
           case LabelRef(_, inst, format) => Some(inst(program.Op(new Constant8(0)), format, Seq()))
           case _ => None
         }
@@ -103,11 +101,11 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
 
       for (token <- compiledAsm.onePass) {
         val result = token match {
-          case InstructionToken(inst) => inst.getBytes
+          case InstructionToken(inst) => inst()
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => callNear(program.Op(Constant32(0))).getBytes
-          case VarRef(_) => push(program.Op(Constant32(0))).getBytes
-          case LabelRef(_, inst, format) => inst(program.Op(new Constant8(0)), format, Seq()).getBytes
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => callNear(program.Op(Constant32(0))).apply.apply
+          case VarRef(_) => push(program.Op(Constant32(0))).apply.apply
+          case LabelRef(_, inst, format) => inst(program.Op(new Constant8(0)), format, Seq()).apply
           case _ => Array[Byte]()
         }
         code ++= result

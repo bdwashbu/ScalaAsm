@@ -21,13 +21,15 @@ trait x86_64 extends x86_32
 trait x86_32 extends x86Mode
 
 trait AsmSection
+ trait HighLevel
 
 trait AsmProgram[Mode <: x86Mode] {
 
   val sections = new ListBuffer[AsmSection]()
   
-  def procNames = codeTokens.collect { case BeginProc(name) => name }
-  def codeTokens = sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.build(seg.builder.toSeq) }
+  lazy val procNames = procTokens.collect { case ProcedureToken(name,_) => name }
+  lazy val procTokens = sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.builder.toSeq }
+  lazy val codeTokens = sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.build(seg.builder.toSeq) }
   def varTokens = sections.collect { case (x: DataSection) => x }.flatMap { seg => seg.tokens }
   def variableNames = varTokens.collect { case Variable(name,_) => name }
   
@@ -35,10 +37,10 @@ trait AsmProgram[Mode <: x86Mode] {
       def apply = from
       override def toString = from.toString
     }
-
+  
   trait CodeSection extends Registers[Mode] with Catalog.Standard with Formats with Addressing with AsmSection {
 
-    val builder = new ListBuffer[InstructionResult]()
+    val builder = new ListBuffer[HighLevel]()
 
     def byte(value: Byte) = Op(Constant8(value))
     def word(value: Short) = Op(Constant16(value))
@@ -48,24 +50,32 @@ trait AsmProgram[Mode <: x86Mode] {
     implicit def toByte(x: Int) = x.toByte
     val One = new One {}
 
-    def procedure(name: String, innerCode: InstructionResult*) = {
+    def procedure(name: String, innerCode: (() => InstructionResult)*) = {
       builder += ProcedureToken(name, innerCode)
     }
     
-    case class Code(code: InstructionResult*) extends InstructionResult {
+    case class Code(code: (() => InstructionResult)*) extends HighLevel with InstructionResult {
       def mnemonic = ""
-      def getBytes = Array()
+      def apply = Array()
     }
 
-    def build(code: Seq[InstructionResult]): Seq[InstructionResult] =
-      code flatMap {
-        case ProcedureToken(name, code) => BeginProc(name) +: build(code)
-        case Code(codes @ _*)           => build(codes)
-        case token                      => List(token)
+    def build(code: Seq[HighLevel]): Seq[InstructionResult] = {
+      
+      def buildLow(code: Seq[() => InstructionResult]): Seq[InstructionResult] = {
+        code.map(_.apply) flatMap {
+          case token                      => List(token)
+        }
       }
+      
+      code flatMap {
+        case ProcedureToken(name, code) => BeginProc(name) +: buildLow(code)
+        case Code(codes @ _*)           => buildLow(codes)
+        case align @ Align(_,_,_)       => List(align)
+      }
+    }
 
     def getRawBytes: Array[Byte] = {
-      build(builder.toSeq) collect { case x: InstructionResult => x } map { x => x.getBytes } reduce (_ ++ _)
+      build(builder.toSeq) collect { case x: InstructionResult => x } map { x => x.apply } reduce (_ ++ _)
     }
 
     private def procRef(procName: String) = ProcRef(procName)
@@ -81,32 +91,38 @@ trait AsmProgram[Mode <: x86Mode] {
       })
     }
 
-    def label(name: String) = Label(name)
+    def label(name: String) = () => Label(name)
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 
-    def push(param: String) = Reference(param)
+    def push(param: String) = () => Reference(param)
 
-    def jnz(ref: String)(implicit ev: JNZ._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+    def jnz(ref: String)(implicit ev: JNZ._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def jz(ref: String)(implicit ev: JZ._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+    def jz(ref: String)(implicit ev: JZ._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def jl(ref: String)(implicit ev: JL._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+    def jl(ref: String)(implicit ev: JL._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def je(ref: String)(implicit ev: JE._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+    def je(ref: String)(implicit ev: JE._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def call(refName: String) = Reference(refName)
+    def call(refName: String): () => InstructionResult = () => {
+      if (procNames.contains(refName)) {
+        ProcRef(refName)
+      } else {
+        ImportRef(0, refName)
+      }
+    }
 
-    def invoke(refName: String) = Invoke(refName)
+    def invoke(refName: String) = () => Invoke(refName)
 
-    def jmp(ref: String)(implicit ev: JMP._1[Constant8], format: OneOperandFormat[Constant8]) = LabelRef(ref, ev, format)
+    def jmp(ref: String)(implicit ev: JMP._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def repeat(numTimes: Int, code: List[InstructionResult]): Code = {
-      val expanded = ListBuffer[InstructionResult]()
+    def repeat(numTimes: Int, code: List[() => InstructionResult]): () => Code = {
+      val expanded = ListBuffer[() => InstructionResult]()
       for (i <- 0 until numTimes) {
         expanded ++= code
       }
-      Code(expanded: _*)
+      () => Code(expanded: _*)
     }
   }
 }

@@ -27,12 +27,12 @@ trait DECLow {
 trait DECImpl extends DECLow {
   implicit object DEC_3 extends DEC._1[r16] {
     def opcode = 0x48 + rw
-    override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
+    override def explicitFormat(op1: r16) = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
   }
 
   implicit object DEC_4 extends DEC._1[r32] {
     def opcode = 0x48 + rd
-    override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
+    override def explicitFormat(op1: r32) = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
   }
 
   implicit object DEC_5 extends DEC._1[rm8] {

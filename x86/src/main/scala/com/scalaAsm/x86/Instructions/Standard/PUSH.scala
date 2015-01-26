@@ -49,19 +49,19 @@ trait PUSHImpl extends PUSHLow {
 
   implicit object PUSH_7 extends PUSH._1[r16] {
     def opcode = 0x50 + rw
-    override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
+    override def explicitFormat(op1: r16) = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
     override def hasImplicateOperand = true
   }
 
   implicit object PUSH_8 extends PUSH._1[r32] {
     def opcode = 0x50 + rd
-    override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
+    override def explicitFormat(op1: r32) = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
     override def hasImplicateOperand = true
   }
 
   implicit object PUSH_9 extends PUSH._1[r64] {
     def opcode = 0x50 + ro
-    override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
+    override def explicitFormat(op1: r64) = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))
     override def hasImplicateOperand = true
   }
 

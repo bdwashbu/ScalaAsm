@@ -42,11 +42,12 @@ case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mn
 }
 
 case class OneMachineCode[O1] (
+  opcode: OpcodeFormat,
   operand: Operand[O1],
-  instBytes: Array[Byte],
-  prefixAndOpcode: Array[Byte],
+  prefixBytes: Array[Byte],
   mnemonic: String,
-  opcodeExtension: Byte) extends InstructionResult {
+  explicitFormat: (O1) => Option[InstructionFormat],
+  implicitFormat: OneOperandFormat[O1]) extends InstructionResult {
 
   override def toString = {
     val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
@@ -54,7 +55,19 @@ case class OneMachineCode[O1] (
   }
 
   def getBytes: Array[Byte] = {
-    prefixAndOpcode ++: instBytes
+    val opEx: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
+    
+    val prefixAndOpcode = if (opcode.isInstanceOf[OpcodeWithReg] && operand().isInstanceOf[reg]) { // this is hacky as hell!
+      val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
+      opcodePlus.reg = operand().asInstanceOf[reg]
+      prefixBytes ++: opcodePlus.get
+    } else {
+      prefixBytes ++: opcode.get
+    }
+    
+    val addressForm = explicitFormat(operand()) getOrElse implicitFormat.getAddressingForm(operand(), opEx)
+    
+    prefixAndOpcode ++: addressForm.getBytes
   }
 }
 

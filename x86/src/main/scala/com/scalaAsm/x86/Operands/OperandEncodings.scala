@@ -3,10 +3,10 @@ package Operands
 
 import Memory._
 import com.scalaAsm.x86.OpcodeFormat
+import com.scalaAsm.x86.Instructions.InstructionFormat
 
 object NoOperand
 
-object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = None)
 
 trait OperandFormat
 

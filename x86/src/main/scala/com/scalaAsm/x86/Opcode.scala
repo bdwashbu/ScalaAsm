@@ -1,7 +1,5 @@
 package com.scalaAsm.x86
 
-import Operands.Memory.ModRM
-
 sealed trait OpcodeFormat {
   def size: Int
   def get: Array[Byte]

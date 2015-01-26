@@ -54,7 +54,6 @@ trait AsmProgram[Mode <: x86Mode] {
     
     case class Code(code: InstructionResult*) extends InstructionResult {
       def mnemonic = ""
-      def getSize = 0
       def getBytes = Array()
     }
 

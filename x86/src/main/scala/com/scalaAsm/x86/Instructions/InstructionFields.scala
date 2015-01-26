@@ -1,8 +1,8 @@
 package com.scalaAsm.x86
-package Operands
-package Memory
+package Instructions
 
-import com.scalaAsm.x86.Instructions.InstructionField
+import com.scalaAsm.x86.Operands.Constant
+import com.scalaAsm.x86.Operands._
 
 protected[x86] abstract class AddressingFormSpecifier(modRM: ModRM, sib: SIB, displacement: Constant[_]) {
   import scala.language.postfixOps

@@ -90,10 +90,6 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
 
     compileAssembly
   }
-
-  object IsAddress {                              
-    def unapply(addy: AbsoluteAddress[_]) = addy.name
-  }
   
   def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Coff = {
 
@@ -182,13 +178,18 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         var result: Option[Relocation] = None
         token match {
           case InstructionToken(inst) => inst match {
-            case OneMachineCode(IsAddress(name), _, _, _, _) =>
+            case OneMachineCode(op1, _, _, _, _) if op1().isInstanceOf[AbsoluteAddress[_]] =>
+              val name = op1().asInstanceOf[AbsoluteAddress[_]].name.get
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(IsAddress(name), _, _, _, _) =>
-              println("HERE")
+            case TwoMachineCode(_, op1, _, _, _, _, _) if op1().isInstanceOf[AbsoluteAddress[_]] =>
+              val name = op1().asInstanceOf[AbsoluteAddress[_]].name.get
+              println("HERE!!" + name)
+              
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(_, IsAddress(name), _, _, _) =>
-              println("HERE2")
+            case TwoMachineCode(_, _, op2, _, _, _, _) if op2().isInstanceOf[AbsoluteAddress[_]] =>
+              val name = op2().asInstanceOf[AbsoluteAddress[_]].name.get
+              println("HERE!!" + name)
+              
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case _ =>
           }

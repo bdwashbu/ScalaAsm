@@ -3,7 +3,6 @@ package Instructions
 
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Constant
-import com.scalaAsm.x86.Operands.Memory.ModRM
 import Memory._
 import com.scalaAsm.x86.OpcodeFormat
 
@@ -31,10 +30,10 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
         val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
         opcodePlus.reg = p1().asInstanceOf[reg]
         val opcodeBytes = implicitFormat.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ } ++: opcodePlus.get
-        OneMachineCode(p1(), addressForm.getBytes, opcodeBytes, mnemonic, opEx)
+        OneMachineCode(p1, addressForm.getBytes, opcodeBytes, mnemonic, opEx)
       } else {
         val opcodeBytes = implicitFormat.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ } ++: opcode.get
-        OneMachineCode(p1(), addressForm.getBytes, opcodeBytes, mnemonic, opEx)
+        OneMachineCode(p1, addressForm.getBytes, opcodeBytes, mnemonic, opEx)
       }
     }
   }
@@ -46,19 +45,8 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def explicitFormat(p1: O1, p2: O2): Option[InstructionFormat] = None
 
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], implicitFormat: TwoOperandFormat[X, Y]) = {
-      val opEx = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
-
-      val addressForm = explicitFormat(p1(), p2()) getOrElse implicitFormat.getAddressingForm(p1(), p2(), opEx)
-
-      if (opcode.isInstanceOf[OpcodeWithReg] && p1().isInstanceOf[reg]) { // this is hacky as hell!
-        val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
-        opcodePlus.reg = p1().asInstanceOf[reg]
-        val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()) { _ ++ _ } ++: opcodePlus.get
-        TwoMachineCode(p1(), p2(), addressForm.getBytes, opcodeBytes, mnemonic)
-      } else {
-        val opcodeBytes = prefix.map(_.get).foldLeft(Array[Byte]()) { _ ++ _ } ++: opcode.get
-        TwoMachineCode(p1(), p2(), addressForm.getBytes, opcodeBytes, mnemonic)
-      }
+      val prefixBytes = implicitFormat.getPrefix(prefix).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
+      TwoMachineCode(opcode, p1, p2, prefixBytes, mnemonic, explicitFormat, implicitFormat)
     }
   }
 }

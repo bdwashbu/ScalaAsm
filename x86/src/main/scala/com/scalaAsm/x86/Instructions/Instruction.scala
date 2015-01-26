@@ -2,6 +2,7 @@ package com.scalaAsm.x86
 package Instructions
 
 import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Instructions._
 
 trait InstructionField {
   def getBytes: Array[Byte]
@@ -31,19 +32,17 @@ class ZeroOperands[X <: InstructionDefinition[_]] {
   def apply(ignored: Unit)(implicit ev: X#_0) = ev.get
 }
 
-case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mnemonic: String) extends InstructionResult {
+object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = None)
 
-  def getSize: Int = {
-    format.getPrefix.size + opcode.size
-  }
+case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mnemonic: String) extends InstructionResult {
 
   def getBytes: Array[Byte] = {
     format.getPrefix ++: opcode.get
   }
 }
 
-case class OneMachineCode[O1, OpEn](
-  operand: O1,
+case class OneMachineCode[O1] (
+  operand: Operand[O1],
   instBytes: Array[Byte],
   prefixAndOpcode: Array[Byte],
   mnemonic: String,
@@ -54,33 +53,39 @@ case class OneMachineCode[O1, OpEn](
     formattedMnemonic + " " + operand.toString
   }
 
-  def getSize: Int = {
-    prefixAndOpcode.size + instBytes.size
-  }
-
   def getBytes: Array[Byte] = {
     prefixAndOpcode ++: instBytes
   }
 }
 
-case class TwoMachineCode[O1, O2, OpEn](
-  operand: O1,
-  operand2: O2,
-  instBytes: Array[Byte],
-  prefixAndOpcode: Array[Byte],
-  mnemonic: String) extends InstructionResult {
+case class TwoMachineCode[O1, O2] (
+  opcode: OpcodeFormat,
+  operand: Operand[O1],
+  operand2: Operand[O2],
+  prefixBytes: Array[Byte],
+  mnemonic: String,
+  explicitFormat: (O1, O2) => Option[InstructionFormat],
+  implicitFormat: TwoOperandFormat[O1, O2]) extends InstructionResult {
 
   override def toString = {
     val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
-    formattedMnemonic + " " + operand.toString + ", " + operand2.toString
-  }
-
-  def getSize: Int = {
-    prefixAndOpcode.size + instBytes.size
-  }
-
+      formattedMnemonic + " " + operand.toString + ", " + operand2.toString
+    }
+  
   def getBytes: Array[Byte] = {
-    prefixAndOpcode ++: instBytes
+    val opEx: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
+    
+    val prefixAndOpcode = if (opcode.isInstanceOf[OpcodeWithReg] && operand().isInstanceOf[reg]) { // this is hacky as hell!
+      val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
+      opcodePlus.reg = operand().asInstanceOf[reg]
+      prefixBytes ++: opcodePlus.get
+    } else {
+      prefixBytes ++: opcode.get
+    }
+    
+    val addressForm = explicitFormat(operand(), operand2()) getOrElse implicitFormat.getAddressingForm(operand(), operand2(), opEx)
+    
+    prefixAndOpcode ++: addressForm.getBytes
   }
 }
 

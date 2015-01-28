@@ -1,4 +1,4 @@
-Scala x86 ![Alt text](/example/smooth-spiral.png)
+Scala x86 ![Alt text](/example/smooth-spiral.png) ![Alt text](/example/exe-icon1.gif)
 ========
 
 Welcome to the best Scala source for all things [x86-64](http://en.wikipedia.org/wiki/X86), [Portable Executable](http://en.wikipedia.org/wiki/Portable_Executable) (.exe), and [COFF](http://en.wikipedia.org/wiki/COFF) (.o)!

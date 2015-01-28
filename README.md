@@ -9,11 +9,11 @@ ScalaAsm is a simple low-level assembly API which uses Scala x86.  It can assemb
 
 #### Implementing x86
 
-Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set.  There are over 700 instructions and each one could have up to dozens of different types of inputs (MOV)!  To put this into programming terms - most instructions are overloaded at least a couple times.  There are more than 1300 instructions needing to be implemented if you want to be thorough.  The Intel x86 spec is 3300 pages, after all.
+Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set.  There are over 700 instructions and each one could have up to dozens of different types of inputs.  The instruction MOV has over 30 different versions for instance.  Therefore, when you account for each version there are more than 1300 unique instruction signatures.  The Intel x86 spec is 3300 pages, after all.
 
-There are far too many x86 instructions to maintain the code behind them manually.  It would be very difficult to make changes.  To get around this, Scala x86 uses auto-generated instruction code definitions which comes from a master x86 XML file.  The source XML can be found in references below.
+There are far too many x86 instructions to maintain the code behind them manually.  It would be difficult and time consuming to make the most trivial changes.  To get around this, Scala x86 uses auto-generated instruction code definitions which comes from a very helpful XML file.  The XML can be found in references below.
 
-All the auto-generated objects are members of a type class.  This was a far better method than function overloading, mainly because we can specify the priority scheme of the definitions.  The end result is great compile time safety and readable code if you want to look at the definitions.
+All the auto-generated instruction definitions are members of a type class.  The end result is great compile time safety and readable code if you want to look at the definitions.
 
 ##### Instructions
 

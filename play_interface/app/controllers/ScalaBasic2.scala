@@ -38,7 +38,7 @@ object x86Parser {
 
     new Arith with AsmProgram[x86_32] {
 
-      import com.scalaAsm.x86.Instructions.Standard._
+      import com.scalaAsm.x86.Instructions.General._
 
       sections += new DataSection {
         builder += Variable("helloWorld", expression + " = %d\r\n\u0000")

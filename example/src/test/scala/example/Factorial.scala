@@ -23,7 +23,7 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
   def getExecutable(input: Int) = {
     object Factorial extends AsmProgram[x86_32] {
 
-      import com.scalaAsm.x86.Instructions.Standard._
+      import com.scalaAsm.x86.Instructions.General._
 
       sections += new DataSection(
         Variable("test", "%d\n\u0000")) {}

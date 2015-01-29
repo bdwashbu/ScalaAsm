@@ -1,0 +1,17 @@
+package com.scalaAsm.x86
+package Instructions
+package General
+
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Operands.Memory._
+
+object ENTER extends InstructionDefinition[OneOpcode]("ENTER") with ENTERImpl
+
+// Make Stack Frame for Procedure Parameters
+
+trait ENTERImpl {
+  implicit object ENTER_0 extends ENTER._2[imm16, imm8] {
+    def opcode = 0xC8
+    override def hasImplicitOperand = true
+  }
+}

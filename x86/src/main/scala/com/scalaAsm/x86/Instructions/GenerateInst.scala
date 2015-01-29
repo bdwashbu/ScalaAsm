@@ -568,7 +568,7 @@ object GenerateInst {
                uniqueInst ++= insts
                val entry = insts(0).entry
                //"general" + entry.group2.map(grp2 => "/" + grp2 + entry.group3.map(grp3 => "/" + grp3).getOrElse("")).getOrElse("")
-               outputInstructionFile(mnem, uniqueInst, "general")
+               outputInstructionFile(mnem, uniqueInst, "General")
              }
            }
       //}

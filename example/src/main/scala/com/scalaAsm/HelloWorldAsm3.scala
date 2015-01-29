@@ -7,7 +7,7 @@ import com.scalaAsm.asm.x86_32
 
 object HelloWorld3 extends AsmProgram[x86_32] {
   
-  import com.scalaAsm.x86.Instructions.Standard._
+  import com.scalaAsm.x86.Instructions.General._
 
   sections += new DataSection (
     Variable("pressAnyKey", "Press any key to continue ...\0"),

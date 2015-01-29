@@ -3,14 +3,14 @@ package com.scalaAsm.asm
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.Tokens.Token
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.x86.Instructions.{ Standard, Formats }
+import com.scalaAsm.x86.Instructions.Formats
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.x86.InstructionResult
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
-import com.scalaAsm.x86.Instructions.Standard._
+import com.scalaAsm.x86.Instructions.General._
 
 import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Operands._

@@ -18,7 +18,7 @@ import com.scalaAsm.asm.x86_32
 
 object HelloWorld extends AsmProgram[x86_32] {
 
-  import com.scalaAsm.x86.Instructions.Standard._
+  import com.scalaAsm.x86.Instructions.General._
   import com.scalaAsm.asm._
 
   sections += new DataSection(

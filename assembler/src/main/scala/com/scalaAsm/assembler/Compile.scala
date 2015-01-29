@@ -2,13 +2,13 @@ package com.scalaAsm
 package assembler
 
 import com.scalaAsm.asm.Tokens._
-import com.scalaAsm.x86.Instructions.Standard._
+//import com.scalaAsm.x86.Instructions.General._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.asm.Registers
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
-import com.scalaAsm.x86.Instructions.Standard
+//import com.scalaAsm.x86.Instructions.Standard
 import com.scalaAsm.x86.Instructions.Formats
 import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Instructions.OneMachineCode

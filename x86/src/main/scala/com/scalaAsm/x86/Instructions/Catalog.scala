@@ -2,7 +2,7 @@ package com.scalaAsm.x86
 package Instructions
 
 import com.scalaAsm.x86.Instructions._
-import com.scalaAsm.x86.Instructions.Standard._
+import com.scalaAsm.x86.Instructions.General._
 
  object Catalog {
     trait Standard {

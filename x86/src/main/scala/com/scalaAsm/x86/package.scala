@@ -26,11 +26,13 @@ package object x86 {
   type m16 = Memory[_16]
   type m32 = Memory[_32]
   type m64 = Memory[_64]
+  type m128 = Memory[_128]
 
   type _8 = Byte
   type _16 = Short
   type _32 = Int
   type _64 = Long
+  type _128 = Long // fix
   
   type reg = GPR
   type r8 = GeneralPurpose[_8]

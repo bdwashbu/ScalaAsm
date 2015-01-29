@@ -12,11 +12,11 @@ object RETN extends InstructionDefinition[OneOpcode]("RETN") with RETNImpl
 trait RETNImpl {
   implicit object RETN_0 extends RETN._1[imm16] {
     def opcode = 0xC2
-    override def hasImplicateOperand = true
+    override def hasImplicitOperand = true
   }
 
   implicit object RETN_1 extends RETN._0 {
     def opcode = 0xC3
-    override def hasImplicateOperand = true
+    override def hasImplicitOperand = true
   }
 }

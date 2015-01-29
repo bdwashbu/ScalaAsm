@@ -15,7 +15,7 @@ object GenerateInst {
 
   trait InstructionInstance {
     protected def getClassHeader(name: String): String
-    protected def hasImplicateOperand: Boolean
+    protected def hasImplicitOperand: Boolean
     protected def getExplicitFormat: Seq[String]
     val mnemonic: String
     def getSize: Int
@@ -55,7 +55,7 @@ object GenerateInst {
       val opcodeString: Seq[String] = getOperand.map { op =>
         op.addressingMethod match {
           case Some(OpcodeSelectsRegister) =>
-            val regCode = if (op.operandType.code == "qp") "o" else op.operandType.code // for some reason the code for 64-bit is "ro"
+            val regCode = if (List("qp", "q") contains op.operandType.code) "o" else op.operandType.code // for some reason the code for 64-bit is "ro"
             Seq("def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + regCode + "\n")
           case _ => getOpcodeString
           //}
@@ -75,13 +75,13 @@ object GenerateInst {
         }
       }.getOrElse(Nil)
 
-      val implicate: Seq[String] = if (entry.syntax.exists { syn => syn.hasImplicate }) {
-        Seq("override def hasImplicateOperand = true\n")
+      val implicitOp: Seq[String] = if (entry.syntax.exists { syn => syn.hasImplicit }) {
+        Seq("override def hasImplicitOperand = true\n")
       } else {
         Nil
       }
       val footer = "}"
-      header +: (Seq(opcodeString, prefix, getExplicitFormat, implicate).flatten.map(x => "  " + x) :+ footer)
+      header +: (Seq(opcodeString, prefix, getExplicitFormat, implicitOp).flatten.map(x => "  " + x) :+ footer)
     }
   }
 
@@ -96,7 +96,7 @@ object GenerateInst {
       result
     }
 
-    def hasImplicateOperand: Boolean = false
+    def hasImplicitOperand: Boolean = false
     def getExplicitFormat = Nil
 
     def getSize: Int = 0
@@ -114,14 +114,14 @@ object GenerateInst {
       result
     }
 
-    def hasImplicateOperand: Boolean = {
-      operand.isImplicate
+    def hasImplicitOperand: Boolean = {
+      operand.isImplicit
     }
     
     def getExplicitFormat = {
         operand.addressingMethod match {
           case Some(OpcodeSelectsRegister) =>
-            Seq("override def explicitFormat = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))\n")
+            Seq("override def explicitFormat(op1: " + operand + ") = Some(InstructionFormat(addressingForm = NoModRM(), immediate = None))\n")
           case _ => Nil
         }
     }
@@ -144,7 +144,7 @@ object GenerateInst {
 
     def getOperand = Some(operands._1)
 
-    def hasImplicateOperand = false
+    def hasImplicitOperand = false
     
     def getExplicitFormat = {
       if (operands._2.addressingMethod.isDefined && operands._2.addressingMethod.isDefined && operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _32 &&
@@ -183,7 +183,7 @@ object GenerateInst {
         //  operands(1).operandType.isDefined) {
         val ops = TwoOperandDef(operands(0), operands(1))
         ops.getInstances.map { instance => x86TwoOperandInstruction(opcode, mnemonic, instance, entry) }
-        //} else if (!operands(1).operandType.isDefined) { // implicate
+        //} else if (!operands(1).operandType.isDefined) { // implicit
         //  operands(0).getInstances.map{instance => x86OneOperandInstruction(mnemonic + "_" + opcode + "_" + instance, opcode, mnemonic, instance, entry)}
         //} else {
         //  Nil
@@ -215,7 +215,7 @@ object GenerateInst {
 
   case class SyntaxDef(mnemonic: String,
                        operands: Seq[OperandDef],
-                       hasImplicate: Boolean)
+                       hasImplicit: Boolean)
 
   case class TwoOperandDef(operand1: OperandDef, operand2: OperandDef) {
 
@@ -370,7 +370,7 @@ object GenerateInst {
         }
       }.getOrElse(addressingMethod.map { addy => addy.toString }.getOrElse("") + operandSize.toString)
     }
-    def isImplicate = false
+    def isImplicit = false
   }
 
   case class TwoOperandInstance(_1: OperandInstance, _2: OperandInstance)
@@ -387,18 +387,18 @@ object GenerateInst {
     if (!node.isEmpty) Some(node.text) else None
   }
   
-  def isImplicate(node: Node): Boolean = {
+  def isImplicit(node: Node): Boolean = {
     val isDisplayed = if (!(node \ "@displayed").isEmpty) (node \@ "displayed") == "yes" else true
-    val hasNoInfo = (node \ "@type").isEmpty && (node \ "@group").isEmpty && (node \ "a").isEmpty && (node \ "t").isEmpty
-    !isDisplayed || hasNoInfo
+    //val hasNoInfo = (node \ "@type").isEmpty && (node \ "@group").isEmpty && (node \ "a").isEmpty && (node \ "t").isEmpty
+    !isDisplayed || (node \ "a").isEmpty
   }
 
   def parseSyntax(entry: NodeSeq): Seq[SyntaxDef] = {
     (entry \ "syntax").map { syntax =>
       val mnemonic = (syntax \ "mnem").text
       val operands = (syntax \ "_").filter { node => node.label != "mnem" }
-      var hasImplicate = false
-      val explicitOperands = operands filter{node => !isImplicate(node)}
+      var hasImplicit = false
+      val explicitOperands = operands filter{node => !isImplicit(node)}
          
       val ops = explicitOperands map { operand =>
         val hasDetails = !(operand \ "a").isEmpty
@@ -429,9 +429,9 @@ object GenerateInst {
         OperandDef(operand.label, opType, opAddressing, opName)
       }
 
-      val hasImplicateOperand = explicitOperands.size != operands.size
+      val hasImplicitOperand = explicitOperands.size != operands.size
       
-      SyntaxDef(mnemonic, ops, hasImplicateOperand)
+      SyntaxDef(mnemonic, ops, hasImplicitOperand)
     }
   }
 
@@ -567,7 +567,8 @@ object GenerateInst {
                val uniqueInst = LinkedHashSet[InstructionInstance]()
                uniqueInst ++= insts
                val entry = insts(0).entry
-               outputInstructionFile(mnem, uniqueInst, "general" + entry.group2.map(grp2 => "/" + grp2 + entry.group3.map(grp3 => "/" + grp3).getOrElse("")).getOrElse(""))
+               //"general" + entry.group2.map(grp2 => "/" + grp2 + entry.group3.map(grp3 => "/" + grp3).getOrElse("")).getOrElse("")
+               outputInstructionFile(mnem, uniqueInst, "general")
              }
            }
       //}

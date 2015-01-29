@@ -12,6 +12,6 @@ object INT extends InstructionDefinition[OneOpcode]("INT") with INTImpl
 trait INTImpl {
   implicit object INT_0 extends INT._1[imm8] {
     def opcode = 0xCD
-    override def hasImplicateOperand = true
+    override def hasImplicitOperand = true
   }
 }

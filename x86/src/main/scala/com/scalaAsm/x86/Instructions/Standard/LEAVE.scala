@@ -12,6 +12,6 @@ object LEAVE extends InstructionDefinition[OneOpcode]("LEAVE") with LEAVEImpl
 trait LEAVEImpl {
   implicit object LEAVE_0 extends LEAVE._0 {
     def opcode = 0xC9
-    override def hasImplicateOperand = true
+    override def hasImplicitOperand = true
   }
 }

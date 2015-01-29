@@ -1,8 +1,8 @@
 package com.scalaAsm.x86
 package Instructions
 
-import com.scalaAsm.x86.Instructions.Standard._
 import com.scalaAsm.x86.Instructions._
+import com.scalaAsm.x86.Instructions.Standard._
 
  object Catalog {
     trait Standard {
@@ -25,7 +25,7 @@ import com.scalaAsm.x86.Instructions._
       object jl extends OneOperand[JL.type]
       object je extends OneOperand[JE.type]
       object int extends OneOperand[INT.type]
-      object rdrand extends OneOperand[RDRAND]
+      //object rdrand extends OneOperand[RDRAND]
       object and extends TwoOperands[AND.type]
       object lea extends TwoOperands[LEA.type]
       object mov extends TwoOperands[MOV.type]

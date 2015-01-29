@@ -12,6 +12,6 @@ object PUSHF extends InstructionDefinition[OneOpcode]("PUSHF") with PUSHFImpl
 trait PUSHFImpl {
   implicit object PUSHF_0 extends PUSHF._0 {
     def opcode = 0x9C
-    override def hasImplicateOperand = true
+    override def hasImplicitOperand = true
   }
 }

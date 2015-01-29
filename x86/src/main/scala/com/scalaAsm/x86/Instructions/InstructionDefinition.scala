@@ -12,13 +12,13 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
     def opcode: Opcode
     val mnemonic = InstructionDefinition.this.mnemonic
     def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
-    def hasImplicateOperand: Boolean = false
+    def hasImplicitOperand: Boolean = false
   }
 
   abstract class _1[-O1] extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
-    def hasImplicateOperand: Boolean = false
+    def hasImplicitOperand: Boolean = false
     def explicitFormat(p1: O1): Option[InstructionFormat] = None
 
     def apply[X <: O1](p1: Operand[X], implicitFormat: OneOperandFormat[X], prefix: Seq[Prefix]) = {
@@ -30,7 +30,7 @@ abstract class InstructionDefinition[Opcode <: OpcodeFormat](val mnemonic: Strin
   abstract class _2[-O1, -O2] extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: Opcode
-    def hasImplicateOperand: Boolean = false
+    def hasImplicitOperand: Boolean = false
     def explicitFormat(p1: O1, p2: O2): Option[InstructionFormat] = None
 
     def apply[X <: O1, Y <: O2](p1: Operand[X], p2: Operand[Y], implicitFormat: TwoOperandFormat[X, Y]) = {

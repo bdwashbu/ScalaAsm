@@ -40,6 +40,13 @@ package object x86 {
   type r32 = GeneralPurpose[_32]
   type r64 = GeneralPurpose[_64]
   
+  type Sreg = SegmentRegister
+  
+  type moffs8 = AbsoluteAddress[_8]
+  type moffs16 = AbsoluteAddress[_16]
+  type moffs32 = AbsoluteAddress[_32]
+  type moffs64 = AbsoluteAddress[_64]
+  
   type rel = Constant[_]
   type rel8 = Constant[_8]
   type rel16 = Constant[_16]

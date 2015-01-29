@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object POP extends InstructionDefinition[OneOpcode]("POP") with POPImpl
+// Description: Pop a Value from the Stack
+// Category: general/stacksegreg
 
-// Pop a Value from the Stack
+object POP extends InstructionDefinition[OneOpcode]("POP") with POPImpl
 
 trait POPLow {
   implicit object POP_0 extends POP._1[rm16] {

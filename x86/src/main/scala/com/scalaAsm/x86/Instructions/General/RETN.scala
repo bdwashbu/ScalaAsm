@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object RETN extends InstructionDefinition[OneOpcode]("RETN") with RETNImpl
+// Description: Return from procedure
+// Category: general/branchstack
 
-// Return from procedure
+object RETN extends InstructionDefinition[OneOpcode]("RETN") with RETNImpl
 
 trait RETNImpl {
   implicit object RETN_0 extends RETN._1[imm16] {

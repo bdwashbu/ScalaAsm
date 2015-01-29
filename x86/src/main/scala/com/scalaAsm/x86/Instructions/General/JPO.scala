@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JPO extends InstructionDefinition[OneOpcode]("JPO") with JPOImpl
+// Description: Jump short if not parity/parity odd
+// Category: general/branch/cond
 
-// Jump short if not parity/parity odd
+object JPO extends InstructionDefinition[OneOpcode]("JPO") with JPOImpl
 
 trait JPOImpl {
   implicit object JPO_0 extends JPO._1[rel8] {

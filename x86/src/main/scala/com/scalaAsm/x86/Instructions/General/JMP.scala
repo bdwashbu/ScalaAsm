@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JMP extends InstructionDefinition[OneOpcode]("JMP") with JMPImpl
+// Description: Jump
+// Category: general/branch
 
-// Jump
+object JMP extends InstructionDefinition[OneOpcode]("JMP") with JMPImpl
 
 trait JMPLow {
   implicit object JMP_0 extends JMP._1[rm16] {

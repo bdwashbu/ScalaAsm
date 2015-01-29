@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object AAS extends InstructionDefinition[OneOpcode]("AAS") with AASImpl
+// Description: ASCII Adjust AL After Subtraction
+// Category: general/arith/decimal
 
-// ASCII Adjust AL After Subtraction
+object AAS extends InstructionDefinition[OneOpcode]("AAS") with AASImpl
 
 trait AASImpl {
   implicit object AAS_0 extends AAS._0 {

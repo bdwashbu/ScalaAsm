@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JECXZ extends InstructionDefinition[OneOpcode]("JECXZ") with JECXZImpl
+// Description: Jump short if eCX register is 0
+// Category: general/branch/cond
 
-// Jump short if eCX register is 0
+object JECXZ extends InstructionDefinition[OneOpcode]("JECXZ") with JECXZImpl
 
 trait JECXZImpl {
   implicit object JECXZ_0 extends JECXZ._1[rel8] {

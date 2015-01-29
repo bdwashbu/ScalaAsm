@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object LOOPNE extends InstructionDefinition[OneOpcode]("LOOPNE") with LOOPNEImpl
+// Description: Decrement count; Jump short if count!=0 and ZF=0
+// Category: general/branch/cond
 
-// Decrement count; Jump short if count!=0 and ZF=0
+object LOOPNE extends InstructionDefinition[OneOpcode]("LOOPNE") with LOOPNEImpl
 
 trait LOOPNEImpl {
   implicit object LOOPNE_0 extends LOOPNE._1[rel8] {

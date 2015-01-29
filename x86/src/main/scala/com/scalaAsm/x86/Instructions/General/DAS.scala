@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object DAS extends InstructionDefinition[OneOpcode]("DAS") with DASImpl
+// Description: Decimal Adjust AL after Subtraction
+// Category: general/arith/decimal
 
-// Decimal Adjust AL after Subtraction
+object DAS extends InstructionDefinition[OneOpcode]("DAS") with DASImpl
 
 trait DASImpl {
   implicit object DAS_0 extends DAS._0 {

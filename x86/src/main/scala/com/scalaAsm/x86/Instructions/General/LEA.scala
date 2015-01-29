@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object LEA extends InstructionDefinition[OneOpcode]("LEA") with LEAImpl
+// Description: Load Effective Address
+// Category: general/datamov
 
-// Load Effective Address
+object LEA extends InstructionDefinition[OneOpcode]("LEA") with LEAImpl
 
 trait LEAImpl {
   implicit object LEA_0 extends LEA._2[r16, m] {

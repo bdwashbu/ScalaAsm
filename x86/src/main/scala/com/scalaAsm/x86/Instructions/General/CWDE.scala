@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CWDE extends InstructionDefinition[OneOpcode]("CWDE") with CWDEImpl
+// Description: Convert
+// Category: general/conver
 
-// Convert
+object CWDE extends InstructionDefinition[OneOpcode]("CWDE") with CWDEImpl
 
 trait CWDEImpl {
   implicit object CWDE_0 extends CWDE._0 {

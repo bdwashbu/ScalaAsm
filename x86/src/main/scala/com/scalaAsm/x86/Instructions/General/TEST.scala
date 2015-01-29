@@ -5,11 +5,12 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
+// Description: Logical Compare
+// Category: general/arith/binary
+
 object TEST extends InstructionDefinition[OneOpcode]("TEST") with TESTImpl
 
-// Logical Compare
-
-trait TESTImpl {
+trait TESTLow {
   implicit object TEST_0 extends TEST._2[rm8, r8] {
     def opcode = 0x84 /r
   }
@@ -32,35 +33,37 @@ trait TESTImpl {
     override def prefix = REX.W(true)
   }
 
-  implicit object TEST_4 extends TEST._1[imm8] {
+  implicit object TEST_4 extends TEST._2[rm8, imm8] {
+    def opcode = 0xF6 /+ 0
+  }
+
+  implicit object TEST_5 extends TEST._2[rm16, imm16] {
+    def opcode = 0xF7 /+ 0
+  }
+
+  implicit object TEST_6 extends TEST._2[rm32, imm32] {
+    def opcode = 0xF7 /+ 0
+  }
+
+  implicit object TEST_7 extends TEST._2[rm64, imm64] {
+    def opcode = 0xF7 /+ 0
+    override def prefix = REX.W(true)
+  }
+}
+
+trait TESTImpl extends TESTLow {
+  implicit object TEST_8 extends TEST._1[imm8] {
     def opcode = 0xA8
     override def hasImplicitOperand = true
   }
 
-  implicit object TEST_5 extends TEST._1[imm16] {
+  implicit object TEST_9 extends TEST._1[imm16] {
     def opcode = 0xA9
     override def hasImplicitOperand = true
   }
 
-  implicit object TEST_6 extends TEST._1[imm32] {
+  implicit object TEST_10 extends TEST._1[imm32] {
     def opcode = 0xA9
     override def hasImplicitOperand = true
-  }
-
-  implicit object TEST_7 extends TEST._2[rm8, imm8] {
-    def opcode = 0xF6 /+ 0
-  }
-
-  implicit object TEST_8 extends TEST._2[rm16, imm16] {
-    def opcode = 0xF7 /+ 0
-  }
-
-  implicit object TEST_9 extends TEST._2[rm32, imm32] {
-    def opcode = 0xF7 /+ 0
-  }
-
-  implicit object TEST_10 extends TEST._2[rm64, imm64] {
-    def opcode = 0xF7 /+ 0
-    override def prefix = REX.W(true)
   }
 }

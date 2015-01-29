@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JNP extends InstructionDefinition[OneOpcode]("JNP") with JNPImpl
+// Description: Jump short if not parity/parity odd
+// Category: general/branch/cond
 
-// Jump short if not parity/parity odd
+object JNP extends InstructionDefinition[OneOpcode]("JNP") with JNPImpl
 
 trait JNPImpl {
   implicit object JNP_0 extends JNP._1[rel8] {

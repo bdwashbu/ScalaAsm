@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object ADX extends InstructionDefinition[OneOpcode]("ADX") with ADXImpl
+// Description: Adjust AX Before Division
+// Category: general/arith/decimal
 
-// Adjust AX Before Division
+object ADX extends InstructionDefinition[OneOpcode]("ADX") with ADXImpl
 
 trait ADXImpl {
   implicit object ADX_0 extends ADX._1[imm8] {

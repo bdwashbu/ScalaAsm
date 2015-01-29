@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object INTO extends InstructionDefinition[OneOpcode]("INTO") with INTOImpl
+// Description: Call to Interrupt Procedure
+// Category: general/breakstack
 
-// Call to Interrupt Procedure
+object INTO extends InstructionDefinition[OneOpcode]("INTO") with INTOImpl
 
 trait INTOImpl {
   implicit object INTO_0 extends INTO._0 {

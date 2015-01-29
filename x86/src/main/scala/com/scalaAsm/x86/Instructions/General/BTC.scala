@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object BTC extends InstructionDefinition[OneOpcode]("BTC") with BTCImpl
+// Description: Bit Test and Complement
+// Category: general/bit
 
-// Bit Test and Complement
+object BTC extends InstructionDefinition[OneOpcode]("BTC") with BTCImpl
 
 trait BTCImpl {
   implicit object BTC_0 extends BTC._2[rm16, imm8] {

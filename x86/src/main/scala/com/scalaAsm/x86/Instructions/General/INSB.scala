@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object INSB extends InstructionDefinition[OneOpcode]("INSB") with INSBImpl
+// Description: Input from Port to String
+// Category: general/inoutstring
 
-// Input from Port to String
+object INSB extends InstructionDefinition[OneOpcode]("INSB") with INSBImpl
 
 trait INSBImpl {
   implicit object INSB_0 extends INSB._0 {

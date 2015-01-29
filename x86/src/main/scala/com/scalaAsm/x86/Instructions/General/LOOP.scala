@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object LOOP extends InstructionDefinition[OneOpcode]("LOOP") with LOOPImpl
+// Description: Decrement count; Jump short if count!=0
+// Category: general/branch/cond
 
-// Decrement count; Jump short if count!=0
+object LOOP extends InstructionDefinition[OneOpcode]("LOOP") with LOOPImpl
 
 trait LOOPImpl {
   implicit object LOOP_0 extends LOOP._1[rel8] {

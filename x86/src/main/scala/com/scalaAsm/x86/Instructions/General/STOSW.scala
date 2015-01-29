@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object STOSW extends InstructionDefinition[OneOpcode]("STOSW") with STOSWImpl
+// Description: Store String
+// Category: general/datamovstring
 
-// Store String
+object STOSW extends InstructionDefinition[OneOpcode]("STOSW") with STOSWImpl
 
 trait STOSWImpl {
   implicit object STOSW_0 extends STOSW._0 {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CALL extends InstructionDefinition[OneOpcode]("CALL") with CALLImpl
+// Description: Call Procedure
+// Category: general/branchstack
 
-// Call Procedure
+object CALL extends InstructionDefinition[OneOpcode]("CALL") with CALLImpl
 
 trait CALLLow {
   implicit object CALL_0 extends CALL._1[rm16] {

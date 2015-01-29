@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CLD extends InstructionDefinition[OneOpcode]("CLD") with CLDImpl
+// Description: Clear Direction Flag
+// Category: general/flgctrl
 
-// Clear Direction Flag
+object CLD extends InstructionDefinition[OneOpcode]("CLD") with CLDImpl
 
 trait CLDImpl {
   implicit object CLD_0 extends CLD._0 {

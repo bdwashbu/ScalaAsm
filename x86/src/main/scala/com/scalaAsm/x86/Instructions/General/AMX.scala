@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object AMX extends InstructionDefinition[OneOpcode]("AMX") with AMXImpl
+// Description: Adjust AX After Multiply
+// Category: general/arith/decimal
 
-// Adjust AX After Multiply
+object AMX extends InstructionDefinition[OneOpcode]("AMX") with AMXImpl
 
 trait AMXImpl {
   implicit object AMX_0 extends AMX._1[imm8] {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object STOSQ extends InstructionDefinition[OneOpcode]("STOSQ") with STOSQImpl
+// Description: Store String
+// Category: general/datamovstring
 
-// Store String
+object STOSQ extends InstructionDefinition[OneOpcode]("STOSQ") with STOSQImpl
 
 trait STOSQImpl {
   implicit object STOSQ_0 extends STOSQ._0 {

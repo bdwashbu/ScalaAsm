@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object SCASW extends InstructionDefinition[OneOpcode]("SCASW") with SCASWImpl
+// Description: Scan String
+// Category: general/arithstring/binary
 
-// Scan String
+object SCASW extends InstructionDefinition[OneOpcode]("SCASW") with SCASWImpl
 
 trait SCASWImpl {
   implicit object SCASW_0 extends SCASW._0 {

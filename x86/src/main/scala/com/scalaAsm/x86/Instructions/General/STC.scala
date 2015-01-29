@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object STC extends InstructionDefinition[OneOpcode]("STC") with STCImpl
+// Description: Set Carry Flag
+// Category: general/flgctrl
 
-// Set Carry Flag
+object STC extends InstructionDefinition[OneOpcode]("STC") with STCImpl
 
 trait STCImpl {
   implicit object STC_0 extends STC._0 {

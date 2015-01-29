@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object IN extends InstructionDefinition[OneOpcode]("IN") with INImpl
+// Description: Input from Port
+// Category: general/inout
 
-// Input from Port
+object IN extends InstructionDefinition[OneOpcode]("IN") with INImpl
 
 trait INImpl {
   implicit object IN_0 extends IN._1[imm8] {

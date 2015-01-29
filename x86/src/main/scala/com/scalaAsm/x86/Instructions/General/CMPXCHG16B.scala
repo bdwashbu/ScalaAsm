@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CMPXCHG16B extends InstructionDefinition[OneOpcode]("CMPXCHG16B") with CMPXCHG16BImpl
+// Description: Compare and Exchange Bytes
+// Category: general/datamovarith/binary
 
-// Compare and Exchange Bytes
+object CMPXCHG16B extends InstructionDefinition[OneOpcode]("CMPXCHG16B") with CMPXCHG16BImpl
 
 trait CMPXCHG16BImpl {
   implicit object CMPXCHG16B_0 extends CMPXCHG16B._1[m128] {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object PUSHFQ extends InstructionDefinition[OneOpcode]("PUSHFQ") with PUSHFQImpl
+// Description: Push rFLAGS Register onto the Stack
+// Category: general/stackflgctrl
 
-// Push rFLAGS Register onto the Stack
+object PUSHFQ extends InstructionDefinition[OneOpcode]("PUSHFQ") with PUSHFQImpl
 
 trait PUSHFQImpl {
   implicit object PUSHFQ_0 extends PUSHFQ._0 {

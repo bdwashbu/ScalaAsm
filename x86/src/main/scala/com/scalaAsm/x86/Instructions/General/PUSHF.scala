@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object PUSHF extends InstructionDefinition[OneOpcode]("PUSHF") with PUSHFImpl
+// Description: Push FLAGS Register onto the Stack
+// Category: general/stackflgctrl
 
-// Push FLAGS Register onto the Stack
+object PUSHF extends InstructionDefinition[OneOpcode]("PUSHF") with PUSHFImpl
 
 trait PUSHFImpl {
   implicit object PUSHF_0 extends PUSHF._0 {

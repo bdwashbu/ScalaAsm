@@ -5,16 +5,23 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
+// Description: Exchange Register/Memory with Register
+// Category: general/datamov
+
 object XCHG extends InstructionDefinition[OneOpcode]("XCHG") with XCHGImpl
 
-// Exchange Register/Memory with Register
-
 trait XCHGLow {
-  implicit object XCHG_0 extends XCHG._2[r16, rm16] {
+  implicit object XCHG_0 extends XCHG._2[r8, rm8] {
+    def opcode = 0x86 /r
+  }
+}
+
+trait XCHGImpl extends XCHGLow {
+  implicit object XCHG_1 extends XCHG._2[r16, rm16] {
     def opcode = 0x87 /r
   }
 
-  implicit object XCHG_1 extends XCHG._2[r32, rm32] {
+  implicit object XCHG_2 extends XCHG._2[r32, rm32] {
     def opcode = 0x87 /r
     override def explicitFormat(op1: r32, op2: rm32) = {
       if (op2.isInstanceOf[reg]) {
@@ -23,15 +30,9 @@ trait XCHGLow {
     }
   }
 
-  implicit object XCHG_2 extends XCHG._2[r64, rm64] {
+  implicit object XCHG_3 extends XCHG._2[r64, rm64] {
     def opcode = 0x87 /r
     override def prefix = REX.W(true)
-  }
-}
-
-trait XCHGImpl extends XCHGLow {
-  implicit object XCHG_3 extends XCHG._2[r8, rm8] {
-    def opcode = 0x86 /r
   }
 
   implicit object XCHG_4 extends XCHG._1[r16] {

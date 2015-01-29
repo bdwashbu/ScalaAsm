@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object AAA extends InstructionDefinition[OneOpcode]("AAA") with AAAImpl
+// Description: ASCII Adjust After Addition
+// Category: general/arith/decimal
 
-// ASCII Adjust After Addition
+object AAA extends InstructionDefinition[OneOpcode]("AAA") with AAAImpl
 
 trait AAAImpl {
   implicit object AAA_0 extends AAA._0 {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CLC extends InstructionDefinition[OneOpcode]("CLC") with CLCImpl
+// Description: Clear Carry Flag
+// Category: general/flgctrl
 
-// Clear Carry Flag
+object CLC extends InstructionDefinition[OneOpcode]("CLC") with CLCImpl
 
 trait CLCImpl {
   implicit object CLC_0 extends CLC._0 {

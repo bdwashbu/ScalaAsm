@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object MOVSB extends InstructionDefinition[OneOpcode]("MOVSB") with MOVSBImpl
+// Description: Move Data from String to String
+// Category: general/datamovstring
 
-// Move Data from String to String
+object MOVSB extends InstructionDefinition[OneOpcode]("MOVSB") with MOVSBImpl
 
 trait MOVSBImpl {
   implicit object MOVSB_0 extends MOVSB._0 {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CLI extends InstructionDefinition[OneOpcode]("CLI") with CLIImpl
+// Description: Clear Interrupt Flag
+// Category: general/flgctrl
 
-// Clear Interrupt Flag
+object CLI extends InstructionDefinition[OneOpcode]("CLI") with CLIImpl
 
 trait CLIImpl {
   implicit object CLI_0 extends CLI._0 {

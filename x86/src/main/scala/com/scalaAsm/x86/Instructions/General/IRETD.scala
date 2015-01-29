@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object IRETD extends InstructionDefinition[OneOpcode]("IRETD") with IRETDImpl
+// Description: Interrupt Return
+// Category: general/breakstack
 
-// Interrupt Return
+object IRETD extends InstructionDefinition[OneOpcode]("IRETD") with IRETDImpl
 
 trait IRETDImpl {
   implicit object IRETD_0 extends IRETD._0 {

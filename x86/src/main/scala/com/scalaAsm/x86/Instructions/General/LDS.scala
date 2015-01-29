@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object LDS extends InstructionDefinition[OneOpcode]("LDS") with LDSImpl
+// Description: Load Far Pointer
+// Category: general/datamovsegreg
 
-// Load Far Pointer
+object LDS extends InstructionDefinition[OneOpcode]("LDS") with LDSImpl
 
 trait LDSImpl {
   implicit object LDS_0 extends LDS._2[r16, m] {

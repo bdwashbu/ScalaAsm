@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object PUSH extends InstructionDefinition[OneOpcode]("PUSH") with PUSHImpl
+// Description: Push Word, Doubleword or Quadword Onto the Stack
+// Category: general/stacksegreg
 
-// Push Word, Doubleword or Quadword Onto the Stack
+object PUSH extends InstructionDefinition[OneOpcode]("PUSH") with PUSHImpl
 
 trait PUSHLow {
   implicit object PUSH_0 extends PUSH._1[rm16] {

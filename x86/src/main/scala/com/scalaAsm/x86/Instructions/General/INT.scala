@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object INT extends InstructionDefinition[OneOpcode]("INT") with INTImpl
+// Description: Call to Interrupt Procedure
+// Category: general/breakstack
 
-// Call to Interrupt Procedure
+object INT extends InstructionDefinition[OneOpcode]("INT") with INTImpl
 
 trait INTImpl {
   implicit object INT_0 extends INT._1[imm8] {

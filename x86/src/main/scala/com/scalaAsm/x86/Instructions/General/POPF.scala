@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object POPF extends InstructionDefinition[OneOpcode]("POPF") with POPFImpl
+// Description: Pop Stack into FLAGS Register
+// Category: general/stackflgctrl
 
-// Pop Stack into FLAGS Register
+object POPF extends InstructionDefinition[OneOpcode]("POPF") with POPFImpl
 
 trait POPFImpl {
   implicit object POPF_0 extends POPF._0 {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CQO extends InstructionDefinition[OneOpcode]("CQO") with CQOImpl
+// Description: Convert
+// Category: general/conver
 
-// Convert
+object CQO extends InstructionDefinition[OneOpcode]("CQO") with CQOImpl
 
 trait CQOImpl {
   implicit object CQO_0 extends CQO._0 {

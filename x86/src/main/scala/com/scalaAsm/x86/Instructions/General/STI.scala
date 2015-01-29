@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object STI extends InstructionDefinition[OneOpcode]("STI") with STIImpl
+// Description: Set Interrupt Flag
+// Category: general/flgctrl
 
-// Set Interrupt Flag
+object STI extends InstructionDefinition[OneOpcode]("STI") with STIImpl
 
 trait STIImpl {
   implicit object STI_0 extends STI._0 {

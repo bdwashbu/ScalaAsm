@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object SCASD extends InstructionDefinition[OneOpcode]("SCASD") with SCASDImpl
+// Description: Scan String
+// Category: general/arithstring/binary
 
-// Scan String
+object SCASD extends InstructionDefinition[OneOpcode]("SCASD") with SCASDImpl
 
 trait SCASDImpl {
   implicit object SCASD_0 extends SCASD._0 {

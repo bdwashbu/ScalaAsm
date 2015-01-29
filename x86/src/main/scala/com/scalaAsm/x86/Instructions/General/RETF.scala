@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object RETF extends InstructionDefinition[OneOpcode]("RETF") with RETFImpl
+// Description: Return from procedure
+// Category: general/branchstack
 
-// Return from procedure
+object RETF extends InstructionDefinition[OneOpcode]("RETF") with RETFImpl
 
 trait RETFImpl {
   implicit object RETF_0 extends RETF._1[imm16] {

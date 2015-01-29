@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object SAHF extends InstructionDefinition[OneOpcode]("SAHF") with SAHFImpl
+// Description: Store AH into Flags
+// Category: general/datamovflgctrl
 
-// Store AH into Flags
+object SAHF extends InstructionDefinition[OneOpcode]("SAHF") with SAHFImpl
 
 trait SAHFImpl {
   implicit object SAHF_0 extends SAHF._0 {

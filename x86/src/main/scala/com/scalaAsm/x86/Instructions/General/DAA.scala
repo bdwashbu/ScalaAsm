@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object DAA extends InstructionDefinition[OneOpcode]("DAA") with DAAImpl
+// Description: Decimal Adjust AL after Addition
+// Category: general/arith/decimal
 
-// Decimal Adjust AL after Addition
+object DAA extends InstructionDefinition[OneOpcode]("DAA") with DAAImpl
 
 trait DAAImpl {
   implicit object DAA_0 extends DAA._0 {

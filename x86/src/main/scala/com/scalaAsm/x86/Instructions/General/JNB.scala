@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JNB extends InstructionDefinition[OneOpcode]("JNB") with JNBImpl
+// Description: Jump short if not below/above or equal/not carry (CF=0)
+// Category: general/branch/cond
 
-// Jump short if not below/above or equal/not carry (CF=0)
+object JNB extends InstructionDefinition[OneOpcode]("JNB") with JNBImpl
 
 trait JNBImpl {
   implicit object JNB_0 extends JNB._1[rel8] {

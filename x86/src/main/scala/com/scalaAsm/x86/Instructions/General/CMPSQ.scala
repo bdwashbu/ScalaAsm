@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CMPSQ extends InstructionDefinition[OneOpcode]("CMPSQ") with CMPSQImpl
+// Description: Compare String Operands
+// Category: general/arithstring/binary
 
-// Compare String Operands
+object CMPSQ extends InstructionDefinition[OneOpcode]("CMPSQ") with CMPSQImpl
 
 trait CMPSQImpl {
   implicit object CMPSQ_0 extends CMPSQ._0 {

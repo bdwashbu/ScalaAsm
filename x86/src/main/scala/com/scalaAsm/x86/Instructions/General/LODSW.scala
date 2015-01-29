@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object LODSW extends InstructionDefinition[OneOpcode]("LODSW") with LODSWImpl
+// Description: Load String
+// Category: general/datamovstring
 
-// Load String
+object LODSW extends InstructionDefinition[OneOpcode]("LODSW") with LODSWImpl
 
 trait LODSWImpl {
   implicit object LODSW_0 extends LODSW._0 {

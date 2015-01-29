@@ -357,6 +357,10 @@ object GenerateInst {
                              operandSize: OperandSize,
                              explicitOperandName: Option[String]) {
     override def toString = {
+      
+      def addy = addressingMethod.map { addy => addy.toString }.getOrElse("")
+      def size = if (addy != "Sreg") operandSize.toString else "" 
+      
       explicitOperandName.map { name => 
         if (name == "rAX") {
           operandSize.size match {
@@ -368,7 +372,7 @@ object GenerateInst {
         } else {
           name
         }
-      }.getOrElse(addressingMethod.map { addy => addy.toString }.getOrElse("") + operandSize.toString)
+      }.getOrElse(addy + size)
     }
     def isImplicit = false
   }
@@ -499,12 +503,10 @@ object GenerateInst {
             operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _32
           val is16 = operands._2.addressingMethod.get.abbreviation == "rm" && operands._2.operandSize == _16 &&
             operands._1.addressingMethod.get.abbreviation == "r" && operands._1.operandSize == _16
-          is64 || is32 || is16
+          val hasRM = operands._2.addressingMethod.get.abbreviation == "rm" || operands._1.addressingMethod.get.abbreviation == "rm"
+          hasRM && !(is64 || is32 || is16)
         case x86OneOperandInstruction(_, _, operand, _) if operand.addressingMethod.isDefined && operand.addressingMethod.isDefined =>
-          val is64 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _64
-          val is32 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _32
-          val is16 = operand.addressingMethod.get.abbreviation == "rm" && operand.operandSize == _16
-          is64 || is32 || is16
+          operand.addressingMethod.get.abbreviation == "rm"
         case _ => false
       }
     }
@@ -512,7 +514,8 @@ object GenerateInst {
     val lowInst = low.zipWithIndex
     val highInst = high.zipWithIndex.map{case(inst,index) => (inst, index + lowInst.size)}
 
-    val briefs = instructions.map(inst => inst.entry.brief).toSet.reduce(_ + ", " + _)
+    val desc = instructions.map(inst => inst.entry.brief).toSet.reduce(_ + ", " + _)
+    val category = "general" + instructions.head.entry.group2.map(grp2 => "/" + grp2 + instructions.head.entry.group3.map(grp3 => "/" + grp3).getOrElse("")).getOrElse("")
     
     writer.println("package com.scalaAsm.x86");
     writer.println("package Instructions");
@@ -521,12 +524,15 @@ object GenerateInst {
     writer.println("import com.scalaAsm.x86.Operands._")
     writer.println("import com.scalaAsm.x86.Operands.Memory._")
     writer.println("")
+    
+    if (desc != "") {
+      writer.println("// Description: " + desc)
+    }
+    
+    writer.println("// Category: " + category + "\n")
+    
     writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition[OneOpcode](\"" + mnemonic + "\") with " + mnemonic.toUpperCase() + "Impl")
     writer.println("")
-    
-    if (briefs != "") {
-      writer.println("// " + briefs + "\n")
-    }
 
     if (!low.isEmpty && !high.isEmpty) {
       writer.println("trait " + mnemonic.toUpperCase() + "Low {")
@@ -563,13 +569,14 @@ object GenerateInst {
       val insts = loadXML().flatMap { x => x.getInstances }
       println(insts.size + " instruction instances generated!")
         insts.filter(inst => inst.entry.group1.getOrElse("") == "gen").groupBy { x => x.mnemonic }.foreach{ 
-             case (mnem, insts) => {
+             case (mnem, insts)  => { 
                val uniqueInst = LinkedHashSet[InstructionInstance]()
                uniqueInst ++= insts
                val entry = insts(0).entry
-               //"general" + entry.group2.map(grp2 => "/" + grp2 + entry.group3.map(grp3 => "/" + grp3).getOrElse("")).getOrElse("")
+               
                outputInstructionFile(mnem, uniqueInst, "General")
              }
+             case _ =>
            }
       //}
       println("Done generating instructions!")

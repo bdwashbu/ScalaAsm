@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JNAE extends InstructionDefinition[OneOpcode]("JNAE") with JNAEImpl
+// Description: Jump short if below/not above or equal/carry (CF=1)
+// Category: general/branch/cond
 
-// Jump short if below/not above or equal/carry (CF=1)
+object JNAE extends InstructionDefinition[OneOpcode]("JNAE") with JNAEImpl
 
 trait JNAEImpl {
   implicit object JNAE_0 extends JNAE._1[rel8] {

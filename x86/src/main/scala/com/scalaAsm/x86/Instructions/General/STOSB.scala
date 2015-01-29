@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object STOSB extends InstructionDefinition[OneOpcode]("STOSB") with STOSBImpl
+// Description: Store String
+// Category: general/datamovstring
 
-// Store String
+object STOSB extends InstructionDefinition[OneOpcode]("STOSB") with STOSBImpl
 
 trait STOSBImpl {
   implicit object STOSB_0 extends STOSB._0 {

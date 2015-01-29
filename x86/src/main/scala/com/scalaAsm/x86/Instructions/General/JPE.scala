@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JPE extends InstructionDefinition[OneOpcode]("JPE") with JPEImpl
+// Description: Jump short if parity/parity even (PF=1)
+// Category: general/branch/cond
 
-// Jump short if parity/parity even (PF=1)
+object JPE extends InstructionDefinition[OneOpcode]("JPE") with JPEImpl
 
 trait JPEImpl {
   implicit object JPE_0 extends JPE._1[rel8] {

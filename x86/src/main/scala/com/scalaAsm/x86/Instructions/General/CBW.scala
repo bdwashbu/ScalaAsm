@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CBW extends InstructionDefinition[OneOpcode]("CBW") with CBWImpl
+// Description: Convert Byte to Word
+// Category: general/conver
 
-// Convert Byte to Word
+object CBW extends InstructionDefinition[OneOpcode]("CBW") with CBWImpl
 
 trait CBWImpl {
   implicit object CBW_0 extends CBW._0 {

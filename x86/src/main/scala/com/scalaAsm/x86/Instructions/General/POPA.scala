@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object POPA extends InstructionDefinition[OneOpcode]("POPA") with POPAImpl
+// Description: Pop All General-Purpose Registers
+// Category: general/stack
 
-// Pop All General-Purpose Registers
+object POPA extends InstructionDefinition[OneOpcode]("POPA") with POPAImpl
 
 trait POPAImpl {
   implicit object POPA_0 extends POPA._0 {

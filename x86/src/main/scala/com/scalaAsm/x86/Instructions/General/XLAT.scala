@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object XLAT extends InstructionDefinition[OneOpcode]("XLAT") with XLATImpl
+// Description: Table Look-up Translation
+// Category: general/datamov
 
-// Table Look-up Translation
+object XLAT extends InstructionDefinition[OneOpcode]("XLAT") with XLATImpl
 
 trait XLATImpl {
   implicit object XLAT_0 extends XLAT._0 {

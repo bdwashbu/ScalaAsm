@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JAE extends InstructionDefinition[OneOpcode]("JAE") with JAEImpl
+// Description: Jump short if not below/above or equal/not carry (CF=0)
+// Category: general/branch/cond
 
-// Jump short if not below/above or equal/not carry (CF=0)
+object JAE extends InstructionDefinition[OneOpcode]("JAE") with JAEImpl
 
 trait JAEImpl {
   implicit object JAE_0 extends JAE._1[rel8] {

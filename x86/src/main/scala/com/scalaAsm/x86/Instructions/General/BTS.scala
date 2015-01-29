@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object BTS extends InstructionDefinition[OneOpcode]("BTS") with BTSImpl
+// Description: Bit Test and Set
+// Category: general/bit
 
-// Bit Test and Set
+object BTS extends InstructionDefinition[OneOpcode]("BTS") with BTSImpl
 
 trait BTSImpl {
   implicit object BTS_0 extends BTS._2[rm16, imm8] {

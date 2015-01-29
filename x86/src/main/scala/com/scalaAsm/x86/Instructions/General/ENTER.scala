@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object ENTER extends InstructionDefinition[OneOpcode]("ENTER") with ENTERImpl
+// Description: Make Stack Frame for Procedure Parameters
+// Category: general/stack
 
-// Make Stack Frame for Procedure Parameters
+object ENTER extends InstructionDefinition[OneOpcode]("ENTER") with ENTERImpl
 
 trait ENTERImpl {
   implicit object ENTER_0 extends ENTER._2[imm16, imm8] {

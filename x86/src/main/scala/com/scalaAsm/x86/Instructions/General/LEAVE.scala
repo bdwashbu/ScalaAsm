@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object LEAVE extends InstructionDefinition[OneOpcode]("LEAVE") with LEAVEImpl
+// Description: High Level Procedure Exit
+// Category: general/stack
 
-// High Level Procedure Exit
+object LEAVE extends InstructionDefinition[OneOpcode]("LEAVE") with LEAVEImpl
 
 trait LEAVEImpl {
   implicit object LEAVE_0 extends LEAVE._0 {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CMPSD extends InstructionDefinition[OneOpcode]("CMPSD") with CMPSDImpl
+// Description: Compare String Operands
+// Category: general/arithstring/binary
 
-// Compare String Operands
+object CMPSD extends InstructionDefinition[OneOpcode]("CMPSD") with CMPSDImpl
 
 trait CMPSDImpl {
   implicit object CMPSD_0 extends CMPSD._0 {

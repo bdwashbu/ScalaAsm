@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object SCAS extends InstructionDefinition[OneOpcode]("SCAS") with SCASImpl
+// Description: Scan String
+// Category: general/arithstring/binary
 
-// Scan String
+object SCAS extends InstructionDefinition[OneOpcode]("SCAS") with SCASImpl
 
 trait SCASImpl {
   implicit object SCAS_0 extends SCAS._0 {

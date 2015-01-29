@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object BTR extends InstructionDefinition[OneOpcode]("BTR") with BTRImpl
+// Description: Bit Test and Reset
+// Category: general/bit
 
-// Bit Test and Reset
+object BTR extends InstructionDefinition[OneOpcode]("BTR") with BTRImpl
 
 trait BTRImpl {
   implicit object BTR_0 extends BTR._2[rm16, imm8] {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object LOOPZ extends InstructionDefinition[OneOpcode]("LOOPZ") with LOOPZImpl
+// Description: Decrement count; Jump short if count!=0 and ZF=1
+// Category: general/branch/cond
 
-// Decrement count; Jump short if count!=0 and ZF=1
+object LOOPZ extends InstructionDefinition[OneOpcode]("LOOPZ") with LOOPZImpl
 
 trait LOOPZImpl {
   implicit object LOOPZ_0 extends LOOPZ._1[rel8] {

@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JB extends InstructionDefinition[OneOpcode]("JB") with JBImpl
+// Description: Jump short if below/not above or equal/carry (CF=1)
+// Category: general/branch/cond
 
-// Jump short if below/not above or equal/carry (CF=1)
+object JB extends InstructionDefinition[OneOpcode]("JB") with JBImpl
 
 trait JBImpl {
   implicit object JB_0 extends JB._1[rel8] {

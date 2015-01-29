@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JLE extends InstructionDefinition[OneOpcode]("JLE") with JLEImpl
+// Description: Jump short if less or equal/not greater ((ZF=1) OR (SF!=OF))
+// Category: general/branch/cond
 
-// Jump short if less or equal/not greater ((ZF=1) OR (SF!=OF))
+object JLE extends InstructionDefinition[OneOpcode]("JLE") with JLEImpl
 
 trait JLEImpl {
   implicit object JLE_0 extends JLE._1[rel8] {

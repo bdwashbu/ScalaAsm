@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object OUT extends InstructionDefinition[OneOpcode]("OUT") with OUTImpl
+// Description: Output to Port
+// Category: general/inout
 
-// Output to Port
+object OUT extends InstructionDefinition[OneOpcode]("OUT") with OUTImpl
 
 trait OUTImpl {
   implicit object OUT_0 extends OUT._1[imm8] {

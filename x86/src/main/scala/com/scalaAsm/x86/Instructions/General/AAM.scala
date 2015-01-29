@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object AAM extends InstructionDefinition[OneOpcode]("AAM") with AAMImpl
+// Description: ASCII Adjust AX After Multiply
+// Category: general/arith/decimal
 
-// ASCII Adjust AX After Multiply
+object AAM extends InstructionDefinition[OneOpcode]("AAM") with AAMImpl
 
 trait AAMImpl {
   implicit object AAM_0 extends AAM._0 {

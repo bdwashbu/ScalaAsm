@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object JRCXZ extends InstructionDefinition[OneOpcode]("JRCXZ") with JRCXZImpl
+// Description: Jump short if rCX register is 0
+// Category: general/branch/cond
 
-// Jump short if rCX register is 0
+object JRCXZ extends InstructionDefinition[OneOpcode]("JRCXZ") with JRCXZImpl
 
 trait JRCXZImpl {
   implicit object JRCXZ_0 extends JRCXZ._1[rel8] {

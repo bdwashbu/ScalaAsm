@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object NOP extends InstructionDefinition[OneOpcode]("NOP") with NOPImpl
+// Description: No Operation
+// Category: general/control
 
-// No Operation
+object NOP extends InstructionDefinition[OneOpcode]("NOP") with NOPImpl
 
 trait NOPLow {
   implicit object NOP_0 extends NOP._1[rm16] {

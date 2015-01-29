@@ -7,9 +7,7 @@ abstract class Register[S: x86Size](val name: String) extends RegisterOrMemory[S
   override def toString = name.toLowerCase()
 }
 
-object Register {
-  type SegmentRegister = GeneralPurpose[_16]
-}
+abstract class SegmentRegister(name: String) extends GeneralPurpose[_16](name)
 
 abstract class GeneralPurpose[S: x86Size](name: String) extends Register[S](name) {
   self =>
@@ -89,12 +87,12 @@ class RDI extends DestinationIndex[_64]("rdi")
 class EDI extends DestinationIndex[_32]("edi")
 class DI extends DestinationIndex[_16]("di")
 
-class ES extends Register.SegmentRegister("es") { val ID = 8 }
-class CS extends Register.SegmentRegister("cs") { val ID = 8 }
-class SS extends Register.SegmentRegister("ss") { val ID = 8 }
-class DS extends Register.SegmentRegister("ds") { val ID = 8 }
-class FS extends Register.SegmentRegister("fs") { val ID = 8 }
-class GS extends Register.SegmentRegister("gs") { val ID = 8 }
+class ES extends SegmentRegister("es") { val ID = 8 }
+class CS extends SegmentRegister("cs") { val ID = 8 }
+class SS extends SegmentRegister("ss") { val ID = 8 }
+class DS extends SegmentRegister("ds") { val ID = 8 }
+class FS extends SegmentRegister("fs") { val ID = 8 }
+class GS extends SegmentRegister("gs") { val ID = 8 }
 
 // Extra 64-bit registers
 // Uses the rex.W field to access

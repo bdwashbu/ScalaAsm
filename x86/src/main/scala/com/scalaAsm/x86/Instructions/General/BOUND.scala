@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object BOUND extends InstructionDefinition[OneOpcode]("BOUND") with BOUNDImpl
+// Description: Check Array Index Against Bounds
+// Category: general/breakstack
 
-// Check Array Index Against Bounds
+object BOUND extends InstructionDefinition[OneOpcode]("BOUND") with BOUNDImpl
 
 trait BOUNDImpl {
   implicit object BOUND_0 extends BOUND._2[r16, m16] {

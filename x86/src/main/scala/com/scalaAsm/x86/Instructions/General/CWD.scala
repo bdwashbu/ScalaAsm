@@ -5,9 +5,10 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-object CWD extends InstructionDefinition[OneOpcode]("CWD") with CWDImpl
+// Description: Convert Word to Doubleword
+// Category: general/conver
 
-// Convert Word to Doubleword
+object CWD extends InstructionDefinition[OneOpcode]("CWD") with CWDImpl
 
 trait CWDImpl {
   implicit object CWD_0 extends CWD._0 {

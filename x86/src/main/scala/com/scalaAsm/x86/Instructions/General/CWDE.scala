@@ -5,7 +5,7 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-// Description: Convert
+// Description: Convert Word to Doubleword
 // Category: general/conver
 
 object CWDE extends InstructionDefinition[OneOpcode]("CWDE") with CWDEImpl

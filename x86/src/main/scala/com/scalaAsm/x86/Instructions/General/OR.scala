@@ -53,14 +53,27 @@ trait ORLow {
     def opcode = 0x81 /+ 1
     override def prefix = REX.W(true)
   }
+
+  implicit object OR_9 extends OR._2[rm16, imm8] {
+    def opcode = 0x83 /+ 1
+  }
+
+  implicit object OR_10 extends OR._2[rm32, imm8] {
+    def opcode = 0x83 /+ 1
+  }
+
+  implicit object OR_11 extends OR._2[rm64, imm8] {
+    def opcode = 0x83 /+ 1
+    override def prefix = REX.W(true)
+  }
 }
 
 trait ORImpl extends ORLow {
-  implicit object OR_9 extends OR._2[r16, rm16] {
+  implicit object OR_12 extends OR._2[r16, rm16] {
     def opcode = 0xB /r
   }
 
-  implicit object OR_10 extends OR._2[r32, rm32] {
+  implicit object OR_13 extends OR._2[r32, rm32] {
     def opcode = 0xB /r
     override def explicitFormat(op1: r32, op2: rm32) = {
       if (op2.isInstanceOf[reg]) {
@@ -69,22 +82,22 @@ trait ORImpl extends ORLow {
     }
   }
 
-  implicit object OR_11 extends OR._2[r64, rm64] {
+  implicit object OR_14 extends OR._2[r64, rm64] {
     def opcode = 0xB /r
     override def prefix = REX.W(true)
   }
 
-  implicit object OR_12 extends OR._1[imm8] {
+  implicit object OR_15 extends OR._1[imm8] {
     def opcode = 0xC
     override def hasImplicitOperand = true
   }
 
-  implicit object OR_13 extends OR._1[imm16] {
+  implicit object OR_16 extends OR._1[imm16] {
     def opcode = 0xD
     override def hasImplicitOperand = true
   }
 
-  implicit object OR_14 extends OR._1[imm32] {
+  implicit object OR_17 extends OR._1[imm32] {
     def opcode = 0xD
     override def hasImplicitOperand = true
   }

@@ -14,4 +14,12 @@ trait JGEImpl {
   implicit object JGE_0 extends JGE._1[rel8] {
     def opcode = 0x7D
   }
+
+  implicit object JGE_1 extends JGE._1[rel16] {
+    def opcode = 0x8D
+  }
+
+  implicit object JGE_2 extends JGE._1[rel32] {
+    def opcode = 0x8D
+  }
 }

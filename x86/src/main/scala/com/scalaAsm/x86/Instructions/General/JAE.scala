@@ -14,4 +14,12 @@ trait JAEImpl {
   implicit object JAE_0 extends JAE._1[rel8] {
     def opcode = 0x73
   }
+
+  implicit object JAE_1 extends JAE._1[rel16] {
+    def opcode = 0x83
+  }
+
+  implicit object JAE_2 extends JAE._1[rel32] {
+    def opcode = 0x83
+  }
 }

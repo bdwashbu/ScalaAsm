@@ -14,4 +14,12 @@ trait JNLImpl {
   implicit object JNL_0 extends JNL._1[rel8] {
     def opcode = 0x7D
   }
+
+  implicit object JNL_1 extends JNL._1[rel16] {
+    def opcode = 0x8D
+  }
+
+  implicit object JNL_2 extends JNL._1[rel32] {
+    def opcode = 0x8D
+  }
 }

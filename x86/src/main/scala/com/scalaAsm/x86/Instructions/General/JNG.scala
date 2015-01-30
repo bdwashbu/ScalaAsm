@@ -14,4 +14,12 @@ trait JNGImpl {
   implicit object JNG_0 extends JNG._1[rel8] {
     def opcode = 0x7E
   }
+
+  implicit object JNG_1 extends JNG._1[rel16] {
+    def opcode = 0x8E
+  }
+
+  implicit object JNG_2 extends JNG._1[rel32] {
+    def opcode = 0x8E
+  }
 }

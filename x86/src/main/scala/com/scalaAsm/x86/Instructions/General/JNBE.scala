@@ -14,4 +14,12 @@ trait JNBEImpl {
   implicit object JNBE_0 extends JNBE._1[rel8] {
     def opcode = 0x77
   }
+
+  implicit object JNBE_1 extends JNBE._1[rel16] {
+    def opcode = 0x87
+  }
+
+  implicit object JNBE_2 extends JNBE._1[rel32] {
+    def opcode = 0x87
+  }
 }

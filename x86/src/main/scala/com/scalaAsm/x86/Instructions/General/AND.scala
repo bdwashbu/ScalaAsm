@@ -53,14 +53,27 @@ trait ANDLow {
     def opcode = 0x81 /+ 4
     override def prefix = REX.W(true)
   }
+
+  implicit object AND_9 extends AND._2[rm16, imm8] {
+    def opcode = 0x83 /+ 4
+  }
+
+  implicit object AND_10 extends AND._2[rm32, imm8] {
+    def opcode = 0x83 /+ 4
+  }
+
+  implicit object AND_11 extends AND._2[rm64, imm8] {
+    def opcode = 0x83 /+ 4
+    override def prefix = REX.W(true)
+  }
 }
 
 trait ANDImpl extends ANDLow {
-  implicit object AND_9 extends AND._2[r16, rm16] {
+  implicit object AND_12 extends AND._2[r16, rm16] {
     def opcode = 0x23 /r
   }
 
-  implicit object AND_10 extends AND._2[r32, rm32] {
+  implicit object AND_13 extends AND._2[r32, rm32] {
     def opcode = 0x23 /r
     override def explicitFormat(op1: r32, op2: rm32) = {
       if (op2.isInstanceOf[reg]) {
@@ -69,22 +82,22 @@ trait ANDImpl extends ANDLow {
     }
   }
 
-  implicit object AND_11 extends AND._2[r64, rm64] {
+  implicit object AND_14 extends AND._2[r64, rm64] {
     def opcode = 0x23 /r
     override def prefix = REX.W(true)
   }
 
-  implicit object AND_12 extends AND._1[imm8] {
+  implicit object AND_15 extends AND._1[imm8] {
     def opcode = 0x24
     override def hasImplicitOperand = true
   }
 
-  implicit object AND_13 extends AND._1[imm16] {
+  implicit object AND_16 extends AND._1[imm16] {
     def opcode = 0x25
     override def hasImplicitOperand = true
   }
 
-  implicit object AND_14 extends AND._1[imm32] {
+  implicit object AND_17 extends AND._1[imm32] {
     def opcode = 0x25
     override def hasImplicitOperand = true
   }

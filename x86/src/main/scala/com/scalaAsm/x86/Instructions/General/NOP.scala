@@ -12,11 +12,11 @@ object NOP extends InstructionDefinition[OneOpcode]("NOP") with NOPImpl
 
 trait NOPLow {
   implicit object NOP_0 extends NOP._1[rm16] {
-    def opcode = 0x1F /+ 0
+    def opcode = 0xD
   }
 
   implicit object NOP_1 extends NOP._1[rm32] {
-    def opcode = 0x1F /+ 0
+    def opcode = 0xD
   }
 }
 

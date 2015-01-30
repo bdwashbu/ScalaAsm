@@ -14,4 +14,12 @@ trait JBImpl {
   implicit object JB_0 extends JB._1[rel8] {
     def opcode = 0x72
   }
+
+  implicit object JB_1 extends JB._1[rel16] {
+    def opcode = 0x82
+  }
+
+  implicit object JB_2 extends JB._1[rel32] {
+    def opcode = 0x82
+  }
 }

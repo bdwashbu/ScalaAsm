@@ -14,4 +14,12 @@ trait JNZImpl {
   implicit object JNZ_0 extends JNZ._1[rel8] {
     def opcode = 0x75
   }
+
+  implicit object JNZ_1 extends JNZ._1[rel16] {
+    def opcode = 0x85
+  }
+
+  implicit object JNZ_2 extends JNZ._1[rel32] {
+    def opcode = 0x85
+  }
 }

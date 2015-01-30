@@ -14,4 +14,12 @@ trait JPEImpl {
   implicit object JPE_0 extends JPE._1[rel8] {
     def opcode = 0x7A
   }
+
+  implicit object JPE_1 extends JPE._1[rel16] {
+    def opcode = 0x8A
+  }
+
+  implicit object JPE_2 extends JPE._1[rel32] {
+    def opcode = 0x8A
+  }
 }

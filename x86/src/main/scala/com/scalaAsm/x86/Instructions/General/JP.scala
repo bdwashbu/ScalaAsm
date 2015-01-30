@@ -14,4 +14,12 @@ trait JPImpl {
   implicit object JP_0 extends JP._1[rel8] {
     def opcode = 0x7A
   }
+
+  implicit object JP_1 extends JP._1[rel16] {
+    def opcode = 0x8A
+  }
+
+  implicit object JP_2 extends JP._1[rel32] {
+    def opcode = 0x8A
+  }
 }

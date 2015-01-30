@@ -53,14 +53,27 @@ trait XORLow {
     def opcode = 0x81 /+ 6
     override def prefix = REX.W(true)
   }
+
+  implicit object XOR_9 extends XOR._2[rm16, imm8] {
+    def opcode = 0x83 /+ 6
+  }
+
+  implicit object XOR_10 extends XOR._2[rm32, imm8] {
+    def opcode = 0x83 /+ 6
+  }
+
+  implicit object XOR_11 extends XOR._2[rm64, imm8] {
+    def opcode = 0x83 /+ 6
+    override def prefix = REX.W(true)
+  }
 }
 
 trait XORImpl extends XORLow {
-  implicit object XOR_9 extends XOR._2[r16, rm16] {
+  implicit object XOR_12 extends XOR._2[r16, rm16] {
     def opcode = 0x33 /r
   }
 
-  implicit object XOR_10 extends XOR._2[r32, rm32] {
+  implicit object XOR_13 extends XOR._2[r32, rm32] {
     def opcode = 0x33 /r
     override def explicitFormat(op1: r32, op2: rm32) = {
       if (op2.isInstanceOf[reg]) {
@@ -69,22 +82,22 @@ trait XORImpl extends XORLow {
     }
   }
 
-  implicit object XOR_11 extends XOR._2[r64, rm64] {
+  implicit object XOR_14 extends XOR._2[r64, rm64] {
     def opcode = 0x33 /r
     override def prefix = REX.W(true)
   }
 
-  implicit object XOR_12 extends XOR._1[imm8] {
+  implicit object XOR_15 extends XOR._1[imm8] {
     def opcode = 0x34
     override def hasImplicitOperand = true
   }
 
-  implicit object XOR_13 extends XOR._1[imm16] {
+  implicit object XOR_16 extends XOR._1[imm16] {
     def opcode = 0x35
     override def hasImplicitOperand = true
   }
 
-  implicit object XOR_14 extends XOR._1[imm32] {
+  implicit object XOR_17 extends XOR._1[imm32] {
     def opcode = 0x35
     override def hasImplicitOperand = true
   }

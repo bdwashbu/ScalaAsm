@@ -5,7 +5,7 @@ package General
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory._
 
-// Description: Convert
+// Description: Convert Doubleword to Quadword
 // Category: general/conver
 
 object CDQ extends InstructionDefinition[OneOpcode]("CDQ") with CDQImpl

@@ -465,7 +465,7 @@ object GenerateInst {
     val pri_opcodes = (xml \\ "pri_opcd")
 
     val opcodes = pri_opcodes.map { pri_opcode =>
-      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0 && ((entry \ "proc_start").size == 0 || (entry \ "proc_start")(0).text == "01" || (entry \ "proc_start")(0).text == "10")}
+      val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0} // && ((entry \ "proc_start").size == 0 || (entry \ "proc_start")(0).text == "01" || (entry \ "proc_start")(0).text == "10")}
       val opcode = Integer.parseInt(pri_opcode \@ "value", 16)
       x86Opcode(opcode, nonAliasedEntries.map(parseEntry))
     }
@@ -579,16 +579,26 @@ object GenerateInst {
          }
       
       val x87Files = insts.filter(inst => inst.entry.group1.getOrElse("") == "x87fpu").groupBy { x => x.mnemonic }
-      x87Files.foreach{ 
+//      x87Files.foreach{ 
+//           case (mnem, insts)  => { 
+//             val uniqueInst = LinkedHashSet[InstructionInstance]()
+//             uniqueInst ++= insts
+//             outputInstructionFile(mnem, uniqueInst, "x87")
+//           }
+//           case _ =>
+//         }
+      
+      val systemFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "system").groupBy { x => x.mnemonic }
+      systemFiles.foreach{ 
            case (mnem, insts)  => { 
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
-             outputInstructionFile(mnem, uniqueInst, "x87")
+             outputInstructionFile(mnem, uniqueInst, "System")
            }
            case _ =>
          }
       
-      println(genFiles.size + " files generated!")
+      println(genFiles.size + x87Files.size + systemFiles.size + " files generated!")
       println("Done generating instructions!")
     } catch {
       case e: Exception => e.printStackTrace()

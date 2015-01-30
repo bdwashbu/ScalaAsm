@@ -14,4 +14,12 @@ trait JNEImpl {
   implicit object JNE_0 extends JNE._1[rel8] {
     def opcode = 0x75
   }
+
+  implicit object JNE_1 extends JNE._1[rel16] {
+    def opcode = 0x85
+  }
+
+  implicit object JNE_2 extends JNE._1[rel32] {
+    def opcode = 0x85
+  }
 }

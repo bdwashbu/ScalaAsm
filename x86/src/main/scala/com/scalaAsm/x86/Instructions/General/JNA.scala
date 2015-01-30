@@ -14,4 +14,12 @@ trait JNAImpl {
   implicit object JNA_0 extends JNA._1[rel8] {
     def opcode = 0x76
   }
+
+  implicit object JNA_1 extends JNA._1[rel16] {
+    def opcode = 0x86
+  }
+
+  implicit object JNA_2 extends JNA._1[rel32] {
+    def opcode = 0x86
+  }
 }

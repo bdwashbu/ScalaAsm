@@ -14,4 +14,12 @@ trait JGImpl {
   implicit object JG_0 extends JG._1[rel8] {
     def opcode = 0x7F
   }
+
+  implicit object JG_1 extends JG._1[rel16] {
+    def opcode = 0x8F
+  }
+
+  implicit object JG_2 extends JG._1[rel32] {
+    def opcode = 0x8F
+  }
 }

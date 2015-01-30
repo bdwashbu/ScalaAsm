@@ -14,4 +14,12 @@ trait JNPImpl {
   implicit object JNP_0 extends JNP._1[rel8] {
     def opcode = 0x7B
   }
+
+  implicit object JNP_1 extends JNP._1[rel16] {
+    def opcode = 0x8B
+  }
+
+  implicit object JNP_2 extends JNP._1[rel32] {
+    def opcode = 0x8B
+  }
 }

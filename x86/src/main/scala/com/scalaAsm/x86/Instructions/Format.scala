@@ -274,6 +274,15 @@ trait Formats extends Low {
         immediate = None)
     }
   }
+  
+  implicit object New_MFormat6 extends OneOperandFormat[AbsoluteAddress[_64]] {
+
+    def getAddressingForm(operand: AbsoluteAddress[_64], opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), Constant64(operand.offset)), //mem.encode(opcode.opcodeExtension),
+        immediate = None)
+    }
+  }
 
   //  implicit object New_AbsoluteAddress32 extends AbsoluteAddress[_32] {
   //    selff =>
@@ -321,6 +330,23 @@ trait Formats extends Low {
     def getAddressingForm(op1: reg, op2: AbsoluteAddress[_32], opcodeExtension: Byte) = {
       InstructionFormat(
         addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), Constant32(op2.offset)),
+        immediate = None)
+    }
+
+    override def getPrefix(prefix: Seq[Prefix]) = {
+      if (prefix.exists(_.isInstanceOf[REX])) {
+        REX(true, false, false, false).get
+      } else {
+        Array[Byte]()
+      }
+    }
+  }
+  
+  implicit object New_RMFormat64 extends TwoOperandFormat[reg, AbsoluteAddress[_64]] {
+
+    def getAddressingForm(op1: reg, op2: AbsoluteAddress[_64], opcodeExtension: Byte) = {
+      InstructionFormat(
+        addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), Constant64(op2.offset)),
         immediate = None)
     }
 

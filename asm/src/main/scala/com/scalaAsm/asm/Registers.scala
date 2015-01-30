@@ -56,4 +56,13 @@ trait Registers[Mode <: x86Mode] {
     object r13 extends R13 with Operand[R13] {def apply = this}
     object r14 extends R14 with Operand[R14] {def apply = this}
     object r15 extends R15 with Operand[R15] {def apply = this}
+    
+    object xmm0 extends XMM0 with Operand[XMM0] {def apply = this}
+    object xmm1 extends XMM1 with Operand[XMM1] {def apply = this}
+    object xmm2 extends XMM2 with Operand[XMM2] {def apply = this}
+    object xmm3 extends XMM3 with Operand[XMM3] {def apply = this}
+    object xmm4 extends XMM4 with Operand[XMM4] {def apply = this}
+    object xmm5 extends XMM5 with Operand[XMM5] {def apply = this}
+    object xmm6 extends XMM6 with Operand[XMM6] {def apply = this}
+    object xmm7 extends XMM7 with Operand[XMM7] {def apply = this}
 }

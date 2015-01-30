@@ -568,8 +568,8 @@ object GenerateInst {
       println("Generating x86 instructions...")
       val insts = loadXML().flatMap { x => x.getInstances }
       println(insts.size + " instruction instances generated!")
-      val files = insts.filter(inst => inst.entry.group1.getOrElse("") == "gen").groupBy { x => x.mnemonic }
-      files.foreach{ 
+      val genFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "gen").groupBy { x => x.mnemonic }
+      genFiles.foreach{ 
            case (mnem, insts)  => { 
              val uniqueInst = LinkedHashSet[InstructionInstance]()
              uniqueInst ++= insts
@@ -577,7 +577,18 @@ object GenerateInst {
            }
            case _ =>
          }
-      println(files.size + " files generated!")
+      
+      val x87Files = insts.filter(inst => inst.entry.group1.getOrElse("") == "x87fpu").groupBy { x => x.mnemonic }
+      x87Files.foreach{ 
+           case (mnem, insts)  => { 
+             val uniqueInst = LinkedHashSet[InstructionInstance]()
+             uniqueInst ++= insts
+             outputInstructionFile(mnem, uniqueInst, "x87")
+           }
+           case _ =>
+         }
+      
+      println(genFiles.size + " files generated!")
       println("Done generating instructions!")
     } catch {
       case e: Exception => e.printStackTrace()

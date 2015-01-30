@@ -23,6 +23,10 @@ case object _16 extends OperandSize { def size = 16 }
 case object _32 extends OperandSize { def size = 32 }
 case object _64 extends OperandSize { def size = 64 }
 case object _128 extends OperandSize { def size = 128 }
+
+case object _64real extends OperandSize { def size = 64 }
+
+
 object _8_8 extends OperandSize { def size = 16 }
 object _16_16 extends OperandSize { def size = 32 }
 object _32_32 extends OperandSize { def size = 64 }
@@ -63,7 +67,7 @@ object OperandType {
         "di" -> FixedOperandType("di", "Doubleword Int", _32, false, false),
         "dq" -> FixedOperandType("dq", "Double Quadword", _128, false, false),
         "dqp" -> CompositeOperandType("dqp", "Double Or Quadword", Seq("d", "q"), false),
-        "dr" -> FixedOperandType("dr", "Double Real", _64, false, false),
+        "dr" -> FixedOperandType("dr", "Double Real", _64real, false, false),
         "ds" -> FixedOperandType("ds","Doubleword Sign Extended To 64", _32, false, false),
         "e" -> StandandOperandType("e", "X87 FPU Environment", false, false),
         "er" -> StandandOperandType("er", "Extended Real", false, false),

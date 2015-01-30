@@ -79,14 +79,21 @@ trait AsmProgram[Mode <: x86Mode] {
     }
 
     private def procRef(procName: String) = ProcRef(procName)
-
     
-
-    def addr(varName: String) = {
+    def addr(varName: String): Operand[AbsoluteAddress[_32]] = {
       Op(new AbsoluteAddress[_32] {
         var offset = 0
         def getRelative = null
         def apply = Constant32(0)
+        val name = Some(varName)
+      })
+    }
+    
+    def addr64(varName: String): Operand[AbsoluteAddress[_64]] = {
+      Op(new AbsoluteAddress[_64] {
+        var offset = 0.toLong
+        def getRelative = null
+        def apply = Constant64(0)
         val name = Some(varName)
       })
     }

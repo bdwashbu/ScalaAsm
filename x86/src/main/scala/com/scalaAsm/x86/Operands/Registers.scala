@@ -105,3 +105,13 @@ class R12 extends Extra64Reg("r12") { val ID = 4 }
 class R13 extends Extra64Reg("r13") { val ID = 5 }
 class R14 extends Extra64Reg("r14") { val ID = 6 }
 class R15 extends Extra64Reg("r15") { val ID = 7 }
+
+abstract class SSERegister(name: String) extends GeneralPurpose[_128](name)
+class XMM0 extends SSERegister("xmm0") { val ID = 0 }
+class XMM1 extends SSERegister("xmm1") { val ID = 1 }
+class XMM2 extends SSERegister("xmm2") { val ID = 2 }
+class XMM3 extends SSERegister("xmm3") { val ID = 3 }
+class XMM4 extends SSERegister("xmm4") { val ID = 4 }
+class XMM5 extends SSERegister("xmm5") { val ID = 5 }
+class XMM6 extends SSERegister("xmm6") { val ID = 6 }
+class XMM7 extends SSERegister("xmm7") { val ID = 7 }

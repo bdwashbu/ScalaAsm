@@ -4,6 +4,7 @@ package Instructions
 import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.x86.Instructions.General._
 import com.scalaAsm.x86.Instructions.x87._
+import com.scalaAsm.x86.Instructions.System._
 
  object Catalog {
     trait Standard {
@@ -43,5 +44,8 @@ import com.scalaAsm.x86.Instructions.x87._
       object fld extends OneOperand[FLD.type]
       object fadd extends ZeroOperands[FADD.type]
       object fstp extends OneOperand[FSTP.type]
+      
+      object rdtsc extends ZeroOperands[RDTSC.type]
+      object cpuid extends ZeroOperands[CPUID.type]
     }
   }

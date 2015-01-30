@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: CPU Identification
 // Category: general/control
 
-object CPUID extends InstructionDefinition[OneOpcode]("CPUID") with CPUIDImpl
+object CPUID extends InstructionDefinition[TwoOpcodes]("CPUID") with CPUIDImpl
 
 trait CPUIDImpl {
   implicit object CPUID_0 extends CPUID._0 {
-    def opcode = 0xA2
+    def opcode = (0x0F,0xA2)
     override def hasImplicitOperand = true
   }
 }

@@ -589,14 +589,14 @@ object GenerateInst {
 //         }
       
       val systemFiles = insts.filter(inst => inst.entry.group1.getOrElse("") == "system").groupBy { x => x.mnemonic }
-      systemFiles.foreach{ 
-           case (mnem, insts)  => { 
-             val uniqueInst = LinkedHashSet[InstructionInstance]()
-             uniqueInst ++= insts
-             outputInstructionFile(mnem, uniqueInst, "System")
-           }
-           case _ =>
-         }
+//      systemFiles.foreach{ 
+//           case (mnem, insts)  => { 
+//             val uniqueInst = LinkedHashSet[InstructionInstance]()
+//             uniqueInst ++= insts
+//             outputInstructionFile(mnem, uniqueInst, "System")
+//           }
+//           case _ =>
+//         }
       
       println(genFiles.size + x87Files.size + systemFiles.size + " files generated!")
       println("Done generating instructions!")

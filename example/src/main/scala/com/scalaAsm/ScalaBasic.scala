@@ -58,14 +58,14 @@ object ScalaBasic {
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
       outputStream2.close
       
-      val factorialStream = new DataOutputStream(new FileOutputStream("factorial.exe"));
+      val rdtscStream = new DataOutputStream(new FileOutputStream("factorial.exe"));
 
-      val factorial = assembler.assemble(Factorial).addIcon("scala.ico")
-      val factorialExe = linker.link(factorial, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+      val rdtsc = assembler.assemble(rdtscExample).addIcon("scala.ico")
+      val rdtscExe = linker.link(rdtsc, 0x3000, false, "kernel32.dll", "msvcrt.dll")
 
-      factorialStream.write(factorialExe.get)
+      rdtscStream.write(rdtscExe.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
-      factorialStream.close
+      rdtscStream.close
       
       
       //      println(coff)

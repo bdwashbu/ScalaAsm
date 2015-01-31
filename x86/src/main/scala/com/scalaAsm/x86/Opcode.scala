@@ -43,6 +43,7 @@ case class TwoOpcodes(opcode1: Byte, opcode2: Byte, prefix: Seq[Prefix]) extends
   val size = 2
   val opcodeExtension: Option[Byte] = None
   def /+(x: Byte) = new TwoOpcodes(opcode1, opcode2, prefix) { override val opcodeExtension = Some(x) }
+  def /(x: RegInModRM) = this
   def isOpcodePlus = false
 }
 

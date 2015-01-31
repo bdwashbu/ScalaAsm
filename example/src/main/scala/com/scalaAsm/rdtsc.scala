@@ -17,9 +17,12 @@ object rdtscExample extends AsmProgram[x86_32] {
   sections += new CodeSection {
 
     builder += Code( 
-      xor(ecx, ecx),
+      //xor(ecx, ecx),
+      cpuid(()),
+      cpuid(()),
+      cpuid(()),
       rdtsc(()),
-      add(ecx, eax),
+      mov(ecx, eax),
       rdtsc(()),
       sub(eax,ecx),
       push(eax),

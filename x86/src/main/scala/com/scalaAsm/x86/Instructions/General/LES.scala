@@ -8,16 +8,16 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Load Far Pointer
 // Category: general/datamovsegreg
 
-object LES extends InstructionDefinition[OneOpcode]("LES") with LESImpl
+object LES extends InstructionDefinition("LES") with LESImpl
 
 trait LESImpl {
   implicit object LES_0 extends LES._2[r16, m] {
-    def opcode = 0xC4 /r
+    val opcode: OneOpcode = 0xC4 /r
     override def hasImplicitOperand = true
   }
 
   implicit object LES_1 extends LES._2[r32, m] {
-    def opcode = 0xC4 /r
+    val opcode: OneOpcode = 0xC4 /r
     override def hasImplicitOperand = true
   }
 }

@@ -32,7 +32,7 @@ object Tokens {
     def mnemonic = ""  
     def apply = Array()
   }
-  case class LabelRef(labelRef: String, inst:InstructionDefinition[OneOpcode]#_1[Constant8], format: OneOperandFormat[Constant8]) extends CodeToken with InstructionResult {
+  case class LabelRef(labelRef: String, inst:InstructionDefinition#_1[Constant8], format: OneOperandFormat[Constant8]) extends CodeToken with InstructionResult {
     def mnemonic = ""
     
     def apply = Array()

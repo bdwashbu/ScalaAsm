@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Fast System Call
 // Category: general/branch
 
-object SYSENTER extends InstructionDefinition[OneOpcode]("SYSENTER") with SYSENTERImpl
+object SYSENTER extends InstructionDefinition("SYSENTER") with SYSENTERImpl
 
 trait SYSENTERImpl {
   implicit object SYSENTER_0 extends SYSENTER._0 {
-    def opcode = 0x34
+    val opcode: TwoOpcodes = (0x0F, 0x34)
     override def hasImplicitOperand = true
   }
 }

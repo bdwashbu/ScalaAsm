@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Call to Interrupt Procedure
 // Category: general/breakstack
 
-object INT extends InstructionDefinition[OneOpcode]("INT") with INTImpl
+object INT extends InstructionDefinition("INT") with INTImpl
 
 trait INTImpl {
   implicit object INT_0 extends INT._1[imm8] {
-    def opcode = 0xCD
+    val opcode: OneOpcode = 0xCD
     override def hasImplicitOperand = true
   }
 }

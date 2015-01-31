@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Load Task Register
 // Category: general
 
-object LTR extends InstructionDefinition[OneOpcode]("LTR") with LTRImpl
+object LTR extends InstructionDefinition("LTR") with LTRImpl
 
 trait LTRImpl {
   implicit object LTR_0 extends LTR._1[rm16] {
-    def opcode = 0x0 /+ 3
+    val opcode: TwoOpcodes = (0x0F, 0x0) /+ 3
     override def hasImplicitOperand = true
   }
 }

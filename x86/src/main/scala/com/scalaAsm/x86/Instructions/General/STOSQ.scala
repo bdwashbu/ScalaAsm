@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Store String
 // Category: general/datamovstring
 
-object STOSQ extends InstructionDefinition[OneOpcode]("STOSQ") with STOSQImpl
+object STOSQ extends InstructionDefinition("STOSQ") with STOSQImpl
 
 trait STOSQImpl {
   implicit object STOSQ_0 extends STOSQ._0 {
-    def opcode = 0xAB
+    val opcode: OneOpcode = 0xAB
     override def hasImplicitOperand = true
   }
 }

@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Input from Port to String
 // Category: general/inoutstring
 
-object INSB extends InstructionDefinition[OneOpcode]("INSB") with INSBImpl
+object INSB extends InstructionDefinition("INSB") with INSBImpl
 
 trait INSBImpl {
   implicit object INSB_0 extends INSB._0 {
-    def opcode = 0x6C
+    val opcode: OneOpcode = 0x6C
     override def hasImplicitOperand = true
   }
 }

@@ -8,16 +8,16 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Return from procedure
 // Category: general/branchstack
 
-object RETF extends InstructionDefinition[OneOpcode]("RETF") with RETFImpl
+object RETF extends InstructionDefinition("RETF") with RETFImpl
 
 trait RETFImpl {
   implicit object RETF_0 extends RETF._1[imm16] {
-    def opcode = 0xCA
+    val opcode: OneOpcode = 0xCA
     override def hasImplicitOperand = true
   }
 
   implicit object RETF_1 extends RETF._0 {
-    def opcode = 0xCB
+    val opcode: OneOpcode = 0xCB
     override def hasImplicitOperand = true
   }
 }

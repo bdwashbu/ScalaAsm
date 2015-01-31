@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Push rFLAGS Register onto the Stack
 // Category: general/stackflgctrl
 
-object PUSHFQ extends InstructionDefinition[OneOpcode]("PUSHFQ") with PUSHFQImpl
+object PUSHFQ extends InstructionDefinition("PUSHFQ") with PUSHFQImpl
 
 trait PUSHFQImpl {
   implicit object PUSHFQ_0 extends PUSHFQ._0 {
-    def opcode = 0x9C
+    val opcode: OneOpcode = 0x9C
     override def hasImplicitOperand = true
   }
 }

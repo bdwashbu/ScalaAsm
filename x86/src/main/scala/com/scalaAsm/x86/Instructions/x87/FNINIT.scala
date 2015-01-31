@@ -8,10 +8,10 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Initialize Floating-Point Unit
 // Category: general/control
 
-object FNINIT extends InstructionDefinition[OneOpcode]("FNINIT") with FNINITImpl
+object FNINIT extends InstructionDefinition("FNINIT") with FNINITImpl
 
 trait FNINITImpl {
   implicit object FNINIT_0 extends FNINIT._0 {
-    def opcode = 0xDB /+ 4
+    val opcode: OneOpcode = 0xDB /+ 4
   }
 }

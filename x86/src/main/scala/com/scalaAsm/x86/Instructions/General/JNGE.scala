@@ -8,18 +8,18 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Jump short if less/not greater (SF!=OF)
 // Category: general/branch/cond
 
-object JNGE extends InstructionDefinition[OneOpcode]("JNGE") with JNGEImpl
+object JNGE extends InstructionDefinition("JNGE") with JNGEImpl
 
 trait JNGEImpl {
   implicit object JNGE_0 extends JNGE._1[rel8] {
-    def opcode = 0x7C
+    val opcode: OneOpcode = 0x7C
   }
 
   implicit object JNGE_1 extends JNGE._1[rel16] {
-    def opcode = 0x8C
+    val opcode: TwoOpcodes = (0x0F, 0x8C)
   }
 
   implicit object JNGE_2 extends JNGE._1[rel32] {
-    def opcode = 0x8C
+    val opcode: TwoOpcodes = (0x0F, 0x8C)
   }
 }

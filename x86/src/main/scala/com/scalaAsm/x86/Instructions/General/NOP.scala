@@ -8,20 +8,20 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: No Operation
 // Category: general/control
 
-object NOP extends InstructionDefinition[OneOpcode]("NOP") with NOPImpl
+object NOP extends InstructionDefinition("NOP") with NOPImpl
 
 trait NOPLow {
   implicit object NOP_0 extends NOP._1[rm16] {
-    def opcode = 0xD
+    val opcode: TwoOpcodes = (0x0F, 0xD)
   }
 
   implicit object NOP_1 extends NOP._1[rm32] {
-    def opcode = 0xD
+    val opcode: TwoOpcodes = (0x0F, 0xD)
   }
 }
 
 trait NOPImpl extends NOPLow {
   implicit object NOP_2 extends NOP._0 {
-    def opcode = 0x90
+    val opcode: OneOpcode = 0x90
   }
 }

@@ -8,10 +8,10 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Clear Exceptions
 // Category: general/control
 
-object FCLEX extends InstructionDefinition[OneOpcode]("FCLEX") with FCLEXImpl
+object FCLEX extends InstructionDefinition("FCLEX") with FCLEXImpl
 
 trait FCLEXImpl {
   implicit object FCLEX_0 extends FCLEX._0 {
-    def opcode = 0xDB /+ 4
+    val opcode: OneOpcode = 0xDB /+ 4
   }
 }

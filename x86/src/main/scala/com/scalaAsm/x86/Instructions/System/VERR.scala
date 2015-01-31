@@ -8,10 +8,10 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Verify a Segment for Reading
 // Category: general
 
-object VERR extends InstructionDefinition[OneOpcode]("VERR") with VERRImpl
+object VERR extends InstructionDefinition("VERR") with VERRImpl
 
 trait VERRImpl {
   implicit object VERR_0 extends VERR._1[rm16] {
-    def opcode = 0x0 /+ 4
+    val opcode: TwoOpcodes = (0x0F, 0x0) /+ 4
   }
 }

@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Output String to Port
 // Category: general/inoutstring
 
-object OUTSB extends InstructionDefinition[OneOpcode]("OUTSB") with OUTSBImpl
+object OUTSB extends InstructionDefinition("OUTSB") with OUTSBImpl
 
 trait OUTSBImpl {
   implicit object OUTSB_0 extends OUTSB._0 {
-    def opcode = 0x6E
+    val opcode: OneOpcode = 0x6E
     override def hasImplicitOperand = true
   }
 }

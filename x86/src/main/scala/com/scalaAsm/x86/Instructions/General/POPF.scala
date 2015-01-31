@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Pop Stack into FLAGS Register
 // Category: general/stackflgctrl
 
-object POPF extends InstructionDefinition[OneOpcode]("POPF") with POPFImpl
+object POPF extends InstructionDefinition("POPF") with POPFImpl
 
 trait POPFImpl {
   implicit object POPF_0 extends POPF._0 {
-    def opcode = 0x9D
+    val opcode: OneOpcode = 0x9D
     override def hasImplicitOperand = true
   }
 }

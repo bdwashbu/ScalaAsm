@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Move Data from String to String
 // Category: general/datamovstring
 
-object MOVSW extends InstructionDefinition[OneOpcode]("MOVSW") with MOVSWImpl
+object MOVSW extends InstructionDefinition("MOVSW") with MOVSWImpl
 
 trait MOVSWImpl {
   implicit object MOVSW_0 extends MOVSW._0 {
-    def opcode = 0xA5
+    val opcode: OneOpcode = 0xA5
     override def hasImplicitOperand = true
   }
 }

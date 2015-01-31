@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Save Processor Extended States
 // Category: general
 
-object XSAVE extends InstructionDefinition[OneOpcode]("XSAVE") with XSAVEImpl
+object XSAVE extends InstructionDefinition("XSAVE") with XSAVEImpl
 
 trait XSAVEImpl {
   implicit object XSAVE_0 extends XSAVE._1[m] {
-    def opcode = 0xAE /+ 4
+    val opcode: TwoOpcodes = (0x0F, 0xAE) /+ 4
     override def hasImplicitOperand = true
   }
 }

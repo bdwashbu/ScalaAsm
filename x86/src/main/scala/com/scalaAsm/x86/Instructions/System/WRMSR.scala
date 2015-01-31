@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Write to Model Specific Register
 // Category: general
 
-object WRMSR extends InstructionDefinition[OneOpcode]("WRMSR") with WRMSRImpl
+object WRMSR extends InstructionDefinition("WRMSR") with WRMSRImpl
 
 trait WRMSRImpl {
   implicit object WRMSR_0 extends WRMSR._0 {
-    def opcode = 0x30
+    val opcode: TwoOpcodes = (0x0F, 0x30)
     override def hasImplicitOperand = true
   }
 }

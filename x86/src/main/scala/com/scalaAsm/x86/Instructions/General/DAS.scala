@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Decimal Adjust AL after Subtraction
 // Category: general/arith/decimal
 
-object DAS extends InstructionDefinition[OneOpcode]("DAS") with DASImpl
+object DAS extends InstructionDefinition("DAS") with DASImpl
 
 trait DASImpl {
   implicit object DAS_0 extends DAS._0 {
-    def opcode = 0x2F
+    val opcode: OneOpcode = 0x2F
     override def hasImplicitOperand = true
   }
 }

@@ -8,10 +8,10 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Set Interrupt Flag
 // Category: general/flgctrl
 
-object STI extends InstructionDefinition[OneOpcode]("STI") with STIImpl
+object STI extends InstructionDefinition("STI") with STIImpl
 
 trait STIImpl {
   implicit object STI_0 extends STI._0 {
-    def opcode = 0xFB
+    val opcode: OneOpcode = 0xFB
   }
 }

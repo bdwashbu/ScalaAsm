@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Push eFLAGS Register onto the Stack
 // Category: general/stackflgctrl
 
-object PUSHFD extends InstructionDefinition[OneOpcode]("PUSHFD") with PUSHFDImpl
+object PUSHFD extends InstructionDefinition("PUSHFD") with PUSHFDImpl
 
 trait PUSHFDImpl {
   implicit object PUSHFD_0 extends PUSHFD._0 {
-    def opcode = 0x9C
+    val opcode: OneOpcode = 0x9C
     override def hasImplicitOperand = true
   }
 }

@@ -8,15 +8,15 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Conditional Move - not zero/not equal (ZF=1)
 // Category: general/datamov
 
-object CMOVNE extends InstructionDefinition[OneOpcode]("CMOVNE") with CMOVNEImpl
+object CMOVNE extends InstructionDefinition("CMOVNE") with CMOVNEImpl
 
 trait CMOVNEImpl {
   implicit object CMOVNE_0 extends CMOVNE._2[r16, rm16] {
-    def opcode = 0x45 /r
+    val opcode: TwoOpcodes = (0x0F, 0x45) /r
   }
 
   implicit object CMOVNE_1 extends CMOVNE._2[r32, rm32] {
-    def opcode = 0x45 /r
+    val opcode: TwoOpcodes = (0x0F, 0x45) /r
     override def explicitFormat(op1: r32, op2: rm32) = {
       if (op2.isInstanceOf[reg]) {
         Some(InstructionFormat(addressingForm = OnlyModRM(ModRMReg(TwoRegisters, op1, op2.asInstanceOf[reg])), immediate = None))
@@ -25,7 +25,7 @@ trait CMOVNEImpl {
   }
 
   implicit object CMOVNE_2 extends CMOVNE._2[r64, rm64] {
-    def opcode = 0x45 /r
+    val opcode: TwoOpcodes = (0x0F, 0x45) /r
     override def prefix = REX.W(true)
   }
 }

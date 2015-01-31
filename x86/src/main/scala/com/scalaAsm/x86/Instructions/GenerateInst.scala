@@ -44,18 +44,18 @@ object GenerateInst {
       val header = getClassHeader(name)
       
       val simpleOpcodeString = if (numOpcodeBytes == 1) {
-        "0x" + opcode.toHexString.toUpperCase()
+        ": OneOpcode = 0x" + opcode.toHexString.toUpperCase()
       } else if (numOpcodeBytes == 2) {
-        "(0x0F, " + "0x" + opcode.toHexString.toUpperCase() + ")"
+        ": TwoOpcodes = (0x0F, 0x" + opcode.toHexString.toUpperCase() + ")"
       }
 
       def getOpcodeString = {
         if (entry.hasRegisterInModRM) {
-          Seq("def opcode = " + simpleOpcodeString + " /r\n")
+          "val opcode" + simpleOpcodeString + " /r"
         } else if (entry.opcodeEx.isDefined) {
-          Seq("def opcode = " + simpleOpcodeString + " /+ " + entry.opcodeEx.get + "\n")
+          "val opcode" + simpleOpcodeString + " /+ " + entry.opcodeEx.get
         } else {
-          Seq("def opcode = " + simpleOpcodeString + "\n")
+          "val opcode" + simpleOpcodeString
         }
       }
 
@@ -63,12 +63,12 @@ object GenerateInst {
         op.addressingMethod match {
           case Some(OpcodeSelectsRegister) =>
             val regCode = if (List("qp", "q") contains op.operandType.code) "o" else op.operandType.code // for some reason the code for 64-bit is "ro"
-            Seq("def opcode = 0x" + opcode.toHexString.toUpperCase() + " + r" + regCode + "\n")
-          case _ => getOpcodeString
+            Seq(getOpcodeString + " + r" + regCode + "\n")
+          case _ => Seq(getOpcodeString + "\n")
           //}
 
         }
-      }.getOrElse(getOpcodeString)
+      }.getOrElse(Seq(getOpcodeString + "\n"))
 
       val prefix: Seq[String] = getOperand.map { op =>
         op match {
@@ -474,8 +474,8 @@ object GenerateInst {
   def loadXML(): Seq[x86InstructionDef] = {
 
     val xml = XML.loadFile("x86reference.xml")
-    val one_opcodes = (xml \ "one_byte" \ "pri_opcd")
-    val two_opcodes = (xml \ "two-byte" \ "pri_opcd")
+    val one_opcodes = (xml \ "one-byte" \\ "pri_opcd")
+    val two_opcodes = (xml \ "two-byte" \\ "pri_opcd")
 
     val opcodes = one_opcodes.map { pri_opcode =>
       val nonAliasedEntries = (pri_opcode \ "entry").filter { entry => (entry \ "@alias").size == 0} // && ((entry \ "proc_start").size == 0 || (entry \ "proc_start")(0).text == "01" || (entry \ "proc_start")(0).text == "10")}
@@ -552,7 +552,7 @@ object GenerateInst {
     
     val opcodeType = if (numOpcodeBytes == 1) "OneOpcode" else "TwoOpcodes"
     
-    writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition[" + opcodeType + "](\"" + mnemonic + "\") with " + mnemonic.toUpperCase() + "Impl")
+    writer.println("object " + mnemonic.toUpperCase() + " extends InstructionDefinition(\"" + mnemonic + "\") with " + mnemonic.toUpperCase() + "Impl")
     writer.println("")
 
     if (!low.isEmpty && !high.isEmpty) {

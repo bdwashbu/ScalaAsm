@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Read Performance-Monitoring Counters
 // Category: general
 
-object RDPMC extends InstructionDefinition[OneOpcode]("RDPMC") with RDPMCImpl
+object RDPMC extends InstructionDefinition("RDPMC") with RDPMCImpl
 
 trait RDPMCImpl {
   implicit object RDPMC_0 extends RDPMC._0 {
-    def opcode = 0x33
+    val opcode: TwoOpcodes = (0x0F, 0x33)
     override def hasImplicitOperand = true
   }
 }

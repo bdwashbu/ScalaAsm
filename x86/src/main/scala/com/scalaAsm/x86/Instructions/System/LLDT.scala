@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Load Local Descriptor Table Register
 // Category: general
 
-object LLDT extends InstructionDefinition[OneOpcode]("LLDT") with LLDTImpl
+object LLDT extends InstructionDefinition("LLDT") with LLDTImpl
 
 trait LLDTImpl {
   implicit object LLDT_0 extends LLDT._1[rm16] {
-    def opcode = 0x0 /+ 2
+    val opcode: TwoOpcodes = (0x0F, 0x0) /+ 2
     override def hasImplicitOperand = true
   }
 }

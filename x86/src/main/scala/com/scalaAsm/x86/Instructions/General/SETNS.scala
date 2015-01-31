@@ -8,10 +8,10 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Set Byte on Condition - not sign (SF=0)
 // Category: general/datamov
 
-object SETNS extends InstructionDefinition[OneOpcode]("SETNS") with SETNSImpl
+object SETNS extends InstructionDefinition("SETNS") with SETNSImpl
 
 trait SETNSImpl {
   implicit object SETNS_0 extends SETNS._1[rm8] {
-    def opcode = 0x99 /+ 0
+    val opcode: TwoOpcodes = (0x0F, 0x99) /+ 0
   }
 }

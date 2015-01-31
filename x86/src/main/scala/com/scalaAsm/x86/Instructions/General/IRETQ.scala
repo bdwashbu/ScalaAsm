@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Interrupt Return
 // Category: general/breakstack
 
-object IRETQ extends InstructionDefinition[OneOpcode]("IRETQ") with IRETQImpl
+object IRETQ extends InstructionDefinition("IRETQ") with IRETQImpl
 
 trait IRETQImpl {
   implicit object IRETQ_0 extends IRETQ._0 {
-    def opcode = 0xCF
+    val opcode: OneOpcode = 0xCF
     override def hasImplicitOperand = true
   }
 }

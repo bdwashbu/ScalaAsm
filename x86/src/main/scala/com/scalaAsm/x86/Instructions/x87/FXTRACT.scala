@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Extract Exponent and Significand
 // Category: general/arith
 
-object FXTRACT extends InstructionDefinition[OneOpcode]("FXTRACT") with FXTRACTImpl
+object FXTRACT extends InstructionDefinition("FXTRACT") with FXTRACTImpl
 
 trait FXTRACTImpl {
   implicit object FXTRACT_0 extends FXTRACT._0 {
-    def opcode = 0xD9 /+ 6
+    val opcode: OneOpcode = 0xD9 /+ 6
     override def hasImplicitOperand = true
   }
 }

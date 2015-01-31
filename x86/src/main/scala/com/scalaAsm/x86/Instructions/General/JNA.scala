@@ -8,18 +8,18 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Jump short if below or equal/not above (CF=1 AND ZF=1)
 // Category: general/branch/cond
 
-object JNA extends InstructionDefinition[OneOpcode]("JNA") with JNAImpl
+object JNA extends InstructionDefinition("JNA") with JNAImpl
 
 trait JNAImpl {
   implicit object JNA_0 extends JNA._1[rel8] {
-    def opcode = 0x76
+    val opcode: OneOpcode = 0x76
   }
 
   implicit object JNA_1 extends JNA._1[rel16] {
-    def opcode = 0x86
+    val opcode: TwoOpcodes = (0x0F, 0x86)
   }
 
   implicit object JNA_2 extends JNA._1[rel32] {
-    def opcode = 0x86
+    val opcode: TwoOpcodes = (0x0F, 0x86)
   }
 }

@@ -8,10 +8,10 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Set Byte on Condition - not below or equal/above (CF=0 AND ZF=0)
 // Category: general/datamov
 
-object SETA extends InstructionDefinition[OneOpcode]("SETA") with SETAImpl
+object SETA extends InstructionDefinition("SETA") with SETAImpl
 
 trait SETAImpl {
   implicit object SETA_0 extends SETA._1[rm8] {
-    def opcode = 0x97 /+ 0
+    val opcode: TwoOpcodes = (0x0F, 0x97) /+ 0
   }
 }

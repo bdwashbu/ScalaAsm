@@ -8,11 +8,11 @@ import com.scalaAsm.x86.Operands.Memory._
 // Description: Read from Model Specific Register
 // Category: general
 
-object RDMSR extends InstructionDefinition[OneOpcode]("RDMSR") with RDMSRImpl
+object RDMSR extends InstructionDefinition("RDMSR") with RDMSRImpl
 
 trait RDMSRImpl {
   implicit object RDMSR_0 extends RDMSR._0 {
-    def opcode = 0x32
+    val opcode: TwoOpcodes = (0x0F, 0x32)
     override def hasImplicitOperand = true
   }
 }

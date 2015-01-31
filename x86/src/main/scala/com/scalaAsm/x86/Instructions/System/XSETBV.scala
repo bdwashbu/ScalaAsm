@@ -12,7 +12,7 @@ object XSETBV extends InstructionDefinition("XSETBV") with XSETBVImpl
 
 trait XSETBVImpl {
   implicit object XSETBV_0 extends XSETBV._0 {
-    val opcode: TwoOpcodes = (0x0F, 0x1) /+ 2
+    val opcode: TwoOpcodes = (0x0F, 0x01) /+ 2
     override def hasImplicitOperand = true
   }
 }

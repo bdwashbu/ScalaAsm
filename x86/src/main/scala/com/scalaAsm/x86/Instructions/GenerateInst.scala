@@ -43,10 +43,12 @@ object GenerateInst {
 
       val header = getClassHeader(name)
       
+      val rawOpcodeString = opcode.toHexString.toUpperCase.reverse.padTo(2, '0').reverse
+      
       val simpleOpcodeString = if (numOpcodeBytes == 1) {
-        ": OneOpcode = 0x" + opcode.toHexString.toUpperCase()
+        ": OneOpcode = 0x" + rawOpcodeString
       } else if (numOpcodeBytes == 2) {
-        ": TwoOpcodes = (0x0F, 0x" + opcode.toHexString.toUpperCase() + ")"
+        ": TwoOpcodes = (0x0F, 0x" + rawOpcodeString + ")"
       }
 
       def getOpcodeString = {

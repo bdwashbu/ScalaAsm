@@ -12,6 +12,6 @@ object INVLPG extends InstructionDefinition("INVLPG") with INVLPGImpl
 
 trait INVLPGImpl {
   implicit object INVLPG_0 extends INVLPG._1[m] {
-    val opcode: TwoOpcodes = (0x0F, 0x1) /+ 7
+    val opcode: TwoOpcodes = (0x0F, 0x01) /+ 7
   }
 }

@@ -12,7 +12,7 @@ object LMSW extends InstructionDefinition("LMSW") with LMSWImpl
 
 trait LMSWImpl {
   implicit object LMSW_0 extends LMSW._1[rm16] {
-    val opcode: TwoOpcodes = (0x0F, 0x1) /+ 6
+    val opcode: TwoOpcodes = (0x0F, 0x01) /+ 6
     override def hasImplicitOperand = true
   }
 }

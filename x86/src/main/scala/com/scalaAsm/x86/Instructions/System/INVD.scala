@@ -12,6 +12,6 @@ object INVD extends InstructionDefinition("INVD") with INVDImpl
 
 trait INVDImpl {
   implicit object INVD_0 extends INVD._0 {
-    val opcode: TwoOpcodes = (0x0F, 0x8)
+    val opcode: TwoOpcodes = (0x0F, 0x08)
   }
 }

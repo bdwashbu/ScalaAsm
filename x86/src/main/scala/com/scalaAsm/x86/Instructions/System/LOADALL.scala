@@ -12,7 +12,7 @@ object LOADALL extends InstructionDefinition("LOADALL") with LOADALLImpl
 
 trait LOADALLImpl {
   implicit object LOADALL_0 extends LOADALL._0 {
-    val opcode: TwoOpcodes = (0x0F, 0x5)
+    val opcode: TwoOpcodes = (0x0F, 0x05)
     override def hasImplicitOperand = true
   }
 }

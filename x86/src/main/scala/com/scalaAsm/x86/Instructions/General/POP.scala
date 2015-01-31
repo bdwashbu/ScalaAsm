@@ -29,7 +29,7 @@ trait POPLow {
 
 trait POPImpl extends POPLow {
   implicit object POP_3 extends POP._0 {
-    val opcode: OneOpcode = 0x7
+    val opcode: OneOpcode = 0x07
     override def hasImplicitOperand = true
   }
 

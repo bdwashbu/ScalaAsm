@@ -12,7 +12,7 @@ object SYSCALL extends InstructionDefinition("SYSCALL") with SYSCALLImpl
 
 trait SYSCALLImpl {
   implicit object SYSCALL_0 extends SYSCALL._0 {
-    val opcode: TwoOpcodes = (0x0F, 0x5)
+    val opcode: TwoOpcodes = (0x0F, 0x05)
     override def hasImplicitOperand = true
   }
 }

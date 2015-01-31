@@ -12,7 +12,7 @@ object RDTSCP extends InstructionDefinition("RDTSCP") with RDTSCPImpl
 
 trait RDTSCPImpl {
   implicit object RDTSCP_0 extends RDTSCP._0 {
-    val opcode: TwoOpcodes = (0x0F, 0x1) /+ 7
+    val opcode: TwoOpcodes = (0x0F, 0x01) /+ 7
     override def hasImplicitOperand = true
   }
 }

@@ -29,7 +29,7 @@ trait PUSHLow {
 
 trait PUSHImpl extends PUSHLow {
   implicit object PUSH_3 extends PUSH._0 {
-    val opcode: OneOpcode = 0x6
+    val opcode: OneOpcode = 0x06
     override def hasImplicitOperand = true
   }
 

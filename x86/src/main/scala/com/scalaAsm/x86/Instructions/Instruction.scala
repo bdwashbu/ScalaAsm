@@ -18,6 +18,7 @@ trait x86Instruction {
   implicit def toByte(x: Int) = x.toByte
   implicit def toOneOpcode(x: Int): OneOpcode = OneOpcode(x.toByte, prefix)
   implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte, prefix)
+  implicit def toThreeOpcodes(x: (Int, Int, Int)): ThreeOpcodes = ThreeOpcodes(x._1.toByte, x._2.toByte, x._3.toByte, prefix)
 }
 
 trait OneOperand[X <: InstructionDefinition] {

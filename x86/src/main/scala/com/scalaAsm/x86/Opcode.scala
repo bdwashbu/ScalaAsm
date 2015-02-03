@@ -47,3 +47,12 @@ case class TwoOpcodes(opcode1: Byte, opcode2: Byte, prefix: Seq[Prefix]) extends
   def isOpcodePlus = false
 }
 
+case class ThreeOpcodes(opcode1: Byte, opcode2: Byte, opcode3: Byte, prefix: Seq[Prefix]) extends OpcodeFormat {
+  def get = Array(opcode1, opcode2, opcode3)
+  val size = 3
+  val opcodeExtension: Option[Byte] = None
+  def /+(x: Byte) = new ThreeOpcodes(opcode1, opcode2, opcode3, prefix) { override val opcodeExtension = Some(x) }
+  def /(x: RegInModRM) = this
+  def isOpcodePlus = false
+}
+

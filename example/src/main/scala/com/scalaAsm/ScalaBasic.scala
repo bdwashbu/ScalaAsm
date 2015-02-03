@@ -4,10 +4,6 @@ import java.io._
 import com.scalaAsm.assembler.Assembler
 import com.scalaAsm.linker.Linker
 import com.scalaAsm.coff.Coff
-import com.scalaAsm.x86.OperandTypes._
-import com.scalaAsm.x86.AddressingMethods._
-import com.scalaAsm.x86.AddressingMethods.AddressingMethod
-import com.scalaAsm.x86.OperandTypes.OperandSize
 import scala.xml._
 import java.io.PrintWriter
 

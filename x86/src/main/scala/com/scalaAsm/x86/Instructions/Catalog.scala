@@ -46,6 +46,7 @@ import com.scalaAsm.x86.Instructions.System._
       object fstp extends OneOperand[FSTP.type]
       
       object rdtsc extends ZeroOperands[RDTSC.type]
+      object rdtscp extends ZeroOperands[RDTSCP.type]
       object cpuid extends ZeroOperands[CPUID.type]
     }
   }

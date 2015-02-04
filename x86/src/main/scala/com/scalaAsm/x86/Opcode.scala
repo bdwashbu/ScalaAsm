@@ -44,7 +44,17 @@ case class TwoOpcodes(opcode1: Byte, opcode2: Byte, prefix: Seq[Prefix]) extends
   val opcodeExtension: Option[Byte] = None
   def /+(x: Byte) = new TwoOpcodes(opcode1, opcode2, prefix) { override val opcodeExtension = Some(x) }
   def /(x: RegInModRM) = this
+  def +(reg: RegInOpcode) = new TwoOpcodeWithReg(opcode1, opcode2, prefix)
   def isOpcodePlus = false
+}
+
+class TwoOpcodeWithReg(opcode: Byte, opcode2: Byte, prefix: Seq[Prefix]) extends TwoOpcodes(opcode, opcode2, prefix) {
+    var reg: reg = _
+    override def get = Array((opcode + reg.ID).toByte)
+    override val size = 1
+    override val opcodeExtension: Option[Byte] = None
+    override def /+(x: Byte) = new TwoOpcodes(opcode, opcode2, prefix) { override val opcodeExtension = Some(x) }
+    override def isOpcodePlus = true
 }
 
 case class ThreeOpcodes(opcode1: Byte, opcode2: Byte, opcode3: Byte, prefix: Seq[Prefix]) extends OpcodeFormat {

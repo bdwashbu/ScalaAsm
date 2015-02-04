@@ -27,6 +27,10 @@ package object x86 {
   type m32 = Memory[_32]
   type m64 = Memory[_64]
   type m128 = Memory[_128]
+  
+  type m32fp = Memory[_32]
+  type m64fp = Memory[_64]
+  type m128fp = Memory[_128]
 
   type _8 = Byte
   type _16 = Short

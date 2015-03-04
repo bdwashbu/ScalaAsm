@@ -155,4 +155,13 @@ How to build:
 3. In Eclipse, under window->preferences->general->workspace->build order, uncheck 'use default order' and set the order from top to bottom: x86, coff, asm, assembler, portableExe, linker, example
 4. Refresh/Clean projects in eclipse
 
+Tricks:
+========
 
+Adding an icon to an executable:
+
+Before: ![Alt text](/example/beforeicon.png)
+```
+assembler.assemble(HelloWorld).addIcon("scala.ico")
+```
+After: ![Alt text](/example/aftericon.png)

@@ -37,7 +37,7 @@ implicit object push4 extends PUSH._1[imm16] {
 }
 ```
 
-[See more instructions](/x86/src/main/scala/com/scalaAsm/x86/Instructions/General "More instructions")
+[See more instructions](https://github.com/bdwashbu/scala-x86-inst/tree/master/src/main/scala/com/scalaAsm/x86/Instructions "More instructions")
 
 Here we see PUSH definitions straight from the Intel x86 specification, and we see that the definitions look similiar. As seen in the code above, sometimes just the opcode is enough information to completely define the instruction!
 

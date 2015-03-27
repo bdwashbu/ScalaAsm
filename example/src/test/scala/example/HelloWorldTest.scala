@@ -15,28 +15,50 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox.Context
+import com.scalaAsm.asm.AsmMacro
+import com.scalaAsm.x86.Instructions.Catalog.Standard
+import com.scalaAsm.x86.Instructions.Catalog
 
 object HelloWorld extends AsmProgram[x86_32] {
 
   import com.scalaAsm.x86.Instructions.General._
-  import com.scalaAsm.asm._
 
+  import com.scalaAsm.asm._
+  val universe: scala.reflect.runtime.universe.type = scala.reflect.runtime.universe
+  import universe._
+  
+  implicit class OctalContext (val sc : StringContext) {
+
+    def o(): () => Reference = macro AsmMacro.impl
+  }
+  
+  //val foo = o"push helloWorld"
+
+  val fuck = new CodeSection{}
+  
+  println(showRaw(reify{fuck.push("helloWorld").apply()}))
+  
   sections += new DataSection(
-    Variable("helloWorld", "Hello World!\r\n\u0000")
+    Variable("helloWorld", "Hello World!\r\n\u0000"),
+    Variable("helloWorld2", "Hello Worldddd!\r\n\u0000")
   ) {}
 
   sections += new CodeSection {
 
     builder += Code(
-      push("helloWorld"),
+      o"push helloWorld2",
       call("printf"),
       pop(ebx),
       retn(()))
   }
 }
 
-class HelloWorldTest extends FlatSpec with ShouldMatchers {
 
+
+class HelloWorldTest extends FlatSpec with ShouldMatchers {
+    
   val executableName = "test_HelloWorldTest.exe"
   
   "A simple 32-bit Hello world" should "print 'Hello World'" in {

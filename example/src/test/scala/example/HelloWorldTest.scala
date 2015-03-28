@@ -20,6 +20,7 @@ import scala.reflect.macros.blackbox.Context
 import com.scalaAsm.asm.AsmMacro
 import com.scalaAsm.x86.Instructions.Catalog.Standard
 import com.scalaAsm.x86.Instructions.Catalog
+import com.scalaAsm.x86.InstructionResult
 
 object HelloWorld extends AsmProgram[x86_32] {
 
@@ -31,15 +32,9 @@ object HelloWorld extends AsmProgram[x86_32] {
   
   implicit class OctalContext (val sc : StringContext) {
 
-    def o(): () => Reference = macro AsmMacro.impl
+    def asm(): () => InstructionResult = macro AsmMacro.impl
   }
-  
-  //val foo = o"push helloWorld"
-
-  val fuck = new CodeSection{}
-  
-  println(showRaw(reify{fuck.push("helloWorld").apply()}))
-  
+ 
   sections += new DataSection(
     Variable("helloWorld", "Hello World!\r\n\u0000"),
     Variable("helloWorld2", "Hello Worldddd!\r\n\u0000")
@@ -48,9 +43,9 @@ object HelloWorld extends AsmProgram[x86_32] {
   sections += new CodeSection {
 
     builder += Code(
-      o"push helloWorld2",
-      call("printf"),
-      pop(ebx),
+      asm"push helloWorld",
+      asm"call printf",
+      asm"pop ebx",
       retn(()))
   }
 }

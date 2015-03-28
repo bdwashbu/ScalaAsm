@@ -23,7 +23,7 @@ trait x86_32 extends x86Mode
 trait AsmSection
  trait HighLevel
 
-trait AsmProgram[Mode <: x86Mode] {
+trait AsmProgram[Mode <: x86Mode] extends Registers[Mode] with Formats {
 
   val sections = new ListBuffer[AsmSection]()
   
@@ -38,7 +38,7 @@ trait AsmProgram[Mode <: x86Mode] {
       override def toString = from.toString
     }
   
-  trait CodeSection extends Registers[Mode] with Catalog.Standard with Formats with Addressing with AsmSection {
+  trait CodeSection extends Catalog.Standard  with Addressing with AsmSection {
 
     val builder = new ListBuffer[HighLevel]()
 

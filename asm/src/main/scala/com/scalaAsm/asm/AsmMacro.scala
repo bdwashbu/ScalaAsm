@@ -27,22 +27,22 @@ object AsmMacro {
             case _ => Nil
           }
          
-         //throw new Exception("AssertionError: " + what.head + ":"  + showRaw(c.prefix.tree))
-//         val name = x.tree match {
-//            case Literal(Constant(text: String)) => text.split('(').last.split(')').head
-//            case _ => ""
-//         }
+         val mnemonic = c.prefix.tree match {
+            case Apply(_, List(Apply(_, xs))) => xs map {
+              case Literal(Constant(x: String)) => x.split(' ').head
+            }
+            case _ => Nil
+          }
          
-
+         //throw new Exception(what.toString)
          
-         
-         //val name = x.value.split('(').last.split(')').head
-         //val tree = importer.importTree(toolBox.parse(code))
-         //c.Expr(Apply(
-         //   Ident(TermName("println")),
-         //   List(Literal(Constant("hello")))))
-            
-         c.Expr(Apply(Select(Select(This(TypeName("HelloWorld")), TermName("fuck")), TermName("push")), List(Literal(Constant(what.head)))))
+        if (what.head == "ebx") {
+           //c.Expr(Apply(Select(Select(This(TypeName("HelloWorld")), TermName("fuck")), TermName("pop")), List(Apply(Select(This(TypeName("HelloWorld")), TermName("ebx")), List(Select(Ident("scala.Predef"), TermName("$conforms")))))))
+           //c.Expr(Apply(Apply(Select(Select(Ident(TermName("$anon")), TermName("pop")), TermName("apply")), List(Apply(Select(This(TypeName("HelloWorld")), TermName("ebx")), List(Select(Ident(TermName("scala.Predef")), TermName("$conforms")))))), List(Select(Ident(TermName("com.scalaAsm.x86.Instructions.General.POP")), TermName("POP_5")), Select(This(TypeName("HelloWorld")), TermName("New_MFormat4")))))
+           c.Expr(Apply(Select(This(TypeName("$anon")), TermName("pop")), List(Select(This(TypeName("HelloWorld")), TermName("ebx")))))
+        } else {      
+           c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic.head)), List(Literal(Constant(what.head)))))
+         }
       }
 
 }

@@ -20,29 +20,28 @@ object AsmMacro {
          val toolBox = currentMirror.mkToolBox()
          val importer = c.universe.mkImporter(ru)
          
-         val what = c.prefix.tree match {
+         val asmInstruction = (c.prefix.tree match {
             case Apply(_, List(Apply(_, xs))) => xs map {
-              case Literal(Constant(x: String)) => x.split(' ').last
+              case Literal(Constant(x: String)) => x
             }
             case _ => Nil
-          }
+          }).head
          
-         val mnemonic = c.prefix.tree match {
-            case Apply(_, List(Apply(_, xs))) => xs map {
-              case Literal(Constant(x: String)) => x.split(' ').head
-            }
-            case _ => Nil
-          }
+         
          
          //throw new Exception(what.toString)
-         
-        if (what.head == "ebx") {
-           //c.Expr(Apply(Select(Select(This(TypeName("HelloWorld")), TermName("fuck")), TermName("pop")), List(Apply(Select(This(TypeName("HelloWorld")), TermName("ebx")), List(Select(Ident("scala.Predef"), TermName("$conforms")))))))
-           //c.Expr(Apply(Apply(Select(Select(Ident(TermName("$anon")), TermName("pop")), TermName("apply")), List(Apply(Select(This(TypeName("HelloWorld")), TermName("ebx")), List(Select(Ident(TermName("scala.Predef")), TermName("$conforms")))))), List(Select(Ident(TermName("com.scalaAsm.x86.Instructions.General.POP")), TermName("POP_5")), Select(This(TypeName("HelloWorld")), TermName("New_MFormat4")))))
-           c.Expr(Apply(Select(This(TypeName("$anon")), TermName("pop")), List(Select(This(TypeName("HelloWorld")), TermName("ebx")))))
-        } else {      
-           c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic.head)), List(Literal(Constant(what.head)))))
-         }
+        if (!asmInstruction.contains(' ')) {
+          val mnemonic = asmInstruction
+          c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Literal(Constant(())))))
+        } else {
+          val mnemonic = asmInstruction.split(' ').head
+          val param = asmInstruction.split(' ').last
+          if (param == "ebx") {
+             c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Select(This(TypeName("HelloWorld")), TermName("ebx")))))
+          } else {      
+             c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Literal(Constant(param)))))
+           }
+        }
       }
 
 }

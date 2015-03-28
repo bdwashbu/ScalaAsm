@@ -35,18 +35,20 @@ object HelloWorld extends AsmProgram[x86_32] {
     def asm(): () => InstructionResult = macro AsmMacro.impl
   }
  
+  
+  
   sections += new DataSection(
     Variable("helloWorld", "Hello World!\r\n\u0000"),
     Variable("helloWorld2", "Hello Worldddd!\r\n\u0000")
   ) {}
 
   sections += new CodeSection {
-
     builder += Code(
       asm"push helloWorld",
       asm"call printf",
       asm"pop ebx",
-      retn(()))
+      asm"retn"
+    )
   }
 }
 

@@ -6,16 +6,17 @@ import com.scalaAsm.x86.Operands.Constant
 import Memory._
 import com.scalaAsm.x86.OpcodeFormat
 
-abstract class InstructionDefinition(val mnemonic: String) {
-
-  abstract class _0 extends x86Instruction {
+trait InstructionDefinition {
+  val mnemonic: String
+  
+  trait _0 extends x86Instruction {
     def opcode: OpcodeFormat
     val mnemonic = InstructionDefinition.this.mnemonic
     def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
     def hasImplicitOperand: Boolean = false
   }
 
-  abstract class _1[-O1] extends x86Instruction {
+  trait _1[-O1] extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: OpcodeFormat
     def hasImplicitOperand: Boolean = false
@@ -27,7 +28,7 @@ abstract class InstructionDefinition(val mnemonic: String) {
     }
   }
 
-  abstract class _2[-O1, -O2] extends x86Instruction {
+  trait _2[-O1, -O2] extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def opcode: OpcodeFormat
     def hasImplicitOperand: Boolean = false

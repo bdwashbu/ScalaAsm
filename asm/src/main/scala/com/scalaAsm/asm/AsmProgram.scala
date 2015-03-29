@@ -103,14 +103,14 @@ trait AsmProgram[Mode <: x86Mode] extends Registers[Mode] with Formats {
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 
     def push(param: String) = () => Reference(param)
+    
+    def jnz(ref: String)(implicit ev: JNZ#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def jnz(ref: String)(implicit ev: JNZ._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    def jz[T <: JZ](ref: String)(implicit ev: T#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def jz(ref: String)(implicit ev: JZ._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    def jl(ref: String)(implicit ev: JL#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def jl(ref: String)(implicit ev: JL._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
-
-    def je(ref: String)(implicit ev: JE._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    def je(ref: String)(implicit ev: JE#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
     def call(refName: String): () => InstructionResult = () => {
       if (procNames.contains(refName)) {
@@ -122,7 +122,7 @@ trait AsmProgram[Mode <: x86Mode] extends Registers[Mode] with Formats {
 
     def invoke(refName: String) = () => Invoke(refName)
 
-    def jmp(ref: String)(implicit ev: JMP._1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    def jmp(ref: String)(implicit ev: JMP#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
     def repeat(numTimes: Int, code: List[() => InstructionResult]): () => Code = {
       val expanded = ListBuffer[() => InstructionResult]()

@@ -21,6 +21,9 @@ import com.scalaAsm.asm.AsmMacro
 import com.scalaAsm.x86.Instructions.Catalog.Standard
 import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.InstructionResult
+import com.scalaAsm.x86.Instructions.General.POP._
+import com.scalaAsm.x86.Instructions.General.POP
+import com.scalaAsm.x86.Operands._
 
 object HelloWorld extends AsmProgram[x86_32] {
 
@@ -48,6 +51,8 @@ object HelloWorld extends AsmProgram[x86_32] {
       asm"call printf",
       asm"pop ebx",
       asm"retn"
+      
+      
     )
   }
 }

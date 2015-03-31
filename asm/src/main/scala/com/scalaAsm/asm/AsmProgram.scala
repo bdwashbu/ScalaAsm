@@ -45,7 +45,7 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
   import universe._
   
   implicit class OctalContext (val sc : StringContext) {
-    def asm(): () => InstructionResult = macro AsmMacro.impl
+    def asm(args: String*): () => InstructionResult = macro AsmMacro.impl
   }
   
   trait CodeSection extends Registers[Mode] with Catalog.Standard  with Addressing with AsmSection {

@@ -43,16 +43,17 @@ object HelloWorld2 extends AsmProgram[x86_32] {
     val hFile = *(ebp + byte(-4))
     //val hFileTest = asm"[ebp - 4]"
     val lpBuffer = *(ebp + byte(8))
-    val STD_OUTPUT_HANDLE = byte(-11)
+    val STD_OUTPUT_HANDLE = "-14"
     val STD_INPUT_HANDLE = byte(-10)
     
     
     
     procedure(name = "flushBuffer",
       asm"push ebp",
-      mov(ebp, esp),
-      add(esp, byte(-12)),
-      push(STD_OUTPUT_HANDLE),
+      asm"mov ebp, esp",
+      asm"add esp, -12",
+      //add(esp, byte(-12)),
+      //asm"push $STD_OUTPUT_HANDLE",
       call("GetStdHandle"),
       mov(hFile, eax),
       push(lpBuffer),
@@ -60,19 +61,19 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       mov(numberOfBytesToWrite, eax),
       push(byte(0)),
       lea(eax, numberOfBytesWritten),
-      push(eax),
+      asm"push eax",
       push(numberOfBytesToWrite),
       push(lpBuffer),
       push(hFile),
       call("WriteFile"),
       mov(eax, numberOfBytesWritten),
-      leave(()),
+      asm"leave",
       retn(word(4)))
 
     procedure(name = "strlen",
       mov(eax, *(esp + byte(4))), // pointer to string
       lea(edx, *(eax + byte(3))),
-      push(ebp),
+      asm"push ebp",
       push(edi),
       mov(ebp, dword(0x80808080)),
 

@@ -16,6 +16,9 @@ import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox.Context
+
 trait x86Mode
 trait x86_64 extends x86_32
 trait x86_32 extends x86Mode
@@ -23,7 +26,7 @@ trait x86_32 extends x86Mode
 trait AsmSection
  trait HighLevel
 
-trait AsmProgram[Mode <: x86Mode] extends Registers[Mode] with Formats {
+trait AsmProgram[Mode <: x86Mode] extends Formats {
 
   val sections = new ListBuffer[AsmSection]()
   
@@ -38,7 +41,14 @@ trait AsmProgram[Mode <: x86Mode] extends Registers[Mode] with Formats {
       override def toString = from.toString
     }
   
-  trait CodeSection extends Catalog.Standard  with Addressing with AsmSection {
+  val universe: scala.reflect.runtime.universe.type = scala.reflect.runtime.universe
+  import universe._
+  
+  implicit class OctalContext (val sc : StringContext) {
+    def asm(): () => InstructionResult = macro AsmMacro.impl
+  }
+  
+  trait CodeSection extends Registers[Mode] with Catalog.Standard  with Addressing with AsmSection {
 
     val builder = new ListBuffer[HighLevel]()
 

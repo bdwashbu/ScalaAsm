@@ -15,8 +15,7 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
-import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
+
 import com.scalaAsm.asm.AsmMacro
 import com.scalaAsm.x86.Instructions.Catalog.Standard
 import com.scalaAsm.x86.Instructions.Catalog
@@ -30,13 +29,13 @@ object HelloWorld extends AsmProgram[x86_32] {
   import com.scalaAsm.x86.Instructions.General._
 
   import com.scalaAsm.asm._
-  val universe: scala.reflect.runtime.universe.type = scala.reflect.runtime.universe
+  //val universe: scala.reflect.runtime.universe.type = scala.reflect.runtime.universe
   import universe._
-  
-  implicit class OctalContext (val sc : StringContext) {
-
-    def asm(): () => InstructionResult = macro AsmMacro.impl
-  }
+//  
+//  implicit class OctalContext (val sc : StringContext) {
+//
+//    def asm(): () => InstructionResult = macro AsmMacro.impl
+//  }
  
   
   
@@ -46,13 +45,12 @@ object HelloWorld extends AsmProgram[x86_32] {
   ) {}
 
   sections += new CodeSection {
+    //println("HEEEEEERE" + (asm"[ebp - 4]").toString)
     builder += Code(
       asm"push helloWorld",
       asm"call printf",
       asm"pop ebx",
       asm"retn"
-      
-      
     )
   }
 }

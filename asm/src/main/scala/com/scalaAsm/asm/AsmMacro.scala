@@ -11,7 +11,11 @@ import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 
+import scala.reflect.runtime.universe._
+
 object AsmMacro {
+  
+ 
   
       def impl (c : Context) (): c.Expr[Function0[Tokens.Reference]] = {
          import c.universe._
@@ -29,19 +33,51 @@ object AsmMacro {
          
          
          
-         //throw new Exception(what.toString)
-        if (!asmInstruction.contains(' ')) {
+        // throw new Exception(c.internal.enclosingOwner.asClass.fullName)
+        if (asmInstruction.charAt(0) == '[') {
+          val times = Select(This(typeNames.EMPTY), TermName("$times"))
+          val ebpReg = Select(This(typeNames.EMPTY), TermName("ebp"))
+          val byteTerm = Select(This(typeNames.EMPTY), TermName("byte"))
+          val conforms = Select(Ident(TermName("scala.Predef")), TermName("$conforms"))
+          c.Expr(Apply(times, List(Apply(Select(ebpReg, TermName("$plus")), List(Apply(byteTerm, List(Literal(Constant(-4)))))))))
+        } else if (!asmInstruction.contains(' ')) {
           val mnemonic = asmInstruction
           c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Literal(Constant(())))))
         } else {
           val mnemonic = asmInstruction.split(' ').head
           val param = asmInstruction.split(' ').last
-          if (param == "ebx") {
-             c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Select(This(TypeName("HelloWorld")), TermName("ebx")))))
+          if (Seq("ebx", "ebp", "eax", "ecx", "edx") contains param) {
+             c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Select(This(typeNames.EMPTY), TermName(param)))))
           } else {      
-             c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Literal(Constant(param)))))
+             c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
            }
         }
+      }
+      
+      def typeImpl (c : Context) (): c.Expr[Operand[_]] = {
+         import c.universe._
+         import scala.reflect.runtime.{currentMirror => cm}
+         import scala.reflect.runtime.{universe => ru}
+         val toolBox = currentMirror.mkToolBox()
+         val importer = c.universe.mkImporter(ru)
+         
+         val asmInstruction = (c.prefix.tree match {
+            case Apply(_, List(Apply(_, xs))) => xs map {
+              case Literal(Constant(x: String)) => x
+            }
+            case _ => Nil
+          }).head
+         
+         
+         
+        // throw new Exception(c.internal.enclosingOwner.asClass.fullName)
+        //if (asmInstruction.charAt(0) == '[') {
+          val times = Select(This(typeNames.EMPTY), TermName("$times"))
+          val ebpReg = Select(This(typeNames.EMPTY), TermName("ebp"))
+          val byteTerm = Select(This(typeNames.EMPTY), TermName("byte"))
+          val conforms = Select(Ident(TermName("scala.Predef")), TermName("$conforms"))
+          c.Expr(Apply(times, List(Apply(Select(ebpReg, TermName("$plus")), List(Apply(byteTerm, List(Literal(Constant(-4)))))))))
+        //}
       }
 
 }

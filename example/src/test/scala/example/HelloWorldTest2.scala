@@ -41,12 +41,15 @@ object HelloWorld2 extends AsmProgram[x86_32] {
     val numberOfBytesToWrite = *(ebp + byte(-12))
     val numberOfBytesWritten = *(ebp + byte(-8))
     val hFile = *(ebp + byte(-4))
+    //val hFileTest = asm"[ebp - 4]"
     val lpBuffer = *(ebp + byte(8))
     val STD_OUTPUT_HANDLE = byte(-11)
     val STD_INPUT_HANDLE = byte(-10)
     
+    
+    
     procedure(name = "flushBuffer",
-      push(ebp),
+      asm"push ebp",
       mov(ebp, esp),
       add(esp, byte(-12)),
       push(STD_OUTPUT_HANDLE),

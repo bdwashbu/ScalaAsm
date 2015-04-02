@@ -17,34 +17,84 @@ import scala.util.control.Exception.allCatch
 object AsmMacro {
   
       def isByte(s: String): Boolean = (allCatch opt s.toByte).isDefined
+      def isDword(s: String): Boolean = (allCatch opt s.toLong).isDefined
   
-      def impl (c : Context) (args: c.Expr[String]*): c.Expr[Function0[Tokens.Reference]] = {
-         import c.universe._
-         import scala.reflect.runtime.{currentMirror => cm}
-         import scala.reflect.runtime.{universe => ru}
-         val toolBox = currentMirror.mkToolBox()
-         val importer = c.universe.mkImporter(ru)
-         
-         val asmInstruction = (c.prefix.tree match {
-            case Apply(_, List(Apply(_, xs))) => xs map {
-              case Literal(Constant(x: String)) => x
+      def impl (c : Context) (args: c.Expr[Any]*): c.Expr[Function0[Tokens.Reference]] = {
+        import c.universe._
+        import scala.reflect.runtime.{currentMirror => cm}
+        import scala.reflect.runtime.{universe => ru}
+        
+        def toAST[A : TypeTag](xs: Tree*): Tree =
+          Apply(
+            Select(Ident(typeOf[A].typeSymbol.companionSymbol), newTermName("apply")),
+            xs.toList)
+    
+        val parts = c.prefix.tree match {
+          case Apply(_, List(Apply(_, rawParts))) =>
+            rawParts zip (args map (_.tree)) map {
+              case (Literal(Constant(rawPart: String)), arg) =>
+                arg.toString
             }
-            case _ => Nil
-          }).head
+        }
+
+        val toolBox = currentMirror.mkToolBox()
+        val importer = c.universe.mkImporter(ru)
          
+        val asmInstruction = (c.prefix.tree match {
+           case Apply(_, List(Apply(_, xs))) => xs map {
+             case Literal(Constant(x: String)) => x
+           }
+           case _ => Nil
+        }).head
          
+//         if (args.size > 0) {
+//           throw new Exception(c.internal.enclosingOwner.asClass.fullName)
+//         }
          
         // throw new Exception(c.internal.enclosingOwner.asClass.fullName)
-        if (!args.isEmpty) {
+        val params = Seq[Tree]((args map (_.tree)): _*)
+        
+        if (!params.isEmpty) {
           val mnemonic = TermName(asmInstruction.split(' ').head)
-          val x = q"${args(0)}"
-          c.Expr(q"$mnemonic(byte($x.toByte))")
+          
+          if (params.head.toString contains "toString") {
+            val param = TermName(asmInstruction.split(' ').tail.mkString.split(',').head)
+            
+            c.Expr(q"$mnemonic($param, dword(input))")
+          } else if (!asmInstruction.contains(',')) {
+            //throw new Exception("fuckcck")
+            val x = q"${args(0)}"
+            if (isByte(x.toString)) {
+              c.Expr(q"$mnemonic(byte($x.toByte))")
+            } else {
+              c.Expr(q"$mnemonic($x)")
+            }
+          } else {          
+            val param = TermName(asmInstruction.split(' ').tail.mkString.split(',').head)
+            val param2 = TermName(parts(0).split('.').last)
+            val x = q"${args(0)}"
+            //throw new Exception(parts(0).toString)
+            c.Expr(q"$mnemonic($param, dword($param2.toInt))")
+//            if (isByte(x.toString)) {
+//              throw new Exception("1")
+//              c.Expr(q"$mnemonic($param, byte($x.toByte))")
+//            } else if (isDword(x.toString)) {
+//              throw new Exception("2")
+//              c.Expr(q"$mnemonic($param, dword($x.toLong))")
+//            } else {
+//              throw new Exception("3")
+//              c.Expr(q"$mnemonic($param, $x)")
+//            }
+          }
         } else if (asmInstruction.charAt(0) == '[') {
           val times = Select(This(typeNames.EMPTY), TermName("$times"))
           val ebpReg = Select(This(typeNames.EMPTY), TermName("ebp"))
           val byteTerm = Select(This(typeNames.EMPTY), TermName("byte"))
           val conforms = Select(Ident(TermName("scala.Predef")), TermName("$conforms"))
           c.Expr(Apply(times, List(Apply(Select(ebpReg, TermName("$plus")), List(Apply(byteTerm, List(Literal(Constant(-4)))))))))
+        } else if (asmInstruction.endsWith(":")) { // label
+          val labelName = Constant(asmInstruction.reverse.tail.reverse)
+          c.Expr(q"label($labelName)") 
         } else if (!asmInstruction.contains(' ')) {
           val mnemonic = asmInstruction
           c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Literal(Constant(())))))

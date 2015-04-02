@@ -24,6 +24,8 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
     object Factorial extends AsmProgram[x86_32] {
 
       import com.scalaAsm.x86.Instructions.General._
+      
+      val convertedInput: String = input.toString
 
       sections += new DataSection(
         Variable("test", "%d\n\u0000")) {}
@@ -31,21 +33,22 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
       sections += new CodeSection {
 
         builder += Code(
-          mov(eax, dword(input)),
-          mov(ebx, eax),
-          label("Begin"),
-          dec(ebx),
-          test(ebx, ebx),
-          je("End"),
-          imul(ebx),
-          jmp("Begin"),
-          label("End"),
-          push(eax),
-          push("test"),
-          call("printf"),
-          pop(eax),
-          pop(eax),
-          retn(()))
+          asm"mov eax, $convertedInput",
+          asm"mov ebx, eax",
+          asm"Begin:",
+          asm"dec ebx",
+          asm"test ebx, ebx",
+          asm"je End",
+          asm"imul ebx",
+          asm"jmp Begin",
+          asm"End:",
+          asm"push eax",
+          asm"push test",
+          asm"call printf",
+          asm"pop eax",
+          asm"pop eax",
+          asm"retn"
+        )
 
       }
     }
@@ -72,13 +75,13 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
         val in = new BufferedReader(
           new InputStreamReader(child.getInputStream()));
 
-        val output = in.readLine()
+        val outputLine = in.readLine()
 
         child.waitFor()
 
         new File(executableName + input).delete()
 
-        output should equal(output.toString)
+        outputLine should equal(output.toString)
     }
 
   }

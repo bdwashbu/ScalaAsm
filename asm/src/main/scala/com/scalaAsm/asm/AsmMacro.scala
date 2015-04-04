@@ -103,8 +103,12 @@ object AsmMacro {
           val param = asmInstruction.split(' ').last
           if (Seq("ebx", "ebp", "eax", "ecx", "edx") contains param) {
              c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Select(This(typeNames.EMPTY), TermName(param)))))
-          } else {      
+          } else if (isDword(param) ){      
              c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
+          } else if (mnemonic == "push") {   
+            c.Expr(q"() => Reference($varName)")
+          } else {
+            c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
           }
         } else {
           val mnemonic = TermName(asmInstruction.split(' ').head)

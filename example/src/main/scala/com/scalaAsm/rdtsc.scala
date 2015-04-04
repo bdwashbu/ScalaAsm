@@ -31,7 +31,7 @@ object rdtscExample extends AsmProgram[x86_32] {
       pop(eax),
       sub(eax,edx),
       push(eax),
-      push("numClocks"),
+      asm"push numClocks",
       call("printf"),
       pop(eax),
       pop(eax),

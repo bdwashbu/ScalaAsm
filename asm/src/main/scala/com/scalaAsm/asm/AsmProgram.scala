@@ -112,7 +112,7 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 
-    def push(param: String) = () => Reference(param)
+    //def push(param: String) = () => Reference(param)
     
     def jnz(ref: String)(implicit ev: JNZ#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 

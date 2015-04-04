@@ -27,7 +27,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
   sections += new CodeSection {
 
     procedure(name = "start",
-      push("pressAnyKey"),
+      asm"push pressAnyKey",
       call("flushBuffer"),
       push(byte(0)),
       call("ExitProcess"))

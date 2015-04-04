@@ -20,10 +20,10 @@ object HelloWorld extends AsmProgram[x86_32] {
     val STD_INPUT_HANDLE = byte(-10)
 
     builder += Code(
-      push("helloWorld"),
+      asm"push helloWorld",
       call("printf"),
       pop(ebx),
-      push("pressAnyKey"),
+      asm"push pressAnyKey",
       call("printf"),
       pop(ebx),
       push(STD_INPUT_HANDLE),

@@ -19,16 +19,16 @@ object HelloWorld3 extends AsmProgram[x86_32] {
 
     procedure(name = "start",
       call("printHelloWorld"),
-      push("pressAnyKey"),
+      asm"push pressAnyKey",
       call("flushBuffer"),
       call("waitForKeypress"),
-      push("newline"),
+      asm"push newline",
       call("flushBuffer"),
       push(byte(0)),
       call("ExitProcess"))
 
     procedure(name = "printHelloWorld",
-      push("helloWorld"),
+      asm"push helloWorld",
       call("printf"),
       add(esp, byte(4)),
       retn(()))

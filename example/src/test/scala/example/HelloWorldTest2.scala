@@ -33,7 +33,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       retn(()))
 
     procedure(name = "printHelloWorld",
-      push("helloWorld"),
+      asm"push helloWorld",
       call("printf"),
       add(esp, byte(4)),
       retn(()))

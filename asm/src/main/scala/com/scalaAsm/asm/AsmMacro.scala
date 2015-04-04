@@ -94,7 +94,7 @@ object AsmMacro {
           c.Expr(Apply(times, List(Apply(Select(ebpReg, TermName("$plus")), List(Apply(byteTerm, List(Literal(Constant(-4)))))))))
         } else if (asmInstruction.endsWith(":")) { // label
           val labelName = Constant(asmInstruction.reverse.tail.reverse)
-          c.Expr(q"label($labelName)") 
+          c.Expr(q"() => Label($labelName)") 
         } else if (!asmInstruction.contains(' ')) {
           val mnemonic = asmInstruction
           c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Literal(Constant(())))))

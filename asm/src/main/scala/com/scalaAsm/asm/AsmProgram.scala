@@ -108,7 +108,7 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
       })
     }
 
-    def label(name: String) = () => Label(name)
+    //def label(name: String) = () => Label(name)
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 

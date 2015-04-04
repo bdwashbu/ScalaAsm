@@ -81,7 +81,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       push(edi),
       mov(ebp, dword(0x80808080)),
 
-      label("start"),
+      asm"start:",
 
       repeat(3, List(
           mov(edi, *(eax)), // read first 4 bytes
@@ -100,12 +100,12 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       and(ecx, ebp),
       jz("start"),
 
-      label("test"),
+      asm"test:",
       test(ecx, dword(0x8080)), // test first 2 bytes
       jnz("end"),
       shr(ecx, byte(0x10)),
       add(eax, byte(2)),
-      label("end"),
+      asm"end:",
       shl(cl),
       sbb(eax, edx), // compute length
       pop(edi),

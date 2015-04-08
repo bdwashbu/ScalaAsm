@@ -118,9 +118,9 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
 
     //def jz[T <: JZ](ref: String)(implicit ev: T#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def jl(ref: String)(implicit ev: JL#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    //def jl(ref: String)(implicit ev: JL#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def je(ref: String)(implicit ev: JE#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    //def je(ref: String)(implicit ev: JE#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
     def call(refName: String): () => InstructionResult = () => {
       if (procNames.contains(refName)) {
@@ -130,9 +130,9 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
       }
     }
 
-    def invoke(refName: String) = () => Invoke(refName)
+    //def invoke(refName: String) = () => Invoke(refName)
 
-    def jmp(ref: String)(implicit ev: JMP#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    //def jmp(ref: String)(implicit ev: JMP#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
     def repeat(numTimes: Int, code: List[() => InstructionResult]): () => Code = {
       val expanded = ListBuffer[() => InstructionResult]()

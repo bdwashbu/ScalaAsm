@@ -122,6 +122,25 @@ object AsmMacro {
               val format = implicitly[OneOperandFormat[Constant8]]
               () => LabelRef($varName, ev, format)
               """)
+          } else if (mnemonic == "je") {   
+            val varName = Constant(param)
+              c.Expr(q"""
+              val ev = implicitly[JE#_1[Constant8]]
+              val format = implicitly[OneOperandFormat[Constant8]]
+              () => LabelRef($varName, ev, format)
+              """)
+          } else if (mnemonic == "jmp") {   
+            val varName = Constant(param)
+              c.Expr(q"""
+              val ev = implicitly[JMP#_1[Constant8]]
+              val format = implicitly[OneOperandFormat[Constant8]]
+              () => LabelRef($varName, ev, format)
+              """)
+          } else if (mnemonic == "invoke") {   
+            val varName = Constant(param)
+              c.Expr(q"""
+              () => Invoke($varName)
+              """)
           } else {
             c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
           }
@@ -141,6 +160,12 @@ object AsmMacro {
             val term1 = TermName(params(0))
             val term2 = TermName(params(1))
             c.Expr(q"$mnemonic($term1, $term2)")
+          } else if ((Seq("ebx", "ebp", "eax", "ecx", "edx", "esp") contains params(0)) && isDword(params(1))) {
+            //throw new Exception(params.reduce(_ + ", " + _))
+            val term1 = TermName(params(0))
+            val aByte = TermName("byte") 
+            val constant = Constant(params(1))
+            c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
           } else if ((Seq("ebx", "ebp", "eax", "ecx", "edx", "esp") contains params(0)) && isByte(params(1))) {
             //throw new Exception(params.reduce(_ + ", " + _))
             val term1 = TermName(params(0))

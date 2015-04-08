@@ -19,6 +19,7 @@ import com.scalaAsm.asm.x86_64
 object HelloWorld64 extends AsmProgram[x86_64] {
   
   import com.scalaAsm.x86.Instructions.General._
+  import com.scalaAsm.x86.Operands._
   
   sections += new DataSection (
     Variable("helloWorld", "Hello World!\r\n\u0000")
@@ -33,7 +34,7 @@ object HelloWorld64 extends AsmProgram[x86_64] {
       mov(rdx, dword(0xE)),
       lea(rcx, addr("helloWorld")),
       sub(rsp, byte(0x20)),
-      invoke("printf"), // needs work
+      asm"invoke printf", // needs work
       lea(rsp, *(rsp+byte(0x28))),
       pop(rsp),
       xor(rax, rax),

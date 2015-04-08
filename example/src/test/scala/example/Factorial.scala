@@ -24,6 +24,7 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
     object Factorial extends AsmProgram[x86_32] {
 
       import com.scalaAsm.x86.Instructions.General._
+      import com.scalaAsm.x86.Operands._
       
       val convertedInput: String = input.toString
 

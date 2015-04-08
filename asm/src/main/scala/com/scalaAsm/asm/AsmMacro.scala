@@ -47,6 +47,8 @@ object AsmMacro {
            case _ => Nil
         }).head
          
+        val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl")
+        
 //         if (args.size > 0) {
 //           throw new Exception(c.internal.enclosingOwner.asClass.fullName)
 //         }
@@ -101,7 +103,7 @@ object AsmMacro {
         } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')){
           val mnemonic = asmInstruction.split(' ').head
           val param = asmInstruction.split(' ').last
-          if (Seq("ebx", "ebp", "eax", "ecx", "edx") contains param) {
+          if (regList contains param) {
              c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Select(This(typeNames.EMPTY), TermName(param)))))
           } else if (isDword(param) ){      
              c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
@@ -156,17 +158,17 @@ object AsmMacro {
           
            
 
-          if ((Seq("ebx", "ebp", "eax", "ecx", "edx", "esp") contains params(0)) && (Seq("ebx", "ebp", "eax", "ecx", "edx", "esp") contains params(1))) {
+          if ((regList contains params(0)) && (regList contains params(1))) {
             val term1 = TermName(params(0))
             val term2 = TermName(params(1))
             c.Expr(q"$mnemonic($term1, $term2)")
-          } else if ((Seq("ebx", "ebp", "eax", "ecx", "edx", "esp") contains params(0)) && isDword(params(1))) {
+          } else if ((regList contains params(0)) && isDword(params(1))) {
             //throw new Exception(params.reduce(_ + ", " + _))
             val term1 = TermName(params(0))
             val aByte = TermName("byte") 
             val constant = Constant(params(1))
             c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
-          } else if ((Seq("ebx", "ebp", "eax", "ecx", "edx", "esp") contains params(0)) && isByte(params(1))) {
+          } else if ((regList contains params(0)) && isByte(params(1))) {
             //throw new Exception(params.reduce(_ + ", " + _))
             val term1 = TermName(params(0))
             val aByte = TermName("byte") 

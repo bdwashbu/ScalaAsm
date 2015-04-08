@@ -57,10 +57,10 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"add esp, -12",
       //add(esp, byte(-12)),
       //asm"push $STD_OUTPUT_HANDLE",
-      call("GetStdHandle"),
+      asm"call GetStdHandle",
       mov(hFile, eax),
       push(lpBuffer),
-      call("strlen"),
+      asm"call strlen",
       mov(numberOfBytesToWrite, eax),
       push(byte(0)),
       lea(eax, numberOfBytesWritten),
@@ -77,38 +77,38 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       mov(eax, *(esp + byte(4))), // pointer to string
       lea(edx, *(eax + byte(3))),
       asm"push ebp",
-      push(edi),
+      asm"push edi",
       mov(ebp, dword(0x80808080)),
 
       asm"start:",
 
       repeat(3, List(
           mov(edi, *(eax)), // read first 4 bytes
-          add(eax, byte(4)), // increment pointer
+          asm"add eax, 4", // increment pointer
           lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
-          not(edi), // invert all bytes
-          and(ecx, edi),
-          and(ecx, ebp),
+          asm"not edi", // invert all bytes
+          asm"and ecx, edi",
+          asm"and ecx, ebp",
           asm"jnz test")),
 
       mov(edi, *(eax)),
-      add(eax, byte(4)),
+      asm"add eax, 4",
       lea(ecx, *(edi - dword(0x1010101))),
-      not(edi),
-      and(ecx, edi),
-      and(ecx, ebp),
+      asm"not edi",
+      asm"and ecx, edi",
+      asm"and ecx, ebp",
       asm"jz start",
 
       asm"test:",
       test(ecx, dword(0x8080)), // test first 2 bytes
       asm"jnz end",
       shr(ecx, byte(0x10)),
-      add(eax, byte(2)),
+      asm"add eax, 2",
       asm"end:",
-      shl(cl),
-      sbb(eax, edx), // compute length
-      pop(edi),
-      pop(ebp),
+      asm"shl cl",
+      asm"sbb eax, edx", // compute length
+      asm"pop edi",
+      asm"pop ebp",
       retn(word(4)))
 
     builder += align(2)

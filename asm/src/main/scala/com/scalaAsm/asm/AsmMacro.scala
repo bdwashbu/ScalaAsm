@@ -106,7 +106,22 @@ object AsmMacro {
           } else if (isDword(param) ){      
              c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
           } else if (mnemonic == "push") {   
+            val varName = Constant(param)
             c.Expr(q"() => Reference($varName)")
+          } else if (mnemonic == "jnz") {   
+            val varName = Constant(param)
+            c.Expr(q"""
+              val ev = implicitly[JNZ#_1[Constant8]]
+              val format = implicitly[OneOperandFormat[Constant8]]
+              () => LabelRef($varName, ev, format)
+              """)
+          } else if (mnemonic == "jz") {   
+            val varName = Constant(param)
+              c.Expr(q"""
+              val ev = implicitly[JZ#_1[Constant8]]
+              val format = implicitly[OneOperandFormat[Constant8]]
+              () => LabelRef($varName, ev, format)
+              """)
           } else {
             c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
           }

@@ -114,9 +114,9 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
 
     //def push(param: String) = () => Reference(param)
     
-    def jnz(ref: String)(implicit ev: JNZ#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    //def jnz(ref: String)(implicit ev: JNZ#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def jz[T <: JZ](ref: String)(implicit ev: T#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
+    //def jz[T <: JZ](ref: String)(implicit ev: T#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
     def jl(ref: String)(implicit ev: JL#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 

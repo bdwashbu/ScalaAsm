@@ -29,15 +29,7 @@ object HelloWorld extends AsmProgram[x86_32] {
   import com.scalaAsm.x86.Instructions.General._
 
   import com.scalaAsm.asm._
-  //val universe: scala.reflect.runtime.universe.type = scala.reflect.runtime.universe
   import universe._
-//  
-//  implicit class OctalContext (val sc : StringContext) {
-//
-//    def asm(): () => InstructionResult = macro AsmMacro.impl
-//  }
- 
-  
   
   sections += new DataSection(
     Variable("helloWorld", "Hello World!\r\n\u0000"),
@@ -45,7 +37,6 @@ object HelloWorld extends AsmProgram[x86_32] {
   ) {}
 
   sections += new CodeSection {
-    //println("HEEEEEERE" + (asm"[ebp - 4]").toString)
     builder += Code(
       asm"push helloWorld",
       asm"call printf",

@@ -15,6 +15,9 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
+import com.scalaAsm.x86.Instructions.Catalog
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86._
 
 object HelloWorld3 extends AsmProgram[x86_32] {
   
@@ -76,7 +79,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
           not(edi), // invert all bytes
           and(ecx, edi),
           and(ecx, ebp),
-          jnz("test"))),
+          asm"jnz test")),
 
       mov(edi, *(eax)),
       add(eax, byte(4)),
@@ -84,11 +87,11 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       not(edi),
       and(ecx, edi),
       and(ecx, ebp),
-      jz("start"),
+      asm"jz start",
 
       asm"test:",
       test(ecx, dword(0x8080)), // test first 2 bytes
-      jnz("end"),
+      asm"jnz end",
       shr(ecx, byte(0x10)),
       add(eax, byte(2)),
       asm"end:",

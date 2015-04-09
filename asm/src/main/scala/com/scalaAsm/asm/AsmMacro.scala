@@ -151,20 +151,25 @@ object AsmMacro {
           }
         } else {
           val mnemonic = TermName(asmInstruction.split(' ').head)
-          val params = asmInstruction.split(' ').tail.mkString.split(',').map{ param =>
+          val params = asmInstruction.split(' ').tail.reduce(_ + " " + _).split(',').map{ param =>
             if (param.contains("(")) {
-              param.split("(").last.split(")").head
+              param.trim.split("(").last.split(")").head
             } else {
-              param
+              param.trim
             }
           }
-          
-           
+
 
           if ((regList contains params(0)) && (regList contains params(1))) {
             val term1 = TermName(params(0))
             val term2 = TermName(params(1))
             c.Expr(q"$mnemonic($term1, $term2)")
+          } else if ((regList contains params(0)) && params(1).split(" ").head == "byte") {
+            //throw new Exception("FFFFFFFFFFFFF")
+            val term1 = TermName(params(0))
+            val aByte = TermName("byte") 
+            val constant = Constant(params(1).split(" ").last)
+            c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
           } else if ((regList contains params(0)) && isDword(params(1))) {
             //throw new Exception(params.reduce(_ + ", " + _))
             val term1 = TermName(params(0))

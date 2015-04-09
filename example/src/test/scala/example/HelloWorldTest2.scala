@@ -31,15 +31,15 @@ object HelloWorld2 extends AsmProgram[x86_32] {
 
     procedure(name = "start",
       asm"call printHelloWorld",
-      push(ebx),
+      asm"push ebx",
       asm"call flushBuffer",
-      retn(()))
+      asm"retn")
 
     procedure(name = "printHelloWorld",
       asm"push helloWorld",
       asm"call printf",
-      add(esp, byte(4)),
-      retn(()))
+      asm"add esp, 4",
+      asm"retn")
       
     val numberOfBytesToWrite = *(ebp + byte(-12))
     val numberOfBytesWritten = *(ebp + byte(-8))
@@ -102,7 +102,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"test:",
       test(ecx, dword(0x8080)), // test first 2 bytes
       asm"jnz end",
-      shr(ecx, byte(0x10)),
+      asm"shr ecx, byte 16",
       asm"add eax, 2",
       asm"end:",
       asm"shl cl",

@@ -110,6 +110,9 @@ object AsmMacro {
           } else if (mnemonic == "push") {   
             val varName = Constant(param)
             c.Expr(q"() => Reference($varName)")
+          } else if (mnemonic == "call") {   
+            val varName = Constant(param)
+            c.Expr(q"() => FunctionReference($varName)")
           } else if (mnemonic == "jnz") {   
             val varName = Constant(param)
             c.Expr(q"""

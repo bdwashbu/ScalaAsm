@@ -29,7 +29,7 @@ object HelloWorldx87 extends AsmProgram[x86_64] {
       mov(rbp, rsp),
       xor(rax, rax),
       mov(rdi, addr64("helloWorld")),
-      call("printf"),
+      asm"call printf",
       fld(addr64("a")),
       fld(addr64("b")),
       //fadd

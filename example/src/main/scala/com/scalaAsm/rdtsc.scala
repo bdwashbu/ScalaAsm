@@ -32,10 +32,10 @@ object rdtscExample extends AsmProgram[x86_32] {
       sub(eax,edx),
       push(eax),
       asm"push numClocks",
-      call("printf"),
+      asm"call printf",
       pop(eax),
       pop(eax),
-      call("_getch"),
+      asm"call _getch",
       retn(())
     )
   }

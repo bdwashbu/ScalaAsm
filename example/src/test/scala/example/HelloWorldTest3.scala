@@ -31,9 +31,9 @@ object HelloWorld3 extends AsmProgram[x86_32] {
 
     procedure(name = "start",
       asm"push pressAnyKey",
-      call("flushBuffer"),
+      asm"call flushBuffer",
       push(byte(0)),
-      call("ExitProcess"))
+      asm"call ExitProcess")
       
     val numberOfBytesToWrite = *(ebp + byte(-12))
     val numberOfBytesWritten = *(ebp + byte(-8))
@@ -47,10 +47,10 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       mov(ebp, esp),
       add(esp, byte(-12)),
       push(STD_OUTPUT_HANDLE),
-      call("GetStdHandle"),
+      asm"call GetStdHandle",
       mov(hFile, eax),
       push(lpBuffer),
-      call("strlen"),
+      asm"call strlen",
       mov(numberOfBytesToWrite, eax),
       push(byte(0)),
       lea(eax, numberOfBytesWritten),
@@ -58,7 +58,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       push(numberOfBytesToWrite),
       push(lpBuffer),
       push(hFile),
-      call("WriteFile"),
+      asm"call WriteFile",
       mov(eax, numberOfBytesWritten),
       leave(()),
       retn(word(4)))

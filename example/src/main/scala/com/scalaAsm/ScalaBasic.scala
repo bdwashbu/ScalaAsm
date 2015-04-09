@@ -17,24 +17,10 @@ object ScalaBasic {
       val linker = new Linker {}
 
       var beginTime = System.nanoTime()
-      val helloWorld = assembler.assemble(HelloWorld3).addIcon("scala.ico")
-
-      val exe = linker.link(helloWorld, 0x3000, false, "kernel32.dll", "msvcrt.dll")
-
-      outputStream.write(exe.get)
-      println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
-      outputStream.close
-
-      val outputStreamSimple = new DataOutputStream(new FileOutputStream("testSimple.exe"));
+      
 
       beginTime = System.nanoTime()
-      val helloWorldSimple = assembler.assemble(HelloWorld).addIcon("scala.ico")
-      helloWorldSimple.write("testCoff.obj")
-      val exeSimple = linker.link(helloWorldSimple, 0x3000, false, "kernel32.dll", "msvcrt.dll")
-
-      outputStreamSimple.write(exeSimple.get)
-      println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
-      outputStreamSimple.close
+      
 
       val outputStream64 = new DataOutputStream(new FileOutputStream("test64.exe"));
 

@@ -30,14 +30,14 @@ object HelloWorld2 extends AsmProgram[x86_32] {
   sections += new CodeSection {
 
     procedure(name = "start",
-      call("printHelloWorld"),
+      asm"call printHelloWorld",
       push(ebx),
-      call("flushBuffer"),
+      asm"call flushBuffer",
       retn(()))
 
     procedure(name = "printHelloWorld",
       asm"push helloWorld",
-      call("printf"),
+      asm"call printf",
       add(esp, byte(4)),
       retn(()))
       
@@ -68,7 +68,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       push(numberOfBytesToWrite),
       push(lpBuffer),
       push(hFile),
-      call("WriteFile"),
+      asm"call WriteFile",
       mov(eax, numberOfBytesWritten),
       asm"leave",
       retn(word(4)))

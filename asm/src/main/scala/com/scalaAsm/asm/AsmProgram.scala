@@ -30,8 +30,6 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
 
   val sections = new ListBuffer[AsmSection]()
   
-  lazy val procNames = procTokens.collect { case ProcedureToken(name,_) => name }
-  lazy val procTokens = sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.builder.toSeq }
   lazy val codeTokens = sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.build(seg.builder.toSeq) }
   def varTokens = sections.collect { case (x: DataSection) => x }.flatMap { seg => seg.tokens }
   def variableNames = varTokens.collect { case Variable(name,_) => name }
@@ -122,13 +120,15 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
 
     //def je(ref: String)(implicit ev: JE#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
-    def call(refName: String): () => InstructionResult = () => {
-      if (procNames.contains(refName)) {
-        ProcRef(refName)
-      } else {
-        ImportRef(0, refName)
-      }
-    }
+//    def call(refName: String): () => InstructionResult = () => {
+//      if (procNames.contains(refName)) {
+//        ProcRef(refName)
+//      } else {
+//        ImportRef(0, refName)
+//      }
+//    }
+    
+    //def call(refName: String): () => InstructionResult = () => FunctionReference(refName)
 
     //def invoke(refName: String) = () => Invoke(refName)
 

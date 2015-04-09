@@ -17,6 +17,11 @@ object Tokens {
     def apply = Array()
   }
   
+  case class FunctionReference(name: String) extends CodeToken with InstructionResult {
+    def mnemonic = ""
+    def apply = Array()
+  }
+  
   case class Address(name: String) extends CodeToken with InstructionResult {
     def mnemonic = ""
     def apply = Array()

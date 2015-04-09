@@ -33,13 +33,26 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
   case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken], variablesSymbols: Seq[CoffSymbol],
       rawData: Array[Byte], prettyPass: Seq[InstructionResult])
   
+  
+      
   def preassemble[Mode <: x86Mode](program: AsmProgram[Mode]): CompiledAssembly = {
-
     
+    lazy val procTokens = program.sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.builder.toSeq }
+    lazy val procNames = procTokens.collect { case ProcedureToken(name,_) => name }
 
     def compileAssembly: CompiledAssembly = {
+      
+      def resolveFunctionRef: Seq[InstructionResult] = program.codeTokens map {
+        case FunctionReference(refName) =>
+          if (procNames.contains(refName)) {
+            ProcRef(refName)
+          } else {
+            ImportRef(0, refName)
+          }
+        case x => x
+      }
 
-      def onePass: Seq[Token] = program.codeTokens flatMap {
+      def onePass: Seq[Token] = resolveFunctionRef flatMap {
 
         case x: SizedToken                                   => Some(x)
         case x: DynamicSizedToken                            => Some(x)

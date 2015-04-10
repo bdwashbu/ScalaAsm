@@ -2,7 +2,7 @@ package com.scalaAsm
 package assembler
 
 import com.scalaAsm.asm.Tokens._
-//import com.scalaAsm.x86.Instructions.General._
+import com.scalaAsm.x86.Instructions.General._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.asm.Registers
@@ -10,7 +10,6 @@ import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
 //import com.scalaAsm.x86.Instructions.Standard
 import com.scalaAsm.x86.Instructions.Formats
-import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Instructions.OneMachineCode
 import com.scalaAsm.x86.Instructions.TwoMachineCode
 import com.scalaAsm.asm.AsmProgram
@@ -26,7 +25,7 @@ import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
 import com.scalaAsm.coff.{ IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION }
 
-class Assembler extends Catalog.Standard with Formats with Addressing {
+class Assembler extends Formats with Addressing {
   self =>
   import scala.language.postfixOps
   
@@ -87,8 +86,8 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
       val prettyPass: Seq[InstructionResult] = onePass flatMap { token =>
         token match {
           case InstructionToken(inst) => Some(inst)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(callNear(program.Op(Constant32(0))).apply)
-          case VarRef(_) => Some(push(program.Op(Constant32(0))).apply)
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(CALL(program.Op(Constant32(0))).apply)
+          case VarRef(_) => Some(PUSH(program.Op(Constant32(0))).apply)
           case LabelRef(_, inst, format) => Some(inst(program.Op(new Constant8(0)), format, Seq()))
           case _ => None
         }
@@ -116,8 +115,8 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
         val result = token match {
           case InstructionToken(inst) => inst()
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => callNear(program.Op(Constant32(0))).apply.apply
-          case VarRef(_) => push(program.Op(Constant32(0))).apply.apply
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => CALL(program.Op(Constant32(0))).apply.apply
+          case VarRef(_) => PUSH(program.Op(Constant32(0))).apply.apply
           case LabelRef(_, inst, format) => inst(program.Op(new Constant8(0)), format, Seq()).apply
           case _ => Array[Byte]()
         }
@@ -233,7 +232,7 @@ class Assembler extends Catalog.Standard with Formats with Addressing {
     // Here, we implicitly add a "KEEP" variable to hold results
 
     val dataSection: Seq[PostToken] = {
-      var parserPosition = 0
+      var parserPosition: Int = 0
       for (token <- Variable("KEEP", "\0\0\0\0") +: dataTokens) yield {
         val result = token match {
           case Variable(name, value) => PostVar(name, value, parserPosition)

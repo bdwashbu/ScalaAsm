@@ -7,7 +7,6 @@ import scala.tools.reflect.ToolBox
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.General._
 
-import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 
@@ -57,7 +56,7 @@ object AsmMacro {
         val params = Seq[Tree]((args map (_.tree)): _*)
         
         if (!params.isEmpty) {
-          val mnemonic = TermName(asmInstruction.split(' ').head)
+          val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase)
           
           if (params.head.toString contains "toString") {
             val param = TermName(asmInstruction.split(' ').tail.mkString.split(',').head)
@@ -98,59 +97,63 @@ object AsmMacro {
           val labelName = Constant(asmInstruction.reverse.tail.reverse)
           c.Expr(q"() => Label($labelName)") 
         } else if (!asmInstruction.contains(' ')) {
-          val mnemonic = asmInstruction
-          c.Expr(Apply(Select(This(TypeName("$anon")), TermName(mnemonic)), List(Literal(Constant(())))))
+          val mnemonic = TermName(asmInstruction.toUpperCase())
+          c.Expr(q"$mnemonic(())")
         } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')){
-          val mnemonic = asmInstruction.split(' ').head
+          val mnemonic = asmInstruction.split(' ').head.toUpperCase()
           val param = asmInstruction.split(' ').last
           if (regList contains param) {
-             c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Select(This(typeNames.EMPTY), TermName(param)))))
+             val term1 = TermName(param)
+            val mnem = TermName(mnemonic)
+            c.Expr(q"$mnem($term1)")
           } else if (isDword(param) ){      
              c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
-          } else if (mnemonic == "push") {   
+          } else if (mnemonic == "PUSH") {   
             val varName = Constant(param)
             c.Expr(q"() => Reference($varName)")
-          } else if (mnemonic == "call") {   
+          } else if (mnemonic == "CALL") {   
             val varName = Constant(param)
             c.Expr(q"() => FunctionReference($varName)")
-          } else if (mnemonic == "jnz") {   
+          } else if (mnemonic == "JNZ") {   
             val varName = Constant(param)
             c.Expr(q"""
               val ev = implicitly[JNZ#_1[Constant8]]
               val format = implicitly[OneOperandFormat[Constant8]]
               () => LabelRef($varName, ev, format)
               """)
-          } else if (mnemonic == "jz") {   
+          } else if (mnemonic == "JZ") {   
             val varName = Constant(param)
               c.Expr(q"""
               val ev = implicitly[JZ#_1[Constant8]]
               val format = implicitly[OneOperandFormat[Constant8]]
               () => LabelRef($varName, ev, format)
               """)
-          } else if (mnemonic == "je") {   
+          } else if (mnemonic == "JE") {   
             val varName = Constant(param)
               c.Expr(q"""
               val ev = implicitly[JE#_1[Constant8]]
               val format = implicitly[OneOperandFormat[Constant8]]
               () => LabelRef($varName, ev, format)
               """)
-          } else if (mnemonic == "jmp") {   
+          } else if (mnemonic == "JMP") {   
             val varName = Constant(param)
               c.Expr(q"""
               val ev = implicitly[JMP#_1[Constant8]]
               val format = implicitly[OneOperandFormat[Constant8]]
               () => LabelRef($varName, ev, format)
               """)
-          } else if (mnemonic == "invoke") {   
+          } else if (mnemonic == "INVOKE") {   
             val varName = Constant(param)
               c.Expr(q"""
               () => Invoke($varName)
               """)
           } else {
-            c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
+            val term1 = Constant(param)
+            val mnem = TermName(mnemonic)
+            c.Expr(q"$mnem($term1)")
           }
         } else {
-          val mnemonic = TermName(asmInstruction.split(' ').head)
+          val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
           val params = asmInstruction.split(' ').tail.reduce(_ + " " + _).split(',').map{ param =>
             if (param.contains("(")) {
               param.trim.split("(").last.split(")").head

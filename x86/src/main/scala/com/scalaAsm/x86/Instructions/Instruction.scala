@@ -29,7 +29,7 @@ trait TwoOperands[X <: InstructionDefinition] {
   def apply[O1, O2](p1: Operand[O1], p2: Operand[O2])(implicit ev: X#_2[O1, O2], format: TwoOperandFormat[O1, O2]) = () => ev(p1, p2, format)
 }
 
-class ZeroOperands[X <: InstructionDefinition] {
+trait ZeroOperands[X <: InstructionDefinition] {
   def apply(ignored: Unit)(implicit ev: X#_0) = () => ev.get
 }
 

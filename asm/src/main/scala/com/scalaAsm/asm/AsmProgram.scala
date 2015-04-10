@@ -12,7 +12,6 @@ import scala.language.implicitConversions
 import java.nio.ByteBuffer
 import com.scalaAsm.x86.Instructions.General._
 
-import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 
@@ -46,7 +45,7 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
     def asm(args: Any*): () => InstructionResult = macro AsmMacro.impl
   }
   
-  trait CodeSection extends Registers[Mode] with Catalog.Standard  with Addressing with AsmSection {
+  trait CodeSection extends Registers[Mode] with Addressing with AsmSection {
 
     val builder = new ListBuffer[HighLevel]()
 
@@ -106,33 +105,7 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
       })
     }
 
-    //def label(name: String) = () => Label(name)
-
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
-
-    //def push(param: String) = () => Reference(param)
-    
-    //def jnz(ref: String)(implicit ev: JNZ#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
-
-    //def jz[T <: JZ](ref: String)(implicit ev: T#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
-
-    //def jl(ref: String)(implicit ev: JL#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
-
-    //def je(ref: String)(implicit ev: JE#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
-
-//    def call(refName: String): () => InstructionResult = () => {
-//      if (procNames.contains(refName)) {
-//        ProcRef(refName)
-//      } else {
-//        ImportRef(0, refName)
-//      }
-//    }
-    
-    //def call(refName: String): () => InstructionResult = () => FunctionReference(refName)
-
-    //def invoke(refName: String) = () => Invoke(refName)
-
-    //def jmp(ref: String)(implicit ev: JMP#_1[Constant8], format: OneOperandFormat[Constant8]) = () => LabelRef(ref, ev, format)
 
     def repeat(numTimes: Int, code: List[() => InstructionResult]): () => Code = {
       val expanded = ListBuffer[() => InstructionResult]()

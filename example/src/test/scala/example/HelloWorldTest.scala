@@ -17,8 +17,7 @@ import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
 
 import com.scalaAsm.asm.AsmMacro
-import com.scalaAsm.x86.Instructions.Catalog.Standard
-import com.scalaAsm.x86.Instructions.Catalog
+
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.General.POP._
 import com.scalaAsm.x86.Instructions.General.POP
@@ -37,6 +36,7 @@ object HelloWorld extends AsmProgram[x86_32] {
   ) {}
 
   sections += new CodeSection {
+    import com.scalaAsm.x86.Instructions.General.PUSH
     builder += Code(
       asm"push helloWorld",
       asm"call printf",

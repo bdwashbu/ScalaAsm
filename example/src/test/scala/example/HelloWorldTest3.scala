@@ -15,7 +15,6 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
-import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 
@@ -32,7 +31,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
     procedure(name = "start",
       asm"push pressAnyKey",
       asm"call flushBuffer",
-      push(byte(0)),
+      PUSH(byte(0)),
       asm"call ExitProcess")
       
     val numberOfBytesToWrite = *(ebp + byte(-12))
@@ -43,63 +42,63 @@ object HelloWorld3 extends AsmProgram[x86_32] {
     val STD_INPUT_HANDLE = byte(-10)
     
     procedure(name = "flushBuffer",
-      push(ebp),
-      mov(ebp, esp),
-      add(esp, byte(-12)),
-      push(STD_OUTPUT_HANDLE),
+      PUSH(ebp),
+      MOV(ebp, esp),
+      ADD(esp, byte(-12)),
+      PUSH(STD_OUTPUT_HANDLE),
       asm"call GetStdHandle",
-      mov(hFile, eax),
-      push(lpBuffer),
+      MOV(hFile, eax),
+      PUSH(lpBuffer),
       asm"call strlen",
-      mov(numberOfBytesToWrite, eax),
-      push(byte(0)),
-      lea(eax, numberOfBytesWritten),
-      push(eax),
-      push(numberOfBytesToWrite),
-      push(lpBuffer),
-      push(hFile),
+      MOV(numberOfBytesToWrite, eax),
+      PUSH(byte(0)),
+      LEA(eax, numberOfBytesWritten),
+      PUSH(eax),
+      PUSH(numberOfBytesToWrite),
+      PUSH(lpBuffer),
+      PUSH(hFile),
       asm"call WriteFile",
-      mov(eax, numberOfBytesWritten),
-      leave(()),
-      retn(word(4)))
+      MOV(eax, numberOfBytesWritten),
+      LEAVE(()),
+      RETN(word(4)))
 
     procedure(name = "strlen",
-      mov(eax, *(esp + byte(4))), // pointer to string
-      lea(edx, *(eax + byte(3))),
-      push(ebp),
-      push(edi),
-      mov(ebp, dword(0x80808080)),
+      MOV(eax, *(esp + byte(4))), // pointer to string
+      LEA(edx, *(eax + byte(3))),
+      PUSH(ebp),
+      PUSH(edi),
+      MOV(ebp, dword(0x80808080)),
 
       asm"start:",
 
       repeat(3, List(
-          mov(edi, *(eax)), // read first 4 bytes
-          add(eax, byte(4)), // increment pointer
-          lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
-          not(edi), // invert all bytes
-          and(ecx, edi),
-          and(ecx, ebp),
+          MOV(edi, *(eax)), // read first 4 bytes
+          ADD(eax, byte(4)), // increment pointer
+          LEA(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
+          NOT(edi), // invert all bytes
+          AND(ecx, edi),
+          AND(ecx, ebp),
           asm"jnz test")),
 
-      mov(edi, *(eax)),
-      add(eax, byte(4)),
-      lea(ecx, *(edi - dword(0x1010101))),
-      not(edi),
-      and(ecx, edi),
-      and(ecx, ebp),
+      MOV(edi, *(eax)),
+      ADD(eax, byte(4)),
+      LEA(ecx, *(edi - dword(0x1010101))),
+      NOT(edi),
+      AND(ecx, edi),
+      AND(ecx, ebp),
       asm"jz start",
 
       asm"test:",
-      test(ecx, dword(0x8080)), // test first 2 bytes
+      TEST(ecx, dword(0x8080)), // test first 2 bytes
       asm"jnz end",
-      shr(ecx, byte(0x10)),
-      add(eax, byte(2)),
+      SHR(ecx, byte(0x10)),
+      ADD(eax, byte(2)),
       asm"end:",
-      shl(cl),
-      sbb(eax, edx), // compute length
-      pop(edi),
-      pop(ebp),
-      retn(word(4)))
+      SHL(cl),
+      SBB(eax, edx), // compute length
+      POP(edi),
+      POP(ebp),
+      RETN(word(4)))
 
     builder += align(2)
   }

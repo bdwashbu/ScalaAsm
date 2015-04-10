@@ -28,17 +28,17 @@ object HelloWorld64 extends AsmProgram[x86_64] {
   sections += new CodeSection {
 
     procedure(name = "start",
-      push(rsp),
-      push(*(rsp)),
-      and(spl, byte(0xF0)),
-      mov(rdx, dword(0xE)),
-      lea(rcx, addr("helloWorld")),
-      sub(rsp, byte(0x20)),
+      PUSH(rsp),
+      PUSH(*(rsp)),
+      AND(spl, byte(0xF0)),
+      MOV(rdx, dword(0xE)),
+      LEA(rcx, addr("helloWorld")),
+      SUB(rsp, byte(0x20)),
       asm"invoke printf", // needs work
-      lea(rsp, *(rsp+byte(0x28))),
-      pop(rsp),
-      xor(rax, rax),
-      retn(())
+      LEA(rsp, *(rsp+byte(0x28))),
+      POP(rsp),
+      XOR(rax, rax),
+      RETN(())
     )
   }
 }

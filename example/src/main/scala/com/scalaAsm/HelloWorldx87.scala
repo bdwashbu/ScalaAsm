@@ -25,19 +25,19 @@ object HelloWorldx87 extends AsmProgram[x86_64] {
     val STD_INPUT_HANDLE = byte(-10)
 
     builder += Code(
-      push(rbp),
-      mov(rbp, rsp),
-      xor(rax, rax),
-      mov(rdi, addr64("helloWorld")),
+      PUSH(rbp),
+      MOV(rbp, rsp),
+      XOR(rax, rax),
+      MOV(rdi, addr64("helloWorld")),
       asm"call printf",
-      fld(addr64("a")),
-      fld(addr64("b")),
+      FLD(addr64("a")),
+      FLD(addr64("b")),
       //fadd
-      fstp(addr64("result")),
-      mov(rdi, addr64("calc_str_x87")),
-      mov(rax, qword(3)),
+      FSTP(addr64("result")),
+      MOV(rdi, addr64("calc_str_x87")),
+      MOV(rax, qword(3)),
       
-      retn(())
+      RETN(())
     )
   }
 }

@@ -15,7 +15,6 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
-import com.scalaAsm.x86.Instructions.Catalog
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 
@@ -58,49 +57,49 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       //add(esp, byte(-12)),
       //asm"push $STD_OUTPUT_HANDLE",
       asm"call GetStdHandle",
-      mov(hFile, eax),
-      push(lpBuffer),
+      MOV(hFile, eax),
+      PUSH(lpBuffer),
       asm"call strlen",
-      mov(numberOfBytesToWrite, eax),
-      push(byte(0)),
-      lea(eax, numberOfBytesWritten),
+      MOV(numberOfBytesToWrite, eax),
+      PUSH(byte(0)),
+      LEA(eax, numberOfBytesWritten),
       asm"push eax",
-      push(numberOfBytesToWrite),
-      push(lpBuffer),
-      push(hFile),
+      PUSH(numberOfBytesToWrite),
+      PUSH(lpBuffer),
+      PUSH(hFile),
       asm"call WriteFile",
-      mov(eax, numberOfBytesWritten),
+      MOV(eax, numberOfBytesWritten),
       asm"leave",
-      retn(word(4)))
+      RETN(word(4)))
 
     procedure(name = "strlen",
-      mov(eax, *(esp + byte(4))), // pointer to string
-      lea(edx, *(eax + byte(3))),
+      MOV(eax, *(esp + byte(4))), // pointer to string
+      LEA(edx, *(eax + byte(3))),
       asm"push ebp",
       asm"push edi",
-      mov(ebp, dword(0x80808080)),
+      MOV(ebp, dword(0x80808080)),
 
       asm"start:",
 
       repeat(3, List(
-          mov(edi, *(eax)), // read first 4 bytes
-          asm"add eax, 4", // increment pointer
-          lea(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
+          MOV(edi, *(eax)), // read first 4 bytes
+          asm"ADD eax, 4", // increment pointer
+          LEA(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
           asm"not edi", // invert all bytes
           asm"and ecx, edi",
           asm"and ecx, ebp",
           asm"jnz test")),
 
-      mov(edi, *(eax)),
+      MOV(edi, *(eax)),
       asm"add eax, 4",
-      lea(ecx, *(edi - dword(0x1010101))),
+      LEA(ecx, *(edi - dword(0x1010101))),
       asm"not edi",
       asm"and ecx, edi",
       asm"and ecx, ebp",
       asm"jz start",
 
       asm"test:",
-      test(ecx, dword(0x8080)), // test first 2 bytes
+      TEST(ecx, dword(0x8080)), // test first 2 bytes
       asm"jnz end",
       asm"shr ecx, byte 16",
       asm"add eax, 2",
@@ -109,7 +108,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"sbb eax, edx", // compute length
       asm"pop edi",
       asm"pop ebp",
-      retn(word(4)))
+      RETN(word(4)))
 
     builder += align(2)
   }

@@ -18,7 +18,7 @@ object AsmMacro {
       def isByte(s: String): Boolean = (allCatch opt s.toByte).isDefined
       def isDword(s: String): Boolean = (allCatch opt s.toLong).isDefined
   
-      def impl (c : Context) (args: c.Expr[Any]*): c.Expr[Tokens.Reference] = {
+      def impl (c : Context) (args: c.Expr[Any]*): c.Expr[InstructionResult] = {
         import c.universe._
         import scala.reflect.runtime.{currentMirror => cm}
         import scala.reflect.runtime.{universe => ru}

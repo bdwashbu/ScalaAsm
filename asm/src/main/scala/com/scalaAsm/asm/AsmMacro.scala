@@ -18,7 +18,7 @@ object AsmMacro {
       def isByte(s: String): Boolean = (allCatch opt s.toByte).isDefined
       def isDword(s: String): Boolean = (allCatch opt s.toLong).isDefined
   
-      def impl (c : Context) (args: c.Expr[Any]*): c.Expr[Function0[Tokens.Reference]] = {
+      def impl (c : Context) (args: c.Expr[Any]*): c.Expr[Tokens.Reference] = {
         import c.universe._
         import scala.reflect.runtime.{currentMirror => cm}
         import scala.reflect.runtime.{universe => ru}
@@ -95,7 +95,7 @@ object AsmMacro {
           c.Expr(Apply(times, List(Apply(Select(ebpReg, TermName("$plus")), List(Apply(byteTerm, List(Literal(Constant(-4)))))))))
         } else if (asmInstruction.endsWith(":")) { // label
           val labelName = Constant(asmInstruction.reverse.tail.reverse)
-          c.Expr(q"() => Label($labelName)") 
+          c.Expr(q"Label($labelName)") 
         } else if (!asmInstruction.contains(' ')) {
           val mnemonic = TermName(asmInstruction.toUpperCase())
           c.Expr(q"$mnemonic(())")
@@ -110,42 +110,42 @@ object AsmMacro {
              c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
           } else if (mnemonic == "PUSH") {   
             val varName = Constant(param)
-            c.Expr(q"() => Reference($varName)")
+            c.Expr(q"Reference($varName)")
           } else if (mnemonic == "CALL") {   
             val varName = Constant(param)
-            c.Expr(q"() => FunctionReference($varName)")
+            c.Expr(q"FunctionReference($varName)")
           } else if (mnemonic == "JNZ") {   
             val varName = Constant(param)
             c.Expr(q"""
               val ev = implicitly[JNZ#_1[Constant8]]
               val format = implicitly[OneOperandFormat[Constant8]]
-              () => LabelRef($varName, ev, format)
+              LabelRef($varName, ev, format)
               """)
           } else if (mnemonic == "JZ") {   
             val varName = Constant(param)
               c.Expr(q"""
               val ev = implicitly[JZ#_1[Constant8]]
               val format = implicitly[OneOperandFormat[Constant8]]
-              () => LabelRef($varName, ev, format)
+              LabelRef($varName, ev, format)
               """)
           } else if (mnemonic == "JE") {   
             val varName = Constant(param)
               c.Expr(q"""
               val ev = implicitly[JE#_1[Constant8]]
               val format = implicitly[OneOperandFormat[Constant8]]
-              () => LabelRef($varName, ev, format)
+              LabelRef($varName, ev, format)
               """)
           } else if (mnemonic == "JMP") {   
             val varName = Constant(param)
               c.Expr(q"""
               val ev = implicitly[JMP#_1[Constant8]]
               val format = implicitly[OneOperandFormat[Constant8]]
-              () => LabelRef($varName, ev, format)
+              LabelRef($varName, ev, format)
               """)
           } else if (mnemonic == "INVOKE") {   
             val varName = Constant(param)
               c.Expr(q"""
-              () => Invoke($varName)
+              Invoke($varName)
               """)
           } else {
             val term1 = Constant(param)

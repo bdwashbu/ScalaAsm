@@ -42,7 +42,7 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
   import universe._
   
   implicit class AsmContext (val sc : StringContext) {
-    def asm(args: Any*): () => InstructionResult = macro AsmMacro.impl
+    def asm(args: Any*): InstructionResult = macro AsmMacro.impl
   }
   
   trait CodeSection extends Registers[Mode] with Addressing with AsmSection {
@@ -57,26 +57,20 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
     implicit def toByte(x: Int) = x.toByte
     val One = new One {}
 
-    def procedure(name: String, innerCode: (() => InstructionResult)*) = {
+    def procedure(name: String, innerCode: InstructionResult*) = {
       builder += ProcedureToken(name, innerCode)
     }
     
-    case class Code(code: (() => InstructionResult)*) extends HighLevel with InstructionResult {
+    case class Code(code: InstructionResult*) extends HighLevel with InstructionResult {
       def mnemonic = ""
       def apply = Array()
     }
 
     def build(code: Seq[HighLevel]): Seq[InstructionResult] = {
       
-      def buildLow(code: Seq[() => InstructionResult]): Seq[InstructionResult] = {
-        code.map(_.apply) flatMap {
-          case token                      => List(token)
-        }
-      }
-      
       code flatMap {
-        case ProcedureToken(name, code) => BeginProc(name) +: buildLow(code)
-        case Code(codes @ _*)           => buildLow(codes)
+        case ProcedureToken(name, code) => BeginProc(name) +: code
+        case Code(codes @ _*)           => codes
         case align @ Align(_,_,_)       => List(align)
       }
     }
@@ -107,12 +101,12 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 
-    def repeat(numTimes: Int, code: List[() => InstructionResult]): () => Code = {
-      val expanded = ListBuffer[() => InstructionResult]()
+    def repeat(numTimes: Int, code: List[InstructionResult]): Code = {
+      val expanded = ListBuffer[InstructionResult]()
       for (i <- 0 until numTimes) {
         expanded ++= code
       }
-      () => Code(expanded: _*)
+      Code(expanded: _*)
     }
   }
 }

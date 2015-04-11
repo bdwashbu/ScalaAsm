@@ -32,7 +32,7 @@ object Tokens {
     def apply = Array()
   }
 
-  case class ProcedureToken(name: String, innerCode: Seq[() => InstructionResult]) extends CodeToken with HighLevel
+  case class ProcedureToken(name: String, innerCode: Seq[InstructionResult]) extends CodeToken with HighLevel
   case class Label(name: String) extends CodeToken with InstructionResult {
     def mnemonic = ""  
     def apply = Array()

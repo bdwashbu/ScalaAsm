@@ -86,8 +86,8 @@ class Assembler extends Formats with Addressing {
       val prettyPass: Seq[InstructionResult] = onePass flatMap { token =>
         token match {
           case InstructionToken(inst) => Some(inst)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(CALL(program.Op(Constant32(0))).apply)
-          case VarRef(_) => Some(PUSH(program.Op(Constant32(0))).apply)
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(CALL(program.Op(Constant32(0))))
+          case VarRef(_) => Some(PUSH(program.Op(Constant32(0))))
           case LabelRef(_, inst, format) => Some(inst(program.Op(new Constant8(0)), format, Seq()))
           case _ => None
         }
@@ -115,8 +115,8 @@ class Assembler extends Formats with Addressing {
         val result = token match {
           case InstructionToken(inst) => inst()
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => CALL(program.Op(Constant32(0))).apply.apply
-          case VarRef(_) => PUSH(program.Op(Constant32(0))).apply.apply
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => CALL(program.Op(Constant32(0))).apply
+          case VarRef(_) => PUSH(program.Op(Constant32(0))).apply
           case LabelRef(_, inst, format) => inst(program.Op(new Constant8(0)), format, Seq()).apply
           case _ => Array[Byte]()
         }

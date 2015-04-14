@@ -15,6 +15,7 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_64
+import com.scalaAsm.asm._
 
 object HelloWorld64 extends AsmProgram[x86_64] {
   

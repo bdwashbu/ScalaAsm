@@ -1,6 +1,7 @@
 package com.scalaAsm
 package assembler
 
+import com.scalaAsm.asm._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Instructions.General._
 import com.scalaAsm.x86.Operands._
@@ -8,7 +9,7 @@ import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.asm.Registers
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
-//import com.scalaAsm.x86.Instructions.Standard
+
 import com.scalaAsm.x86.Instructions.Formats
 import com.scalaAsm.x86.Instructions.OneMachineCode
 import com.scalaAsm.x86.Instructions.TwoMachineCode
@@ -25,9 +26,15 @@ import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
 import com.scalaAsm.coff.{ IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION }
 
+import com.scalaAsm.asm.AsmMacro
+
+import com.scalaAsm.x86.InstructionResult
+import com.scalaAsm.x86.Operands._
+
 class Assembler extends Formats with Addressing {
   self =>
   import scala.language.postfixOps
+  import com.scalaAsm.x86.Instructions.General._
   
   case class CompiledAssembly(onePass: Seq[Token], positionPass: Seq[PostToken], variablesSymbols: Seq[CoffSymbol],
       rawData: Array[Byte], prettyPass: Seq[InstructionResult])
@@ -86,9 +93,9 @@ class Assembler extends Formats with Addressing {
       val prettyPass: Seq[InstructionResult] = onePass flatMap { token =>
         token match {
           case InstructionToken(inst) => Some(inst)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(CALL(program.Op(Constant32(0))))
-          case VarRef(_) => Some(PUSH(program.Op(Constant32(0))))
-          case LabelRef(_, inst, format) => Some(inst(program.Op(new Constant8(0)), format, Seq()))
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(CALL(Op(Constant32(0))))
+          case VarRef(_) => Some(PUSH(Op(Constant32(0))))
+          case LabelRef(_, inst, format) => Some(inst(Op(new Constant8(0)), format, Seq()))
           case _ => None
         }
       }
@@ -115,9 +122,9 @@ class Assembler extends Formats with Addressing {
         val result = token match {
           case InstructionToken(inst) => inst()
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
-          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => CALL(program.Op(Constant32(0))).apply
-          case VarRef(_) => PUSH(program.Op(Constant32(0))).apply
-          case LabelRef(_, inst, format) => inst(program.Op(new Constant8(0)), format, Seq()).apply
+          case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => asm"call 0".apply
+          case VarRef(_) => PUSH(Op(Constant32(0))).apply
+          case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).apply
           case _ => Array[Byte]()
         }
         code ++= result

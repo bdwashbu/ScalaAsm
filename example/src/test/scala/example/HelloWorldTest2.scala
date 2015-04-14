@@ -11,6 +11,7 @@ import java.io.InputStream
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileInputStream
+import com.scalaAsm.asm._
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection

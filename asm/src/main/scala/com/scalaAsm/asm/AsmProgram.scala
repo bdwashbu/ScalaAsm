@@ -7,7 +7,7 @@ import com.scalaAsm.x86.Instructions.Formats
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
-import com.scalaAsm.x86.InstructionResult
+
 import scala.language.implicitConversions
 import java.nio.ByteBuffer
 import com.scalaAsm.x86.Instructions.General._
@@ -15,8 +15,7 @@ import com.scalaAsm.x86.Instructions.General._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 
-import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
+
 
 trait x86Mode
 trait x86_64 extends x86_32
@@ -33,26 +32,16 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
   def varTokens = sections.collect { case (x: DataSection) => x }.flatMap { seg => seg.tokens }
   def variableNames = varTokens.collect { case Variable(name,_) => name }
   
-  def Op[X](from: X) = new Operand[X] {
-      def apply = from
-      override def toString = from.toString
-    }
+ 
   
   val universe: scala.reflect.runtime.universe.type = scala.reflect.runtime.universe
   import universe._
   
-  implicit class AsmContext (val sc : StringContext) {
-    def asm(args: Any*): InstructionResult = macro AsmMacro.impl
-  }
+
   
   trait CodeSection extends Registers[Mode] with Addressing with AsmSection {
 
     val builder = new ListBuffer[HighLevel]()
-
-    def byte(value: Byte) = Op(Constant8(value))
-    def word(value: Short) = Op(Constant16(value))
-    def dword(value: Int) = Op(Constant32(value))
-    def qword(value: Long) = Op(Constant64(value))
 
     implicit def toByte(x: Int) = x.toByte
     val One = new One {}

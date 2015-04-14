@@ -106,14 +106,17 @@ object AsmMacro {
              val term1 = TermName(param)
             val mnem = TermName(mnemonic)
             c.Expr(q"$mnem($term1)")
-          } else if (isDword(param) ){      
-             c.Expr(Apply(Select(This(typeNames.EMPTY), TermName(mnemonic)), List(Literal(Constant(param)))))
+          } else if (mnemonic == "CALL" && !isDword(param)) {   
+            val varName = Constant(param)
+            c.Expr(q"FunctionReference($varName)")
+          } else if (isDword(param) ){     
+            //throw new Exception("fffffffffff")
+             val varName = Constant(param)
+             val mnem = TermName(mnemonic)
+             c.Expr(q"$mnem(dword($varName.toInt))")
           } else if (mnemonic == "PUSH") {   
             val varName = Constant(param)
             c.Expr(q"Reference($varName)")
-          } else if (mnemonic == "CALL") {   
-            val varName = Constant(param)
-            c.Expr(q"FunctionReference($varName)")
           } else if (mnemonic == "JNZ") {   
             val varName = Constant(param)
             c.Expr(q"""

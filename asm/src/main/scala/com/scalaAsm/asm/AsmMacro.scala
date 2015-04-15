@@ -22,12 +22,99 @@ object AsmMacro {
         import c.universe._
         import scala.reflect.runtime.{currentMirror => cm}
         import scala.reflect.runtime.{universe => ru}
+
+        val parts = c.prefix.tree match {
+          case Apply(_, List(Apply(_, rawParts))) =>
+            rawParts zip (args map (_.tree)) map {
+              case (Literal(Constant(rawPart: String)), arg) =>
+                arg.toString
+            }
+        }
+
+        val toolBox = currentMirror.mkToolBox()
+        val importer = c.universe.mkImporter(ru)
+         
+        val asmInstruction = (c.prefix.tree match {
+           case Apply(_, List(Apply(_, xs))) => xs map {
+             case Literal(Constant(x: String)) => x
+           }
+           case _ => Nil
+        }).head
+         
+        val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl")
         
-        def toAST[A : TypeTag](xs: Tree*): Tree =
-          Apply(
-            Select(Ident(typeOf[A].typeSymbol.companionSymbol), newTermName("apply")),
-            xs.toList)
-    
+        // throw new Exception(c.internal.enclosingOwner.asClass.fullName)
+        val params = Seq[Tree]((args map (_.tree)): _*)
+        
+        if (!params.isEmpty) {
+          impl2(c)(args: _*)
+        } else if (asmInstruction.charAt(0) == '[') {
+          impl2(c)(args: _*)
+        } else if (asmInstruction.endsWith(":")) { // label
+          val labelName = Constant(asmInstruction.reverse.tail.reverse)
+          c.Expr(q"Label($labelName)") 
+        } else if (!asmInstruction.contains(' ')) {
+          val mnemonic = TermName(asmInstruction.toUpperCase())
+          c.Expr(q"$mnemonic(())")
+        } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')){
+          val mnemonic = asmInstruction.split(' ').head.toUpperCase()
+          val param = asmInstruction.split(' ').last
+          if (regList contains param) {
+             impl2(c)(args: _*)
+          } else if (mnemonic == "CALL" && !isDword(param)) {   
+            val varName = Constant(param)
+            c.Expr(q"FunctionReference($varName)")
+          } else if (isDword(param) ){     
+            impl2(c)(args: _*)
+          } else if (mnemonic == "PUSH") {   
+            val varName = Constant(param)
+            c.Expr(q"Reference($varName)")
+          } else if (mnemonic == "JNZ") {   
+            val varName = Constant(param)
+            c.Expr(q"""
+              val ev = implicitly[JNZ#_1[Constant8]]
+              val format = implicitly[OneOperandFormat[Constant8]]
+              LabelRef($varName, ev, format)
+              """)
+          } else if (mnemonic == "JZ") {   
+            val varName = Constant(param)
+              c.Expr(q"""
+              val ev = implicitly[JZ#_1[Constant8]]
+              val format = implicitly[OneOperandFormat[Constant8]]
+              LabelRef($varName, ev, format)
+              """)
+          } else if (mnemonic == "JE") {   
+            val varName = Constant(param)
+              c.Expr(q"""
+              val ev = implicitly[JE#_1[Constant8]]
+              val format = implicitly[OneOperandFormat[Constant8]]
+              LabelRef($varName, ev, format)
+              """)
+          } else if (mnemonic == "JMP") {   
+            val varName = Constant(param)
+              c.Expr(q"""
+              val ev = implicitly[JMP#_1[Constant8]]
+              val format = implicitly[OneOperandFormat[Constant8]]
+              LabelRef($varName, ev, format)
+              """)
+          } else if (mnemonic == "INVOKE") {   
+            val varName = Constant(param)
+              c.Expr(q"""
+              Invoke($varName)
+              """)
+          } else {
+            impl2(c)(args: _*)
+          }
+        } else {
+          impl2(c)(args: _*)
+        }
+      }
+      
+      def impl2 (c : Context) (args: c.Expr[Any]*): c.Expr[InstructionResult] = {
+        import c.universe._
+        import scala.reflect.runtime.{currentMirror => cm}
+        import scala.reflect.runtime.{universe => ru}
+
         val parts = c.prefix.tree match {
           case Apply(_, List(Apply(_, rawParts))) =>
             rawParts zip (args map (_.tree)) map {
@@ -106,50 +193,11 @@ object AsmMacro {
              val term1 = TermName(param)
             val mnem = TermName(mnemonic)
             c.Expr(q"$mnem($term1)")
-          } else if (mnemonic == "CALL" && !isDword(param)) {   
-            val varName = Constant(param)
-            c.Expr(q"FunctionReference($varName)")
           } else if (isDword(param) ){     
             //throw new Exception("fffffffffff")
              val varName = Constant(param)
              val mnem = TermName(mnemonic)
              c.Expr(q"$mnem(dword($varName.toInt))")
-          } else if (mnemonic == "PUSH") {   
-            val varName = Constant(param)
-            c.Expr(q"Reference($varName)")
-          } else if (mnemonic == "JNZ") {   
-            val varName = Constant(param)
-            c.Expr(q"""
-              val ev = implicitly[JNZ#_1[Constant8]]
-              val format = implicitly[OneOperandFormat[Constant8]]
-              LabelRef($varName, ev, format)
-              """)
-          } else if (mnemonic == "JZ") {   
-            val varName = Constant(param)
-              c.Expr(q"""
-              val ev = implicitly[JZ#_1[Constant8]]
-              val format = implicitly[OneOperandFormat[Constant8]]
-              LabelRef($varName, ev, format)
-              """)
-          } else if (mnemonic == "JE") {   
-            val varName = Constant(param)
-              c.Expr(q"""
-              val ev = implicitly[JE#_1[Constant8]]
-              val format = implicitly[OneOperandFormat[Constant8]]
-              LabelRef($varName, ev, format)
-              """)
-          } else if (mnemonic == "JMP") {   
-            val varName = Constant(param)
-              c.Expr(q"""
-              val ev = implicitly[JMP#_1[Constant8]]
-              val format = implicitly[OneOperandFormat[Constant8]]
-              LabelRef($varName, ev, format)
-              """)
-          } else if (mnemonic == "INVOKE") {   
-            val varName = Constant(param)
-              c.Expr(q"""
-              Invoke($varName)
-              """)
           } else {
             val term1 = Constant(param)
             val mnem = TermName(mnemonic)
@@ -196,32 +244,6 @@ object AsmMacro {
           //Expr(Apply(Select(Select(Ident(TermName("$anon")), TermName("mov")), TermName("apply")), List(Select(Ident(TermName("$anon")), TermName("ebp")), Apply(Select(Ident(TermName("$anon")), TermName("esp")))))))
           
         }
-      }
-      
-      def typeImpl (c : Context) (): c.Expr[Operand[_]] = {
-         import c.universe._
-         import scala.reflect.runtime.{currentMirror => cm}
-         import scala.reflect.runtime.{universe => ru}
-         val toolBox = currentMirror.mkToolBox()
-         val importer = c.universe.mkImporter(ru)
-         
-         val asmInstruction = (c.prefix.tree match {
-            case Apply(_, List(Apply(_, xs))) => xs map {
-              case Literal(Constant(x: String)) => x
-            }
-            case _ => Nil
-          }).head
-         
-         
-         
-        // throw new Exception(c.internal.enclosingOwner.asClass.fullName)
-        //if (asmInstruction.charAt(0) == '[') {
-          val times = Select(This(typeNames.EMPTY), TermName("$times"))
-          val ebpReg = Select(This(typeNames.EMPTY), TermName("ebp"))
-          val byteTerm = Select(This(typeNames.EMPTY), TermName("byte"))
-          val conforms = Select(Ident(TermName("scala.Predef")), TermName("$conforms"))
-          c.Expr(Apply(times, List(Apply(Select(ebpReg, TermName("$plus")), List(Apply(byteTerm, List(Literal(Constant(-4)))))))))
-        //}
       }
 
 }

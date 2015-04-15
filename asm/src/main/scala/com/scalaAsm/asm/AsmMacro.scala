@@ -46,16 +46,9 @@ object AsmMacro {
         // throw new Exception(c.internal.enclosingOwner.asClass.fullName)
         val params = Seq[Tree]((args map (_.tree)): _*)
         
-        if (!params.isEmpty) {
-          impl2(c)(args: _*)
-        } else if (asmInstruction.charAt(0) == '[') {
-          impl2(c)(args: _*)
-        } else if (asmInstruction.endsWith(":")) { // label
+        if (asmInstruction.endsWith(":")) { // label
           val labelName = Constant(asmInstruction.reverse.tail.reverse)
           c.Expr(q"Label($labelName)") 
-        } else if (!asmInstruction.contains(' ')) {
-          val mnemonic = TermName(asmInstruction.toUpperCase())
-          c.Expr(q"$mnemonic(())")
         } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')){
           val mnemonic = asmInstruction.split(' ').head.toUpperCase()
           val param = asmInstruction.split(' ').last
@@ -99,9 +92,7 @@ object AsmMacro {
               """)
           } else if (mnemonic == "INVOKE") {   
             val varName = Constant(param)
-              c.Expr(q"""
-              Invoke($varName)
-              """)
+              c.Expr(q"Invoke($varName)")
           } else {
             impl2(c)(args: _*)
           }

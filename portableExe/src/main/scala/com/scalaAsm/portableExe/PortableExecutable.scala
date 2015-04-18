@@ -3,6 +3,9 @@ package com.scalaAsm.portableExe
 import sections._
 import scala.collection.mutable.ArrayBuffer
 import com.scalaAsm.coff.Section
+import com.scalaAsm
+import com.scalaAsm.x86.Instructions.instructionMap
+import com.scalaAsm.x86._
 
 case class PortableExecutable(dosHeader: DosHeader,
   peHeader: NtHeader,
@@ -15,6 +18,18 @@ case class PortableExecutable(dosHeader: DosHeader,
     array ++: Array.fill(numPadding)(filler)
   }
 
+  def dissemble: Seq[String] = {
+    val code = sections(0).contents
+    println(sections(0).contents(0))
+    for (i <- 0 to 3) {
+      println("GO")
+      val possible = instructionMap.instMap(code(i) & 0x000000FF).toSeq
+      val result = possible.filter(inst => inst.opcode.isInstanceOf[OneOpcode] && inst.prefix.isEmpty).map(inst => inst.mnemonic).toSeq
+      result.foreach(println)
+    }
+    null
+  }
+  
   def get(): Array[Byte] = {
     
     val totalSize = sections.last.header.pointerToRawData + sections.last.header.sizeOfRawData

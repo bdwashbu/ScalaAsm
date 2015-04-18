@@ -12,6 +12,7 @@ trait InstructionField {
 trait x86Instruction {
   import scala.language.implicitConversions
   val mnemonic: String
+  def opcode: OpcodeFormat
   def prefix = Seq[Prefix]()
 
   implicit def toPrefixSeq(x: Prefix) = Seq(x)

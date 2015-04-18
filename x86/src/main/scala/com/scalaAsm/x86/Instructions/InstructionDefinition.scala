@@ -10,7 +10,6 @@ trait InstructionDefinition {
   val mnemonic: String
   
   trait _0 extends x86Instruction {
-    def opcode: OpcodeFormat
     val mnemonic = InstructionDefinition.this.mnemonic
     def get = ZeroMachineCode(new NoOperandFormat {}, opcode, mnemonic)
     def hasImplicitOperand: Boolean = false
@@ -18,7 +17,6 @@ trait InstructionDefinition {
 
   trait _1[-O1] extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
-    def opcode: OpcodeFormat
     def hasImplicitOperand: Boolean = false
     def explicitFormat(p1: O1): Option[InstructionFormat] = None
 
@@ -30,7 +28,6 @@ trait InstructionDefinition {
 
   trait _2[-O1, -O2] extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
-    def opcode: OpcodeFormat
     def hasImplicitOperand: Boolean = false
     def explicitFormat(p1: O1, p2: O2): Option[InstructionFormat] = None
 

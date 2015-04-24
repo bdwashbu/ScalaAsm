@@ -70,22 +70,22 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
 
     private def procRef(procName: String) = ProcRef(procName)
     
-    def addr(varName: String): Operand[AbsoluteAddress[_32]] = {
-      Op(new AbsoluteAddress[_32] {
+    def addr(varName: String): AbsoluteAddress[_32] = {
+      new AbsoluteAddress[_32] {
         var offset = 0
         def getRelative = null
         def apply = Constant32(0)
         val name = Some(varName)
-      })
+      }
     }
     
-    def addr64(varName: String): Operand[AbsoluteAddress[_64]] = {
-      Op(new AbsoluteAddress[_64] {
+    def addr64(varName: String): AbsoluteAddress[_64] = {
+      new AbsoluteAddress[_64] {
         var offset = 0.toLong
         def getRelative = null
         def apply = Constant64(0)
         val name = Some(varName)
-      })
+      }
     }
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)

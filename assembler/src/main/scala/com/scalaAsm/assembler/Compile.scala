@@ -95,7 +95,7 @@ class Assembler extends Formats with Addressing {
           case InstructionToken(inst) => Some(inst)
           case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(asm"call 0")
           case VarRef(_) => Some(asm"push 0")
-          case LabelRef(_, inst, format) => Some(inst(Op(new Constant8(0)), format, Seq()))
+          case LabelRef(_, inst, format) => Some(inst(new Constant8(0), format, Seq()))
           case _ => None
         }
       }
@@ -124,7 +124,7 @@ class Assembler extends Formats with Addressing {
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
           case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => asm"call 0".apply
           case VarRef(_) => asm"push 0".apply
-          case LabelRef(_, inst, format) => inst(Op(new Constant8(0)), format, Seq()).apply
+          case LabelRef(_, inst, format) => inst(new Constant8(0), format, Seq()).apply
           case _ => Array[Byte]()
         }
         code ++= result
@@ -195,14 +195,14 @@ class Assembler extends Formats with Addressing {
         var result: Option[Relocation] = None
         token match {
           case InstructionToken(inst) => inst match {
-            case OneMachineCode(_, op1, _, _, _, _) if op1().isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op1().asInstanceOf[AbsoluteAddress[_]].name.get
+            case OneMachineCode(_, op1, _, _, _, _) if op1.isInstanceOf[AbsoluteAddress[_]] =>
+              val name = op1.asInstanceOf[AbsoluteAddress[_]].name.get
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(_, op1, _, _, _, _, _) if op1().isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op1().asInstanceOf[AbsoluteAddress[_]].name.get
+            case TwoMachineCode(_, op1, _, _, _, _, _) if op1.isInstanceOf[AbsoluteAddress[_]] =>
+              val name = op1.asInstanceOf[AbsoluteAddress[_]].name.get
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(_, _, op2, _, _, _, _) if op2().isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op2().asInstanceOf[AbsoluteAddress[_]].name.get
+            case TwoMachineCode(_, _, op2, _, _, _, _) if op2.isInstanceOf[AbsoluteAddress[_]] =>
+              val name = op2.asInstanceOf[AbsoluteAddress[_]].name.get
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case _ =>
           }

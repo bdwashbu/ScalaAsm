@@ -4,7 +4,7 @@ package Operands
 import com.scalaAsm.x86.Instructions.InstructionField
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 
-trait One extends Operand[One]{
+trait One {
   def size = 1
   def apply = this
 }

@@ -10,14 +10,9 @@ package object asm {
   implicit class AsmContext (val sc : StringContext) {
     def asm(args: Any*): InstructionResult = macro AsmMacro.impl
   }
-  
-  def Op[X](from: X) = new Operand[X] {
-    def apply = from
-    override def toString = from.toString
-  }
    
-  def byte(value: Byte) = Op(Constant8(value))
-  def word(value: Short) = Op(Constant16(value))
-  def dword(value: Int) = Op(Constant32(value))
-  def qword(value: Long) = Op(Constant64(value))
+  def byte(value: Byte) = Constant8(value)
+  def word(value: Short) = Constant16(value)
+  def dword(value: Int) = Constant32(value)
+  def qword(value: Long) = Constant64(value)
 }

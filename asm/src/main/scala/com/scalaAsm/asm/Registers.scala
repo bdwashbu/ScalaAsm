@@ -4,65 +4,59 @@ import com.scalaAsm.x86.Operands._
 
 trait Registers[Mode <: x86Mode] {
 
-//    trait RegisterOps[X <: GeneralPurpose[_]] {
-//      self: Operand[X] =>
-//      def -[Z: x86Size](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get.negate)
-//      def +[Z: x86Size](offset: Operand[Constant[Z]]) = get.getBaseIndex(offset.get)
-//    }
-    
-    case class RegisterOperand[X <: GeneralPurpose[_]](reg: X) extends Operand[X] {
-      def apply = reg
+    trait RegisterOperand[X <: GeneralPurpose[_]] {
+      val reg: X
       override def toString = reg.toString
-      def -[Z: x86Size](offset: Operand[Constant[Z]]) = reg.getBaseIndex(offset().negate)
-      def +[Z: x86Size](offset: Operand[Constant[Z]]) = reg.getBaseIndex(offset())
+      def -[Z: x86Size](offset: Constant[Z]) = reg.getBaseIndex(offset.negate)
+      def +[Z: x86Size](offset: Constant[Z]) = reg.getBaseIndex(offset)
     }
 
-    def rdi(implicit ev: Mode <:< x86_64) = RegisterOperand(new RDI)
-    def rax(implicit ev: Mode <:< x86_64) = RegisterOperand(new RAX)
-    def rcx(implicit ev: Mode <:< x86_64) = RegisterOperand(new RCX)
-    def rbp(implicit ev: Mode <:< x86_64) = RegisterOperand(new RBP)
-    def rdx(implicit ev: Mode <:< x86_64) = RegisterOperand(new RDX)
-    def rbx(implicit ev: Mode <:< x86_64) = RegisterOperand(new RBX)
-    def rsp(implicit ev: Mode <:< x86_64) = RegisterOperand(new RSP)
+    object rdi extends RDI with RegisterOperand[RDI]{val reg = new RDI}
+    object rax extends RAX with RegisterOperand[RAX]{val reg = new RAX}
+    object rcx extends RCX with RegisterOperand[RCX]{val reg = new RCX}
+    object rbp extends RBP with RegisterOperand[RBP]{val reg = new RBP}
+    object rdx extends RDX with RegisterOperand[RDX]{val reg = new RDX}
+    object rbx extends RBX with RegisterOperand[RBX]{val reg = new RBX}
+    object rsp extends RSP with RegisterOperand[RSP]{val reg = new RSP}
   
-    def edi(implicit ev: Mode <:< x86_32) = RegisterOperand(new EDI)
-    def ebx(implicit ev: Mode <:< x86_32) = RegisterOperand(new EBX)
-    def eax(implicit ev: Mode <:< x86_32) = RegisterOperand(new EAX)
-    def ecx(implicit ev: Mode <:< x86_32) = RegisterOperand(new ECX)
-    def ebp(implicit ev: Mode <:< x86_32) = RegisterOperand(new EBP)
-    def edx(implicit ev: Mode <:< x86_32) = RegisterOperand(new EDX)
-    def esp(implicit ev: Mode <:< x86_32) = RegisterOperand(new ESP)
+    object edi extends EDI with RegisterOperand[EDI]{val reg = new EDI}
+    object eax extends EAX with RegisterOperand[EAX]{val reg = new EAX}
+    object ecx extends ECX with RegisterOperand[ECX]{val reg = new ECX}
+    object ebp extends EBP with RegisterOperand[EBP]{val reg = new EBP}
+    object edx extends EDX with RegisterOperand[EDX]{val reg = new EDX}
+    object ebx extends EBX with RegisterOperand[EBX]{val reg = new EBX}
+    object esp extends ESP with RegisterOperand[ESP]{val reg = new ESP}
   
-    object ax extends AX with Operand[AX] {def apply = this}
-    object cx extends CX with Operand[CX] {def apply = this}
-    object dx extends DX with Operand[DX] {def apply = this}
+    object ax extends AX
+    object cx extends CX
+    object dx extends DX
   
-    object ah extends AH with Operand[AH] {def apply = this}
+    object ah extends AH
   
-    object cl extends CL with Operand[CL] {def apply = this}
+    object cl extends CL
   
-    object spl extends SPL with Operand[SPL] {def apply = this}
+    object spl extends SPL
   
-    object es extends ES with Operand[ES] {def apply = this}
-    object cs extends CS with Operand[CS] {def apply = this}
-    object ss extends SS with Operand[SS] {def apply = this}
-    object ds extends DS with Operand[DS] {def apply = this}
+    object es extends ES
+    object cs extends CS
+    object ss extends SS
+    object ds extends DS
   
-    object r8 extends R8 with Operand[R8] {def apply = this}
-    object r9 extends R9 with Operand[R9] {def apply = this}
-    object r10 extends R10 with Operand[R10] {def apply = this}
-    object r11 extends R11 with Operand[R11] {def apply = this}
-    object r12 extends R12 with Operand[R12] {def apply = this}
-    object r13 extends R13 with Operand[R13] {def apply = this}
-    object r14 extends R14 with Operand[R14] {def apply = this}
-    object r15 extends R15 with Operand[R15] {def apply = this}
+    object r8 extends R8
+    object r9 extends R9
+    object r10 extends R10
+    object r11 extends R11
+    object r12 extends R12
+    object r13 extends R13
+    object r14 extends R14
+    object r15 extends R15
     
-    object xmm0 extends XMM0 with Operand[XMM0] {def apply = this}
-    object xmm1 extends XMM1 with Operand[XMM1] {def apply = this}
-    object xmm2 extends XMM2 with Operand[XMM2] {def apply = this}
-    object xmm3 extends XMM3 with Operand[XMM3] {def apply = this}
-    object xmm4 extends XMM4 with Operand[XMM4] {def apply = this}
-    object xmm5 extends XMM5 with Operand[XMM5] {def apply = this}
-    object xmm6 extends XMM6 with Operand[XMM6] {def apply = this}
-    object xmm7 extends XMM7 with Operand[XMM7] {def apply = this}
+    object xmm0 extends XMM0
+    object xmm1 extends XMM1
+    object xmm2 extends XMM2
+    object xmm3 extends XMM3
+    object xmm4 extends XMM4
+    object xmm5 extends XMM5
+    object xmm6 extends XMM6
+    object xmm7 extends XMM7
 }

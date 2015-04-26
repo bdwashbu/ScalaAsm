@@ -11,8 +11,8 @@ package object asm {
     def asm(args: Any*): InstructionResult = macro AsmMacro.impl
   }
    
-  def byte(value: Byte) = Constant8(value)
-  def word(value: Short) = Constant16(value)
-  def dword(value: Int) = Constant32(value)
-  def qword(value: Long) = Constant64(value)
+  def byte(value: Byte) = new Constant(value) {}
+  def word(value: Short) = new Constant(value) {}
+  def dword(value: Int) = new Constant(value) {}
+  def qword(value: Long) = new Constant(value) {}
 }

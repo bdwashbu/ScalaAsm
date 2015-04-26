@@ -47,26 +47,26 @@ object AsmMacro {
           case "CALL" => c.Expr(q"FunctionReference($varName)")
           case "PUSH" => c.Expr(q"Reference($varName)")
           case "JNZ" => c.Expr(q"""
-                val ev = implicitly[JNZ#_1[Constant8]]
-                val format = implicitly[OneOperandFormat[Constant8]]
+                val ev = implicitly[JNZ#_1[Constant[_8]]]
+                val format = implicitly[OneOperandFormat[Constant[_8]]]
                 LabelRef($varName, ev, format)
                 """)
           case "JZ" =>
             c.Expr(q"""
-                val ev = implicitly[JZ#_1[Constant8]]
-                val format = implicitly[OneOperandFormat[Constant8]]
+                val ev = implicitly[JZ#_1[Constant[_8]]]
+                val format = implicitly[OneOperandFormat[Constant[_8]]]
                 LabelRef($varName, ev, format)
                 """)
           case "JE" =>
             c.Expr(q"""
-                val ev = implicitly[JE#_1[Constant8]]
-                val format = implicitly[OneOperandFormat[Constant8]]
+                val ev = implicitly[JE#_1[Constant[_8]]]
+                val format = implicitly[OneOperandFormat[Constant[_8]]]
                 LabelRef($varName, ev, format)
                 """)
           case "JMP" =>
             c.Expr(q"""
-                val ev = implicitly[JMP#_1[Constant8]]
-                val format = implicitly[OneOperandFormat[Constant8]]
+                val ev = implicitly[JMP#_1[Constant[_8]]]
+                val format = implicitly[OneOperandFormat[Constant[_8]]]
                 LabelRef($varName, ev, format)
                 """)
           case "INVOKE" => c.Expr(q"Invoke($varName)")

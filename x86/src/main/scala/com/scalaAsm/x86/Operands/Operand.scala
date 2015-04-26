@@ -9,46 +9,48 @@ trait One {
   def apply = this
 }
 
+import java.nio.{ByteBuffer, ByteOrder}
 
 
 
-
-abstract class Constant[Size: x86Size](val value: Size) extends InstructionField {
-  import java.nio.{ByteBuffer, ByteOrder}
+class Constant[Size: x86Size](val value: Size)(implicit writer: ConstantWriter[Size]) extends InstructionField {
+  
   val buffer = ByteBuffer.allocate(size)
-  buffer.order(ByteOrder.LITTLE_ENDIAN)
-  def negate: Constant[Size]
+  if (size != 0) {
+    buffer.order(ByteOrder.LITTLE_ENDIAN)
+    writer.write(buffer, value)
+  }
+  
+  def negate: Constant[Size] = new Constant[Size](getNegative) {}
   def size = implicitly[x86Size[Size]].size
   protected def getNegative = implicitly[x86Size[Size]].negate(value)
   def getBytes: Array[Byte] = {
       buffer.array()
   }
-  
+
   override def toString = value.toString
 }
 
-case class Constant8(x: Byte) extends Constant[_8](x) {
-  self =>
-  buffer.put(value)
-  def negate = Constant8(getNegative)
+object ConstantWriter {
+  implicit object Constant8 extends ConstantWriter[_8] {
+    def write(buffer: ByteBuffer, value: _8) = buffer.put(value)
+  }
+  
+  implicit object Constant16 extends ConstantWriter[_16] {
+    def write(buffer: ByteBuffer, value: _16) = buffer.putShort(value)
+  }
+  
+  implicit object Constant32 extends ConstantWriter[_32] {
+    def write(buffer: ByteBuffer, value: _32) = buffer.putInt(value)
+  }
+  
+  implicit object Constant64 extends ConstantWriter[_64] {
+    def write(buffer: ByteBuffer, value: _64) = buffer.putLong(value)
+  }
 }
 
-case class Constant16(x: Short) extends Constant[_16](x) {
-  self =>
-  buffer.putShort(value)
-  def negate = Constant16(getNegative)
-}
-
-case class Constant32(x: Int) extends Constant[_32](x) {
-  self =>
-  buffer.putInt(value)
-  def negate = Constant32(getNegative)
-}
-
-case class Constant64(x: Long) extends Constant[_64](x) {
-  self =>
-  buffer.putLong(value)
-  def negate = Constant64(getNegative)
+abstract class ConstantWriter[Size: x86Size] {
+  def write(buffer: ByteBuffer, value: Size): Unit
 }
 
 class RegisterOrMemory[Size: x86Size]

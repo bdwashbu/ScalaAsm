@@ -16,6 +16,7 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
+import com.scalaAsm.x86._
 
 class FactorialTest extends FlatSpec with ShouldMatchers {
 
@@ -62,6 +63,7 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
     
     val factorial = assembler.assemble(Factorial).addIcon("scala.ico")
     val exe = linker.link(factorial, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+    exe.dissemble
     outputStream.write(exe.get)
     outputStream.close
     fileOut.close()

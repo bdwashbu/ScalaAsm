@@ -95,7 +95,7 @@ class Assembler extends Formats with Addressing {
           case InstructionToken(inst) => Some(inst)
           case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(asm"call 0")
           case VarRef(_) => Some(asm"push 0")
-          case LabelRef(_, inst, format) => Some(inst(new Constant8(0), format, Seq()))
+          case LabelRef(_, inst, format) => Some(inst(new Constant(0.toByte) {}, format, Seq()))
           case _ => None
         }
       }
@@ -124,7 +124,7 @@ class Assembler extends Formats with Addressing {
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
           case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => asm"call 0".apply
           case VarRef(_) => asm"push 0".apply
-          case LabelRef(_, inst, format) => inst(new Constant8(0), format, Seq()).apply
+          case LabelRef(_, inst, format) => inst(new Constant(0.toByte) {}, format, Seq()).apply
           case _ => Array[Byte]()
         }
         code ++= result

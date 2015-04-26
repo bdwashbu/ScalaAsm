@@ -1,10 +1,10 @@
 package com.scalaAsm.asm
 
 import com.scalaAsm.x86.Instructions._
-import com.scalaAsm.x86.Operands.Constant8
 import com.scalaAsm.x86.Operands.OneOperandFormat
 import com.scalaAsm.x86.OpcodeFormat
 import com.scalaAsm.x86.Operands.Constant
+import com.scalaAsm.x86._
 import com.scalaAsm.x86.OneOpcode
 import com.scalaAsm.x86.InstructionResult
 
@@ -37,7 +37,7 @@ object Tokens {
     def mnemonic = ""  
     def apply = Array()
   }
-  case class LabelRef(labelRef: String, inst:InstructionDefinition#_1[Constant8], format: OneOperandFormat[Constant8]) extends CodeToken with InstructionResult {
+  case class LabelRef(labelRef: String, inst:InstructionDefinition#_1[Constant[_8]], format: OneOperandFormat[Constant[_8]]) extends CodeToken with InstructionResult {
     def mnemonic = ""
     
     def apply = Array()

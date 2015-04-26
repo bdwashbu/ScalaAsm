@@ -7,6 +7,7 @@ sealed trait OpcodeFormat {
   def /+(x: Byte): OpcodeFormat
   def isOpcodePlus: Boolean
   def prefix: Seq[Prefix]
+  def hasModRMByte: Boolean
 }
 
 sealed trait RegInOpcode

@@ -79,7 +79,6 @@ object NoSibField extends NoSib {
 }
 
 abstract class NoDisp(value: Int) extends Constant[_32](value) {
-  def negate = this
   override def size: Int = 0
 }
 

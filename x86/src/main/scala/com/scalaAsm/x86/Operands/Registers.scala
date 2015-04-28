@@ -1,7 +1,7 @@
 package com.scalaAsm.x86
 package Operands
 
-import com.scalaAsm.x86.Operands.Memory.Memory
+import com.scalaAsm.x86.Operands.Memory._
 
 abstract class Register[S: x86Size](val name: String) extends RegisterOrMemory[S] {
   override def toString = name.toLowerCase()
@@ -21,11 +21,8 @@ abstract class GeneralPurpose[S: x86Size](name: String) extends Register[S](name
   
   abstract class Indirect extends Memory[S] {
     def base: GeneralPurpose[S] = self
-    def get: Indirect = this
+    def get = this
   }
-  
-  def getIndirect: this.type#Indirect = new Indirect{}
-  def getBaseIndex[Y: x86Size](const: Constant[Y]) = new BaseIndex(const) {}
 }
 
 trait UniformByteRegister[Size] extends GeneralPurpose[Size]

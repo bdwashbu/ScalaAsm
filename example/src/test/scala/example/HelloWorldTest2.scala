@@ -41,11 +41,11 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"add esp, 4",
       asm"retn")
       
-    val numberOfBytesToWrite = *(ebp + byte(-12))
-    val numberOfBytesWritten = *(ebp + byte(-8))
-    val hFile = *(ebp + byte(-4))
+    val numberOfBytesToWrite = ebp + byte(-12)
+    val numberOfBytesWritten = ebp + byte(-8)
+    val hFile = ebp + byte(-4)
     //val hFileTest = asm"[ebp - 4]"
-    val lpBuffer = *(ebp + byte(8))
+    val lpBuffer = ebp + byte(8)
     val STD_OUTPUT_HANDLE = "-14"
     val STD_INPUT_HANDLE = byte(-10)
     
@@ -74,8 +74,8 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       RETN(word(4)))
 
     procedure(name = "strlen",
-      MOV(eax, *(esp + byte(4))), // pointer to string
-      LEA(edx, *(eax + byte(3))),
+      MOV(eax, esp + byte(4)), // pointer to string
+      LEA(edx, eax + byte(3)),
       asm"push ebp",
       asm"push edi",
       MOV(ebp, dword(0x80808080)),
@@ -85,7 +85,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       repeat(3, List(
           MOV(edi, *(eax)), // read first 4 bytes
           asm"ADD eax, 4", // increment pointer
-          LEA(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
+          LEA(ecx, edi - dword(0x1010101)), // subtract 1 from each byte
           asm"not edi", // invert all bytes
           asm"and ecx, edi",
           asm"and ecx, ebp",
@@ -93,7 +93,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
 
       MOV(edi, *(eax)),
       asm"add eax, 4",
-      LEA(ecx, *(edi - dword(0x1010101))),
+      LEA(ecx, edi - dword(0x1010101)),
       asm"not edi",
       asm"and ecx, edi",
       asm"and ecx, ebp",

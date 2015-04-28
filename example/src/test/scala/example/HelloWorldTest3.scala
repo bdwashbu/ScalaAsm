@@ -35,10 +35,10 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       PUSH(byte(0)),
       asm"call ExitProcess")
       
-    val numberOfBytesToWrite = *(ebp + byte(-12))
-    val numberOfBytesWritten = *(ebp + byte(-8))
-    val hFile = *(ebp + byte(-4))
-    val lpBuffer = *(ebp + byte(8))
+    val numberOfBytesToWrite = ebp + byte(-12)
+    val numberOfBytesWritten = ebp + byte(-8)
+    val hFile = ebp + byte(-4)
+    val lpBuffer = ebp + byte(8)
     val STD_OUTPUT_HANDLE = byte(-11)
     val STD_INPUT_HANDLE = byte(-10)
     
@@ -64,8 +64,8 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       RETN(word(4)))
 
     procedure(name = "strlen",
-      MOV(eax, *(esp + byte(4))), // pointer to string
-      LEA(edx, *(eax + byte(3))),
+      MOV(eax, esp + byte(4)), // pointer to string
+      LEA(edx, eax + byte(3)),
       PUSH(ebp),
       PUSH(edi),
       MOV(ebp, dword(0x80808080)),
@@ -75,7 +75,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       repeat(3, List(
           MOV(edi, *(eax)), // read first 4 bytes
           ADD(eax, byte(4)), // increment pointer
-          LEA(ecx, *(edi - dword(0x1010101))), // subtract 1 from each byte
+          LEA(ecx, edi - dword(0x1010101)), // subtract 1 from each byte
           NOT(edi), // invert all bytes
           AND(ecx, edi),
           AND(ecx, ebp),
@@ -83,7 +83,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
 
       MOV(edi, *(eax)),
       ADD(eax, byte(4)),
-      LEA(ecx, *(edi - dword(0x1010101))),
+      LEA(ecx, edi - dword(0x1010101)),
       NOT(edi),
       AND(ecx, edi),
       AND(ecx, ebp),

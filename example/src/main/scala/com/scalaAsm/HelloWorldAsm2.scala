@@ -28,7 +28,7 @@ object HelloWorld2 extends AsmProgram[x86_64] {
       LEA(rcx, addr("helloWorld")),
       SUB(rsp, byte(0x20)),
       asm"invoke printf", // needs work
-      LEA(rsp, *(rsp + byte(0x28))),
+      LEA(rsp, rsp + byte(0x28)),
       POP(rsp),
       PUSH(rsp),
       PUSH(*(rsp)),
@@ -37,7 +37,7 @@ object HelloWorld2 extends AsmProgram[x86_64] {
       LEA(rcx, addr("pressAnyKey")),
       SUB(rsp, byte(0x20)),
       asm"invoke printf", // needs work
-      LEA(rsp, *(rsp+byte(0x28))),
+      LEA(rsp, rsp + byte(0x28)),
       POP(rsp),
       PUSH(rsp),
       PUSH(*(rsp)),
@@ -45,7 +45,7 @@ object HelloWorld2 extends AsmProgram[x86_64] {
       MOV(rcx, STD_INPUT_HANDLE),
       SUB(rsp, byte(0x20)),
       asm"invoke GetStdHandle", // needs work
-      LEA(rsp, *(rsp+byte(0x28))),
+      LEA(rsp, rsp + byte(0x28)),
       POP(rsp),
       PUSH(rsp),
       PUSH(*(rsp)),
@@ -53,14 +53,14 @@ object HelloWorld2 extends AsmProgram[x86_64] {
       MOV(rcx, rax),
       SUB(rsp, byte(0x20)),
       asm"invoke FlushConsoleInputBuffer", // needs work
-      LEA(rsp, *(rsp+byte(0x28))),
+      LEA(rsp, rsp + byte(0x28)),
       POP(rsp),
       PUSH(rsp),
       PUSH(*(rsp)),
       AND(spl, byte(0xF0)),
       SUB(rsp, byte(0x20)),
       asm"invoke _getch", // needs work
-      LEA(rsp, *(rsp+byte(0x28))),
+      LEA(rsp, rsp + byte(0x28)),
       POP(rsp),
       XOR(rax, rax),
       RETN(())

@@ -36,7 +36,7 @@ object HelloWorld64 extends AsmProgram[x86_64] {
       LEA(rcx, addr("helloWorld")),
       SUB(rsp, byte(0x20)),
       asm"invoke printf", // needs work
-      LEA(rsp, *(rsp+byte(0x28))),
+      LEA(rsp, rsp + byte(0x28)),
       POP(rsp),
       XOR(rax, rax),
       RETN(())

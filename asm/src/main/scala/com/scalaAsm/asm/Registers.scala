@@ -5,28 +5,21 @@ import com.scalaAsm.x86._
 
 trait Registers[Mode <: x86Mode] {
 
-    trait RegisterOperand[X] {
-      val reg: GeneralPurpose[X]
-      override def toString = reg.toString
-      def -[Z: x86Size](offset: Constant[Z]) = new reg.BaseIndex(offset.negate) {}
-      def +[Z: x86Size](offset: Constant[Z]) = new reg.BaseIndex(offset) {}
-    }
-
-    object rdi extends RDI with RegisterOperand[_64]{val reg = new RDI}
-    object rax extends RAX with RegisterOperand[_64]{val reg = new RAX}
-    object rcx extends RCX with RegisterOperand[_64]{val reg = new RCX}
-    object rbp extends RBP with RegisterOperand[_64]{val reg = new RBP}
-    object rdx extends RDX with RegisterOperand[_64]{val reg = new RDX}
-    object rbx extends RBX with RegisterOperand[_64]{val reg = new RBX}
-    object rsp extends RSP with RegisterOperand[_64]{val reg = new RSP}
+    object rdi extends RDI
+    object rax extends RAX
+    object rcx extends RCX
+    object rbp extends RBP
+    object rdx extends RDX
+    object rbx extends RBX
+    object rsp extends RSP
   
-    object edi extends EDI with RegisterOperand[_32]{val reg = new EDI}
-    object eax extends EAX with RegisterOperand[_32]{val reg = new EAX}
-    object ecx extends ECX with RegisterOperand[_32]{val reg = new ECX}
-    object ebp extends EBP with RegisterOperand[_32]{val reg = new EBP}
-    object edx extends EDX with RegisterOperand[_32]{val reg = new EDX}
-    object ebx extends EBX with RegisterOperand[_32]{val reg = new EBX}
-    object esp extends ESP with RegisterOperand[_32]{val reg = new ESP}
+    object edi extends EDI
+    object eax extends EAX
+    object ecx extends ECX
+    object ebp extends EBP
+    object edx extends EDX
+    object ebx extends EBX
+    object esp extends ESP
   
     object ax extends AX
     object cx extends CX

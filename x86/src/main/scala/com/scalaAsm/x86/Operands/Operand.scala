@@ -3,17 +3,9 @@ package Operands
 
 import com.scalaAsm.x86.Instructions.InstructionField
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
-
-trait One {
-  def size = 1
-  def apply = this
-}
-
 import java.nio.{ByteBuffer, ByteOrder}
 
-
-
-class Constant[Size: x86Size](val value: Size)(implicit writer: ConstantWriter[Size]) extends InstructionField {
+case class Constant[Size: x86Size](val value: Size)(implicit writer: ConstantWriter[Size]) extends InstructionField {
   
   val buffer = ByteBuffer.allocate(size)
   if (size != 0) {

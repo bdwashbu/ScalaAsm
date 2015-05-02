@@ -44,7 +44,6 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
     val builder = new ListBuffer[HighLevel]()
 
     implicit def toByte(x: Int) = x.toByte
-    val One = new One {}
 
     def procedure(name: String, innerCode: InstructionResult*) = {
       builder += ProcedureToken(name, innerCode)

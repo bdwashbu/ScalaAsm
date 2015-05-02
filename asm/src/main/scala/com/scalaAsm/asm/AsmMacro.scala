@@ -31,8 +31,12 @@ object AsmMacro {
       }
       case _ => Nil
     }).head
+    
+    val params = Seq[Tree]((args map (_.tree)): _*)
 
-    if (asmInstruction.endsWith(":")) { // label
+    if (!params.isEmpty) {
+      impl2(c)(args: _*)
+    } else if (asmInstruction.endsWith(":")) { // label
       val labelName = Constant(asmInstruction.reverse.tail.reverse)
       c.Expr(q"Label($labelName)")
     } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')) {

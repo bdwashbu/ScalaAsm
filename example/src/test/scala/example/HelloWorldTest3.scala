@@ -95,7 +95,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       SHR(ecx, byte(0x10)),
       ADD(eax, byte(2)),
       asm"end:",
-      SHL(cl),
+      asm"shl cl",
       SBB(eax, edx), // compute length
       POP(edi),
       POP(ebp),

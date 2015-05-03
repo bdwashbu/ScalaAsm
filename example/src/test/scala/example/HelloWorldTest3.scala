@@ -43,62 +43,62 @@ object HelloWorld3 extends AsmProgram[x86_32] {
     val STD_INPUT_HANDLE = byte(-10)
     
     procedure(name = "flushBuffer",
-      PUSH(ebp),
-      MOV(ebp, esp),
-      ADD(esp, byte(-12)),
-      PUSH(STD_OUTPUT_HANDLE),
+      asm"push ebp",
+      asm"mov ebp, esp",
+      asm"add esp, byte -12",
+      asm"push $STD_OUTPUT_HANDLE",
       asm"call GetStdHandle",
       MOV(hFile, eax),
-      PUSH(lpBuffer),
+      asm"push $lpBuffer",
       asm"call strlen",
       MOV(numberOfBytesToWrite, eax),
-      PUSH(byte(0)),
+      asm"push 0",
       LEA(eax, numberOfBytesWritten),
-      PUSH(eax),
-      PUSH(numberOfBytesToWrite),
-      PUSH(lpBuffer),
-      PUSH(hFile),
+      asm"push eax",
+      asm"push $numberOfBytesToWrite",
+      asm"push $lpBuffer",
+      asm"push $hFile",
       asm"call WriteFile",
       MOV(eax, numberOfBytesWritten),
-      LEAVE(()),
+      asm"leave",
       RETN(word(4)))
 
     procedure(name = "strlen",
       MOV(eax, esp + byte(4)), // pointer to string
       LEA(edx, eax + byte(3)),
-      PUSH(ebp),
-      PUSH(edi),
+      asm"push ebp",
+      asm"push edi",
       MOV(ebp, dword(0x80808080)),
 
       asm"start:",
 
       repeat(3, List(
           MOV(edi, *(eax)), // read first 4 bytes
-          ADD(eax, byte(4)), // increment pointer
+          asm"add eax, 4", // increment pointer
           LEA(ecx, edi - dword(0x1010101)), // subtract 1 from each byte
-          NOT(edi), // invert all bytes
-          AND(ecx, edi),
-          AND(ecx, ebp),
+          asm"not edi", // invert all bytes
+          asm"and ecx, edi",
+          asm"and ecx, ebp",
           asm"jnz test")),
 
       MOV(edi, *(eax)),
       ADD(eax, byte(4)),
       LEA(ecx, edi - dword(0x1010101)),
-      NOT(edi),
-      AND(ecx, edi),
-      AND(ecx, ebp),
+      asm"not edi",
+      asm"and ecx, edi",
+      asm"and ecx, ebp",
       asm"jz start",
 
       asm"test:",
       TEST(ecx, dword(0x8080)), // test first 2 bytes
       asm"jnz end",
-      SHR(ecx, byte(0x10)),
-      ADD(eax, byte(2)),
+      asm"shr ecx, byte 16",
+      asm"add eax, 2",
       asm"end:",
       asm"shl cl",
       SBB(eax, edx), // compute length
-      POP(edi),
-      POP(ebp),
+      asm"pop edi",
+      asm"pop ebp",
       RETN(word(4)))
 
     builder += align(2)

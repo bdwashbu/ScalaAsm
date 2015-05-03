@@ -15,7 +15,7 @@ import scala.util.control.Exception.allCatch
 
 object AsmMacro {
 
-  val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl")
+  val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "rsp", "rax")
 
   def isByte(s: String): Boolean = (allCatch opt s.toByte).isDefined
   def isDword(s: String): Boolean = (allCatch opt s.toLong).isDefined

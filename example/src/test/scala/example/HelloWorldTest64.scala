@@ -29,7 +29,7 @@ object HelloWorld64 extends AsmProgram[x86_64] {
   sections += new CodeSection {
 
     procedure(name = "start",
-      PUSH(rsp),
+      asm"push rsp",
       PUSH(*(rsp)),
       AND(spl, byte(0xF0)),
       MOV(rdx, dword(0xE)),
@@ -37,8 +37,8 @@ object HelloWorld64 extends AsmProgram[x86_64] {
       SUB(rsp, byte(0x20)),
       asm"invoke printf", // needs work
       LEA(rsp, rsp + byte(0x28)),
-      POP(rsp),
-      XOR(rax, rax),
+      asm"pop rsp",
+      asm"xor rax, rax",
       RETN(())
     )
   }

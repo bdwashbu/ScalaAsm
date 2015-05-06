@@ -45,7 +45,7 @@ object AsmMacro {
       }
       case _ => Nil
     }).head
-    
+
     val params = Seq[Tree]((args map (_.tree)): _*)
 
     if (!params.isEmpty) {
@@ -60,7 +60,7 @@ object AsmMacro {
         impl2(c)(args: _*)
       } else if (!isDword(param)) {
         val varName = Constant(param)
-        
+
         mnemonic match {
           case "CALL" => c.Expr(q"FunctionReference($varName)")
           case "PUSH" => c.Expr(q"Reference($varName)")
@@ -88,7 +88,7 @@ object AsmMacro {
                 LabelRef($varName, ev, format)
                 """)
           case "INVOKE" => c.Expr(q"Invoke($varName)")
-          case _ => impl2(c)(args: _*)
+          case _        => impl2(c)(args: _*)
         }
       } else {
         impl2(c)(args: _*)
@@ -110,16 +110,16 @@ object AsmMacro {
             arg.toString
         }
     }
-    
+
     val fullInst = asmInstructions.reduce(_ + "" + _)
     val asmInstruction = asmInstructions.head
     val params = Seq[Tree]((args map (_.tree)): _*)
-    
+
     val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase)
-      //throw new Exception(params.head.toString())
+    //throw new Exception(params.head.toString())
     if (params.head.toString contains "toString") {
       val param = TermName(asmInstruction.split(' ').tail.mkString.split(',').head)
-     // throw new Exception("kookoo")
+      // throw new Exception("kookoo")
       c.Expr(q"$mnemonic($param, dword(input))")
     } else if (!fullInst.contains(',')) {
       //throw new Exception("fuckcck")
@@ -138,9 +138,9 @@ object AsmMacro {
       //throw new Exception(params(0).tpe.typeSymbol.name.toString)
       //c.Expr(q"$mnemonic($param, dword($param2.toInt))")
       params(0).tpe.typeSymbol.name.toString match {
-        case "Byte" => c.Expr(q"$mnemonic($param, byte($param2))")
+        case "Byte"         => c.Expr(q"$mnemonic($param, byte($param2))")
         case "Long" | "Int" => c.Expr(q"$mnemonic($param, dword($param2))")
-        case _ => c.Expr(q"$mnemonic($param, $param2)")
+        case _              => c.Expr(q"$mnemonic($param, $param2)")
       }
     } else {
       val param = TermName(asmInstructions.last.split(' ').tail.mkString.split(',').head)
@@ -148,7 +148,38 @@ object AsmMacro {
       c.Expr(q"$mnemonic($x, $param)")
     }
   }
+
+  object TwoOperands {
+    def unapply(line: String): Option[(String, String)] = {
+      if (line.contains(' ') && line.contains(',')) {
+        val params = line.split(' ').tail.reduce(_ + " " + _).split(',').map { param =>
+          if (param.contains("(")) {
+            param.trim.split("(").last.split(")").head
+          } else {
+            param.trim
+          }
+        }
+        Some(params(0), params(1))
+      } else {
+        None
+      }
+    }
+  }
   
+  object OneOperand {
+    def unapply(line: String): Option[String] = {
+      if (line.contains(' ') && !line.contains(',')) {
+        Some(line.split(' ').last)
+      } else {
+        None
+      }
+    }
+  }
+  
+  object NoOperand {
+    def unapply(line: String): Boolean = !line.contains(' ')
+  }
+
   def impl2(c: Context)(args: c.Expr[Any]*): c.Expr[InstructionResult] = {
     import c.universe._
     import scala.reflect.runtime.{ currentMirror => cm }
@@ -171,85 +202,77 @@ object AsmMacro {
       }
       case _ => Nil
     })
-    
+
     val asmInstruction = asmInstructions.head
-    
-    
-    
 
     //         if (args.size > 0) {
     //           throw new Exception(c.internal.enclosingOwner.asClass.fullName)
     //         }
 
     // throw new Exception(c.internal.enclosingOwner.asClass.fullName)
-    
+
     //throw new Exception(asmInstructions.reduce(_ + ", " + _))
     if (!args.isEmpty) { // contains an interpolated value
       parseInterpolated(c, asmInstructions)(args)
-    } else if (!asmInstruction.contains(' ')) {
-      val mnemonic = TermName(asmInstruction.toUpperCase())
-      c.Expr(q"$mnemonic(())")
-    } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')) { // one operand
-      val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
-      val param = asmInstruction.split(' ').last
-      if (regList contains param) {
-        val term1 = TermName(param)
-        c.Expr(q"$mnemonic($term1)")
-      } else {  
-        val term1 = Constant(param)
-        if (isDword(param)) {
-          c.Expr(q"$mnemonic(dword($term1.toInt))")
-        } else {
+    } else {
+      asmInstruction match {
+      case NoOperand() =>
+        val mnemonic = TermName(asmInstruction.toUpperCase())
+        c.Expr(q"$mnemonic(())")
+      case OneOperand(param) =>
+        val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
+        if (regList contains param) {
+          val term1 = TermName(param)
           c.Expr(q"$mnemonic($term1)")
-        }
-      }
-    } else { // two operands
-      val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
-      val params = asmInstruction.split(' ').tail.reduce(_ + " " + _).split(',').map { param =>
-        if (param.contains("(")) {
-          param.trim.split("(").last.split(")").head
         } else {
-          param.trim
+          val term1 = Constant(param)
+          if (isDword(param)) {
+            c.Expr(q"$mnemonic(dword($term1.toInt))")
+          } else {
+            c.Expr(q"$mnemonic($term1)")
+          }
         }
-      }
+      case TwoOperands(operand1, operand2) =>
+        val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
 
-      if ((regList contains params(0)) && (regList contains params(1))) {
-        val term1 = TermName(params(0))
-        val term2 = TermName(params(1))
-        c.Expr(q"$mnemonic($term1, $term2)")
-      } else if ((regList contains params(0)) && params(1).split(" ").head == "byte") {
-        //throw new Exception("FFFFFFFFFFFFF")
-        val term1 = TermName(params(0))
-        val constant = Constant(params(1).split(" ").last)
-        c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
-      } else if ((regList contains params(0)) && params(1).split(" ").head == "dword") {
-        //throw new Exception("FFFFFFFFFFFFF")
-        val term1 = TermName(params(0))
-        val constant = Constant(params(1).split(" ").last)
-        c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
-      } else if ((regList contains params(0)) && isByte(params(1))) {
-        
-        val term1 = TermName(params(0))
-        if (params(1).contains("0x")) {
-          val constant = Constant(Integer.parseInt(params(1).drop(2), 16))
+        if ((regList contains operand1) && (regList contains operand2)) {
+          val term1 = TermName(operand1)
+          val term2 = TermName(operand2)
+          c.Expr(q"$mnemonic($term1, $term2)")
+        } else if ((regList contains operand1) && operand2.split(" ").head == "byte") {
+          //throw new Exception("FFFFFFFFFFFFF")
+          val term1 = TermName(operand1)
+          val constant = Constant(operand2.split(" ").last)
           c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
-        } else {
-          val constant = Constant(params(1))
-          c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
-        }
-      } else if ((regList contains params(0)) && isDword(params(1))) {
-        //throw new Exception(params.reduce(_ + ", " + _))
-        
-        val term1 = TermName(params(0))
-        if (params(1).contains("0x")) {
-          val constant = Constant(Long.parseLong(params(1).drop(2), 16))
+        } else if ((regList contains operand1) && operand2.split(" ").head == "dword") {
+          //throw new Exception("FFFFFFFFFFFFF")
+          val term1 = TermName(operand1)
+          val constant = Constant(operand2.split(" ").last)
           c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
+        } else if ((regList contains operand1) && isByte(operand2)) {
+
+          val term1 = TermName(operand1)
+          if (operand2.contains("0x")) {
+            val constant = Constant(Integer.parseInt(operand2.drop(2), 16))
+            c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
+          } else {
+            val constant = Constant(operand2)
+            c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
+          }
+        } else if ((regList contains operand1) && isDword(operand2)) {
+          //throw new Exception(params.reduce(_ + ", " + _))
+
+          val term1 = TermName(operand1)
+          if (operand2.contains("0x")) {
+            val constant = Constant(Long.parseLong(operand2.drop(2), 16))
+            c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
+          } else {
+            val constant = Constant(operand2)
+            c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
+          }
         } else {
-          val constant = Constant(params(1))
-          c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
+          c.Expr(Apply(Select(This(TypeName("$anon")), mnemonic), List(Literal(Constant(())))))
         }
-      } else {
-        c.Expr(Apply(Select(This(TypeName("$anon")), mnemonic), List(Literal(Constant(())))))
       }
 
       //Expr(Apply(Select(Select(Ident(TermName("$anon")), TermName("mov")), TermName("apply")), List(Select(Ident(TermName("$anon")), TermName("ebp")), Apply(Select(Ident(TermName("$anon")), TermName("esp")))))))

@@ -65,7 +65,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
 
     procedure(name = "strlen",
       MOV(eax, esp + byte(4)), // pointer to string
-      LEA(edx, eax + byte(3)),
+      LEA(edx, eax + byte(3)), //asm"lea edx, [eax + 3]",
       asm"push ebp",
       asm"push edi",
       MOV(ebp, dword(0x80808080)),

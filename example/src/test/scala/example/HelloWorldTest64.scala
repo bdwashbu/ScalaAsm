@@ -31,7 +31,7 @@ object HelloWorld64 extends AsmProgram[x86_64] {
     procedure(name = "start",
       asm"push rsp",
       PUSH(*(rsp)),
-      AND(spl, byte(0xF0)),
+      asm"and spl, 0xF0",
       MOV(rdx, dword(0xE)),
       LEA(rcx, addr("helloWorld")),
       SUB(rsp, byte(0x20)),

@@ -28,8 +28,6 @@ class ConditionalTest extends FlatSpec with ShouldMatchers {
       import com.scalaAsm.asm._
       import com.scalaAsm.x86.Operands._
       
-      val convertedInput: String = input.toString
-
       sections += new DataSection(
         Variable("jumpTaken", "Jump taken!\n\u0000"),
         Variable("jumpNotTaken", "Jump not taken!\n\u0000")
@@ -38,7 +36,7 @@ class ConditionalTest extends FlatSpec with ShouldMatchers {
       sections += new CodeSection {
 
         builder += Code(
-          asm"mov ebx, 4",
+          asm"mov ebx, dword 4",
           asm"test ebx, $input", // test if input == 4
           asm"jz zero", // jz will jump if input != 4
           asm"jmp notzero",

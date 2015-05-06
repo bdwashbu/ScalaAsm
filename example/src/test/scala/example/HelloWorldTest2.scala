@@ -55,21 +55,19 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"push ebp",
       asm"mov ebp, esp",
       asm"add esp, -12",
-      //add(esp, byte(-12)),
-      //asm"push $STD_OUTPUT_HANDLE",
       asm"call GetStdHandle",
-      MOV(hFile, eax),
+      asm"mov $hFile, eax",
       asm"push $lpBuffer",
       asm"call strlen",
-      MOV(numberOfBytesToWrite, eax),
+      asm"mov $numberOfBytesToWrite, eax",
       asm"push byte 0",
-      LEA(eax, numberOfBytesWritten),
+      asm"lea eax, $numberOfBytesWritten",
       asm"push eax",
       asm"push $numberOfBytesToWrite",
       asm"push $lpBuffer",
       asm"push $hFile",
       asm"call WriteFile",
-      MOV(eax, numberOfBytesWritten),
+      asm"mov eax, $numberOfBytesWritten",
       asm"leave",
       RETN(word(4)))
 
@@ -78,7 +76,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       LEA(edx, eax + byte(3)),
       asm"push ebp",
       asm"push edi",
-      MOV(ebp, dword(0x80808080)),
+      asm"mov ebp, 0x80808080",
 
       asm"start:",
 
@@ -100,7 +98,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"jz start",
 
       asm"test:",
-      TEST(ecx, dword(0x8080)), // test first 2 bytes
+      asm"test ecx, 0x8080", // test first 2 bytes
       asm"jnz end",
       asm"shr ecx, byte 16",
       asm"add eax, 2",

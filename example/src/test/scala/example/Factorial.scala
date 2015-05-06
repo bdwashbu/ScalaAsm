@@ -27,8 +27,6 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
 
       import com.scalaAsm.x86.Instructions.General._
       import com.scalaAsm.x86.Operands._
-      
-      val convertedInput: String = input.toString
 
       sections += new DataSection(
         Variable("test", "%d\n\u0000")) {}
@@ -36,7 +34,7 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
       sections += new CodeSection {
 
         builder += Code(
-          asm"mov eax, $convertedInput",
+          asm"mov eax, $input",
           asm"mov ebx, eax",
           asm"Begin:",
           asm"dec ebx",

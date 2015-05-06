@@ -222,7 +222,12 @@ object AsmCompiler {
       object Byte {
         def convertByte(operand: String): String = {
           if (operand.startsWith("0x")) {
-              (Long.parseLong(operand.drop(2), 16).toByte).toString
+              val result = Long.parseLong(operand.drop(2), 16)
+              if (result > 128 || result < -128) {
+                throw new Exception(s"Error: $result is out of range for byte")
+              }
+              
+              result.toByte.toString
             } else {
               operand
             }

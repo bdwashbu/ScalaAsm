@@ -10,7 +10,7 @@ package object asm {
   import com.scalaAsm.x86
   
   implicit class AsmContext (val sc : StringContext) {
-    def asm(args: Any*): InstructionResult = macro AsmMacro.impl
+    def asm(args: Any*): InstructionResult = macro AsmCompiler.asmMacro
   }
    
   def byte(value: Byte) = Constant(value)

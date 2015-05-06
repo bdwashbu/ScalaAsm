@@ -6,7 +6,6 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Instructions.General._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
-import com.scalaAsm.asm.Registers
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
 
@@ -26,7 +25,7 @@ import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
 import com.scalaAsm.coff.{ IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION }
 
-import com.scalaAsm.asm.AsmMacro
+import com.scalaAsm.asm.AsmCompiler
 
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Operands._

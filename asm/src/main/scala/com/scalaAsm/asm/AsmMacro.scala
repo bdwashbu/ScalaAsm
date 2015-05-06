@@ -15,13 +15,13 @@ import scala.util.control.Exception.allCatch
 import java.lang.Long;
 import java.lang.Byte;
 
-object AsmMacro {
+object AsmCompiler {
 
   val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "rsp", "rax", "spl")
 
   def isByte(s: String): Boolean = {
     if (s.contains("0x")) {
-      Long.parseLong(s.drop(2), 16) < 256
+      Long.parseLong(s.drop(2), 16) < 128
     } else {
       (allCatch opt s.toByte).isDefined
     }
@@ -34,7 +34,7 @@ object AsmMacro {
     }
   }
 
-  def impl(c: Context)(args: c.Expr[Any]*): c.Expr[InstructionResult] = {
+  def asmMacro(c: Context)(args: c.Expr[Any]*): c.Expr[InstructionResult] = {
     import c.universe._
     import scala.reflect.runtime.{ currentMirror => cm }
     import scala.reflect.runtime.{ universe => ru }
@@ -49,7 +49,7 @@ object AsmMacro {
     val params = Seq[Tree]((args map (_.tree)): _*)
 
     if (!params.isEmpty) {
-      impl2(c)(args: _*)
+      x86Macro(c)(args: _*)
     } else if (asmInstruction.endsWith(":")) { // label
       val labelName = Constant(asmInstruction.reverse.tail.reverse)
       c.Expr(q"Label($labelName)")
@@ -57,7 +57,7 @@ object AsmMacro {
       val mnemonic = asmInstruction.split(' ').head.toUpperCase()
       val param = asmInstruction.split(' ').last
       if (regList contains param) {
-        impl2(c)(args: _*)
+        x86Macro(c)(args: _*)
       } else if (!isDword(param)) {
         val varName = Constant(param)
 
@@ -88,13 +88,13 @@ object AsmMacro {
                 LabelRef($varName, ev, format)
                 """)
           case "INVOKE" => c.Expr(q"Invoke($varName)")
-          case _        => impl2(c)(args: _*)
+          case _        => x86Macro(c)(args: _*)
         }
       } else {
-        impl2(c)(args: _*)
+        x86Macro(c)(args: _*)
       }
     } else {
-      impl2(c)(args: _*)
+      x86Macro(c)(args: _*)
     }
   }
 
@@ -165,26 +165,82 @@ object AsmMacro {
       }
     }
   }
-  
-  object OneOperand {
-    def unapply(line: String): Option[String] = {
-      if (line.contains(' ') && !line.contains(',')) {
-        Some(line.split(' ').last)
-      } else {
-        None
-      }
-    }
-  }
-  
-  object NoOperand {
-    def unapply(line: String): Boolean = !line.contains(' ')
-  }
 
-  def impl2(c: Context)(args: c.Expr[Any]*): c.Expr[InstructionResult] = {
+ 
+
+  def x86Macro(c: Context)(args: c.Expr[Any]*): c.Expr[InstructionResult] = {
     import c.universe._
     import scala.reflect.runtime.{ currentMirror => cm }
     import scala.reflect.runtime.{ universe => ru }
 
+     object OneOperand {
+        def unapply(line: String): Option[String] = {
+          if (line.contains(' ') && !line.contains(',')) {
+            Some(line.split(' ').last)
+          } else {
+            None
+          }
+        }
+      }
+    
+      object NoOperand {
+        def unapply(line: String): Boolean = !line.contains(' ')
+      }
+      
+      object Register {
+        def unapply(operand: String): Option[TermName] = {
+          if (regList contains operand) {
+            Some(TermName(operand))
+          } else {
+            None
+          }
+        }
+      }
+      
+      object Dword {
+        def convertDword(operand: String): String = {
+          if (operand.startsWith("0x")) {
+              (Long.parseLong(operand.drop(2), 16).toInt).toString
+            } else {
+              operand
+            }
+        }
+        
+        def unapply(operand: String): Option[Constant] = {
+         if (operand.split(" ").head == "dword" && isDword(convertDword(operand.split(" ").last))) {
+            //throw new Exception("WTF")
+            Some(Constant(convertDword(operand.split(" ").last)))
+          } else if (isDword(convertDword(operand))) {
+            //throw new Exception("WTF2")
+            Some(Constant(convertDword(operand)))
+          } else {
+            None
+          }
+        }
+      }
+      
+      object Byte {
+        def convertByte(operand: String): String = {
+          if (operand.startsWith("0x")) {
+              (Long.parseLong(operand.drop(2), 16).toByte).toString
+            } else {
+              operand
+            }
+        }
+        
+        def unapply(operand: String): Option[Constant] = {
+          if (operand.split(" ").head == "byte" && isByte(convertByte(operand.split(" ").last))) {
+            //throw new Exception("WTF")
+            Some(Constant(convertByte(operand.split(" ").last)))
+          } else if (isByte(convertByte(operand))) {
+            //throw new Exception("WTF2")
+            Some(Constant(convertByte(operand)))
+          } else {
+            None
+          }
+        }
+      }
+    
     val parts = c.prefix.tree match {
       case Apply(_, List(Apply(_, rawParts))) =>
         rawParts zip (args map (_.tree)) map {
@@ -203,76 +259,32 @@ object AsmMacro {
       case _ => Nil
     })
 
-    val asmInstruction = asmInstructions.head
-
-    //         if (args.size > 0) {
-    //           throw new Exception(c.internal.enclosingOwner.asClass.fullName)
-    //         }
-
-    // throw new Exception(c.internal.enclosingOwner.asClass.fullName)
-
-    //throw new Exception(asmInstructions.reduce(_ + ", " + _))
     if (!args.isEmpty) { // contains an interpolated value
       parseInterpolated(c, asmInstructions)(args)
     } else {
+      val asmInstruction = asmInstructions.head
+      val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
+
       asmInstruction match {
-      case NoOperand() =>
-        val mnemonic = TermName(asmInstruction.toUpperCase())
-        c.Expr(q"$mnemonic(())")
-      case OneOperand(param) =>
-        val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
-        if (regList contains param) {
-          val term1 = TermName(param)
-          c.Expr(q"$mnemonic($term1)")
-        } else {
-          val term1 = Constant(param)
-          if (isDword(param)) {
-            c.Expr(q"$mnemonic(dword($term1.toInt))")
-          } else {
-            c.Expr(q"$mnemonic($term1)")
+        case NoOperand() =>
+          c.Expr(q"$mnemonic(())")
+        case OneOperand(param) =>
+          param match {
+            case Register(reg) => c.Expr(q"$mnemonic($reg)")
+            case Dword(dword) => c.Expr(q"$mnemonic(dword($dword.toInt))")
           }
-        }
-      case TwoOperands(operand1, operand2) =>
-        val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
-
-        if ((regList contains operand1) && (regList contains operand2)) {
-          val term1 = TermName(operand1)
-          val term2 = TermName(operand2)
-          c.Expr(q"$mnemonic($term1, $term2)")
-        } else if ((regList contains operand1) && operand2.split(" ").head == "byte") {
-          //throw new Exception("FFFFFFFFFFFFF")
-          val term1 = TermName(operand1)
-          val constant = Constant(operand2.split(" ").last)
-          c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
-        } else if ((regList contains operand1) && operand2.split(" ").head == "dword") {
-          //throw new Exception("FFFFFFFFFFFFF")
-          val term1 = TermName(operand1)
-          val constant = Constant(operand2.split(" ").last)
-          c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
-        } else if ((regList contains operand1) && isByte(operand2)) {
-
-          val term1 = TermName(operand1)
-          if (operand2.contains("0x")) {
-            val constant = Constant(Integer.parseInt(operand2.drop(2), 16))
-            c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
-          } else {
-            val constant = Constant(operand2)
-            c.Expr(q"$mnemonic($term1, byte($constant.toByte))")
+        case TwoOperands(operand1, operand2) =>
+          (operand1, operand2) match {
+            case (Register(reg1), Register(reg2)) => c.Expr(q"$mnemonic($reg1, $reg2)")
+            case (Register(reg), Dword(dword)) =>  c.Expr(q"$mnemonic($reg, dword($dword.toInt))")
+            case (Register(reg), Byte(byteVal)) => c.Expr(q"$mnemonic($reg, byte($byteVal.toByte))")
+            
           }
-        } else if ((regList contains operand1) && isDword(operand2)) {
-          //throw new Exception(params.reduce(_ + ", " + _))
 
-          val term1 = TermName(operand1)
-          if (operand2.contains("0x")) {
-            val constant = Constant(Long.parseLong(operand2.drop(2), 16))
-            c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
-          } else {
-            val constant = Constant(operand2)
-            c.Expr(q"$mnemonic($term1, dword($constant.toInt))")
-          }
-        } else {
-          c.Expr(Apply(Select(This(TypeName("$anon")), mnemonic), List(Literal(Constant(())))))
-        }
+          
+//          } else {
+//            c.Expr(Apply(Select(This(TypeName("$anon")), mnemonic), List(Literal(Constant(())))))
+//          }
       }
 
       //Expr(Apply(Select(Select(Ident(TermName("$anon")), TermName("mov")), TermName("apply")), List(Select(Ident(TermName("$anon")), TermName("ebp")), Apply(Select(Ident(TermName("$anon")), TermName("esp")))))))

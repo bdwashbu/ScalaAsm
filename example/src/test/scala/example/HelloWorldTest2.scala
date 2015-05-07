@@ -57,7 +57,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"add esp, -12",
       asm"call GetStdHandle",
       asm"mov $hFile, eax",
-      asm"push $lpBuffer",
+      asm"push $lpBuffer eax eax $lpBuffer",
       asm"call strlen",
       asm"mov $numberOfBytesToWrite, eax",
       asm"push byte 0",

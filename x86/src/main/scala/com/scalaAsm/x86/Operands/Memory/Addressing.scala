@@ -5,11 +5,7 @@ import com.scalaAsm.x86._
 
 trait Memory[Size] extends RegisterOrMemory[Size] 
 
-trait AbsoluteAddress[Size] extends Memory[Size] {
-  self =>
-  var offset: Size
-  def getRelative: Constant[Size]
-  def apply: Constant[Size]
-  val name: Option[String]
+case class AbsoluteAddress[Size: x86Size](offset: Size) extends Memory[Size] {
+  val name: String = ""
 }
 

@@ -100,44 +100,33 @@ object AsmCompiler {
 
   def parseInterpolated(c: Context, asmInstructions: List[String])(args: Seq[c.Expr[Any]]): c.Expr[InstructionResult] = {
     import c.universe._
-    import scala.reflect.runtime.{ currentMirror => cm }
-    import scala.reflect.runtime.{ universe => ru }
-
-    val parts = c.prefix.tree match {
-      case Apply(_, List(Apply(_, rawParts))) =>
-        rawParts zip (args map (_.tree)) map {
-          case (Literal(Constant(rawPart: String)), arg) =>
-            arg.toString
-        }
-    }
 
     val fullInst = asmInstructions.reduce(_ + "" + _)
     val asmInstruction = asmInstructions.head
-    val params = Seq[Tree]((args map (_.tree)): _*)
+    val interpolatedArgs = Seq[Tree]((args map (_.tree)): _*)
+    
+    //c.abort(c.enclosingPosition, asmInstructions.reduce(_ + " | " + _) + ":" + params.toString)
 
     val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase)
     //throw new Exception(params.head.toString())
-    if (params.head.toString contains "toString") {
+    if (interpolatedArgs.head.toString contains "toString") {
       val param = TermName(asmInstruction.split(' ').tail.mkString.split(',').head)
       // throw new Exception("kookoo")
       c.Expr(q"$mnemonic($param, dword(input))")
     } else if (!fullInst.contains(',')) {
+      //c.abort(c.enclosingPosition, asmInstructions(0).toString)
       //throw new Exception("fuckcck")
-      val x = q"${args(0)}"
+      val x = q"${interpolatedArgs(0)}"
       if (isByte(x.toString)) {
         c.Expr(q"$mnemonic(byte($x.toByte))")
       } else {
         c.Expr(q"$mnemonic($x)")
       }
-    } else if (asmInstructions.size == 2 && asmInstructions.last.size == 0) { // interpolated var at end of string
+    } else if (asmInstructions.size == 2 && interpolatedArgs.size == 1 && asmInstructions.last.size == 0) { // interpolated var at end of string
       val param = TermName(asmInstruction.split(' ').tail.mkString.split(',').head)
-      val paramString = parts(0).split('.').last
-      val param2 = TermName(paramString)
-      //throw new Exception(params(0).tpe.typeSymbol.name)
-      //val x = q"${args(0)}"
-      //throw new Exception(params(0).tpe.typeSymbol.name.toString)
-      //c.Expr(q"$mnemonic($param, dword($param2.toInt))")
-      params(0).tpe.typeSymbol.name.toString match {
+      val param2 = TermName(interpolatedArgs(0).toString.split('.').last)
+
+      interpolatedArgs(0).tpe.typeSymbol.name.toString match {
         case "Byte"         => c.Expr(q"$mnemonic($param, byte($param2))")
         case "Long" | "Int" => c.Expr(q"$mnemonic($param, dword($param2))")
         case _              => c.Expr(q"$mnemonic($param, $param2)")
@@ -149,22 +138,7 @@ object AsmCompiler {
     }
   }
 
-  object TwoOperands {
-    def unapply(line: String): Option[(String, String)] = {
-      if (line.contains(' ') && line.contains(',')) {
-        val params = line.split(' ').tail.reduce(_ + " " + _).split(',').map { param =>
-          if (param.contains("(")) {
-            param.trim.split("(").last.split(")").head
-          } else {
-            param.trim
-          }
-        }
-        Some(params(0), params(1))
-      } else {
-        None
-      }
-    }
-  }
+  
 
  
 
@@ -173,10 +147,29 @@ object AsmCompiler {
     import scala.reflect.runtime.{ currentMirror => cm }
     import scala.reflect.runtime.{ universe => ru }
 
+     object TwoOperands {
+      def unapply(line: List[String]): Option[(TermName, String, String)] = {
+        val mnemonic = TermName(line.head.split(' ').head.toUpperCase())
+        if (line.head.contains(' ') && line.head.contains(',')) {
+          val params = line.head.split(' ').tail.reduce(_ + " " + _).split(',').map { param =>
+            if (param.contains("(")) {
+              param.trim.split("(").last.split(")").head
+            } else {
+              param.trim
+            }
+          }
+          Some(mnemonic, params(0), params(1))
+        } else {
+          None
+        }
+      }
+    }
+    
      object OneOperand {
-        def unapply(line: String): Option[String] = {
-          if (line.contains(' ') && !line.contains(',')) {
-            Some(line.split(' ').last)
+        def unapply(line: List[String]): Option[(TermName, String)] = {
+          val mnemonic = TermName(line.head.split(' ').head.toUpperCase())
+          if (line.head.contains(' ') && !line.head.contains(',')) {
+            Some(mnemonic, line.head.split(' ').last)
           } else {
             None
           }
@@ -184,13 +177,30 @@ object AsmCompiler {
       }
     
       object NoOperand {
-        def unapply(line: String): Boolean = !line.contains(' ')
+        def unapply(line: List[String]): Option[TermName] = {
+          if (!line.head.contains(' ')) {
+            Some(TermName(line.head.split(' ').head.toUpperCase()))
+          } else {
+            None
+          }
+        }
       }
       
       object Register {
         def unapply(operand: String): Option[TermName] = {
           if (regList contains operand) {
             Some(TermName(operand))
+          } else {
+            None
+          }
+        }
+      }
+      
+      object Memory {
+        def unapply(operand: String): Option[c.Expr[InstructionResult]] = {
+         if (operand.startsWith("[") && operand.endsWith("]")) {
+           val reg = operand.drop(1).dropRight(1)
+            Some(c.Expr(q"AbsoluteAddress($reg)"))
           } else {
             None
           }
@@ -208,10 +218,8 @@ object AsmCompiler {
         
         def unapply(operand: String): Option[Constant] = {
          if (operand.split(" ").head == "dword" && isDword(convertDword(operand.split(" ").last))) {
-            //throw new Exception("WTF")
             Some(Constant(convertDword(operand.split(" ").last)))
           } else if (isDword(convertDword(operand))) {
-            //throw new Exception("WTF2")
             Some(Constant(convertDword(operand)))
           } else {
             None
@@ -222,9 +230,9 @@ object AsmCompiler {
       object Byte {
         def convertByte(operand: String): String = {
           if (operand.startsWith("0x")) {
-              val result = Long.parseLong(operand.drop(2), 16)
-              if (result > 128 || result < -128) {
-                throw new Exception(s"Error: $result is out of range for byte")
+              val result = Long.parseLong(operand.drop(2), 16) & 0xFFFFFFFF
+              if (result > 255) {
+                c.abort(c.enclosingPosition, s"Error: Value '$result' is too large for a byte")
               }
               
               result.toByte.toString
@@ -245,17 +253,9 @@ object AsmCompiler {
           }
         }
       }
-    
-    val parts = c.prefix.tree match {
-      case Apply(_, List(Apply(_, rawParts))) =>
-        rawParts zip (args map (_.tree)) map {
-          case (Literal(Constant(rawPart: String)), arg) =>
-            arg.toString
-        }
-    }
 
-    val toolBox = currentMirror.mkToolBox()
-    val importer = c.universe.mkImporter(ru)
+    //val toolBox = currentMirror.mkToolBox()
+    //val importer = c.universe.mkImporter(ru)
 
     val asmInstructions = (c.prefix.tree match {
       case Apply(_, List(Apply(_, xs))) => xs map {
@@ -267,20 +267,19 @@ object AsmCompiler {
     if (!args.isEmpty) { // contains an interpolated value
       parseInterpolated(c, asmInstructions)(args)
     } else {
-      val asmInstruction = asmInstructions.head
-      val mnemonic = TermName(asmInstruction.split(' ').head.toUpperCase())
-
-      asmInstruction match {
-        case NoOperand() =>
+      asmInstructions match {
+        case NoOperand(mnemonic) =>
           c.Expr(q"$mnemonic(())")
-        case OneOperand(param) =>
+        case OneOperand(mnemonic, param) =>
           param match {
             case Register(reg) => c.Expr(q"$mnemonic($reg)")
+            case Memory(mem) => c.Expr(q"$mnemonic($mem)")
             case Dword(dword) => c.Expr(q"$mnemonic(dword($dword.toInt))")
           }
-        case TwoOperands(operand1, operand2) =>
+        case TwoOperands(mnemonic, operand1, operand2) =>
           (operand1, operand2) match {
             case (Register(reg1), Register(reg2)) => c.Expr(q"$mnemonic($reg1, $reg2)")
+            case (Register(reg1), Memory(mem)) => c.Expr(q"$mnemonic($reg1, $mem)")
             case (Register(reg), Dword(dword)) =>  c.Expr(q"$mnemonic($reg, dword($dword.toInt))")
             case (Register(reg), Byte(byteVal)) => c.Expr(q"$mnemonic($reg, byte($byteVal.toByte))")
             

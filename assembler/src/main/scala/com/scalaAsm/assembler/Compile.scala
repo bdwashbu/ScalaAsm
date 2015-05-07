@@ -195,13 +195,13 @@ class Assembler extends Formats with Addressing {
         token match {
           case InstructionToken(inst) => inst match {
             case OneMachineCode(_, op1, _, _, _, _) if op1.isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op1.asInstanceOf[AbsoluteAddress[_]].name.get
+              val name = op1.asInstanceOf[AbsoluteAddress[_]].name
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case TwoMachineCode(_, op1, _, _, _, _, _) if op1.isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op1.asInstanceOf[AbsoluteAddress[_]].name.get
+              val name = op1.asInstanceOf[AbsoluteAddress[_]].name
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case TwoMachineCode(_, _, op2, _, _, _, _) if op2.isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op2.asInstanceOf[AbsoluteAddress[_]].name.get
+              val name = op2.asInstanceOf[AbsoluteAddress[_]].name
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case _ =>
           }

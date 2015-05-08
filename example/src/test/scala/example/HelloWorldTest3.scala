@@ -32,7 +32,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
     procedure(name = "start",
       asm"push pressAnyKey",
       asm"call flushBuffer",
-      PUSH(byte(0)),
+      asm"push 0",
       asm"call ExitProcess")
       
     val numberOfBytesToWrite = ebp + byte(-12)
@@ -48,18 +48,18 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       asm"add esp, byte -12",
       asm"push $STD_OUTPUT_HANDLE",
       asm"call GetStdHandle",
-      MOV(hFile, eax),
+      asm"mov $hFile, eax",
       asm"push $lpBuffer",
       asm"call strlen",
-      MOV(numberOfBytesToWrite, eax),
+      asm"mov $numberOfBytesToWrite, eax",
       asm"push 0",
-      LEA(eax, numberOfBytesWritten),
+      asm"lea eax, $numberOfBytesWritten",
       asm"push eax",
       asm"push $numberOfBytesToWrite",
       asm"push $lpBuffer",
       asm"push $hFile",
       asm"call WriteFile",
-      MOV(eax, numberOfBytesWritten),
+      asm"mov eax, $numberOfBytesWritten",
       asm"leave",
       RETN(word(4)))
 
@@ -73,7 +73,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       asm"start:",
 
       repeat(3, List(
-          MOV(edi, *(eax)), // read first 4 bytes
+          asm"mov edi, [eax]", // read first 4 bytes
           asm"add eax, 4", // increment pointer
           LEA(ecx, edi - dword(0x1010101)), // subtract 1 from each byte
           asm"not edi", // invert all bytes
@@ -81,8 +81,8 @@ object HelloWorld3 extends AsmProgram[x86_32] {
           asm"and ecx, ebp",
           asm"jnz test")),
 
-      MOV(edi, *(eax)),
-      ADD(eax, byte(4)),
+      asm"mov edi, [eax]",
+      asm"add eax 4",
       LEA(ecx, edi - dword(0x1010101)),
       asm"not edi",
       asm"and ecx, edi",
@@ -90,13 +90,13 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       asm"jz start",
 
       asm"test:",
-      TEST(ecx, dword(0x8080)), // test first 2 bytes
+      asm"test ecx 0x8080", // test first 2 bytes
       asm"jnz end",
       asm"shr ecx, byte 16",
       asm"add eax, 2",
       asm"end:",
       asm"shl cl",
-      SBB(eax, edx), // compute length
+      asm"sbb eax, edx", // compute length
       asm"pop edi",
       asm"pop ebp",
       RETN(word(4)))

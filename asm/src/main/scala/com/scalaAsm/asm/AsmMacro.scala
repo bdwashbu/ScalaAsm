@@ -21,7 +21,7 @@ object AsmCompiler {
 
   def isByte(s: String): Boolean = {
     if (s.contains("0x")) {
-      Long.parseLong(s.drop(2), 16) < 128
+      Long.parseLong(s.drop(2), 16) < 256
     } else {
       (allCatch opt s.toByte).isDefined
     }
@@ -56,7 +56,7 @@ object AsmCompiler {
     } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
       val mnemonic = asmInstruction.split(' ').head.toUpperCase()
       val param = asmInstruction.split(' ').last
-      if (regList contains param) {
+      if (regList.contains(param) || (param.contains("[") && param.contains("]"))) {
         x86Macro(c)(args: _*)
       } else if (!isDword(param)) {
         val varName = Constant(param)
@@ -198,9 +198,11 @@ object AsmCompiler {
       
       object Memory {
         def unapply(operand: String): Option[c.Expr[InstructionResult]] = {
+
          if (operand.startsWith("[") && operand.endsWith("]")) {
-           val reg = operand.drop(1).dropRight(1)
-            Some(c.Expr(q"AbsoluteAddress($reg)"))
+           
+           val reg = TermName(operand.drop(1).dropRight(1))
+            Some(c.Expr(q"$reg.Indirect()"))
           } else {
             None
           }
@@ -230,22 +232,22 @@ object AsmCompiler {
       object Byte {
         def convertByte(operand: String): String = {
           if (operand.startsWith("0x")) {
-              val result = Long.parseLong(operand.drop(2), 16) & 0xFFFFFFFF
+              val result = Long.parseLong(operand.drop(2), 16)
               if (result > 255) {
                 c.abort(c.enclosingPosition, s"Error: Value '$result' is too large for a byte")
               }
               
-              result.toByte.toString
+              Long.parseLong(operand.drop(2), 16).toByte.toString
             } else {
               operand
             }
         }
         
         def unapply(operand: String): Option[Constant] = {
-          if (operand.split(" ").head == "byte" && isByte(convertByte(operand.split(" ").last))) {
+          if (operand.split(" ").head == "byte" && isByte(operand.split(" ").last)) {
             //throw new Exception("WTF")
             Some(Constant(convertByte(operand.split(" ").last)))
-          } else if (isByte(convertByte(operand))) {
+          } else if (isByte(operand)) {
             //throw new Exception("WTF2")
             Some(Constant(convertByte(operand)))
           } else {
@@ -272,17 +274,17 @@ object AsmCompiler {
           c.Expr(q"$mnemonic(())")
         case OneOperand(mnemonic, param) =>
           param match {
-            case Register(reg) => c.Expr(q"$mnemonic($reg)")
             case Memory(mem) => c.Expr(q"$mnemonic($mem)")
+            case Register(reg) => c.Expr(q"$mnemonic($reg)")
             case Dword(dword) => c.Expr(q"$mnemonic(dword($dword.toInt))")
           }
         case TwoOperands(mnemonic, operand1, operand2) =>
           (operand1, operand2) match {
-            case (Register(reg1), Register(reg2)) => c.Expr(q"$mnemonic($reg1, $reg2)")
             case (Register(reg1), Memory(mem)) => c.Expr(q"$mnemonic($reg1, $mem)")
-            case (Register(reg), Dword(dword)) =>  c.Expr(q"$mnemonic($reg, dword($dword.toInt))")
+            case (Register(reg1), Register(reg2)) => c.Expr(q"$mnemonic($reg1, $reg2)")
             case (Register(reg), Byte(byteVal)) => c.Expr(q"$mnemonic($reg, byte($byteVal.toByte))")
-            
+            case (Register(reg), Dword(dword)) =>  c.Expr(q"$mnemonic($reg, dword($dword.toInt))")
+
           }
 
           

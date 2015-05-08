@@ -81,7 +81,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"start:",
 
       repeat(3, List(
-          MOV(edi, *(eax)), // read first 4 bytes
+          asm"mov edi, [eax]", // read first 4 bytes
           asm"ADD eax, 4", // increment pointer
           LEA(ecx, edi - dword(0x1010101)), // subtract 1 from each byte
           asm"not edi", // invert all bytes
@@ -89,7 +89,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
           asm"and ecx, ebp",
           asm"jnz test")),
 
-      MOV(edi, *(eax)),
+      asm"mov edi, [eax]",
       asm"add eax, 4",
       LEA(ecx, edi - dword(0x1010101)),
       asm"not edi",

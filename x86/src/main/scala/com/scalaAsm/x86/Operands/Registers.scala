@@ -22,7 +22,7 @@ abstract class GeneralPurpose[S: x86Size](name: String) extends Register[S](name
     def get: BaseIndex[Y] = this
   }
   
-  abstract class Indirect extends Memory[S] {
+  case class Indirect() extends Memory[S] {
     def base: GeneralPurpose[S] = self
     def get = this
   }

@@ -212,7 +212,7 @@ object AsmCompiler {
       object Dword {
         def convertDword(operand: String): String = {
           if (operand.startsWith("0x")) {
-              (Long.parseLong(operand.drop(2), 16)).toString
+              (Long.parseLong(operand.drop(2), 16)).toInt.toString
             } else {
               operand
             }

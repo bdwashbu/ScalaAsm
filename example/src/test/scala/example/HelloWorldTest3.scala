@@ -64,18 +64,18 @@ object HelloWorld3 extends AsmProgram[x86_32] {
       RETN(word(4)))
 
     procedure(name = "strlen",
-      MOV(eax, esp + byte(4)), // pointer to string
-      LEA(edx, eax + byte(3)), //asm"lea edx, [eax + 3]",
+      asm"mov eax, [esp + 4]",
+      asm"lea edx, [eax + 3]",
       asm"push ebp",
       asm"push edi",
-      MOV(ebp, dword(0x80808080)),
+      asm"mov ebp, 0x80808080",
 
       asm"start:",
 
       repeat(3, List(
           asm"mov edi, [eax]", // read first 4 bytes
           asm"add eax, 4", // increment pointer
-          LEA(ecx, edi - dword(0x1010101)), // subtract 1 from each byte
+          asm"lea ecx, [edi - 0x1010101]", // subtract 1 from each byte
           asm"not edi", // invert all bytes
           asm"and ecx, edi",
           asm"and ecx, ebp",
@@ -83,7 +83,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
 
       asm"mov edi, [eax]",
       asm"add eax 4",
-      LEA(ecx, edi - dword(0x1010101)),
+      asm"lea ecx, [edi - 0x1010101]",
       asm"not edi",
       asm"and ecx, edi",
       asm"and ecx, ebp",

@@ -200,9 +200,29 @@ object AsmCompiler {
         def unapply(operand: String): Option[c.Expr[InstructionResult]] = {
 
          if (operand.startsWith("[") && operand.endsWith("]")) {
-           
-           val reg = TermName(operand.drop(1).dropRight(1))
-            Some(c.Expr(q"$reg.Indirect()"))
+           val trimmed = operand.drop(1).dropRight(1)
+           if (operand.contains("+")) { // base index addressing
+             val tokens = trimmed.split(" ")
+             val reg = TermName(tokens(0))
+             
+             tokens(2) match {
+               case Byte(byteVal) => Some(c.Expr(q"$reg + byte($byteVal.toByte)"))
+               case Dword(dword) => Some(c.Expr(q"$reg + dword($dword.toInt)"))
+             }
+
+           } else if (operand.contains("-")) { // base index addressing
+             val tokens = trimmed.split(" ")
+             val reg = TermName(tokens(0))
+             
+             tokens(2) match {
+               case Byte(byteVal) => Some(c.Expr(q"$reg - byte($byteVal.toByte)"))
+               case Dword(dword) => Some(c.Expr(q"$reg - dword($dword.toInt)"))
+             }
+
+           } else { // register indirect addressing
+             val reg = TermName(operand.drop(1).dropRight(1))
+              Some(c.Expr(q"$reg.Indirect()"))
+           }
           } else {
             None
           }

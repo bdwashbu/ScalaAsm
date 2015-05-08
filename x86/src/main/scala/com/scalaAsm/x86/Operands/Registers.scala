@@ -17,7 +17,7 @@ abstract class GeneralPurpose[S: x86Size](name: String) extends Register[S](name
   def -[Z: x86Size](offset: Constant[Z]): BaseIndex[Z] = new BaseIndex(offset.negate) {}
   def +[Z: x86Size](offset: Constant[Z]): BaseIndex[Z] = new BaseIndex(offset) {}
   
-  abstract class BaseIndex[Y: x86Size](val displacement: Constant[Y]) extends Memory[S] {
+  case class BaseIndex[Y: x86Size](displacement: Constant[Y]) extends Memory[S] {
     def base: GeneralPurpose[S] = self
     def get: BaseIndex[Y] = this
   }

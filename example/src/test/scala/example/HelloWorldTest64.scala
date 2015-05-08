@@ -31,16 +31,15 @@ object HelloWorld64 extends AsmProgram[x86_64] {
     procedure(name = "start",
       asm"push rsp",
       asm"push [rsp]",
-      //PUSH(*(rsp)),
       asm"and spl, 0xF0",
-      MOV(rdx, dword(0xE)),
+      asm"mov rdx, dword 0xE",
       LEA(rcx, addr("helloWorld")),
-      SUB(rsp, byte(0x20)),
+      asm"sub rsp, 0x20",
       asm"invoke printf", // needs work
       LEA(rsp, rsp + byte(0x28)),
       asm"pop rsp",
       asm"xor rax, rax",
-      RETN(())
+      asm"retn"
     )
   }
 }

@@ -17,7 +17,7 @@ import java.lang.Byte;
 
 object AsmCompiler {
 
-  val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "rsp", "rax", "spl")
+  val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "rsp", "rax", "spl", "rdx")
 
   def isByte(s: String): Boolean = {
     if (s.contains("0x")) {
@@ -212,16 +212,16 @@ object AsmCompiler {
       object Dword {
         def convertDword(operand: String): String = {
           if (operand.startsWith("0x")) {
-              (Long.parseLong(operand.drop(2), 16).toInt).toString
+              (Long.parseLong(operand.drop(2), 16)).toString
             } else {
               operand
             }
         }
         
         def unapply(operand: String): Option[Constant] = {
-         if (operand.split(" ").head == "dword" && isDword(convertDword(operand.split(" ").last))) {
+         if (operand.split(" ").head == "dword" && isDword(operand.split(" ").last)) {
             Some(Constant(convertDword(operand.split(" ").last)))
-          } else if (isDword(convertDword(operand))) {
+          } else if (isDword(operand)) {
             Some(Constant(convertDword(operand)))
           } else {
             None
@@ -247,7 +247,7 @@ object AsmCompiler {
           if (operand.split(" ").head == "byte" && isByte(operand.split(" ").last)) {
             //throw new Exception("WTF")
             Some(Constant(convertByte(operand.split(" ").last)))
-          } else if (isByte(operand)) {
+          } else if (!operand.contains(" ") && isByte(operand)) {
             //throw new Exception("WTF2")
             Some(Constant(convertByte(operand)))
           } else {

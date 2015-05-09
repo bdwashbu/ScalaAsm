@@ -15,7 +15,6 @@ import com.scalaAsm.x86.Instructions.TwoMachineCode
 import com.scalaAsm.asm.AsmProgram
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.x86Mode
-import com.scalaAsm.asm.Addressing
 import com.scalaAsm.coff.Relocation
 import scala.collection.mutable.ArrayBuffer
 import com.scalaAsm.coff.CoffSymbol
@@ -30,7 +29,7 @@ import com.scalaAsm.asm.AsmCompiler
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Operands._
 
-class Assembler extends Formats with Addressing {
+class Assembler extends Formats {
   self =>
   import scala.language.postfixOps
   import com.scalaAsm.x86.Instructions.General._

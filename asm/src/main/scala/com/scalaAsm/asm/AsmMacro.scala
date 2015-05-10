@@ -5,11 +5,6 @@ import scala.reflect.macros.blackbox.Context
 import scala.reflect.runtime.currentMirror
 import scala.tools.reflect.ToolBox
 import com.scalaAsm.x86.InstructionResult
-//import com.scalaAsm.x86.Instructions.General._
-
-//import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.x86Macro
-
 import scala.reflect.runtime.universe._
 import scala.util.control.Exception.allCatch
 import java.lang.Long;

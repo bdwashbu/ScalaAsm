@@ -18,6 +18,11 @@ import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
+import scala.language.experimental.macros
+import com.scalaAsm.asm.AsmCompiler
+
+
+
 
 object HelloWorld2 extends AsmProgram[x86_32] {
   
@@ -43,7 +48,8 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       
     val numberOfBytesToWrite = ebp + byte(-12)
     val numberOfBytesWritten = ebp + byte(-8)
-    val hFile = ebp + byte(-4)
+    val hFile = ebp - byte(4)
+    //val hFile = "[ebp - 4]"
     //val hFileTest = asm"[ebp - 4]"
     val lpBuffer = ebp + byte(8)
     val STD_OUTPUT_HANDLE = "-14"

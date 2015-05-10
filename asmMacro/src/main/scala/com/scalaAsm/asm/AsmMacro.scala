@@ -34,12 +34,14 @@ object AsmCompiler {
     import scala.reflect.runtime.{ currentMirror => cm }
     import scala.reflect.runtime.{ universe => ru }
 
-    val asmInstruction = (c.prefix.tree match {
+    val blah = (c.prefix.tree match {
       case Apply(_, List(Apply(_, xs))) => xs map {
         case Literal(Constant(x: String)) => x
       }
       case _ => Nil
-    }).head
+    })
+    
+    val asmInstruction = if (blah.isEmpty) args(0).tree.symbol.name.decodedName.toString else blah.head
 
     val params = Seq[Tree]((args map (_.tree)): _*)
 

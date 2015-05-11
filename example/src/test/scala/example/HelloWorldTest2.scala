@@ -19,9 +19,6 @@ import com.scalaAsm.asm.x86_32
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 import scala.language.experimental.macros
-import com.scalaAsm.asm.AsmCompiler
-
-
 
 
 object HelloWorld2 extends AsmProgram[x86_32] {
@@ -106,7 +103,7 @@ object HelloWorld2 extends AsmProgram[x86_32] {
       asm"test:",
       asm"test ecx, 0x8080", // test first 2 bytes
       asm"jnz end",
-      asm"shr ecx, byte 16",
+      asm"shr ecx, 16",
       asm"add eax, 2",
       asm"end:",
       asm"shl cl",

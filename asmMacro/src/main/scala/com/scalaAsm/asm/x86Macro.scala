@@ -11,6 +11,7 @@ import scala.reflect.runtime.universe._
 import scala.util.control.Exception.allCatch
 import java.lang.Long;
 import java.lang.Byte;
+import scala.reflect.macros.{TypecheckException}
 
 object x86Macro {
   
@@ -215,6 +216,23 @@ object x86Macro {
       case _ => Nil
     })
 
+    def checkTypeCheck(reg: String, line: String, mnemonic: String) = {
+      val poo = if (line.contains(" ")) {
+        s"$mnemonic($reg, byte(${line.split(" ").last}))"
+      } else {
+        s"$mnemonic($reg, byte($line))"
+      }
+        
+      var returnVal = true;
+      
+        try c.typeCheck(c.parse("{ "+poo+" }")) catch { case e: TypecheckException =>
+          val msg = e.getMessage
+          returnVal = false
+        }
+        
+      returnVal
+    }
+    
     if (!args.isEmpty) { // contains an interpolated value
       parseInterpolated(c, asmInstructions)(args)
     } else {
@@ -228,10 +246,14 @@ object x86Macro {
             case Dword(dword) => c.Expr(q"$mnemonic(dword($dword.toInt))")
           }
         case TwoOperands(mnemonic, operand1, operand2) =>
+          val mnem = mnemonic
           (operand1, operand2) match {
             case (Register(reg1), Memory(mem)) => c.Expr(q"$mnemonic($reg1, $mem)")
             case (Register(reg1), Register(reg2)) => c.Expr(q"$mnemonic($reg1, $reg2)")
-            case (Register(reg), Byte(byteVal)) => c.Expr(q"$mnemonic($reg, byte($byteVal.toByte))")
+            case (Register(reg), Byte(byteVal)) if checkTypeCheck(operand1, operand2, asmInstructions.head.split(' ').head.toUpperCase()) => {
+              
+              c.Expr(q"$mnemonic($reg, byte($byteVal.toByte))")
+            }
             case (Register(reg), Dword(dword)) =>  c.Expr(q"$mnemonic($reg, dword($dword.toInt))")
 
           }

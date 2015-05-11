@@ -36,7 +36,7 @@ class ConditionalTest extends FlatSpec with ShouldMatchers {
       sections += new CodeSection {
 
         builder += Code(
-          asm"mov ebx, dword 4",
+          asm"mov ebx, 4",
           asm"test ebx, $input", // test if input == 4
           asm"jz zero", // jz will jump if input != 4
           asm"jmp notzero",

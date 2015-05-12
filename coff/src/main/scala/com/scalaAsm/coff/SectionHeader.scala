@@ -44,7 +44,7 @@ case class SectionHeader(
   def write: Array[Byte] = {
     val bbuf = ByteBuffer.allocate(256);
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
-    bbuf.put(name.padTo(8, 0.toChar) map(_.toByte) toArray)
+    bbuf.put(name.padTo(8, 0.toChar).map(_.toByte).toArray)
     bbuf.putInt(virtualSize)
     bbuf.putInt(virtualAddress)
     bbuf.putInt(sizeOfRawData)

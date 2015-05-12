@@ -34,7 +34,7 @@ object ImageExportDirectory {
 	      val name = Array.fill(input.position() - (RVA - exportFileOffset) - 1)(0.toByte)
 	      input.position(RVA - exportFileOffset)
 	      input.get(name)
-	      name map(_.toChar) mkString
+	      name.map(_.toChar).mkString
 	    }
       }
     }

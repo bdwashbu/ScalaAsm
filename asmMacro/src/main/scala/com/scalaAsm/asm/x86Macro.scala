@@ -225,7 +225,7 @@ object x86Macro {
         
       var returnVal = true;
       
-        try c.typeCheck(c.parse("{ "+poo+" }")) catch { case e: TypecheckException =>
+        try c.typecheck(c.parse("{ "+poo+" }")) catch { case e: TypecheckException =>
           val msg = e.getMessage
           returnVal = false
         }

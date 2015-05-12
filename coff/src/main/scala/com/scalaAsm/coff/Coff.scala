@@ -97,7 +97,7 @@ case class Coff(sections: Seq[Section], relocations: Seq[Relocation], symbols: S
 
     val outputStream = new DataOutputStream(new FileOutputStream(fileName));
     
-    val numSymbolsAndAux = symbols map {sym => 1 + sym.auxiliarySymbols.size} sum
+    val numSymbolsAndAux = symbols.map{sym => 1 + sym.auxiliarySymbols.size}.sum
 
     val sectionHeaders = sections.map(_.header.write).reduce(_ ++ _)
 

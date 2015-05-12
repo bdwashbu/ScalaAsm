@@ -42,7 +42,7 @@ object CoffSymbol {
   def getSymbolEntry(input: ByteBuffer): CoffSymbol = {
      val rawName = Array.fill(8)(0.toByte)
      input.get(rawName)
-     val name = rawName map(_.toChar) mkString
+     val name = rawName.map(_.toChar).mkString
      val value = input.getInt()
      val sectionNumber = input.getShort()
      val symbolType = SymbolType(input.getShort())
@@ -212,7 +212,7 @@ case class AuxiliaryFormatFiles (
   
   def write() = {
     bbuf.rewind()
-    bbuf.put(fileName.padTo(18, 0.toChar) map(_.toByte) toArray)
+    bbuf.put(fileName.padTo(18, 0.toChar).map(_.toByte).toArray)
     bbuf.array()
   } 
 }

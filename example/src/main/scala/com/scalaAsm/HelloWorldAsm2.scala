@@ -11,8 +11,8 @@ object HelloWorld2 extends AsmProgram[x86_64] {
   import com.scalaAsm.x86.Instructions.General._
   
   sections += new DataSection (
-    Variable("helloWorld", "Hello World!\r\n\0"),
-    Variable("pressAnyKey", "Press any key to continue ...\0")
+    Variable("helloWorld", "Hello World!\r\n\u0000"),
+    Variable("pressAnyKey", "Press any key to continue ...\u0000")
   ) {}
 
   sections += new CodeSection {

@@ -238,7 +238,7 @@ class Assembler extends Formats {
 
     val dataSection: Seq[PostToken] = {
       var parserPosition: Int = 0
-      for (token <- Variable("KEEP", "\0\0\0\0") +: dataTokens) yield {
+      for (token <- Variable("KEEP", "\u0000\u0000\u0000\u0000") +: dataTokens) yield {
         val result = token match {
           case Variable(name, value) => PostVar(name, value, parserPosition)
           case Align(to, filler, _)  => ByteOutputPost(Array.fill((to - (parserPosition % to)) % to)(filler))

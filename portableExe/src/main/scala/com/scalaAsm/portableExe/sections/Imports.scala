@@ -53,7 +53,7 @@ trait ImportSymbol extends Positionable {
   
 case class Imports(val imports: Seq[Extern], val offset: Int) {
 
-  private def alignTo16(name: String) = if (name.size % 2 == 1) name + "\0" else name
+  private def alignTo16(name: String) = if (name.size % 2 == 1) name + "\u0000" else name
 
   private case class ImageImportByName(hint: Short = 0, name: String) extends ImportSymbol {
 
@@ -126,7 +126,7 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
     val firstStream = new DataOutputStream(firstByteOutput)
 
     val importByNames: Seq[ImportSymbol] = imports.flatMap { importEntry =>
-      importEntry.functionNames.map(name => ImageImportByName(0, name + "\0")) :+ DLLName(alignTo16(importEntry.dllName + "\0"))
+      importEntry.functionNames.map(name => ImageImportByName(0, name + "\u0000")) :+ DLLName(alignTo16(importEntry.dllName + "\u0000"))
     }
 
     val numThunks = importAddressTable.map(imports => imports.thunks.size).sum

@@ -38,7 +38,7 @@ object HelloWorld3 extends AsmProgram[x86_32] {
     val numberOfBytesToWrite = ebp + byte(-12)
     val numberOfBytesWritten = ebp + byte(-8)
     val hFile = ebp + byte(-4)
-    val lpBuffer = ebp + byte(8)
+    val lpBuffer = "[ebp + 8]"
     val STD_OUTPUT_HANDLE = byte(-11)
     val STD_INPUT_HANDLE = byte(-10)
     

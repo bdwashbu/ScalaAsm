@@ -39,7 +39,7 @@ trait AsmProgram[Mode <: x86Mode] extends Formats {
   
 
   
-  trait CodeSection extends Registers[Mode] with AsmSection {
+  trait CodeSection extends Registers with AsmSection {
 
     val builder = new ListBuffer[HighLevel]()
 

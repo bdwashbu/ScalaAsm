@@ -11,13 +11,9 @@ import scala.collection.mutable.ListBuffer
 object ResourceGen {
   def compileResources(resLocation: Int, iconName: String): Array[Byte] = { 
     
-    val file = new File(iconName);
-	 
-    
+    val file = new File(iconName); 
     val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
-    
-    
-    
+
     //convert file into array of bytes
     val fileInputStream = new FileInputStream(file);
     fileInputStream.read(bFile);
@@ -76,53 +72,6 @@ object DirectoryTypeID extends Enumeration {
     val html = Value(23)
     val assemblyManifest = Value(24)
 }
-
-//object ParsedImageResourceDirectory {
-//
-//  def getResourceDir(input: ByteBuffer, beginningFileLocation: Int, level: Int, beginningOfSection: Int): ParsedImageResourceDirectory = {
-//    val characteristics = input.getInt
-//    val timeDateStamp = input.getInt
-//    val majorVersion = input.getShort
-//    val minorVersion = input.getShort
-//    val numberOfNamedEntries = input.getShort
-//    val numberOfIdEntries = input.getShort
-//
-//    val namedEntries = for (i <- 0 until numberOfNamedEntries) yield {
-//      ParsedImageResourceDirectoryEntry.getNamedDirectoryEntry(input, beginningFileLocation, beginningOfSection, level)
-//    }
-//
-//    val idEntries = for (i <- 0 until numberOfIdEntries) yield {
-//      ParsedImageResourceDirectoryEntry.getIdDirectoryEntry(input, beginningFileLocation, beginningOfSection, level)
-//    }
-//
-//    ParsedImageResourceDirectory(
-//      characteristics, 
-//      timeDateStamp, 
-//      majorVersion, 
-//      minorVersion, 
-//      namedEntries,
-//      idEntries)
-//  }
-//
-//  def getAllNamedEntries(root: ParsedImageResourceDirectory): Seq[NamedImageResourceDirectoryEntry] = {
-//      val dirs = (root.namedEntries ++ root.idEntries).collect { case x: ParsedImageResourceDirectoryEntry => x }
-//      dirs.collect { case x: NamedImageResourceDirectoryEntry => x } ++ dirs.flatMap { x => getAllNamedEntries(x.directory) }
-//  }
-//  
-//  def getResources(input: ByteBuffer, sections: Seq[SectionHeader], dir: ImageDataDirectory): ParsedImageResourceDirectory = {
-//
-//    val section = sections.find(section => section.virtualAddress <= dir.virtualAddress &&
-//      section.virtualAddress + section.sizeOfRawData > dir.virtualAddress)
-//
-//    val resourceFileOffset = section.get.virtualAddress - section.get.pointerToRawData
-//    input.position(dir.virtualAddress - resourceFileOffset)
-//    val beginningFileLocation = input.position
-//
-//    val resourceRoot = getResourceDir(input, beginningFileLocation, 0, resourceFileOffset)
-//
-//    resourceRoot
-//  }
-//}
 
 case class ResourceData(data: Array[Byte]) extends ResourceField {
   
@@ -258,7 +207,6 @@ case class RootDir(dir: ResourceDirectory) {
     
   def place: Unit = {
     def placeRecursive(resourceField: ResourceField, position: Int): Unit = {
-      println(resourceField.getClass().getName() + ": " + position)
       var newPos = position + resourceField.size
       resourceField.position = position;
       resourceField.getChildren.foreach{child => placeRecursive(child, newPos); newPos += child.getTotalSize}
@@ -301,15 +249,6 @@ case class ImageResourceDirectory(
   }
 }
 
-//case class ParsedImageResourceDirectory(
-//  characteristics: Int,
-//  timeDateStamp: Int,
-//  majorVersion: Short,
-//  minorVersion: Short,
-//  namedEntries: Seq[NamedImageResourceDirectoryEntry],
-//  idEntries: Seq[ImageResourceEntry]) {
-//}
-
 case class ImageResourceDirectoryEntry(
   val name: Int,
   val offsetToData: Int) {
@@ -321,76 +260,6 @@ case class ImageResourceDirectoryEntry(
     buffer.putInt(offsetToData)
     buffer.array
   }
-}
-
-//trait ParsedImageResourceDirectoryEntry extends ImageResourceEntry {
-//  val offsetToData: Int
-//  val directory: ParsedImageResourceDirectory
-//}
-
-//case class NamedImageResourceDirectoryEntry(
-//  name: String,
-//  offsetToData: Int,
-//  directory: ParsedImageResourceDirectory) extends ParsedImageResourceDirectoryEntry
-//
-//case class IdImageResourceDirectoryEntry(
-//  id: Int,
-//  offsetToData: Int,
-//  directory: ParsedImageResourceDirectory) extends ParsedImageResourceDirectoryEntry
-
-
-  
-object ParsedImageResourceDirectoryEntry {
-//  def getNamedDirectoryEntry(input: ByteBuffer, beginningFileLocation: Int, beginningOfSection: Int, level: Int): NamedImageResourceDirectoryEntry = {
-//    val namePtr = input.getInt
-//    val offsetToData = input.getInt
-//    val savedPos = input.position
-//    //val result = if (namePtr >>> 31 == 1) {
-//    val pointer = namePtr & 0x7FFFFFFF
-//    input.position(beginningFileLocation + pointer)
-//    val stringLength = input.getShort
-//    var name: String = ""
-//    for (i <- 0 until stringLength) {
-//      name += input.getShort.toChar
-//    }
-//    var resDir: ParsedImageResourceDirectory = null
-//
-//    val savedPos2 = input.position
-//    input.position((offsetToData & 0x7FFFFFFF) + beginningFileLocation)
-//    if (level < 2) {
-//      resDir = ParsedImageResourceDirectory.getResourceDir(input, beginningFileLocation, level + 1, beginningOfSection)
-//    }
-//    input.position(savedPos2)
-//
-//    val result = NamedImageResourceDirectoryEntry(name, offsetToData, resDir)
-//    //}
-//    input.position(savedPos)
-//    result
-//  }
-//
-//  def getIdDirectoryEntry(input: ByteBuffer, beginningFileLocation: Int, beginningOfSection: Int, level: Int): ImageResourceEntry = {
-//    val namePtr = input.getInt
-//    val offsetToData = input.getInt
-//    val savedPos = input.position
-//    val id = namePtr & 0x7FFFFFFF
-//    var result: ImageResourceEntry = null
-//
-//    if (id == 0x409 || id == 0x415) {
-//      input.position((offsetToData & 0x7FFFFFFF) + beginningFileLocation)
-//      result = ImageResourceDataEntry.getDataEntry(input, beginningFileLocation)
-//    } else {
-//      val savedPos = input.position
-//      input.position((offsetToData & 0x7FFFFFFF) + beginningFileLocation)
-//      if (level < 2) {
-//        val resDir = ParsedImageResourceDirectory.getResourceDir(input, beginningFileLocation, level + 1, beginningOfSection)
-//        result = IdImageResourceDirectoryEntry(id, offsetToData, resDir)
-//      }
-//      input.position(savedPos)
-//    }
-//
-//    input.position(savedPos)
-//    result
-//  }
 }
 
 object ImageResourceDataEntry {

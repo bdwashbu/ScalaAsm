@@ -6,6 +6,7 @@ import scala.reflect.runtime.currentMirror
 
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
+import scala.util.Try
 
 import scala.reflect.runtime.universe._
 import scala.util.control.Exception.allCatch
@@ -15,30 +16,7 @@ import scala.reflect.macros.{ TypecheckException }
 
 object x86Macro {
 
-  val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "rsp", "rax", "spl", "rdx")
-
-  def isByte(s: String): Boolean = {
-    if (s.contains("0x")) {
-      Long.parseLong(s.drop(2), 16) < 256
-    } else {
-      (allCatch opt s.toByte).isDefined
-    }
-  }
-  def isDword(s: String): Boolean = {
-    if (s.contains("0x")) {
-      (allCatch opt Long.parseLong(s.drop(2), 16)).isDefined
-    } else {
-      (allCatch opt s.toLong).isDefined
-    }
-  }
-
-  //   def parseParam(c: Context, param: String): c.Tree = {
-  //     param match {
-  //        case Dword(dword)       => c.parse(s"byte($dword))")
-  //        case "Long" | "Int" => c.Expr(q"$mnemonic($param, dword($param2))")
-  //        case _              => c.Expr(q"$mnemonic($param, $param2)")
-  //      }
-  //   }
+  
 
   def parseParam(c: Context)(param: c.Tree): String = {
     import c.universe._
@@ -59,10 +37,10 @@ object x86Macro {
     //c.abort(c.enclosingPosition, valdefs(name))
 
     (valdefs(name), typeName) match {
-      case (Dword(dword), _)    => s"dword($dword))"
+      case (Dword(dword), "String")    => s"$dword)"
       case (_, "Int")           => s"dword($name)"
-      case (Byte(byteVal), _)   => s"byte($byteVal)"
-      case (Memory(byteVal), _) => s"$byteVal"
+      case (Byte(byteVal), "String")   => s"$byteVal"
+      case (Memory(mem), "String") => s"$mem"
       case _                    => s"$param"
     }
   }
@@ -94,6 +72,15 @@ object x86Macro {
   }
 
   object Byte {
+    def isByte(s: String): Boolean = {
+      val result = Try(if (s.contains("0x")) {
+        Long.parseLong(s.drop(2), 16) < 256
+      } else {
+        Long.parseLong(s, 10) < 256
+      })
+      result.getOrElse(false)
+    }
+     
     def convertByte(operand: String): String = {
       if (operand.startsWith("0x")) {
         val result = Long.parseLong(operand.drop(2), 16)
@@ -108,12 +95,16 @@ object x86Macro {
     }
 
     def unapply(operand: String): Option[String] = {
-      if (operand.split(" ").head == "byte" && isByte(operand.split(" ").last)) {
-        //throw new Exception("WTF")
-        Some(convertByte(operand.split(" ").last))
-      } else if (!operand.contains(" ") && isByte(operand)) {
-        //throw new Exception("WTF2")
-        Some(convertByte(operand))
+      if (operand.split(" ").head != "dword") {
+        if (operand.split(" ").head == "byte" && isByte(operand.split(" ").last)) {
+          //throw new Exception("WTF")
+          Some(convertByte(operand.split(" ").last))
+        } else if (!operand.contains(" ") && isByte(operand)) {
+          //throw new Exception("WTF2")
+          Some(convertByte(operand))
+        } else {
+          None
+        }
       } else {
         None
       }
@@ -121,6 +112,14 @@ object x86Macro {
   }
 
   object Dword {
+    def isDword(s: String): Boolean = {
+      if (s.contains("0x")) {
+        (allCatch opt Long.parseLong(s.drop(2), 16)).isDefined
+      } else {
+        (allCatch opt s.toLong).isDefined
+      }
+    }
+    
     def convertDword(operand: String): String = {
       if (operand.startsWith("0x")) {
         (Long.parseLong(operand.drop(2), 16)).toInt.toString
@@ -130,10 +129,14 @@ object x86Macro {
     }
 
     def unapply(operand: String): Option[String] = {
-      if (operand.split(" ").head == "dword" && isDword(operand.split(" ").last)) {
-        Some(convertDword(operand.split(" ").last))
-      } else if (isDword(operand)) {
-        Some(convertDword(operand))
+      if (operand.split(" ").head != "byte") {
+        if (operand.split(" ").head == "dword" && isDword(operand.split(" ").last)) {
+          Some(convertDword(operand.split(" ").last))
+        } else if (isDword(operand)) {
+          Some(convertDword(operand))
+        } else {
+          None
+        }
       } else {
         None
       }
@@ -146,19 +149,19 @@ object x86Macro {
       if (operand.startsWith("[") && operand.endsWith("]")) {
         val trimmed = operand.drop(1).dropRight(1)
         if (operand.contains("+")) { // base index addressing
-          val tokens = trimmed.split(" ")
+          val tokens = trimmed.split('+').map(_.trim)
           val reg = TermName(tokens(0))
 
-          tokens(2) match {
+          tokens(1) match {
             case Byte(byteVal) => Some(s"$reg + byte($byteVal.toByte)")
             case Dword(dword)  => Some(s"$reg + dword($dword.toInt)")
           }
 
         } else if (operand.contains("-")) { // base index addressing
-          val tokens = trimmed.split(" ")
+          val tokens = trimmed.split('-').map(_.trim)
           val reg = TermName(tokens(0))
 
-          tokens(2) match {
+          tokens(1) match {
             case Byte(byteVal) => Some(s"$reg - byte($byteVal.toByte)")
             case Dword(dword)  => Some(s"$reg - dword($dword.toInt)")
           }
@@ -179,10 +182,10 @@ object x86Macro {
     import scala.reflect.runtime.{ universe => ru }
 
     object TwoOperands {
-      def unapply(line: List[String]): Option[(String, String, String)] = {
-        val mnemonic = line.head.split(' ').head.toUpperCase()
-        if (line.head.contains(' ') && line.head.contains(',')) {
-          val params = line.head.split(' ').tail.reduce(_ + " " + _).split(',').map { param =>
+      def unapply(line: String): Option[(String, String, String)] = {
+        val mnemonic = line.split(' ').head.toUpperCase()
+        if (line.contains(' ') && line.contains(',')) {
+          val params = line.split(' ').tail.reduce(_ + " " + _).split(',').map { param =>
             if (param.contains("(")) {
               param.trim.split("(").last.split(")").head
             } else {
@@ -197,10 +200,10 @@ object x86Macro {
     }
 
     object OneOperand {
-      def unapply(line: List[String]): Option[(String, String)] = {
-        val mnemonic = line.head.split(' ').head.toUpperCase()
-        if (line.head.contains(' ') && !line.head.contains(',')) {
-          Some(mnemonic, line.head.split(' ').last)
+      def unapply(line: String): Option[(String, String)] = {
+        val mnemonic = line.split(' ').head.toUpperCase()
+        if (line.contains(' ') && !line.contains(',')) {
+          Some(mnemonic, line.split(' ').last)
         } else {
           None
         }
@@ -208,9 +211,9 @@ object x86Macro {
     }
 
     object NoOperand {
-      def unapply(line: List[String]): Option[String] = {
-        if (!line.head.contains(' ')) {
-          Some(line.head.split(' ').head.toUpperCase())
+      def unapply(line: String): Option[String] = {
+        if (!line.contains(' ')) {
+          Some(line.split(' ').head.toUpperCase())
         } else {
           None
         }
@@ -218,6 +221,8 @@ object x86Macro {
     }
 
     object Register {
+      val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "rsp", "rax", "spl", "rdx")
+      
       def unapply(operand: String): Option[String] = {
         if (regList contains operand) {
           Some(operand)
@@ -232,17 +237,13 @@ object x86Macro {
 
     val asmInstructions = (c.prefix.tree match {
       case Apply(_, List(Apply(_, xs))) => xs map {
-        case Literal(Constant(x: String)) => x
+        case Literal(Constant(x: String)) => x.replaceAll("\\s+", " ").trim
       }
       case _ => Nil
     })
 
-    def checkTypeCheck(reg: String, line: String, mnemonic: String) = {
-      val expr = if (line.contains(" ")) {
-        s"$mnemonic($reg, byte(${line.split(" ").last}))"
-      } else {
-        s"$mnemonic($reg, byte($line))"
-      }
+    def checkType2Arg(arg0: String, arg1: String, mnemonic: String) = {
+      val expr = s"$mnemonic($arg0, $arg1)"
 
       val testType = scala.util.Try(c.typecheck(c.parse("{ " + expr + " }")))
 
@@ -252,7 +253,7 @@ object x86Macro {
     if (!args.isEmpty) { // contains an interpolated value
       parseInterpolated(c, asmInstructions)(args)
     } else {
-      val inst = asmInstructions match {
+      val inst = asmInstructions.head match {
         case NoOperand(mnemonic) =>
           s"$mnemonic(())"
         case OneOperand(mnemonic, param) =>
@@ -266,8 +267,7 @@ object x86Macro {
           (operand1, operand2) match {
             case (Register(reg1), Memory(mem))    => s"$mnemonic($reg1, $mem)"
             case (Register(reg1), Register(reg2)) => s"$mnemonic($reg1, $reg2)"
-            case (Register(reg), Byte(byteVal)) if checkTypeCheck(operand1, operand2, asmInstructions.head.split(' ').head.toUpperCase()) => {
-
+            case (Register(reg), Byte(byteVal)) if checkType2Arg(reg, s"byte($byteVal.toByte)", mnemonic) => {
               s"$mnemonic($reg, byte($byteVal.toByte))"
             }
             case (Register(reg), Dword(dword)) => s"$mnemonic($reg, dword($dword.toInt))"

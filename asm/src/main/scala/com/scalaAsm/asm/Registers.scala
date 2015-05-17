@@ -3,7 +3,7 @@ package com.scalaAsm.asm
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 
-trait Registers[Mode <: x86Mode] {
+trait Registers {
 
     object rdi extends RDI
     object rax extends RAX

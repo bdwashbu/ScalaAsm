@@ -41,7 +41,7 @@ object AsmCompiler {
       case _ => Nil
     })
     
-    val asmInstruction = if (blah.isEmpty) args(0).tree.symbol.name.decodedName.toString else blah.head
+    val asmInstruction = (if (blah.isEmpty) args(0).tree.symbol.name.decodedName.toString else blah.head).replaceAll("\\s+", " ").trim
 
     val params = Seq[Tree]((args map (_.tree)): _*)
 

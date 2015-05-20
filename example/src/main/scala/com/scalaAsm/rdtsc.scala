@@ -6,7 +6,7 @@ import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
 import com.scalaAsm.asm._
 
-object rdtscExample extends AsmProgram[x86_32] {
+object rdtscExample extends AsmProgram {
   
   import com.scalaAsm.x86.Instructions.General._
   import com.scalaAsm.x86.Instructions.System._

@@ -39,9 +39,9 @@ class Assembler extends Formats {
   
   
       
-  def preassemble[Mode <: x86Mode](program: AsmProgram[Mode]): CompiledAssembly = {
+  def preassemble(program: AsmProgram): CompiledAssembly = {
     
-    lazy val procTokens = program.sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.builder.toSeq }
+    lazy val procTokens = program.sections.collect { case (x: AsmProgram#CodeSection) => x }.flatMap { seg => seg.builder.toSeq }
     lazy val procNames = procTokens.collect { case ProcedureToken(name,_) => name }
 
     def compileAssembly: CompiledAssembly = {
@@ -106,7 +106,7 @@ class Assembler extends Formats {
     compileAssembly
   }
   
-  def assemble[Mode <: x86Mode](program: AsmProgram[Mode]): Coff = {
+  def assemble(program: AsmProgram): Coff = {
 
     val compiledAsm = preassemble(program)
 

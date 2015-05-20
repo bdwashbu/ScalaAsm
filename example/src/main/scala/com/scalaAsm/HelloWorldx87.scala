@@ -6,7 +6,7 @@ import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_64
 import com.scalaAsm.asm._
 
-object HelloWorldx87 extends AsmProgram[x86_64] {
+object HelloWorldx87 extends AsmProgram {
   
   import com.scalaAsm.x86.Instructions.General._
   import com.scalaAsm.x86.Instructions.x87._

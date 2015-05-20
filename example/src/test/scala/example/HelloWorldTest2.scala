@@ -21,7 +21,7 @@ import com.scalaAsm.x86._
 import scala.language.experimental.macros
 
 
-object HelloWorld2 extends AsmProgram[x86_32] {
+object HelloWorld2 extends AsmProgram {
   
   import com.scalaAsm.x86.Instructions.General._
 
@@ -121,31 +121,6 @@ class HelloWorldTest2 extends FlatSpec with ShouldMatchers {
   val executableName = "test_HelloWorldTest2.exe"
 
   "A complex 32-bit Hello world" should "print 'Hello World'" in {
-    val name = System.nanoTime
-    new File(executableName).delete()
-    val outputStream = new DataOutputStream(new FileOutputStream(executableName));
-    val assembler = new Assembler {}
-    val linker = new Linker {}
-
-    var beginTime = System.nanoTime()
-    val helloWorld = assembler.assemble(HelloWorld2).addIcon("scala.ico")
-
-    val exe = linker.link(helloWorld, 0x3000, false, "kernel32.dll", "msvcrt.dll")
-
-    outputStream.write(exe.get)
-    println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
-    outputStream.close
-
-    val child = Runtime.getRuntime().exec(executableName);
-    val in = new BufferedReader(
-      new InputStreamReader(child.getInputStream()));
-
-    val output = in.readLine()
-
-    child.waitFor()
-
-    new File(executableName).delete()
-
-    output should equal("Hello World!")
+    getProgramOutput(HelloWorld2, false) should equal("Hello World!")
   }
 }

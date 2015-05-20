@@ -47,9 +47,13 @@ object AsmCompiler {
 
     if (!params.isEmpty) {
       x86Macro.x86(c)(args: _*)
-    } else if (asmInstruction.endsWith(":")) { // label
-      val labelName = Constant(asmInstruction.reverse.tail.reverse)
-      c.Expr(q"Label($labelName)")
+    } else if (asmInstruction.contains(':')) { // label
+      if (asmInstruction.endsWith(":") && asmInstruction.count(_ == ':') == 1 && !asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
+        val labelName = Constant(asmInstruction.reverse.tail.reverse)
+        c.Expr(q"Label($labelName)")
+      } else {
+        c.abort(c.enclosingPosition, s"Error: bad label format")
+      }
     } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
       val mnemonic = asmInstruction.split(' ').head.toUpperCase()
       val param = asmInstruction.split(' ').last

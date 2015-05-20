@@ -22,7 +22,7 @@ class ConditionalTest extends FlatSpec with ShouldMatchers {
   val executableName = "test_ConditionalTest.exe"
 
   def getExecutable(input: Int) = {
-    object Factorial extends AsmProgram[x86_32] {
+    object Factorial extends AsmProgram {
 
       import com.scalaAsm.x86.Instructions.General._
       import com.scalaAsm.asm._

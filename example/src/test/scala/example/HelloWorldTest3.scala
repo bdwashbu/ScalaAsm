@@ -19,7 +19,7 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 import com.scalaAsm.asm._
 
-object HelloWorld3 extends AsmProgram[x86_32] {
+object HelloWorld3 extends AsmProgram {
   
   import com.scalaAsm.x86.Instructions.General._
 
@@ -110,33 +110,6 @@ class HelloWorldTest3 extends FlatSpec with ShouldMatchers {
   val executableName = "test_HelloWorldTest3.exe"
 
   "A test of flushbuffer" should "print 'Press any key to continue...'" in {
-    val name = System.nanoTime
-    new File(executableName).delete()
-    val outputStream = new DataOutputStream(new FileOutputStream(executableName));
-    val assembler = new Assembler {}
-    val linker = new Linker {}
-
-    var beginTime = System.nanoTime()
-    val helloWorld = assembler.assemble(HelloWorld3).addIcon("scala.ico")
-
-    val exe = linker.link(helloWorld, 0x3000, false, "kernel32.dll", "msvcrt.dll")
-
-    outputStream.write(exe.get)
-    println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
-    outputStream.close
-
-    val child = Runtime.getRuntime().exec(executableName);
-    val in = new BufferedReader(
-      new InputStreamReader(child.getInputStream()));
-
-    val output = in.readLine()
-    
-    println(output)
-
-    child.waitFor()
-
-    new File(executableName).delete()
-
-    output should equal("Press any key to continue ...")
+    getProgramOutput(HelloWorld3, false) should equal("Press any key to continue ...")
   }
 }

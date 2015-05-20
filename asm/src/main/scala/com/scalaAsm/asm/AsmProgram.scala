@@ -24,11 +24,11 @@ trait x86_32 extends x86Mode
 trait AsmSection
  trait HighLevel
 
-trait AsmProgram[Mode <: x86Mode] extends Formats {
+trait AsmProgram extends Formats {
 
   val sections = new ListBuffer[AsmSection]()
   
-  lazy val codeTokens = sections.collect { case (x: AsmProgram[_]#CodeSection) => x }.flatMap { seg => seg.build(seg.builder.toSeq) }
+  lazy val codeTokens = sections.collect { case (x: AsmProgram#CodeSection) => x }.flatMap { seg => seg.build(seg.builder.toSeq) }
   def varTokens = sections.collect { case (x: DataSection) => x }.flatMap { seg => seg.tokens }
   def variableNames = varTokens.collect { case Variable(name,_) => name }
   

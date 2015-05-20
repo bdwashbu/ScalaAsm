@@ -148,7 +148,7 @@ object x86Macro {
 
       if (operand.startsWith("[") && operand.endsWith("]")) {
         val trimmed = operand.drop(1).dropRight(1)
-        if (operand.contains("+")) { // base index addressing
+        if (operand.contains("+") && operand.count(_ == '+') == 1) { // base index addressing
           val tokens = trimmed.split('+').map(_.trim)
           val reg = TermName(tokens(0))
 
@@ -157,7 +157,7 @@ object x86Macro {
             case Dword(dword)  => Some(s"$reg + dword($dword.toInt)")
           }
 
-        } else if (operand.contains("-")) { // base index addressing
+        } else if (operand.contains("-") && operand.count(_ == '-') == 1) { // base index addressing
           val tokens = trimmed.split('-').map(_.trim)
           val reg = TermName(tokens(0))
 
@@ -265,7 +265,8 @@ object x86Macro {
         case TwoOperands(mnemonic, operand1, operand2) =>
           val mnem = mnemonic
           (operand1, operand2) match {
-            case (Register(reg1), Memory(mem))    => s"$mnemonic($reg1, $mem)"
+            case (Register(reg), Memory(mem))    => s"$mnemonic($reg, $mem)"
+            case (Memory(mem), Register(reg))    => s"$mnemonic($mem, $reg)"
             case (Register(reg1), Register(reg2)) => s"$mnemonic($reg1, $reg2)"
             case (Register(reg), Byte(byteVal)) if checkType2Arg(reg, s"byte($byteVal.toByte)", mnemonic) => {
               s"$mnemonic($reg, byte($byteVal.toByte))"

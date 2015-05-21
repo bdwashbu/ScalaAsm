@@ -45,7 +45,7 @@ object x86Macro {
     }
   }
 
-  def parseInterpolated(c: Context, asmInstructions: List[String])(args: Seq[c.Expr[Any]]): c.Expr[InstructionResult] = {
+  def parseInterpolated(c: Context, asmInstructions: List[String])(args: Seq[c.Expr[Any]]): String = {
     import c.universe._
 
     val fullInst = asmInstructions.reduce(_ + "" + _)
@@ -68,7 +68,7 @@ object x86Macro {
       s"$mnemonic($x, $param)"
     }
 
-    c.Expr(c.parse(s"$inst"))
+    s"$inst"
   }
 
   object Byte {
@@ -176,7 +176,7 @@ object x86Macro {
     }
   }
 
-  def x86(c: Context)(args: c.Expr[Any]*): c.Expr[InstructionResult] = {
+  def x86(c: Context)(args: c.Expr[Any]*): String = {
     import c.universe._
     import scala.reflect.runtime.{ currentMirror => cm }
     import scala.reflect.runtime.{ universe => ru }
@@ -274,7 +274,7 @@ object x86Macro {
             case (Register(reg), Dword(dword)) => s"$mnemonic($reg, dword($dword.toInt))"
           }
       }
-      c.Expr(c.parse(s"$inst"))
+      s"$inst"
     }
   }
 

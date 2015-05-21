@@ -45,14 +45,15 @@ object AsmCompiler {
 
     val params = Seq[Tree]((args map (_.tree)): _*)
 
-    if (!params.isEmpty) {
+    val result = if (!params.isEmpty) {
       x86Macro.x86(c)(args: _*)
     } else if (asmInstruction.contains(':')) { // label
       if (asmInstruction.endsWith(":") && asmInstruction.count(_ == ':') == 1 && !asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
-        val labelName = Constant(asmInstruction.reverse.tail.reverse)
-        c.Expr(q"Label($labelName)")
+        val labelName = asmInstruction.reverse.tail.reverse
+        s"""Label(\"$labelName\")"""
       } else {
         c.abort(c.enclosingPosition, s"Error: bad label format")
+        ""
       }
     } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
       val mnemonic = asmInstruction.split(' ').head.toUpperCase()
@@ -60,35 +61,35 @@ object AsmCompiler {
       if (regList.contains(param) || (param.contains("[") && param.contains("]"))) {
         x86Macro.x86(c)(args: _*)
       } else if (!isDword(param)) {
-        val varName = Constant(param)
+        val varName = param
 
         mnemonic match {
-          case "CALL" => c.Expr(q"FunctionReference($varName)")
-          case "PUSH" => c.Expr(q"Reference($varName)")
-          case "JNZ" => c.Expr(q"""
+          case "CALL" => s"""FunctionReference(\"$varName\")"""
+          case "PUSH" => s"""Reference(\"$varName\")"""
+          case "JNZ" => s"""
                 val ev = implicitly[JNZ#_1[Constant[_8]]]
                 val format = implicitly[OneOperandFormat[Constant[_8]]]
-                LabelRef($varName, ev, format)
-                """)
+                LabelRef(\"$varName\", ev, format)
+                """
           case "JZ" =>
-            c.Expr(q"""
+               s"""
                 val ev = implicitly[JZ#_1[Constant[_8]]]
                 val format = implicitly[OneOperandFormat[Constant[_8]]]
-                LabelRef($varName, ev, format)
-                """)
+                LabelRef(\"$varName\", ev, format)
+                """
           case "JE" =>
-            c.Expr(q"""
+               s"""
                 val ev = implicitly[JE#_1[Constant[_8]]]
                 val format = implicitly[OneOperandFormat[Constant[_8]]]
-                LabelRef($varName, ev, format)
-                """)
+                LabelRef(\"$varName\", ev, format)
+                """
           case "JMP" =>
-            c.Expr(q"""
+               s"""
                 val ev = implicitly[JMP#_1[Constant[_8]]]
                 val format = implicitly[OneOperandFormat[Constant[_8]]]
-                LabelRef($varName, ev, format)
-                """)
-          case "INVOKE" => c.Expr(q"Invoke($varName)")
+                LabelRef(\"$varName\", ev, format)
+                """
+          case "INVOKE" => s"""Invoke(\"$varName\")"""
           case _        => x86Macro.x86(c)(args: _*)
         }
       } else {
@@ -97,6 +98,8 @@ object AsmCompiler {
     } else {
       x86Macro.x86(c)(args: _*)
     }
+    
+    c.Expr(c.parse(result))
   }
 
  

@@ -49,7 +49,7 @@ object AsmCompiler {
     
     val interleved = interleave(text, args, 1)
     val withSeparators: Seq[Any] = interleved.flatMap{x => x match {
-      case x: String => x.split("\n").head +: x.split("\n").tail.map{x => List(0, x)}
+      case x: String => x.split("\n").head +: x.split("\n").tail.flatMap{x => List(0, x)}
       case x: c.Expr[_] => List(x)
     }}
     
@@ -117,8 +117,8 @@ object AsmCompiler {
         x86Macro.x86(c, inst)(args: _*)
       }
     }
-    
-    c.Expr(c.parse(translated(0)))
+    //c.abort(c.enclosingPosition, translated.reduce{_ + ", " + _})
+    c.Expr(c.parse(translated.reduce{_ + ", " + _}))
   }
 
  

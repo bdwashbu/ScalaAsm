@@ -41,6 +41,8 @@ object AsmCompiler {
       case _ => Nil
     })
     
+    //c.abort(c.enclosingPosition, blah.toString)
+    
     val asmInstruction = (if (blah.isEmpty) args(0).tree.symbol.name.decodedName.toString else blah.head).replaceAll("\\s+", " ").trim
 
     val params = Seq[Tree]((args map (_.tree)): _*)
@@ -64,31 +66,18 @@ object AsmCompiler {
         val varName = param
 
         mnemonic match {
-          case "CALL" => s"""FunctionReference(\"$varName\")"""
-          case "PUSH" => s"""Reference(\"$varName\")"""
-          case "JNZ" => s"""
-                val ev = implicitly[JNZ#_1[Constant[_8]]]
-                val format = implicitly[OneOperandFormat[Constant[_8]]]
-                LabelRef(\"$varName\", ev, format)
-                """
+          case "CALL" =>
+            s"""FunctionReference(\"$varName\")"""
+          case "PUSH" =>
+            s"""Reference(\"$varName\")"""
+          case "JNZ" =>
+            s"""LabelRef(\"$varName\", implicitly[JNZ#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
           case "JZ" =>
-               s"""
-                val ev = implicitly[JZ#_1[Constant[_8]]]
-                val format = implicitly[OneOperandFormat[Constant[_8]]]
-                LabelRef(\"$varName\", ev, format)
-                """
+            s"""LabelRef(\"$varName\", implicitly[JZ#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
           case "JE" =>
-               s"""
-                val ev = implicitly[JE#_1[Constant[_8]]]
-                val format = implicitly[OneOperandFormat[Constant[_8]]]
-                LabelRef(\"$varName\", ev, format)
-                """
+            s"""LabelRef(\"$varName\", implicitly[JE#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
           case "JMP" =>
-               s"""
-                val ev = implicitly[JMP#_1[Constant[_8]]]
-                val format = implicitly[OneOperandFormat[Constant[_8]]]
-                LabelRef(\"$varName\", ev, format)
-                """
+            s"""LabelRef(\"$varName\", implicitly[JMP#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
           case "INVOKE" => s"""Invoke(\"$varName\")"""
           case _        => x86Macro.x86(c)(args: _*)
         }

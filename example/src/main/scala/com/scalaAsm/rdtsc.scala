@@ -18,26 +18,26 @@ object rdtscExample extends AsmProgram {
   sections += new CodeSection {
 
     builder += Code( 
-      RDTSCP(()),
-      PUSH(edx),
-      PUSH(eax),
-      CPUID(()),
-      RDTSCP(()),
-      PUSH(edx),
-      PUSH(eax),
-      CPUID(()),
-      POP(edx),
-      POP(edx),
-      POP(eax),
-      POP(eax),
-      SUB(eax,edx),
-      PUSH(eax),
+      List(RDTSCP(())),
+      List(PUSH(edx)),
+      List(PUSH(eax)),
+      List(CPUID(())),
+      List(RDTSCP(())),
+      List(PUSH(edx)),
+      List(PUSH(eax)),
+      List(CPUID(())),
+      List(POP(edx)),
+      List(POP(edx)),
+      List(POP(eax)),
+      List(POP(eax)),
+      List(SUB(eax,edx)),
+      List(PUSH(eax)),
       asm"push numClocks",
       asm"call printf",
-      POP(eax),
-      POP(eax),
+      List(POP(eax)),
+      List(POP(eax)),
       asm"call _getch",
-      RETN(())
+      List(RETN(()))
     )
   }
 }

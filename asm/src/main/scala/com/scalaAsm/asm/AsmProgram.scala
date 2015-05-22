@@ -45,11 +45,11 @@ trait AsmProgram extends Formats {
 
     implicit def toByte(x: Int) = x.toByte
 
-    def procedure(name: String, innerCode: InstructionResult*) = {
-      builder += ProcedureToken(name, innerCode)
+    def procedure(name: String, innerCode: List[InstructionResult]*) = {
+      builder += ProcedureToken(name, innerCode.reduce{_ ++ _})
     }
     
-    case class Code(code: InstructionResult*) extends HighLevel with InstructionResult {
+    case class Code(code: List[InstructionResult]*) extends HighLevel with InstructionResult {
       def mnemonic = ""
       def apply = Array()
     }
@@ -58,7 +58,7 @@ trait AsmProgram extends Formats {
       
       code flatMap {
         case ProcedureToken(name, code) => BeginProc(name) +: code
-        case Code(codes @ _*)           => codes
+        case Code(codes @ _*)           => codes.reduce{_ ++ _}
         case align @ Align(_,_,_)       => List(align)
       }
     }
@@ -83,12 +83,8 @@ trait AsmProgram extends Formats {
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 
-    def repeat(numTimes: Int, code: List[InstructionResult]): Code = {
-      val expanded = ListBuffer[InstructionResult]()
-      for (i <- 0 until numTimes) {
-        expanded ++= code
-      }
-      Code(expanded: _*)
+    def repeat(numTimes: Int, code: List[List[InstructionResult]]): List[Code] = {
+      (0 until numTimes).map{x => Code(code.reduce{_ ++ _})}.toList
     }
   }
 }

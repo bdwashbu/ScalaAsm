@@ -29,7 +29,7 @@ object AsmCompiler {
     }
   }
 
-  def asmMacro(c: Context)(args: c.Expr[Any]*): c.Expr[InstructionResult] = {
+  def asmMacro(c: Context)(args: c.Expr[Any]*): c.Expr[List[InstructionResult]] = {
     import c.universe._
     import scala.reflect.runtime.{ currentMirror => cm }
     import scala.reflect.runtime.{ universe => ru }
@@ -118,7 +118,7 @@ object AsmCompiler {
       }
     }
     //c.abort(c.enclosingPosition, translated.reduce{_ + ", " + _})
-    c.Expr(c.parse(translated.reduce{_ + ", " + _}))
+    c.Expr(c.parse("List(" + translated.reduce{_ + ", " + _} + ")"))
   }
 
  

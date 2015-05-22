@@ -35,20 +35,20 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
 
         builder += Code(
           asm"mov eax, $input",
-          asm"mov ebx, eax",
-          asm"Begin:",
-          asm"dec ebx",
-          asm"test ebx, ebx",
-          asm"je End",
-          asm"imul ebx",
-          asm"jmp Begin",
-          asm"End:",
-          asm"push eax",
-          asm"push test",
-          asm"call printf",
-          asm"pop eax",
-          asm"pop eax",
-          asm"retn"
+          asm"""mov ebx, eax
+          Begin:
+          dec ebx
+          test ebx, ebx
+          je End
+          imul ebx
+          jmp Begin
+          End:
+          push eax
+          push test
+          call printf
+          pop eax
+          pop eax
+          retn"""
         )
 
       }

@@ -11,7 +11,7 @@ package object asm {
 
   implicit class AsmContext (val sc : StringContext) {
     //def asm(args: Any*): InstructionResult = asm3(sc.s(args))
-    def asm(args: Any*): InstructionResult = macro AsmCompiler.asmMacro
+    def asm(args: Any*): List[InstructionResult] = macro AsmCompiler.asmMacro
   }
  
   def byte(value: Byte) = Constant(value)

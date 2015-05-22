@@ -33,7 +33,7 @@ object HelloWorld64 extends AsmProgram {
       asm"push [rsp]",
       asm"and spl, 0xF0",
       asm"mov rdx, dword 0xE",
-      LEA(rcx, addr("helloWorld")),
+      List(LEA(rcx, addr("helloWorld"))),
       asm"sub rsp, 0x20",
       asm"invoke printf", // needs work
       asm"lea rsp, [rsp + 0x28]",

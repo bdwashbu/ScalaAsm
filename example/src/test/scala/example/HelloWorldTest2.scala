@@ -72,7 +72,7 @@ object HelloWorld2 extends AsmProgram {
       asm"call WriteFile",
       asm"mov eax, $numberOfBytesWritten",
       asm"leave",
-      RETN(word(4)))
+      List(RETN(word(4))))
 
     procedure(name = "strlen",
       asm"mov eax, [esp + 4]", // pointer to string
@@ -110,7 +110,7 @@ object HelloWorld2 extends AsmProgram {
       asm"sbb eax, edx", // compute length
       asm"pop edi",
       asm"pop ebp",
-      RETN(word(4)))
+      List(RETN(word(4))))
 
     builder += align(2)
   }

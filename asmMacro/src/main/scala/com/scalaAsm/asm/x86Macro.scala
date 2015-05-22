@@ -176,7 +176,22 @@ object x86Macro {
     }
   }
 
-  def x86(c: Context)(args: c.Expr[Any]*): String = {
+  def x86Mac(c: Context)(args: c.Expr[Any]*): String = {
+    import c.universe._
+    import scala.reflect.runtime.{ currentMirror => cm }
+    import scala.reflect.runtime.{ universe => ru }
+    
+    val asmInstructions = (c.prefix.tree match {
+      case Apply(_, List(Apply(_, xs))) => xs map {
+        case Literal(Constant(x: String)) => x.replaceAll("\\s+", " ").trim
+      }
+      case _ => Nil
+    })
+    
+    x86(c, asmInstructions)(args: _*)
+  }
+  
+  def x86(c: Context, line: List[String])(args: c.Expr[Any]*): String = {
     import c.universe._
     import scala.reflect.runtime.{ currentMirror => cm }
     import scala.reflect.runtime.{ universe => ru }
@@ -235,12 +250,7 @@ object x86Macro {
     //val toolBox = currentMirror.mkToolBox()
     //val importer = c.universe.mkImporter(ru)
 
-    val asmInstructions = (c.prefix.tree match {
-      case Apply(_, List(Apply(_, xs))) => xs map {
-        case Literal(Constant(x: String)) => x.replaceAll("\\s+", " ").trim
-      }
-      case _ => Nil
-    })
+    
 
     def checkType2Arg(arg0: String, arg1: String, mnemonic: String) = {
       val expr = s"$mnemonic($arg0, $arg1)"
@@ -251,9 +261,11 @@ object x86Macro {
     }
 
     if (!args.isEmpty) { // contains an interpolated value
-      parseInterpolated(c, asmInstructions)(args)
+      parseInterpolated(c, line)(args)
     } else {
-      val inst = asmInstructions.head match {
+      //c.abort(c.enclosingPosition, line.head)
+      val trimmed = line.head.replaceAll("\\s+", " ").trim
+      val inst = trimmed match {
         case NoOperand(mnemonic) =>
           s"$mnemonic(())"
         case OneOperand(mnemonic, param) =>

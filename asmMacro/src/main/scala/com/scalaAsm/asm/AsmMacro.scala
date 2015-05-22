@@ -70,14 +70,14 @@ object AsmCompiler {
     val translated = splitBySeparator(withSeparators, 0).map { line =>
       
       val newArgs = line.collect{case x:c.Expr[_] => x}
-      val inst = line.collect{case x:String => x}
+      val inst = line.collect{case x:String => x}.toList
     
       val asmInstruction = (if (inst.isEmpty) newArgs(0).tree.symbol.name.decodedName.toString else inst.head).replaceAll("\\s+", " ").trim
   
       val params = Seq[Tree]((newArgs map (_.tree)): _*)
   
       if (!params.isEmpty) {
-        x86Macro.x86(c)(args: _*)
+        x86Macro.x86(c, inst)(args: _*)
       } else if (asmInstruction.contains(':')) { // label
         if (asmInstruction.endsWith(":") && asmInstruction.count(_ == ':') == 1 && !asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
           val labelName = asmInstruction.reverse.tail.reverse
@@ -90,7 +90,7 @@ object AsmCompiler {
         val mnemonic = asmInstruction.split(' ').head.toUpperCase()
         val param = asmInstruction.split(' ').last
         if (regList.contains(param) || (param.contains("[") && param.contains("]"))) {
-          x86Macro.x86(c)(args: _*)
+          x86Macro.x86(c, inst)(args: _*)
         } else if (!isDword(param)) {
           val varName = param
   
@@ -108,13 +108,13 @@ object AsmCompiler {
             case "JMP" =>
               s"""LabelRef(\"$varName\", implicitly[JMP#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
             case "INVOKE" => s"""Invoke(\"$varName\")"""
-            case _        => x86Macro.x86(c)(args: _*)
+            case _        => x86Macro.x86(c, inst)(args: _*)
           }
         } else {
-          x86Macro.x86(c)(args: _*)
+          x86Macro.x86(c, inst)(args: _*)
         }
       } else {
-        x86Macro.x86(c)(args: _*)
+        x86Macro.x86(c, inst)(args: _*)
       }
     }
     

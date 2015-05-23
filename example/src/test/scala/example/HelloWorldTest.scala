@@ -33,10 +33,10 @@ object HelloWorld extends AsmProgram {
 
   sections += new CodeSection {
     builder += Code(
-      asm"push helloWorld",
-      asm"call printf",
-      asm"pop ebx",
-      asm"retn"
+      asm"""push helloWorld
+      call printf
+      pop ebx
+      retn"""
     )
   }
 }

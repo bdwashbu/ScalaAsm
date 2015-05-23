@@ -83,7 +83,7 @@ trait AsmProgram extends Formats {
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 
-    def repeat(numTimes: Int, code: List[List[InstructionResult]]): List[Code] = {
+    def repeat(numTimes: Int, code: List[InstructionResult]*): List[Code] = {
       (0 until numTimes).map{x => Code(code.reduce{_ ++ _})}.toList
     }
   }

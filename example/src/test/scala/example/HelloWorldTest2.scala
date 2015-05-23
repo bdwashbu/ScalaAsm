@@ -83,14 +83,14 @@ object HelloWorld2 extends AsmProgram {
 
       asm"start:",
 
-      repeat(3, List(
+      repeat(3,
           asm"mov edi, [eax]", // read first 4 bytes
           asm"ADD eax, 4", // increment pointer
           asm"lea ecx, [edi - 0x1010101]", // subtract 1 from each byte
           asm"not edi", // invert all bytes
           asm"and ecx, edi",
           asm"and ecx, ebp",
-          asm"jnz test")),
+          asm"jnz test"),
 
       asm"mov edi, [eax]",
       asm"add eax, 4",

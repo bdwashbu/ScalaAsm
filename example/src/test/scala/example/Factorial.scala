@@ -34,8 +34,8 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
       sections += new CodeSection {
 
         builder += Code(
-          asm"mov eax, $input",
-          asm"""mov ebx, eax
+          asm"""mov eax, $input
+          mov ebx, eax
           Begin:
           dec ebx
           test ebx, ebx

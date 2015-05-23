@@ -82,7 +82,7 @@ object HelloWorld3 extends AsmProgram {
           asm"jnz test")),
 
       asm"mov edi, [eax]",
-      asm"add eax 4",
+      asm"add eax, 4",
       asm"lea ecx, [edi - 0x1010101]",
       asm"not edi",
       asm"and ecx, edi",
@@ -90,7 +90,7 @@ object HelloWorld3 extends AsmProgram {
       asm"jz start",
 
       asm"test:",
-      asm"test ecx 0x8080", // test first 2 bytes
+      asm"test ecx, 0x8080", // test first 2 bytes
       asm"jnz end",
       asm"shr ecx, byte 16",
       asm"add eax, 2",

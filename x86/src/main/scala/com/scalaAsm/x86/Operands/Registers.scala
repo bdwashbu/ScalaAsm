@@ -20,6 +20,7 @@ abstract class GeneralPurpose[S: x86Size](name: String) extends Register[S](name
   case class BaseIndex[Y: x86Size](displacement: Constant[Y]) extends Memory[S] {
     def base: GeneralPurpose[S] = self
     def get: BaseIndex[Y] = this
+    override def toString = "[" + name + " " + (if (displacement.value.toString.contains('-')) '-' else '+') + "]"
   }
   
   case class Indirect() extends Memory[S] {

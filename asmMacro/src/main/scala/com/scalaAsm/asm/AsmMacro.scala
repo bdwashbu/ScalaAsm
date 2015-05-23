@@ -40,109 +40,107 @@ object AsmCompiler {
       }
       case _ => Nil
     })
-    
+
     def interleave(xs: Seq[Object], ys: Seq[Object], n: Int): Seq[Object] = {
       val iter = xs grouped n
       val coll = iter zip ys.iterator flatMap { case (xs, y) => if (xs.size == n) xs :+ y else xs }
       (coll ++ iter.flatten).toIndexedSeq
     }
-    
+
     val interleved = interleave(text, args, 1)
-    
+
     //c.abort(c.enclosingPosition, interleved.toString)
-    
-    
-    val withSeparators: Seq[Any] = interleved.flatMap{x => x match {
-      case x: String => {
+
+    val withSeparators: Seq[Any] = interleved.flatMap { x =>
+      x match {
+        case x: String => {
           val lines = x.split("\\r?\\n")
-          if (lines.head.trim.size != 0 && lines.head.trim.isEmpty()) {
-            0 +: lines.tail.flatMap{x => List(x, 0)}
-          } else if (!lines.head.trim.isEmpty()) {
-            lines.head +: lines.tail.flatMap{x => List(0, x)}
-          } else {
-            List(x)
-          }        
+          lines.head +: lines.tail.flatMap { x => List(0, x) }
+        }
+        case x: c.Expr[_] => List(x)
+        case _            => Nil
       }
-      case x: c.Expr[_] => List(x)
-      case _ => Nil
-    }}
-    
-    //c.abort(c.enclosingPosition, withSeparators.toString)
-    
-    def splitBySeparator( l: Seq[Any], sep: Any ): Seq[Seq[Any]] = {
+    }
+
+    //c.abort(c.enclosingPosition, "SEP: " + withSeparators.toString)
+
+    def splitBySeparator(l: Seq[Any], sep: Any): Seq[Seq[Any]] = {
       import collection.mutable.ListBuffer
       val b = ListBuffer(ListBuffer[Any]())
       l foreach { e =>
-        if ( e == sep ) {
-          if  ( !b.last.isEmpty ) b += ListBuffer[Any]()
-        }
-        else b.last += e
+        if (e == sep) {
+          if (!b.last.isEmpty) b += ListBuffer[Any]()
+        } else b.last += e
       }
       b.map(_.toSeq)
     }
-    
+
     //c.abort(c.enclosingPosition, splitBySeparator(withSeparators, 0).toString)
-    
+
     val translated = splitBySeparator(withSeparators, 0).map { line =>
-      
-      val newArgs = line.collect{case x:c.Expr[_] => x}
-      val inst = line.collect{case x:String => x}.toList
-    
-      val asmInstruction = (if (inst.isEmpty) newArgs(0).tree.symbol.name.decodedName.toString else inst.head).replaceAll("\\s+", " ").trim
-  
-      val params = Seq[Tree]((newArgs map (_.tree)): _*)
-  
-      if (!params.isEmpty) {
+
+      val newArgs = line.collect { case x: c.Expr[_] => x }
+      val inst = line.collect { case x: String => x }.toList
+
+      processLine(c)(inst, newArgs: _*)
+    }
+    //c.abort(c.enclosingPosition, translated.reduce{_ + ", " + _})
+    c.Expr(c.parse("List(" + translated.reduce { _ + ", " + _ } + ")"))
+  }
+
+  def processLine(c: Context)(inst: List[String], args: c.Expr[Any]*): String = {
+    import c.universe._
+    import scala.reflect.runtime.{ currentMirror => cm }
+    import scala.reflect.runtime.{ universe => ru }
+    //if (newArgs.size == 0)
+    // c.abort(c.enclosingPosition, "inst:" + inst + " new args: " + newArgs)
+
+    val asmInstruction = (if (inst.isEmpty) args(0).tree.symbol.name.decodedName.toString else inst.head).replaceAll("\\s+", " ").trim
+
+    val params = Seq[Tree]((args map (_.tree)): _*)
+
+    if (!params.isEmpty) {
+      x86Macro.x86(c, inst)(args: _*)
+    } else if (asmInstruction.contains(':')) { // label
+      if (asmInstruction.endsWith(":") && asmInstruction.count(_ == ':') == 1 && !asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
+        val labelName = asmInstruction.reverse.tail.reverse
+        s"""Label(\"$labelName\")"""
+      } else {
+        c.abort(c.enclosingPosition, s"Error: bad label format")
+        ""
+      }
+    } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
+      val mnemonic = asmInstruction.split(' ').head.toUpperCase()
+      val param = asmInstruction.split(' ').last
+      if (regList.contains(param) || (param.contains("[") && param.contains("]"))) {
         x86Macro.x86(c, inst)(args: _*)
-      } else if (asmInstruction.contains(':')) { // label
-        if (asmInstruction.endsWith(":") && asmInstruction.count(_ == ':') == 1 && !asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
-          val labelName = asmInstruction.reverse.tail.reverse
-          s"""Label(\"$labelName\")"""
-        } else {
-          c.abort(c.enclosingPosition, s"Error: bad label format")
-          ""
-        }
-      } else if (asmInstruction.contains(' ') && !asmInstruction.contains(',')) {
-        val mnemonic = asmInstruction.split(' ').head.toUpperCase()
-        val param = asmInstruction.split(' ').last
-        if (regList.contains(param) || (param.contains("[") && param.contains("]"))) {
-          x86Macro.x86(c, inst)(args: _*)
-        } else if (!isDword(param)) {
-          val varName = param
-  
-          mnemonic match {
-            case "CALL" =>
-              s"""FunctionReference(\"$varName\")"""
-            case "PUSH" =>
-              s"""Reference(\"$varName\")"""
-            case "JNZ" =>
-              s"""LabelRef(\"$varName\", implicitly[JNZ#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
-            case "JZ" =>
-              s"""LabelRef(\"$varName\", implicitly[JZ#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
-            case "JE" =>
-              s"""LabelRef(\"$varName\", implicitly[JE#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
-            case "JMP" =>
-              s"""LabelRef(\"$varName\", implicitly[JMP#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
-            case "INVOKE" => s"""Invoke(\"$varName\")"""
-            case _        => x86Macro.x86(c, inst)(args: _*)
-          }
-        } else {
-          x86Macro.x86(c, inst)(args: _*)
+      } else if (!isDword(param)) {
+        val varName = param
+
+        mnemonic match {
+          case "CALL" =>
+            s"""FunctionReference(\"$varName\")"""
+          case "PUSH" =>
+            s"""Reference(\"$varName\")"""
+          case "JNZ" =>
+            s"""LabelRef(\"$varName\", implicitly[JNZ#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
+          case "JZ" =>
+            s"""LabelRef(\"$varName\", implicitly[JZ#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
+          case "JE" =>
+            s"""LabelRef(\"$varName\", implicitly[JE#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
+          case "JMP" =>
+            s"""LabelRef(\"$varName\", implicitly[JMP#_1[Constant[_8]]], implicitly[OneOperandFormat[Constant[_8]]])"""
+          case "INVOKE" => s"""Invoke(\"$varName\")"""
+          case _        => x86Macro.x86(c, inst)(args: _*)
         }
       } else {
         x86Macro.x86(c, inst)(args: _*)
       }
+    } else {
+      x86Macro.x86(c, inst)(args: _*)
     }
-    //c.abort(c.enclosingPosition, translated.reduce{_ + ", " + _})
-    c.Expr(c.parse("List(" + translated.reduce{_ + ", " + _} + ")"))
   }
 
- 
-
-  
-
- 
-
-  
-
 }
+
+

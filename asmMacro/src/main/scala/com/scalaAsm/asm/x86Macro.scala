@@ -35,40 +35,28 @@ object x86Macro {
     }.toMap.withDefaultValue(name)
 
     //c.abort(c.enclosingPosition, valdefs(name))
+    val valDef = valdefs(name)
 
-    (valdefs(name), typeName) match {
-      case (Dword(dword), "String")    => s"$dword)"
-      case (_, "Int")           => s"dword($name)"
-      case (Byte(byteVal), "String")   => s"$byteVal"
-      case (Memory(mem), "String") => s"$mem"
-      case _                    => s"$param"
+    (valDef, typeName) match {
+      case (_, "Int")           => s"dword($valDef)"
+      case (_, "String")        => valDef
+      case _                    => valDef
     }
   }
 
   def parseInterpolated(c: Context, asmInstructions: List[String])(args: Seq[c.Expr[Any]]): String = {
     import c.universe._
 
-    val fullInst = asmInstructions.reduce(_ + "" + _)
-    val asmInstruction = asmInstructions.head
-
-    //c.abort(c.enclosingPosition, asmInstructions.reduce(_ + " | " + _) + ":" + params.toString)
-
-    val mnemonic = asmInstruction.split(' ').head.toUpperCase
-    //throw new Exception(params.head.toString())
-    val inst = if (!fullInst.contains(',')) {
-      val param = parseParam(c)(args(0).tree)
-      s"$mnemonic($param)"
-    } else if (asmInstructions.size == 2 && args.size == 1 && asmInstructions.last.size == 0) { // interpolated var at end of string
-      val param = asmInstruction.split(' ').tail.mkString.split(',').head
-      val param2 = parseParam(c)(args(0).tree)
-      s"$mnemonic($param, $param2)"
-    } else {
-      val param = asmInstructions.last.split(' ').tail.mkString.split(',').head
-      val x = parseParam(c)(args(0).tree)
-      s"$mnemonic($x, $param)"
+    def interleave(xs: Seq[String], ys: Seq[String], n: Int): Seq[String] = {
+      val iter = xs grouped n
+      val coll = iter zip ys.iterator flatMap { case (xs, y) => if (xs.size == n) xs :+ y else xs }
+      (coll ++ iter.flatten).toIndexedSeq
     }
-
-    s"$inst"
+    
+    val interleved = interleave(asmInstructions, args.map{x => parseParam(c)(x.tree)}, 1)
+    val inst = interleved.reduce{_ + "" + _}
+ 
+    inst
   }
 
   object Byte {
@@ -199,13 +187,16 @@ object x86Macro {
     object TwoOperands {
       def unapply(line: String): Option[(String, String, String)] = {
         val mnemonic = line.split(' ').head.toUpperCase()
-        if (line.contains(' ') && line.contains(',')) {
-          val params = line.split(' ').tail.reduce(_ + " " + _).split(',').map { param =>
-            if (param.contains("(")) {
-              param.trim.split("(").last.split(")").head
-            } else {
+        val index = line.indexOf(" ")
+        val paramString = line.splitAt(index+1)._2
+        if (paramString.contains(',')) {
+          
+          val params = paramString.split(',').map { param =>
+            //if (param.contains("(")) {
+            //  param.trim.split("(").last.split(")").head
+            //} else {
               param.trim
-            }
+            //}
           }
           Some(mnemonic, params(0), params(1))
         } else {
@@ -218,7 +209,8 @@ object x86Macro {
       def unapply(line: String): Option[(String, String)] = {
         val mnemonic = line.split(' ').head.toUpperCase()
         if (line.contains(' ') && !line.contains(',')) {
-          Some(mnemonic, line.split(' ').last)
+          val index = line.indexOf(" ")
+          Some(mnemonic, line.splitAt(index+1)._2)
         } else {
           None
         }
@@ -260,12 +252,15 @@ object x86Macro {
       testType.isSuccess
     }
 
-    val result = if (!args.isEmpty) { // contains an interpolated value
-      parseInterpolated(c, line)(args)
-    } else {
+    //val blah = parseInterpolated(c, line)(args)
+    
+    //val result = if (!args.isEmpty) { // contains an interpolated value
+    //  parseInterpolated(c, line)(args)
+    //} else {
       //c.abort(c.enclosingPosition, line.head)
-      val trimmed = line.head.replaceAll("\\s+", " ").trim
-      val inst = trimmed match {
+      val trimmed = parseInterpolated(c, line)(args).replaceAll("\\s+", " ").trim
+      //c.abort(c.enclosingPosition, "blar: " + trimmed)
+      val result = trimmed match {
         case NoOperand(mnemonic) =>
           s"$mnemonic(())"
         case OneOperand(mnemonic, param) =>
@@ -273,9 +268,12 @@ object x86Macro {
             case Memory(mem)   => s"$mnemonic($mem)"
             case Register(reg) => s"$mnemonic($reg)"
             case Dword(dword)  => s"$mnemonic(dword($dword.toInt))"
+            case Byte(byteVal) => s"$mnemonic(byte($byteVal.toByte))"
+            case x: String     => s"$mnemonic($x)"
           }
         case TwoOperands(mnemonic, operand1, operand2) =>
           val mnem = mnemonic
+          //c.abort(c.enclosingPosition, "dork: " + trimmed)
           (operand1, operand2) match {
             case (Register(reg), Memory(mem))    => s"$mnemonic($reg, $mem)"
             case (Memory(mem), Register(reg))    => s"$mnemonic($mem, $reg)"
@@ -284,13 +282,15 @@ object x86Macro {
               s"$mnemonic($reg, byte($byteVal.toByte))"
             }
             case (Register(reg), Dword(dword)) => s"$mnemonic($reg, dword($dword.toInt))"
+            case (Register(reg), x: String) => s"$mnemonic($reg, $x)"
+            case (x: String, Register(reg)) => s"$mnemonic($x, $reg)"
           }
       }
-      inst
-    }
+    //c.abort(c.enclosingPosition, "blax: " + result)
+    
     val sanity = scala.util.Try(c.typecheck(c.parse("{ " + result + " }")))
     if (sanity.isFailure) {
-      c.abort(c.enclosingPosition, "Error: does not compile: " + result)
+      //c.abort(c.enclosingPosition, "Error: does not compile: " + result)
     }
     result
   }

@@ -260,7 +260,7 @@ object x86Macro {
       testType.isSuccess
     }
 
-    if (!args.isEmpty) { // contains an interpolated value
+    val result = if (!args.isEmpty) { // contains an interpolated value
       parseInterpolated(c, line)(args)
     } else {
       //c.abort(c.enclosingPosition, line.head)
@@ -286,8 +286,13 @@ object x86Macro {
             case (Register(reg), Dword(dword)) => s"$mnemonic($reg, dword($dword.toInt))"
           }
       }
-      s"$inst"
+      inst
     }
+    val sanity = scala.util.Try(c.typecheck(c.parse("{ " + result + " }")))
+    if (sanity.isFailure) {
+      c.abort(c.enclosingPosition, "Error: does not compile: " + result)
+    }
+    result
   }
 
 }

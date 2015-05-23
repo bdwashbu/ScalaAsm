@@ -48,12 +48,26 @@ object AsmCompiler {
     }
     
     val interleved = interleave(text, args, 1)
+    
+    //c.abort(c.enclosingPosition, interleved.toString)
+    
+    
     val withSeparators: Seq[Any] = interleved.flatMap{x => x match {
-      case x: String => x.split("\n").head +: x.split("\n").tail.flatMap{x => List(0, x)}
+      case x: String => {
+          val lines = x.split("\\r?\\n")
+          if (lines.head.trim.size != 0 && lines.head.trim.isEmpty()) {
+            0 +: lines.tail.flatMap{x => List(x, 0)}
+          } else if (!lines.head.trim.isEmpty()) {
+            lines.head +: lines.tail.flatMap{x => List(0, x)}
+          } else {
+            List(x)
+          }        
+      }
       case x: c.Expr[_] => List(x)
+      case _ => Nil
     }}
     
-    //c.abort(c.enclosingPosition, splitBySeparator(withSeparators, 0).toString)
+    //c.abort(c.enclosingPosition, withSeparators.toString)
     
     def splitBySeparator( l: Seq[Any], sep: Any ): Seq[Seq[Any]] = {
       import collection.mutable.ListBuffer
@@ -66,6 +80,8 @@ object AsmCompiler {
       }
       b.map(_.toSeq)
     }
+    
+    //c.abort(c.enclosingPosition, splitBySeparator(withSeparators, 0).toString)
     
     val translated = splitBySeparator(withSeparators, 0).map { line =>
       

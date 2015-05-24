@@ -57,10 +57,6 @@ object AsmCompiler {
         case x: String => {
           var lines = x.split("\\r?\\n").toList
           
-//          if (lines.head.size == 0) {
-//            lines = lines.drop(1)
-//          }
-          //c.abort(c.enclosingPosition, String.format("%x", new BigInteger(1, lines.head.getBytes("UTF-16"))))
           if (lines.last.trim.isEmpty) {
             lines.head +: lines.tail.dropRight(1).flatMap { x => List(0, x) }
           } else {
@@ -75,30 +71,19 @@ object AsmCompiler {
 
     //c.abort(c.enclosingPosition, "SEP: " + withSeparators.toString)
 
-    def ltrim(s: String) = s.replaceAll("^\\s+", "")
-    def rtrim(s: String) = s.replaceAll("\\s+$", "")
-    
     def splitBySeparator(l: Seq[Any], sep: Any): Seq[Seq[Any]] = {
       import collection.mutable.ListBuffer
       val b = ListBuffer(ListBuffer[Any]())
       l foreach { e =>
         if (e == sep) {
           if (!b.last.isEmpty) {
-            if (b.last.last.isInstanceOf[String]) {
-              val last = b.last.last.asInstanceOf[String]
-              b.last.dropRight(1) += rtrim(last)
-            }
             b += ListBuffer[Any]()
           }
         } else {
-          if (e.isInstanceOf[String]) {
-            b.last += ltrim(e.asInstanceOf[String])
-          } else {
-            b.last += e
-          }
+          b.last += e
         }
       }
-      b.map(_.toSeq)
+      b.map(_.toSeq).filterNot{x => x.size == 1 && x.head.isInstanceOf[String] && x.head.asInstanceOf[String].trim.isEmpty}
     }
 
     //c.abort(c.enclosingPosition, splitBySeparator(withSeparators, 0).toString)
@@ -110,7 +95,7 @@ object AsmCompiler {
 
       processLine(c)(inst, newArgs: _*)
     }
-    //c.abort(c.enclosingPosition, translated.reduce{_ + ", " + _})
+
     c.Expr(c.parse("List(" + translated.reduce { _ + ", " + _ } + ")"))
   }
 

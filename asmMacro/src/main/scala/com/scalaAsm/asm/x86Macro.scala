@@ -98,6 +98,46 @@ object x86Macro {
       }
     }
   }
+  
+  object Word {
+    def isWord(s: String): Boolean = {
+      val result = Try(if (s.contains("0x")) {
+        Long.parseLong(s.drop(2), 16) < 65536
+      } else {
+        Long.parseLong(s, 10) < 65536
+      })
+      result.getOrElse(false)
+    }
+     
+    def convertWord(operand: String): String = {
+      if (operand.startsWith("0x")) {
+        val result = Long.parseLong(operand.drop(2), 16)
+        //              if (result > 255) {
+        //                c.abort(c.enclosingPosition, s"Error: Value '$result' is too large for a byte")
+        //              }
+
+        Long.parseLong(operand.drop(2), 16).toShort.toString
+      } else {
+        operand
+      }
+    }
+
+    def unapply(operand: String): Option[String] = {
+      if (operand.split(" ").head != "byte" && operand.split(" ").head != "dword") {
+        if (operand.split(" ").head == "word" && isWord(operand.split(" ").last)) {
+          //throw new Exception("WTF")
+          Some(convertWord(operand.split(" ").last))
+        } else if (!operand.contains(" ") && isWord(operand)) {
+          //throw new Exception("WTF2")
+          Some(convertWord(operand))
+        } else {
+          None
+        }
+      } else {
+        None
+      }
+    }
+  }
 
   object Dword {
     def isDword(s: String): Boolean = {
@@ -242,7 +282,13 @@ object x86Macro {
     //val toolBox = currentMirror.mkToolBox()
     //val importer = c.universe.mkImporter(ru)
 
-    
+    def checkType1Arg(arg0: String, mnemonic: String) = {
+      val expr = s"$mnemonic($arg0)"
+
+      val testType = scala.util.Try(c.typecheck(c.parse("{ " + expr + " }")))
+
+      testType.isSuccess
+    }
 
     def checkType2Arg(arg0: String, arg1: String, mnemonic: String) = {
       val expr = s"$mnemonic($arg0, $arg1)"
@@ -267,8 +313,10 @@ object x86Macro {
           param match {
             case Memory(mem)   => s"$mnemonic($mem)"
             case Register(reg) => s"$mnemonic($reg)"
-            case Dword(dword)  => s"$mnemonic(dword($dword.toInt))"
-            case Byte(byteVal) => s"$mnemonic(byte($byteVal.toByte))"
+            case Dword(dword) if checkType1Arg(s"dword($dword.toInt)", mnemonic) => s"$mnemonic(dword($dword.toInt))"
+            case Byte(byteVal) if checkType1Arg(s"byte($byteVal.toByte)", mnemonic) => s"$mnemonic(byte($byteVal.toByte))"
+            case Word(word)  => s"$mnemonic(word($word.toShort))"
+            
             case x: String     => s"$mnemonic($x)"
           }
         case TwoOperands(mnemonic, operand1, operand2) =>

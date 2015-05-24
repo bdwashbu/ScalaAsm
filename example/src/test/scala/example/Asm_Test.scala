@@ -33,7 +33,9 @@ class AsmTest extends FlatSpec with ShouldMatchers with Registers with Formats {
      "asm\"labelTes:t:\"" shouldNot compile
      "asm\":labelTest\"" shouldNot compile
      "asm\"End\"" shouldNot compile
+     "asm\"\"\"mov ebx,\n4\"\"\"" shouldNot compile
      
+     "asm\"mov ebx, 4  //comment test\"" should compile
      "asm\"mov ebx, 4\"" should compile
      "asm\"mov ebx, 0x4\"" should compile
      "asm\"mov ebx,4\"" should compile
@@ -48,7 +50,10 @@ class AsmTest extends FlatSpec with ShouldMatchers with Registers with Formats {
      "asm\"add ebx, 0xFFFFFFFF\"" should compile
      "asm\"add ebx, byte 255\"" should compile
      "asm\"add ebx,byte 0xFF\"" should compile
+     "asm\"retn 0xFFF\"" should compile
+     "asm\"retn 4\"" should compile
      "asm\"add ebx,dword 255\"" should compile
+     "asm\"\"\"\nmov ebx, 0x4\nadd ebx, 0xFFFFFFFF\"\"\"" should compile
      
      "asm\"mov eax, [esp + 4]\"" should compile
      "asm\"mov eax, [esp-4]\"" should compile

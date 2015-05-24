@@ -22,6 +22,13 @@ object AsmCompiler {
       (allCatch opt s.toByte).isDefined
     }
   }
+  def isWord(s: String): Boolean = {
+    if (s.contains("0x")) {
+      Long.parseLong(s.drop(2), 16) < 65536
+    } else {
+      (allCatch opt s.toShort).isDefined
+    }
+  }
   def isDword(s: String): Boolean = {
     if (s.contains("0x")) {
       (allCatch opt Long.parseLong(s.drop(2), 16)).isDefined
@@ -55,7 +62,14 @@ object AsmCompiler {
     val withSeparators: Seq[Any] = interleved.flatMap { x =>
       x match {
         case x: String => {
-          var lines = x.split("\\r?\\n").toList
+          var lines = x.split("\\r?\\n").toList.map{x => 
+              val commentLoc = x.indexOf("//")
+              if (commentLoc == -1) { // no comment found
+                x
+              } else {
+                x.substring(0, commentLoc)
+              }
+            }
           
           if (lines.last.trim.isEmpty) {
             lines.head +: lines.tail.dropRight(1).flatMap { x => List(0, x) }

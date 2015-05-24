@@ -29,11 +29,12 @@ object HelloWorld3 extends AsmProgram {
 
   sections += new CodeSection {
 
-    procedure(name = "start",
-      asm"""push pressAnyKey
+    procedure(name = "start", asm"""
+      push pressAnyKey
       call flushBuffer
       push 0
-      call ExitProcess""")
+      call ExitProcess
+    """)
       
     val numberOfBytesToWrite = ebp + byte(-12)
     val numberOfBytesWritten = ebp + byte(-8)
@@ -42,9 +43,9 @@ object HelloWorld3 extends AsmProgram {
     val STD_OUTPUT_HANDLE = -11
     val STD_INPUT_HANDLE = -10
     
-    procedure(name = "flushBuffer",
-      asm"""push ebp
-      mov ebp, esp
+    procedure(name = "flushBuffer", asm"""
+      push ebp
+      mov ebp, esp // what
       add esp, byte -12
       push $STD_OUTPUT_HANDLE
       call GetStdHandle
@@ -63,8 +64,8 @@ object HelloWorld3 extends AsmProgram {
       leave""",
       List(RETN(word(4))))
 
-    procedure(name = "strlen",
-      asm"""mov eax, [esp + 4]
+    procedure(name = "strlen", asm"""
+      mov eax, [esp + 4]
       lea edx, [eax + 3]
       push ebp
       push edi
@@ -80,7 +81,10 @@ object HelloWorld3 extends AsmProgram {
           asm"and ecx, ebp",
           asm"jnz test"),
 
-      asm"""mov edi, [eax]
+      
+      
+      asm"""
+      mov edi, [eax]
       add eax, 4
       lea ecx, [edi - 0x1010101]
       not edi
@@ -96,7 +100,8 @@ object HelloWorld3 extends AsmProgram {
       shl cl
       sbb eax, edx
       pop edi
-      pop ebp""",
+      pop ebp
+      """,
       List(RETN(word(4))))
 
     builder += align(2)

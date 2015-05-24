@@ -61,8 +61,9 @@ object HelloWorld3 extends AsmProgram {
       push $hFile
       call WriteFile
       mov eax, $numberOfBytesWritten
-      leave""",
-      List(RETN(word(4))))
+      leave
+      retn 4
+      """)
 
     procedure(name = "strlen", asm"""
       mov eax, [esp + 4]
@@ -72,14 +73,15 @@ object HelloWorld3 extends AsmProgram {
       mov ebp, 0x80808080
       start:""",
 
-      repeat(3,
-          asm"mov edi, [eax]", // read first 4 bytes
-          asm"add eax, 4", // increment pointer
-          asm"lea ecx, [edi - 0x1010101]", // subtract 1 from each byte
-          asm"not edi", // invert all bytes
-          asm"and ecx, edi",
-          asm"and ecx, ebp",
-          asm"jnz test"),
+      repeat(3, asm"""
+          mov edi, [eax] // read first 4 bytes
+          add eax, 4 // increment pointer
+          lea ecx, [edi - 0x1010101] // subtract 1 from each byte
+          not edi // invert all bytes
+          and ecx, edi
+          and ecx, ebp
+          jnz test
+        """),
 
       
       
@@ -101,8 +103,9 @@ object HelloWorld3 extends AsmProgram {
       sbb eax, edx
       pop edi
       pop ebp
-      """,
-      List(RETN(word(4))))
+      retn 4
+      """
+      )
 
     builder += align(2)
   }

@@ -282,7 +282,7 @@ object x86Macro {
     //val toolBox = currentMirror.mkToolBox()
     //val importer = c.universe.mkImporter(ru)
 
-    def checkType1Arg(arg0: String, mnemonic: String) = {
+    def checkForImplicit(mnemonic: String, arg0: String) = {
       val expr = s"$mnemonic($arg0)"
 
       val testType = scala.util.Try(c.typecheck(c.parse("{ " + expr + " }")))
@@ -290,7 +290,7 @@ object x86Macro {
       testType.isSuccess
     }
 
-    def checkType2Arg(arg0: String, arg1: String, mnemonic: String) = {
+    def checkForImplicit2(mnemonic: String, arg0: String, arg1: String) = {
       val expr = s"$mnemonic($arg0, $arg1)"
 
       val testType = scala.util.Try(c.typecheck(c.parse("{ " + expr + " }")))
@@ -313,8 +313,8 @@ object x86Macro {
           param match {
             case Memory(mem)   => s"$mnemonic($mem)"
             case Register(reg) => s"$mnemonic($reg)"
-            case Dword(dword) if checkType1Arg(s"dword($dword.toInt)", mnemonic) => s"$mnemonic(dword($dword.toInt))"
-            case Byte(byteVal) if checkType1Arg(s"byte($byteVal.toByte)", mnemonic) => s"$mnemonic(byte($byteVal.toByte))"
+            case Dword(dword) if checkForImplicit(mnemonic, s"dword($dword.toInt)") => s"$mnemonic(dword($dword.toInt))"
+            case Byte(byteVal) if checkForImplicit(mnemonic, s"byte($byteVal.toByte)") => s"$mnemonic(byte($byteVal.toByte))"
             case Word(word)  => s"$mnemonic(word($word.toShort))"
             
             case x: String     => s"$mnemonic($x)"
@@ -326,7 +326,7 @@ object x86Macro {
             case (Register(reg), Memory(mem))    => s"$mnemonic($reg, $mem)"
             case (Memory(mem), Register(reg))    => s"$mnemonic($mem, $reg)"
             case (Register(reg1), Register(reg2)) => s"$mnemonic($reg1, $reg2)"
-            case (Register(reg), Byte(byteVal)) if checkType2Arg(reg, s"byte($byteVal.toByte)", mnemonic) => {
+            case (Register(reg), Byte(byteVal)) if checkForImplicit2(mnemonic, reg, s"byte($byteVal.toByte)") => {
               s"$mnemonic($reg, byte($byteVal.toByte))"
             }
             case (Register(reg), Dword(dword)) => s"$mnemonic($reg, dword($dword.toInt))"

@@ -7,8 +7,9 @@ import scala.tools.reflect.ToolBox
 import com.scalaAsm.x86.InstructionResult
 import scala.reflect.runtime.universe._
 import scala.util.control.Exception.allCatch
-import java.lang.Long;
-import java.lang.Byte;
+import java.lang.Long
+import java.lang.Byte
+import java.math.BigInteger
 
 object AsmCompiler {
 
@@ -54,8 +55,18 @@ object AsmCompiler {
     val withSeparators: Seq[Any] = interleved.flatMap { x =>
       x match {
         case x: String => {
-          val lines = x.split("\\r?\\n")
-          lines.head +: lines.tail.flatMap { x => List(0, x) }
+          var lines = x.split("\\r?\\n").toList
+          
+//          if (lines.head.size == 0) {
+//            lines = lines.drop(1)
+//          }
+          //c.abort(c.enclosingPosition, String.format("%x", new BigInteger(1, lines.head.getBytes("UTF-16"))))
+          if (lines.last.trim.isEmpty) {
+            lines.head +: lines.tail.dropRight(1).flatMap { x => List(0, x) }
+          } else {
+            lines.head +: lines.tail.flatMap { x => List(0, x) }
+          }
+          
         }
         case x: c.Expr[_] => List(x)
         case _            => Nil
@@ -64,13 +75,28 @@ object AsmCompiler {
 
     //c.abort(c.enclosingPosition, "SEP: " + withSeparators.toString)
 
+    def ltrim(s: String) = s.replaceAll("^\\s+", "")
+    def rtrim(s: String) = s.replaceAll("\\s+$", "")
+    
     def splitBySeparator(l: Seq[Any], sep: Any): Seq[Seq[Any]] = {
       import collection.mutable.ListBuffer
       val b = ListBuffer(ListBuffer[Any]())
       l foreach { e =>
         if (e == sep) {
-          if (!b.last.isEmpty) b += ListBuffer[Any]()
-        } else b.last += e
+          if (!b.last.isEmpty) {
+            if (b.last.last.isInstanceOf[String]) {
+              val last = b.last.last.asInstanceOf[String]
+              b.last.dropRight(1) += rtrim(last)
+            }
+            b += ListBuffer[Any]()
+          }
+        } else {
+          if (e.isInstanceOf[String]) {
+            b.last += ltrim(e.asInstanceOf[String])
+          } else {
+            b.last += e
+          }
+        }
       }
       b.map(_.toSeq)
     }

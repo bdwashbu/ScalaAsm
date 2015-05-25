@@ -71,7 +71,7 @@ object AsmCompiler {
               }
             }
           
-          if (lines.last.trim.isEmpty) {
+          if (lines.last.trim.isEmpty && lines.size > 2) {
             lines.head +: lines.tail.dropRight(1).flatMap { x => List(0, x) }
           } else {
             lines.head +: lines.tail.flatMap { x => List(0, x) }

@@ -34,6 +34,7 @@ class AsmTest extends FlatSpec with ShouldMatchers with Registers with Formats {
      "asm\":labelTest\"" shouldNot compile
      "asm\"End\"" shouldNot compile
      "asm\"\"\"mov ebx,\n4\"\"\"" shouldNot compile
+     "asm\"fld b\"" shouldNot compile
      
      "asm\"mov ebx, 4  //comment test\"" should compile
      "asm\"mov ebx, 4\"" should compile

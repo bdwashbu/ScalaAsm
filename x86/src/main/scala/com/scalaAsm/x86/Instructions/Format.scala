@@ -170,22 +170,19 @@ trait Formats extends Low {
         immediate = Some(op2))
     }
   }
+  
+  implicit object MFormatIGeneric extends OneOperandFormat[Indirect[_]] {
 
-  implicit object New_MFormat2R3 extends OneOperandFormat[Indirect[_64]] {
-
-    def getAddressingForm(operand: Indirect[_64], opcodeExtension: Byte) = {
-      InstructionFormat(
+    def getAddressingForm(operand: Indirect[_], opcodeExtension: Byte) = {
+      if (Seq("rsp", "esp").contains(operand.base.name)) {
+         InstructionFormat(
         WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
         immediate = None)
-    }
-  }
-  
-  trait MFormatIGeneric extends OneOperandFormat[Indirect[_32]] {
-
-    def getAddressingForm(operand: Indirect[_32], opcodeExtension: Byte) = {
+      } else {
       InstructionFormat(
         addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base)),
         immediate = None)
+      }
     }
   }
 

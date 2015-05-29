@@ -11,9 +11,9 @@ import scala.language.implicitConversions
 import com.scalaAsm.x86.Operands._
 
 trait Low {
-  implicit object New_RMFormat extends TwoOperandFormat[reg, reg + _8] {
+  implicit object New_RMFormat extends TwoOperandFormat[reg, reg#BaseIndex[_8]] {
 
-    def getAddressingForm(op1: reg, op2: reg + _8, opcodeExtension: Byte) = {
+    def getAddressingForm(op1: reg, op2: reg#BaseIndex[_8], opcodeExtension: Byte) = {
       InstructionFormat(
         NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement),
         immediate = None)
@@ -108,33 +108,33 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_OffsetFormat extends OneOperandFormat[r64 + _] {
+  implicit object New_OffsetFormat extends OneOperandFormat[r64#BaseIndex[_]] {
 
-    def getAddressingForm(operand: r64 + _, opcodeExtension: Byte) = {
+    def getAddressingForm(operand: r64#BaseIndex[_], opcodeExtension: Byte) = {
       InstructionFormat(
         WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
         immediate = None)
     }
   }
 
-  implicit object New_OffsetFormat2 extends OneOperandFormat[reg + _8] {
+  implicit object New_OffsetFormat2 extends OneOperandFormat[reg#BaseIndex[_8]] {
 
-    def getAddressingForm(operand: reg + _8, opcodeExtension: Byte) = {
+    def getAddressingForm(operand: reg#BaseIndex[_8], opcodeExtension: Byte) = {
       InstructionFormat(
         NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, operand.base), operand.displacement),
         immediate = None)
     }
   }
 
-  implicit object New_MRFormat extends TwoOperandFormat[reg + _8, reg] {
+  implicit object New_MRFormat extends TwoOperandFormat[reg#BaseIndex[_8], reg] {
 
-    def getAddressingForm(op1: reg + _8, op2: reg, opcodeExtension: Byte) = {
+    def getAddressingForm(op1: reg#BaseIndex[_8], op2: reg, opcodeExtension: Byte) = {
       New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
     }
   }
 
-  implicit object New_RMFormatB1 extends TwoOperandFormat[reg, StackPointer[_] + _8] {
-    def getAddressingForm(op1: reg, op2: StackPointer[_] + _8, opcodeExtension: Byte) = {
+  implicit object New_RMFormatB1 extends TwoOperandFormat[reg, StackPointer[_]#BaseIndex[_8]] {
+    def getAddressingForm(op1: reg, op2: StackPointer[_]#BaseIndex[_8], opcodeExtension: Byte) = {
       InstructionFormat(
         WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement),
         immediate = None)
@@ -247,9 +247,9 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MFormatB1 extends OneOperandFormat[r64 + _] {
+  implicit object New_MFormatB1 extends OneOperandFormat[r64#BaseIndex[_]] {
 
-    def getAddressingForm(operand: r64 + _, opcodeExtension: Byte) = {
+    def getAddressingForm(operand: r64#BaseIndex[_], opcodeExtension: Byte) = {
       InstructionFormat(
         WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
         immediate = None)
@@ -257,9 +257,9 @@ trait Formats extends Low {
 
   }
 
-  implicit object New_RMFormatB2 extends TwoOperandFormat[reg, reg + _32] {
+  implicit object New_RMFormatB2 extends TwoOperandFormat[reg, reg#BaseIndex[_32]] {
 
-    def getAddressingForm(op1: reg, op2: reg + _32, opcodeExtension: Byte) = {
+    def getAddressingForm(op1: reg, op2: reg#BaseIndex[_32], opcodeExtension: Byte) = {
       InstructionFormat(
         NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = op2.base), op2.displacement),
         immediate = None)

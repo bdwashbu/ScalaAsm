@@ -56,6 +56,4 @@ package object x86 {
   type rel16 = Constant[_16]
   type rel32 = Constant[_32]
   type rel64 = Constant[_64]
-  
-  type +[Reg <: GeneralPurpose[_], Y] = Reg#BaseIndex[Y]
 }

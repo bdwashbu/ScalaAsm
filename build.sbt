@@ -13,7 +13,7 @@ scalaVersion := "2.11.6"
 lazy val scalax86 = project.in(file(".")).aggregate(x86, coff, asm, assembler, portableExe, linker, example)
     
 lazy val example = project.in(file("example"))
-    .dependsOn(x86, asm, assembler, linker)
+    .dependsOn(x86, asm, assembler, linker, coff)
     
 lazy val coff = project.in(file("coff"))
 

@@ -34,7 +34,7 @@ trait ZeroOperands[X <: InstructionDefinition] {
   def apply(ignored: Unit)(implicit ev: X#_0): ZeroMachineCode = ev.get
 }
 
-object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = None)
+object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = Array())
 
 case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mnemonic: String) extends InstructionResult {
 

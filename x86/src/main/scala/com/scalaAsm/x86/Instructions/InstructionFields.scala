@@ -4,44 +4,41 @@ package Instructions
 import com.scalaAsm.x86.Operands.Constant
 import com.scalaAsm.x86.Operands._
 
-protected[x86] abstract class AddressingFormSpecifier(modRM: ModRM, sib: SIB, displacement: Constant[_]) {
+protected[x86] abstract class AddressingFormSpecifier(modRM: ModRM, sib: SIB, displacement: Array[Byte]) {
   import scala.language.postfixOps
   
-  def components: Seq[InstructionField] = Seq(modRM, sib, displacement)
+  def components: Seq[InstructionField] = Seq(modRM, sib)
 
   lazy val getBytes: Array[Byte] = {
-    components flatMap (_.getBytes) toArray
+    (components flatMap (_.getBytes) toArray) ++: displacement
   }
 
   lazy val size: Int = {
-    components flatMap (x => List(x.size)) sum
+    components.flatMap (x => List(x.size)).sum + displacement.size
   }
 }
 
 protected[x86] case class InstructionFormat (
   
   addressingForm: AddressingFormSpecifier,
-  immediate: Option[Constant[_]]) {
+  immediate: Array[Byte]) {
   
   lazy val getBytes: Array[Byte] = {
-    addressingForm.getBytes ++: (immediate match {
-      case Some(imm) => imm.getBytes
-      case None => Array[Byte]()
-    })
+    addressingForm.getBytes ++: immediate
   }
 }
 
-case class NoModRM() extends AddressingFormSpecifier(NoModField, NoSibField, NoDispField)
+case class NoModRM() extends AddressingFormSpecifier(NoModField, NoSibField, Array())
 
-case class OnlyDisplacement[Offset <: Constant[_]](offset: Offset) extends AddressingFormSpecifier(NoModField, NoSibField, offset)
+case class OnlyDisplacement(offset: Array[Byte]) extends AddressingFormSpecifier(NoModField, NoSibField, offset)
 
-case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier(mod, NoSibField, NoDispField)
+case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier(mod, NoSibField, Array())
 
-case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier(mod, theSIB, NoDispField)
+case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier(mod, theSIB, Array())
 
-case class NoSIBWithDisplacement[Offset <: Constant[_]](mod: ModRM, offset: Offset) extends AddressingFormSpecifier(mod, NoSibField, offset)
+case class NoSIBWithDisplacement(mod: ModRM, offset: Array[Byte]) extends AddressingFormSpecifier(mod, NoSibField, offset)
 
-case class WithSIBWithDisplacement[Mod <: ModRM, Sib <: SIB, Disp <: Constant[_]](mod: Mod, theSIB: Sib, offset: Disp) extends AddressingFormSpecifier(mod, theSIB, offset)
+case class WithSIBWithDisplacement[Mod <: ModRM, Sib <: SIB](mod: Mod, theSIB: Sib, offset: Array[Byte]) extends AddressingFormSpecifier(mod, theSIB, offset)
 
 sealed class RegisterMode(val value: Byte)
 case object NoDisplacement    extends RegisterMode(0) // [reg32 + eax*n]
@@ -81,8 +78,6 @@ object NoSibField extends NoSib {
 abstract class NoDisp(value: Int) extends Constant[_32](value) {
   override def size: Int = 0
 }
-
-object NoDispField extends NoDisp(0)
 
 case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) extends ModRegisterMemory {
   def getBytes = Array(((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte)

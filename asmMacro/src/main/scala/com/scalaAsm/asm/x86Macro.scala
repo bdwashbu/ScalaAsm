@@ -196,7 +196,7 @@ object x86Macro {
 
         } else { // register indirect addressing
           val reg = operand.drop(1).dropRight(1)
-          Some(s"$reg.Indirect()")
+          Some(s"Indirect($reg)")
         }
       } else {
         None

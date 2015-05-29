@@ -1,19 +1,12 @@
 package example
 
 import org.scalatest._
-import java.io.DataOutputStream
-import java.io.FileOutputStream
 import com.scalaAsm.assembler.Assembler
 import com.scalaAsm.linker.Linker
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.InputStream
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileInputStream
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
+import com.scalaAsm.x86.Operands.Indirect
 import com.scalaAsm.asm.x86_64
 import com.scalaAsm.asm._
 

@@ -5,6 +5,7 @@ import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.{x86_32, x86_64}
 import com.scalaAsm.asm._
+import com.scalaAsm.x86.Operands._
 
 object HelloWorld2 extends AsmProgram {
   

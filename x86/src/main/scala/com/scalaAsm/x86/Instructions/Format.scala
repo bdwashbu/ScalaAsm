@@ -117,30 +117,6 @@ trait Formats extends Low {
       }
     }
   }
-  
-  implicit object New_MIFormat64 extends TwoOperandFormat[reg, imm64] {
-
-    def getAddressingForm(op1: reg, op2: imm64, opcodeExtension: Byte) = {
-      if (opcodeExtension != -1) {
-        InstructionFormat(
-          addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
-          immediate = op2.getBytes)
-      } else
-        InstructionFormat(
-          addressingForm = NoModRM(),
-          immediate = op2.getBytes)
-    }
-
-    override def getPrefix(prefix: Seq[Prefix]) = {
-      if (prefix.exists(_.isInstanceOf[REX])) {
-        REX(true, false, false, true).get
-      } else {
-        Array[Byte]()
-      }
-    }
-  }
-
- 
 
   implicit object MFormatIGeneric extends OneOperandFormat[Indirect[_]] {
 

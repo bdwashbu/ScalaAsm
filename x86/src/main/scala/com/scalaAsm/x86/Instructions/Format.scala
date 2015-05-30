@@ -12,25 +12,14 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.ConstantWriter
 
 trait Low {
-  
+  implicit object New_OIFormat64 extends TwoOperandFormat[reg, imm] {
 
-   implicit object New_OIFormat64 extends TwoOperandFormat[rm, imm] {
-
-    def getAddressingForm(op1: rm, op2: imm, opcodeExtension: Byte) = {
-      if (op1.isInstanceOf[reg]) {
-         InstructionFormat(
+    def getAddressingForm(op1: reg, op2: imm, opcodeExtension: Byte) = {
+       InstructionFormat(
         addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1.asInstanceOf[reg])),
-        immediate = op2.getBytes)
-      } else {
-        InstructionFormat(
-        addressingForm = NoModRM(),
-        immediate = op2.getBytes)
-      }
-      
-     
+        immediate = op2.getBytes)  
     }
   }
-
 }
 
 trait Formats extends Low {

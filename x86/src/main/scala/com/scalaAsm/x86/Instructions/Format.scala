@@ -13,21 +13,8 @@ import com.scalaAsm.x86.Operands.ConstantWriter
 
 trait Formats {
 
-  implicit object New_MFormat64 extends OneOperandFormat[rel64] {
-
-    def getAddressingForm(operand: rel64, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = OnlyDisplacement(operand.getBytes),
-        immediate = Array())
-    }
-  }
-
-  implicit object New_DSFormat extends OneOperandFormat[DS] {
-    def getAddressingForm(op1: DS, opcodeExtension: Byte) = NoAddressingForm
-  }
-
-  implicit object New_CSFormat extends OneOperandFormat[CS] {
-    def getAddressingForm(op1: CS, opcodeExtension: Byte) = NoAddressingForm
+  implicit object New_DSFormat extends OneOperandFormat[SegmentRegister] {
+    def getAddressingForm(op1: SegmentRegister, opcodeExtension: Byte) = NoAddressingForm
   }
 
   implicit object New_IFormat8 extends OneOperandFormat[imm] {
@@ -98,12 +85,50 @@ trait Formats {
     }
   }
 
-   implicit object New_RMFormat3 extends TwoOperandFormat[reg, Indirect[_]] {
+   implicit object New_RMFormat extends TwoOperandFormat[reg, Memory[_]] {
 
-    def getAddressingForm(op1: reg, op2: Indirect[_], opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = OnlyModRM(ModRMReg(NoDisplacement, op1, rm = op2.base)),
-        immediate = Array())
+    def getAddressingForm(op1: reg, op2: Memory[_], opcodeExtension: Byte) = {
+      op2 match {
+        case Indirect(base) =>
+          InstructionFormat(
+            addressingForm = OnlyModRM(ModRMReg(NoDisplacement, op1, rm = base)),
+            immediate = Array())
+        case BaseIndex(base, offset) =>
+          if (offset.size == 1) {
+            if (base.name == "rsp" || base.name == "esp") {
+              InstructionFormat(
+              WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, base), ScaleIndexByte(SIB.One, new ESP, base), offset.getBytes),
+              immediate = Array())
+            } else {
+              InstructionFormat(
+                NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = base), offset.getBytes),
+                immediate = Array())
+            }
+          } else {
+            InstructionFormat(
+            NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = base), offset.getBytes),
+            immediate = Array())
+          }
+        case op2 @ AbsoluteAddress(address) =>
+          InstructionFormat(
+            addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.getBytes),
+            immediate = Array())
+      }  
+    }
+    
+    override def getPrefix(prefix: Seq[Prefix], op1: reg, op2: Memory[_]) = {
+      if (prefix.exists(_.isInstanceOf[REX])) {
+        REX(true, false, false, false).get
+      } else {
+        Array[Byte]()
+      }
+    }
+  }
+   
+  implicit object New_MRFormat extends TwoOperandFormat[Memory[_], reg] {
+
+    def getAddressingForm(op1: Memory[_], op2: reg, opcodeExtension: Byte) = {
+      New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
     }
   }
   
@@ -115,35 +140,7 @@ trait Formats {
         immediate = Array())
     }
   }
-
-  implicit object New_MRFormat extends TwoOperandFormat[BaseIndex[_], reg] {
-
-    def getAddressingForm(op1: BaseIndex[_], op2: reg, opcodeExtension: Byte) = {
-      New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
-    }
-  }
   
-  implicit object New_RMFormat extends TwoOperandFormat[reg, BaseIndex[_]] {
-
-    def getAddressingForm(op1: reg, op2: BaseIndex[_], opcodeExtension: Byte) = {
-      if (op2.displacement.size == 1) {
-        if (op2.base.name == "rsp" || op2.base.name == "esp") {
-          InstructionFormat(
-          WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement.getBytes),
-          immediate = Array())
-        } else {
-          InstructionFormat(
-            NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement.getBytes),
-            immediate = Array())
-        }
-      } else {
-        InstructionFormat(
-        NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = op2.base), op2.displacement.getBytes),
-        immediate = Array())
-      }
-    }
-  }
-
   implicit object New_RMFormat6 extends TwoOperandFormat[reg, reg] {
 
     def getAddressingForm(op1: reg, op2: reg, opcodeExtension: Byte) = {
@@ -151,23 +148,6 @@ trait Formats {
       InstructionFormat(
         OnlyModRM(ModRMReg(TwoRegisters, op2, op1)),
         immediate = Array())
-    }
-  }
-
-  implicit object New_RMFormat2 extends TwoOperandFormat[reg, AbsoluteAddress[_]] {
-
-    def getAddressingForm(op1: reg, op2: AbsoluteAddress[_], opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.getBytes),
-        immediate = Array())
-    }
-
-    override def getPrefix(prefix: Seq[Prefix], op1: reg, op2: AbsoluteAddress[_]) = {
-      if (prefix.exists(_.isInstanceOf[REX])) {
-        REX(true, false, false, false).get
-      } else {
-        Array[Byte]()
-      }
     }
   }
 }

@@ -27,14 +27,23 @@ trait Low {
     }
   }
 
-  implicit object New_OIFormat32 extends TwoOperandFormat[rm, imm32] {
+   implicit object New_OIFormat64 extends TwoOperandFormat[rm, imm] {
 
-    def getAddressingForm(op1: rm, op2: imm32, opcodeExtension: Byte) = {
-      InstructionFormat(
+    def getAddressingForm(op1: rm, op2: imm, opcodeExtension: Byte) = {
+      if (op1.isInstanceOf[reg]) {
+         InstructionFormat(
+        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1.asInstanceOf[reg])),
+        immediate = op2.getBytes)
+      } else {
+        InstructionFormat(
         addressingForm = NoModRM(),
         immediate = op2.getBytes)
+      }
+      
+     
     }
   }
+
 }
 
 trait Formats extends Low {
@@ -114,24 +123,6 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MIFormat8 extends TwoOperandFormat[reg, imm8] {
-
-    def getAddressingForm(op1: reg, op2: imm8, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
-        immediate = op2.getBytes)
-    }
-  }
-
-  implicit object New_MIFormat16 extends TwoOperandFormat[reg, imm16] {
-
-    def getAddressingForm(op1: reg, op2: imm16, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
-        immediate = op2.getBytes)
-    }
-  }
-
   implicit object New_MIFormat32 extends TwoOperandFormat[reg, imm32] {
 
     def getAddressingForm(op1: reg, op2: imm32, opcodeExtension: Byte) = {
@@ -153,25 +144,31 @@ trait Formats extends Low {
       }
     }
   }
-
-  implicit object New_OIFormat64 extends TwoOperandFormat[rm, imm64] {
-
-    def getAddressingForm(op1: rm, op2: imm64, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoModRM(),
-        immediate = op2.getBytes)
-    }
-  }
-
-  implicit object New_OIFormat16 extends TwoOperandFormat[rm, imm16] {
-
-    def getAddressingForm(op1: rm, op2: imm16, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoModRM(),
-        immediate = op2.getBytes)
-    }
-  }
   
+  implicit object New_MIFormat64 extends TwoOperandFormat[reg, imm64] {
+
+    def getAddressingForm(op1: reg, op2: imm64, opcodeExtension: Byte) = {
+      if (opcodeExtension != -1) {
+        InstructionFormat(
+          addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
+          immediate = op2.getBytes)
+      } else
+        InstructionFormat(
+          addressingForm = NoModRM(),
+          immediate = op2.getBytes)
+    }
+
+    override def getPrefix(prefix: Seq[Prefix]) = {
+      if (prefix.exists(_.isInstanceOf[REX])) {
+        REX(true, false, false, true).get
+      } else {
+        Array[Byte]()
+      }
+    }
+  }
+
+ 
+
   implicit object MFormatIGeneric extends OneOperandFormat[Indirect[_]] {
 
     def getAddressingForm(operand: Indirect[_], opcodeExtension: Byte) = {

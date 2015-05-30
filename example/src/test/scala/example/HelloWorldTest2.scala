@@ -19,6 +19,7 @@ import com.scalaAsm.asm.x86_32
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86._
 import scala.language.experimental.macros
+import com.scalaAsm.x86.Operands.Memory.Indirect
 
 
 object HelloWorld2 extends AsmProgram {

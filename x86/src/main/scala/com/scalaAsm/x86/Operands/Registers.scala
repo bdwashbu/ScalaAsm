@@ -16,18 +16,7 @@ abstract class GeneralPurpose[S: x86Size](name: String) extends Register[S](name
   
   def -(offset: Constant[_]): BaseIndex[S] = new BaseIndex(self, offset.negate) {}
   def +(offset: Constant[_]): BaseIndex[S] = new BaseIndex(self, offset) {}
-  
-  
-  
-  
 }
-
-case class BaseIndex[Y: x86Size](base: GeneralPurpose[Y], displacement: Constant[_]) extends Memory[Y] {
-    def get: BaseIndex[Y] = this
-    override def toString = "[" + base.name + " " + (if (displacement.value.toString.contains('-')) '-' else '+') + "]"
-  }
-
-case class Indirect[S: x86Size](base: GeneralPurpose[S]) extends Memory[S]
 
 trait UniformByteRegister[Size] extends GeneralPurpose[Size]
 

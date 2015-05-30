@@ -6,7 +6,7 @@ import com.scalaAsm.linker.Linker
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
-import com.scalaAsm.x86.Operands.Indirect
+import com.scalaAsm.x86.Operands.Memory.Indirect
 import com.scalaAsm.asm.x86_64
 import com.scalaAsm.asm._
 

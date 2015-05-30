@@ -39,16 +39,34 @@ trait Formats {
     }
   }
 
-  implicit object New_OffsetFormat2 extends OneOperandFormat[BaseIndex[_]] {
+  implicit object New_OffsetFormat2 extends OneOperandFormat[Memory[_]] {
 
-    def getAddressingForm(operand: BaseIndex[_], opcodeExtension: Byte) = {
-      if (operand.base.name == "rsp" || operand.base.name == "esp") {     
-        InstructionFormat(
-        WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
-        immediate = Array()) 
-      } else {
-        InstructionFormat(
-          NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, operand.base), operand.displacement.getBytes),
+    def getAddressingForm(operand: Memory[_], opcodeExtension: Byte) = {
+      
+      operand match {
+        case BaseIndex(base, offset) =>
+          if (base.name == "rsp" || base.name == "esp") {     
+            InstructionFormat(
+            WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
+            immediate = Array()) 
+          } else {
+            InstructionFormat(
+              NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, base), offset.getBytes),
+              immediate = Array())
+          }
+        case Indirect(base) =>
+         if (Seq("rsp", "esp").contains(base.name)) {
+             InstructionFormat(
+            WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
+            immediate = Array())
+          } else {
+            InstructionFormat(
+              addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, base)),
+              immediate = Array())
+          }
+        case x @ AbsoluteAddress(offset) =>
+           InstructionFormat(
+          addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), x.getBytes), //mem.encode(opcode.opcodeExtension),
           immediate = Array())
       }
     }
@@ -76,21 +94,6 @@ trait Formats {
         }
       } else {
         Array[Byte]()
-      }
-    }
-  }
-
-  implicit object MFormatIGeneric extends OneOperandFormat[Indirect[_]] {
-
-    def getAddressingForm(operand: Indirect[_], opcodeExtension: Byte) = {
-      if (Seq("rsp", "esp").contains(operand.base.name)) {
-         InstructionFormat(
-        WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
-        immediate = Array())
-      } else {
-      InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base)),
-        immediate = Array())
       }
     }
   }
@@ -138,15 +141,6 @@ trait Formats {
         NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = op2.base), op2.displacement.getBytes),
         immediate = Array())
       }
-    }
-  }
-
-  implicit object New_MFormat5 extends OneOperandFormat[AbsoluteAddress[_]] {
-
-    def getAddressingForm(operand: AbsoluteAddress[_], opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), operand.getBytes), //mem.encode(opcode.opcodeExtension),
-        immediate = Array())
     }
   }
 

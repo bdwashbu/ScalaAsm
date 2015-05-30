@@ -12,20 +12,7 @@ import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.ConstantWriter
 
 trait Low {
-  implicit object New_RMFormat extends TwoOperandFormat[reg, reg#BaseIndex[_8]] {
-
-    def getAddressingForm(op1: reg, op2: reg#BaseIndex[_8], opcodeExtension: Byte) = {
-      if (op2.base.name == "rsp" || op2.base.name == "esp") {
-        InstructionFormat(
-        WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement.getBytes),
-        immediate = Array())
-      } else {
-        InstructionFormat(
-          NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement.getBytes),
-          immediate = Array())
-      }
-    }
-  }
+  
 
    implicit object New_OIFormat64 extends TwoOperandFormat[rm, imm] {
 
@@ -161,12 +148,25 @@ trait Formats extends Low {
 
   }
 
-  implicit object New_RMFormatB2 extends TwoOperandFormat[reg, reg#BaseIndex[_32]] {
+  
+  implicit object New_RMFormat extends TwoOperandFormat[reg, reg#BaseIndex[_]] {
 
-    def getAddressingForm(op1: reg, op2: reg#BaseIndex[_32], opcodeExtension: Byte) = {
-      InstructionFormat(
+    def getAddressingForm(op1: reg, op2: reg#BaseIndex[_], opcodeExtension: Byte) = {
+      if (op2.displacement.size == 1) {
+        if (op2.base.name == "rsp" || op2.base.name == "esp") {
+          InstructionFormat(
+          WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, op2.base), ScaleIndexByte(SIB.One, new ESP, op2.base), op2.displacement.getBytes),
+          immediate = Array())
+        } else {
+          InstructionFormat(
+            NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = op2.base), op2.displacement.getBytes),
+            immediate = Array())
+        }
+      } else {
+        InstructionFormat(
         NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = op2.base), op2.displacement.getBytes),
         immediate = Array())
+      }
     }
   }
 

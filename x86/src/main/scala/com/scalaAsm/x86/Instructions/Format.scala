@@ -48,15 +48,6 @@ trait Low {
 
 trait Formats extends Low {
 
-  implicit object New_IFormat32 extends OneOperandFormat[imm32] {
-
-    def getAddressingForm(operand: imm32, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoModRM(),
-        immediate = operand.getBytes)
-    }
-  }
-
   implicit object New_MFormat64 extends OneOperandFormat[rel64] {
 
     def getAddressingForm(operand: rel64, opcodeExtension: Byte) = {
@@ -74,27 +65,9 @@ trait Formats extends Low {
     def getAddressingForm(op1: CS, opcodeExtension: Byte) = NoAddressingForm
   }
 
-  implicit object New_IFormat8 extends OneOperandFormat[imm8] {
+  implicit object New_IFormat8 extends OneOperandFormat[imm] {
 
-    def getAddressingForm(operand: imm8, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoModRM(),
-        immediate = operand.getBytes)
-    }
-  }
-
-  implicit object New_IFormat16 extends OneOperandFormat[imm16] {
-
-    def getAddressingForm(operand: imm16, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = NoModRM(),
-        immediate = operand.getBytes)
-    }
-  }
-
-  implicit object New_IFormat64 extends OneOperandFormat[imm64] {
-
-    def getAddressingForm(operand: imm64, opcodeExtension: Byte) = {
+    def getAddressingForm(operand: imm, opcodeExtension: Byte) = {
       InstructionFormat(
         addressingForm = NoModRM(),
         immediate = operand.getBytes)

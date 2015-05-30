@@ -35,26 +35,22 @@ trait Formats {
           InstructionFormat(
             addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, reg)), ///reg.encode(opcode.opcodeExtension),
             immediate = Array())
-        case BaseIndex(base, offset) =>
-          if (base.name == "rsp" || base.name == "esp") {     
+        case BaseIndex(base, offset) if (base.name == "rsp" || base.name == "esp") => 
             InstructionFormat(
             WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
             immediate = Array()) 
-          } else {
+        case BaseIndex(base, offset) =>
             InstructionFormat(
               NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, base), offset.getBytes),
               immediate = Array())
-          }
-        case Indirect(base) =>
-         if (Seq("rsp", "esp").contains(base.name)) {
+        case Indirect(base) if (base.name == "rsp" || base.name == "esp") =>
              InstructionFormat(
             WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
             immediate = Array())
-          } else {
+        case Indirect(base) =>
             InstructionFormat(
               addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, base)),
               immediate = Array())
-          }
         case x @ AbsoluteAddress(offset) =>
            InstructionFormat(
           addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), x.getBytes), //mem.encode(opcode.opcodeExtension),
@@ -89,10 +85,14 @@ trait Formats {
     }
   }
 
-   implicit object New_RMFormat extends TwoOperandFormat[reg, Memory[_]] {
+   implicit object New_RMFormat extends TwoOperandFormat[reg, rm] {
 
-    def getAddressingForm(op1: reg, op2: Memory[_], opcodeExtension: Byte) = {
+    def getAddressingForm(op1: reg, op2: rm, opcodeExtension: Byte) = {
       op2 match {
+        case reg @ GeneralPurpose(_) =>
+           InstructionFormat(
+            OnlyModRM(ModRMReg(TwoRegisters, reg, op1)),
+            immediate = Array())
         case Indirect(base) =>
           InstructionFormat(
             addressingForm = OnlyModRM(ModRMReg(NoDisplacement, op1, rm = base)),
@@ -120,7 +120,7 @@ trait Formats {
       }  
     }
     
-    override def getPrefix(prefix: Seq[Prefix], op1: reg, op2: Memory[_]) = {
+    override def getPrefix(prefix: Seq[Prefix], op1: reg, op2: rm) = {
       if (prefix.exists(_.isInstanceOf[REX])) {
         REX(true, false, false, false).get
       } else {
@@ -133,16 +133,6 @@ trait Formats {
 
     def getAddressingForm(op1: Memory[_], op2: reg, opcodeExtension: Byte) = {
       New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
-    }
-  }
-  
-  implicit object New_RMFormat6 extends TwoOperandFormat[reg, reg] {
-
-    def getAddressingForm(op1: reg, op2: reg, opcodeExtension: Byte) = {
-
-      InstructionFormat(
-        OnlyModRM(ModRMReg(TwoRegisters, op2, op1)),
-        immediate = Array())
     }
   }
 }

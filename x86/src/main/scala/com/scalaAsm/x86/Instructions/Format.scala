@@ -61,9 +61,9 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_OffsetFormat2 extends OneOperandFormat[reg#BaseIndex[_8]] {
+  implicit object New_OffsetFormat2 extends OneOperandFormat[BaseIndex[_]] {
 
-    def getAddressingForm(operand: reg#BaseIndex[_8], opcodeExtension: Byte) = {
+    def getAddressingForm(operand: BaseIndex[_], opcodeExtension: Byte) = {
       if (operand.base.name == "rsp" || operand.base.name == "esp") {     
         InstructionFormat(
         WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
@@ -73,13 +73,6 @@ trait Formats extends Low {
           NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, operand.base), operand.displacement.getBytes),
           immediate = Array())
       }
-    }
-  }
-
-  implicit object New_MRFormat extends TwoOperandFormat[reg#BaseIndex[_8], reg] {
-
-    def getAddressingForm(op1: reg#BaseIndex[_8], op2: reg, opcodeExtension: Byte) = {
-      New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
     }
   }
 
@@ -138,20 +131,16 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MFormatB1 extends OneOperandFormat[r64#BaseIndex[_]] {
+  implicit object New_MRFormat extends TwoOperandFormat[BaseIndex[_], reg] {
 
-    def getAddressingForm(operand: r64#BaseIndex[_], opcodeExtension: Byte) = {
-      InstructionFormat(
-        WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, operand.base), ScaleIndexByte(SIB.One, new ESP, operand.base)),
-        immediate = Array())
+    def getAddressingForm(op1: BaseIndex[_], op2: reg, opcodeExtension: Byte) = {
+      New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
     }
-
   }
-
   
-  implicit object New_RMFormat extends TwoOperandFormat[reg, reg#BaseIndex[_]] {
+  implicit object New_RMFormat extends TwoOperandFormat[reg, BaseIndex[_]] {
 
-    def getAddressingForm(op1: reg, op2: reg#BaseIndex[_], opcodeExtension: Byte) = {
+    def getAddressingForm(op1: reg, op2: BaseIndex[_], opcodeExtension: Byte) = {
       if (op2.displacement.size == 1) {
         if (op2.base.name == "rsp" || op2.base.name == "esp") {
           InstructionFormat(

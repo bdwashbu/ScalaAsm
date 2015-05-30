@@ -113,9 +113,9 @@ trait Formats extends Low {
     }
   }
 
-   implicit object New_RMFormat3 extends TwoOperandFormat[reg, Indirect[_32]] {
+   implicit object New_RMFormat3 extends TwoOperandFormat[reg, Indirect[_]] {
 
-    def getAddressingForm(op1: reg, op2: Indirect[_32], opcodeExtension: Byte) = {
+    def getAddressingForm(op1: reg, op2: Indirect[_], opcodeExtension: Byte) = {
       InstructionFormat(
         addressingForm = OnlyModRM(ModRMReg(NoDisplacement, op1, rm = op2.base)),
         immediate = Array())

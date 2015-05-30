@@ -26,11 +26,15 @@ trait Formats {
     }
   }
 
-  implicit object New_OffsetFormat2 extends OneOperandFormat[Memory[_]] {
+  implicit object New_OffsetFormat2 extends OneOperandFormat[rm] {
 
-    def getAddressingForm(operand: Memory[_], opcodeExtension: Byte) = {
+    def getAddressingForm(operand: rm, opcodeExtension: Byte) = {
       
       operand match {
+        case reg @ GeneralPurpose(_) =>
+          InstructionFormat(
+            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, reg)), ///reg.encode(opcode.opcodeExtension),
+            immediate = Array())
         case BaseIndex(base, offset) =>
           if (base.name == "rsp" || base.name == "esp") {     
             InstructionFormat(
@@ -129,15 +133,6 @@ trait Formats {
 
     def getAddressingForm(op1: Memory[_], op2: reg, opcodeExtension: Byte) = {
       New_RMFormat.getAddressingForm(op2, op1, opcodeExtension)
-    }
-  }
-  
-  implicit object New_MFormat4 extends OneOperandFormat[reg] {
-
-    def getAddressingForm(operand: reg, opcodeExtension: Byte) = {
-      InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, operand)), ///reg.encode(opcode.opcodeExtension),
-        immediate = Array())
     }
   }
   

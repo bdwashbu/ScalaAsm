@@ -3,13 +3,13 @@ package Operands
 
 import com.scalaAsm.x86.Operands.Memory._
 
-abstract class Register[S: x86Size](val name: String) extends RegisterOrMemory[S] {
+abstract class Register[S: x86Size](name: String) extends RegisterOrMemory[S] {
   override def toString = name.toLowerCase()
 }
 
 abstract class SegmentRegister(name: String) extends GeneralPurpose[_16](name)
 
-abstract class GeneralPurpose[S: x86Size](name: String) extends Register[S](name) {
+abstract case class GeneralPurpose[S: x86Size](name: String) extends Register[S](name) {
   self =>
     
   val ID: Int

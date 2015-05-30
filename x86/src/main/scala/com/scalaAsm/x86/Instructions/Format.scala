@@ -11,18 +11,7 @@ import scala.language.implicitConversions
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.ConstantWriter
 
-trait Low {
-  implicit object New_OIFormat64 extends TwoOperandFormat[reg, imm] {
-
-    def getAddressingForm(op1: reg, op2: imm, opcodeExtension: Byte) = {
-       InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1.asInstanceOf[reg])),
-        immediate = op2.getBytes)  
-    }
-  }
-}
-
-trait Formats extends Low {
+trait Formats {
 
   implicit object New_MFormat64 extends OneOperandFormat[rel64] {
 
@@ -65,9 +54,9 @@ trait Formats extends Low {
     }
   }
 
-  implicit object New_MIFormat32 extends TwoOperandFormat[reg, imm32] {
+  implicit object New_MIFormat32 extends TwoOperandFormat[reg, imm] {
 
-    def getAddressingForm(op1: reg, op2: imm32, opcodeExtension: Byte) = {
+    def getAddressingForm(op1: reg, op2: imm, opcodeExtension: Byte) = {
       if (opcodeExtension != -1) {
         InstructionFormat(
           addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1)),
@@ -78,9 +67,13 @@ trait Formats extends Low {
           immediate = op2.getBytes)
     }
 
-    override def getPrefix(prefix: Seq[Prefix]) = {
+    override def getPrefix(prefix: Seq[Prefix], op1: reg, op2: imm) = {
       if (prefix.exists(_.isInstanceOf[REX])) {
-        REX(true, false, false, true).get
+        if (op1.name == "rsp") {
+          REX(true, false, false, false).get
+        } else {
+          REX(true, false, false, true).get
+        }
       } else {
         Array[Byte]()
       }
@@ -175,7 +168,7 @@ trait Formats extends Low {
         immediate = Array())
     }
 
-    override def getPrefix(prefix: Seq[Prefix]) = {
+    override def getPrefix(prefix: Seq[Prefix], op1: reg, op2: AbsoluteAddress[_]) = {
       if (prefix.exists(_.isInstanceOf[REX])) {
         REX(true, false, false, false).get
       } else {

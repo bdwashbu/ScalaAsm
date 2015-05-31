@@ -13,11 +13,7 @@ import com.scalaAsm.x86.Operands.ConstantWriter
 
 trait Formats {
 
-  implicit object New_DSFormat extends OneOperandFormat[SegmentRegister] {
-    def getAddressingForm(op1: SegmentRegister, opcodeExtension: Byte, opcodeSelectsRegister: Boolean) = NoAddressingForm
-  }
-
-  implicit object New_IFormat8 extends OneOperandFormat[imm] {
+  implicit object ImmFormat extends OneOperandFormat[imm] {
 
     def getAddressingForm(operand: imm, opcodeExtension: Byte, opcodeSelectsRegister: Boolean) = {
       InstructionFormat(
@@ -26,15 +22,15 @@ trait Formats {
     }
   }
 
-  implicit object New_OffsetFormat2 extends OneOperandFormat[rm] {
+  implicit object RmFormat extends OneOperandFormat[rm] {
 
     def getAddressingForm(operand: rm, opcodeExtension: Byte, opcodeSelectsRegister: Boolean) = {
       
       operand match {
         case reg @ GeneralPurpose(_) if opcodeSelectsRegister =>
-          InstructionFormat(
-            addressingForm = NoModRM(),
-            immediate = Array())
+          NoAddressingForm
+        case reg @ GeneralPurpose(_) if reg.isInstanceOf[SegmentRegister] => 
+          NoAddressingForm
         case reg @ GeneralPurpose(_) =>
           InstructionFormat(
             addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, reg)),
@@ -63,7 +59,7 @@ trait Formats {
     }
   }
 
-  implicit object New_MIFormat32 extends TwoOperandFormat[reg, imm] {
+  implicit object RegImmFormat extends TwoOperandFormat[reg, imm] {
 
     def getAddressingForm(op1: reg, op2: imm, opcodeExtension: Byte, opcodeSelectsRegister: Boolean) = {
       if (opcodeExtension != -1) {
@@ -89,7 +85,7 @@ trait Formats {
     }
   }
 
-   implicit object New_RMFormat extends TwoOperandFormat[reg, rm] {
+   implicit object RegRmFormat extends TwoOperandFormat[reg, rm] {
 
     def getAddressingForm(op1: reg, op2: rm, opcodeExtension: Byte, opcodeSelectsRegister: Boolean) = {
       op2 match {
@@ -133,10 +129,10 @@ trait Formats {
     }
   }
    
-  implicit object New_MRFormat extends TwoOperandFormat[Memory[_], reg] {
+  implicit object MemRegFormat extends TwoOperandFormat[Memory[_], reg] {
 
     def getAddressingForm(op1: Memory[_], op2: reg, opcodeExtension: Byte, opcodeSelectsRegister: Boolean) = {
-      New_RMFormat.getAddressingForm(op2, op1, opcodeExtension, opcodeSelectsRegister)
+      RegRmFormat.getAddressingForm(op2, op1, opcodeExtension, opcodeSelectsRegister)
     }
   }
 }

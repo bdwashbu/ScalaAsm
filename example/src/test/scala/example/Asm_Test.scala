@@ -9,7 +9,7 @@ import org.scalatest._
   import com.scalaAsm.asm.Tokens._
   import com.scalaAsm.x86.Operands.Memory.Indirect
   
-class AsmTest extends FlatSpec with ShouldMatchers with Registers with Formats {
+class AsmTest extends FlatSpec with ShouldMatchers with Registers {
   
   "it" should "not compile aesm" in {
 

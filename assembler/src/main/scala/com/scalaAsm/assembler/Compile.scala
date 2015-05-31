@@ -9,7 +9,6 @@ import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
 
-import com.scalaAsm.x86.Instructions.Formats
 import com.scalaAsm.x86.Instructions.OneMachineCode
 import com.scalaAsm.x86.Instructions.TwoMachineCode
 import com.scalaAsm.asm.AsmProgram
@@ -29,7 +28,7 @@ import com.scalaAsm.asm.AsmCompiler
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Operands._
 
-class Assembler extends Formats {
+class Assembler {
   self =>
   import scala.language.postfixOps
   import com.scalaAsm.x86.Instructions.General._
@@ -64,7 +63,7 @@ class Assembler extends Formats {
         case Invoke(name)                                    => Some(InvokeRef(0, name))
         case Reference(name) if program.variableNames.contains(name) => Some(VarRef(name))
         case label @ Label(name)                             => Some(label)
-        case labelref @ LabelRef(name, inst, format)         => Some(labelref)
+        case labelref @ LabelRef(name, inst)                 => Some(labelref)
         case x: InstructionResult                            => Some(InstructionToken(x))
       }
 
@@ -93,7 +92,7 @@ class Assembler extends Formats {
           case InstructionToken(inst) => Some(inst)
           case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => Some(asm"call 0".head)
           case VarRef(_) => Some(asm"push 0".head)
-          case LabelRef(_, inst, format) => Some(inst(new Constant(0.toByte) {}, Seq()))
+          case LabelRef(_, inst) => Some(inst(new Constant(0.toByte) {}, Seq()))
           case _ => None
         }
       }
@@ -122,7 +121,7 @@ class Assembler extends Formats {
           case Padding(to, _) => Array.fill(to)(0xCC.toByte)
           case ProcRef(_) | InvokeRef(_, _) | ImportRef(_, _) => asm"call 0".head.apply
           case VarRef(_) => asm"push 0".head.apply
-          case LabelRef(_, inst, format) => inst(new Constant(0.toByte) {}, Seq()).apply
+          case LabelRef(_, inst) => inst(new Constant(0.toByte) {}, Seq()).apply
           case _ => Array[Byte]()
         }
         code ++= result
@@ -212,7 +211,7 @@ class Assembler extends Formats {
             result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 6))
           case ImportRef(_, name) =>
             result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
-          case LabelRef(name, inst, format) =>
+          case LabelRef(name, inst) =>
             result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 7))
           case _ => None
         }

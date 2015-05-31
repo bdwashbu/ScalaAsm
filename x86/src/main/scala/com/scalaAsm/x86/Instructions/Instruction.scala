@@ -48,7 +48,7 @@ case class OneMachineCode[O1] (
   operand: O1,
   prefixBytes: Array[Byte],
   mnemonic: String,
-  explicitFormat: OneOperandFormat[O1]) extends InstructionResult {
+  format: OneOperandFormat[O1]) extends InstructionResult {
 
   override def toString = {
     val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
@@ -66,7 +66,7 @@ case class OneMachineCode[O1] (
       prefixBytes ++: opcode.get
     }
     
-    val addressForm = explicitFormat.getAddressingForm(operand, opEx, opcode.isInstanceOf[OpcodeWithReg])
+    val addressForm = format.getAddressingForm(operand, opEx, opcode.isInstanceOf[OpcodeWithReg])
     
     prefixAndOpcode ++: addressForm.getBytes
   }
@@ -78,7 +78,7 @@ case class TwoMachineCode[O1, O2] (
   operand2: O2,
   prefixBytes: Array[Byte],
   mnemonic: String,
-  explicitFormat: TwoOperandFormat[O1, O2]) extends InstructionResult {
+  format: TwoOperandFormat[O1, O2]) extends InstructionResult {
 
   override def toString = {
     val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
@@ -96,7 +96,7 @@ case class TwoMachineCode[O1, O2] (
       prefixBytes ++: opcode.get
     }
     
-    val addressForm = explicitFormat.getAddressingForm(operand, operand2, opEx, opcode.isInstanceOf[OpcodeWithReg])
+    val addressForm = format.getAddressingForm(operand, operand2, opEx, opcode.isInstanceOf[OpcodeWithReg])
     
     prefixAndOpcode ++: addressForm.getBytes
   }

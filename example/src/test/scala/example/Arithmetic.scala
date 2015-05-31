@@ -13,11 +13,11 @@ import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.x86.Instructions.General._
 import com.scalaAsm.x86.Operands._
 
-class ArithmeticTest extends FlatSpec with ShouldMatchers with Formats {
+class ArithmeticTest extends FlatSpec with ShouldMatchers {
 
   val executableName = "test_ArithmeticTest.exe"
   
-  def getExecutable[O1 <: InstructionDefinition, O2](inst: TwoOperands[O1], input1: Int, input2: O2)(implicit ev: O1#_2[EAX, O2], format: TwoOperandFormat[EAX, O2]): AsmProgram = {
+  def getExecutable[O1 <: InstructionDefinition, O2](inst: TwoOperands[O1], input1: Int, input2: O2)(implicit ev: O1#_2[EAX, O2]): AsmProgram = {
     new AsmProgram {
 
       sections += new DataSection(

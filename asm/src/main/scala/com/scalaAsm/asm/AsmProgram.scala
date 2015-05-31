@@ -3,7 +3,6 @@ package com.scalaAsm.asm
 import scala.collection.mutable.ListBuffer
 import com.scalaAsm.asm.Tokens.Token
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.x86.Instructions.Formats
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Operands._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
@@ -24,7 +23,7 @@ trait x86_32 extends x86Mode
 trait AsmSection
  trait HighLevel
 
-trait AsmProgram extends Formats {
+trait AsmProgram {
 
   val sections = new ListBuffer[AsmSection]()
   

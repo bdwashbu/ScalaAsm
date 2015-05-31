@@ -52,36 +52,49 @@ trait OneOperandFormats[-X] {
   
     def getAddressingForm(operand: rm) = {
   
-      operand match {
-        case reg @ GeneralPurpose(_) if opcodeSelectsRegister =>
-          NoAddressingForm
-        case reg @ GeneralPurpose(_) if reg.isInstanceOf[SegmentRegister] =>
-          NoAddressingForm
-        case reg @ GeneralPurpose(_) =>
-          InstructionFormat(
-            addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, reg)),
-            immediate = Array())
-        case BaseIndex(base, offset) if (base.name == "rsp" || base.name == "esp") =>
-          InstructionFormat(
-            WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
-            immediate = Array())
-        case BaseIndex(base, offset) =>
-          InstructionFormat(
-            NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, base), offset.getBytes),
-            immediate = Array())
-        case Indirect(base) if (base.name == "rsp" || base.name == "esp") =>
-          InstructionFormat(
-            WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
-            immediate = Array())
-        case Indirect(base) =>
-          InstructionFormat(
-            addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, base)),
-            immediate = Array())
-        case x @ AbsoluteAddress(offset) =>
-          InstructionFormat(
-            addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), x.getBytes), //mem.encode(opcode.opcodeExtension),
-            immediate = Array())
+      getRegFormat(operand).getOrElse{
+        operand match {
+          case BaseIndex(base, offset) if (base.name == "rsp" || base.name == "esp") =>
+            InstructionFormat(
+              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
+              immediate = Array())
+          case BaseIndex(base, offset) =>
+            InstructionFormat(
+              NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, base), offset.getBytes),
+              immediate = Array())
+          case Indirect(base) if (base.name == "rsp" || base.name == "esp") =>
+            InstructionFormat(
+              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
+              immediate = Array())
+          case Indirect(base) =>
+            InstructionFormat(
+              addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, base)),
+              immediate = Array())
+          case x @ AbsoluteAddress(offset) =>
+            InstructionFormat(
+              addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), x.getBytes), //mem.encode(opcode.opcodeExtension),
+              immediate = Array())
+        }
       }
+    }
+  }
+  
+  def getRegFormat(regOrMemory: rm): Option[InstructionFormat] = regOrMemory match {
+    case reg @ GeneralPurpose(_) if opcodeSelectsRegister =>
+      Some(NoAddressingForm)
+    case reg @ GeneralPurpose(_) if reg.isInstanceOf[SegmentRegister] =>
+      Some(NoAddressingForm)
+    case reg @ GeneralPurpose(_) =>
+      Some(InstructionFormat(
+        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, reg)),
+        immediate = Array()))
+    case _ => None
+  }
+  
+  object RegFormat extends OneOperandFormat[reg] {
+  
+    def getAddressingForm(operand: reg) = {
+      getRegFormat(operand).get
     }
   }
 }

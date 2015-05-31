@@ -21,7 +21,8 @@ trait InstructionDefinition {
     val format: OneOperandFormat[O1]
     def opcodeSelectsRegister = opcode.isInstanceOf[OpcodeWithReg]
     def opcodeExtension: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
-
+    val hasRMByte: Boolean
+    
     def apply[X <: O1](p1: X, prefix: Seq[Prefix]) = {
       val prefixBytes = format.getPrefix(prefix, p1).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
       OneMachineCode(opcode, p1, prefixBytes, mnemonic, format)
@@ -34,7 +35,8 @@ trait InstructionDefinition {
     val format: TwoOperandFormat[O1, O2]
     def opcodeSelectsRegister = opcode.isInstanceOf[OpcodeWithReg]
     def opcodeExtension: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
-
+    val hasRMByte: Boolean
+    
     def apply[X <: O1, Y <: O2](p1: X, p2: Y) = {
       val prefixBytes = format.getPrefix(prefix, p1, p2).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
       TwoMachineCode(opcode, p1, p2, prefixBytes, mnemonic, format)

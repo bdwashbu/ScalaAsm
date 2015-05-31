@@ -23,11 +23,11 @@ trait x86Instruction {
 }
 
 trait OneOperand[X <: InstructionDefinition] {
-  def apply[O1](p1: O1)(implicit ev: X#_1[O1], format: OneOperandFormat[O1]): OneMachineCode[O1] = ev(p1, format, ev.prefix)
+  def apply[O1](p1: O1)(implicit ev: X#_1[O1]): OneMachineCode[O1] = ev(p1, ev.prefix)
 }
 
 trait TwoOperands[X <: InstructionDefinition] {
-  def apply[O1, O2](p1: O1, p2: O2)(implicit ev: X#_2[O1, O2], format: TwoOperandFormat[O1, O2]): TwoMachineCode[O1, O2] = ev(p1, p2, format)
+  def apply[O1, O2](p1: O1, p2: O2)(implicit ev: X#_2[O1, O2]): TwoMachineCode[O1, O2] = ev(p1, p2)
 }
 
 trait ZeroOperands[X <: InstructionDefinition] {
@@ -48,8 +48,7 @@ case class OneMachineCode[O1] (
   operand: O1,
   prefixBytes: Array[Byte],
   mnemonic: String,
-  explicitFormat: (O1) => Option[InstructionFormat],
-  implicitFormat: OneOperandFormat[O1]) extends InstructionResult {
+  explicitFormat: OneOperandFormat[O1]) extends InstructionResult {
 
   override def toString = {
     val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
@@ -67,7 +66,7 @@ case class OneMachineCode[O1] (
       prefixBytes ++: opcode.get
     }
     
-    val addressForm = implicitFormat.getAddressingForm(operand, opEx, opcode.isInstanceOf[OpcodeWithReg])
+    val addressForm = explicitFormat.getAddressingForm(operand, opEx, opcode.isInstanceOf[OpcodeWithReg])
     
     prefixAndOpcode ++: addressForm.getBytes
   }
@@ -79,8 +78,7 @@ case class TwoMachineCode[O1, O2] (
   operand2: O2,
   prefixBytes: Array[Byte],
   mnemonic: String,
-  explicitFormat: (O1, O2) => Option[InstructionFormat],
-  implicitFormat: TwoOperandFormat[O1, O2]) extends InstructionResult {
+  explicitFormat: TwoOperandFormat[O1, O2]) extends InstructionResult {
 
   override def toString = {
     val formattedMnemonic = mnemonic.head + mnemonic.tail.toLowerCase()
@@ -98,7 +96,7 @@ case class TwoMachineCode[O1, O2] (
       prefixBytes ++: opcode.get
     }
     
-    val addressForm = implicitFormat.getAddressingForm(operand, operand2, opEx, opcode.isInstanceOf[OpcodeWithReg])
+    val addressForm = explicitFormat.getAddressingForm(operand, operand2, opEx, opcode.isInstanceOf[OpcodeWithReg])
     
     prefixAndOpcode ++: addressForm.getBytes
   }

@@ -18,22 +18,22 @@ trait InstructionDefinition {
   trait _1[-O1] extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def hasImplicitOperand: Boolean = false
-    def explicitFormat(p1: O1): Option[InstructionFormat] = None
+    val explicitFormat: OneOperandFormat[O1]
 
-    def apply[X <: O1](p1: X, implicitFormat: OneOperandFormat[X], prefix: Seq[Prefix]) = {
-      val prefixBytes = implicitFormat.getPrefix(prefix, p1).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
-      OneMachineCode(opcode, p1, prefixBytes, mnemonic, explicitFormat, implicitFormat)
+    def apply[X <: O1](p1: X, prefix: Seq[Prefix]) = {
+      val prefixBytes = explicitFormat.getPrefix(prefix, p1).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
+      OneMachineCode(opcode, p1, prefixBytes, mnemonic, explicitFormat)
     }
   }
 
   trait _2[-O1, -O2] extends x86Instruction {
     val mnemonic = InstructionDefinition.this.mnemonic
     def hasImplicitOperand: Boolean = false
-    def explicitFormat(p1: O1, p2: O2): Option[InstructionFormat] = None
+    val explicitFormat: TwoOperandFormat[O1, O2]
 
-    def apply[X <: O1, Y <: O2](p1: X, p2: Y, implicitFormat: TwoOperandFormat[X, Y]) = {
-      val prefixBytes = implicitFormat.getPrefix(prefix, p1, p2).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
-      TwoMachineCode(opcode, p1, p2, prefixBytes, mnemonic, explicitFormat, implicitFormat)
+    def apply[X <: O1, Y <: O2](p1: X, p2: Y) = {
+      val prefixBytes = explicitFormat.getPrefix(prefix, p1, p2).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
+      TwoMachineCode(opcode, p1, p2, prefixBytes, mnemonic, explicitFormat)
     }
   }
 }

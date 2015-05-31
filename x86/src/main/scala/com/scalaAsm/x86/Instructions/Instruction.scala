@@ -67,7 +67,7 @@ case class OneMachineCode[O1] (
       prefixBytes ++: opcode.get
     }
     
-    val addressForm = explicitFormat(operand) getOrElse implicitFormat.getAddressingForm(operand, opEx)
+    val addressForm = implicitFormat.getAddressingForm(operand, opEx, opcode.isInstanceOf[OpcodeWithReg])
     
     prefixAndOpcode ++: addressForm.getBytes
   }
@@ -98,7 +98,7 @@ case class TwoMachineCode[O1, O2] (
       prefixBytes ++: opcode.get
     }
     
-    val addressForm = explicitFormat(operand, operand2) getOrElse implicitFormat.getAddressingForm(operand, operand2, opEx)
+    val addressForm = implicitFormat.getAddressingForm(operand, operand2, opEx, opcode.isInstanceOf[OpcodeWithReg])
     
     prefixAndOpcode ++: addressForm.getBytes
   }

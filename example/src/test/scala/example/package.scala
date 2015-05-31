@@ -17,8 +17,10 @@ package object example {
     
     var executableName = ""
     synchronized {
-      iteration += 1
-      executableName = s"test$iteration.exe"
+      do {
+        iteration += 1
+        executableName = s"test$iteration.exe"
+      } while (new File(executableName).exists)
     }
 
     val name = System.nanoTime

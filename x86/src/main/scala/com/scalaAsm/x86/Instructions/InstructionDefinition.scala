@@ -1,8 +1,8 @@
 package com.scalaAsm.x86
 package Instructions
 
-import com.scalaAsm.x86.Operands._
-import com.scalaAsm.x86.Operands.Constant
+import Operands._
+import Operands.Constant
 import Memory._
 import com.scalaAsm.x86.OpcodeFormat
 
@@ -15,10 +15,12 @@ trait InstructionDefinition {
     def hasImplicitOperand: Boolean = false
   }
 
-  trait _1[-O1] extends x86Instruction {
+  trait _1[-O1] extends x86Instruction with OneOperandFormats[O1] {
     val mnemonic = InstructionDefinition.this.mnemonic
     def hasImplicitOperand: Boolean = false
     val format: OneOperandFormat[O1]
+    def opcodeSelectsRegister = opcode.isInstanceOf[OpcodeWithReg]
+    def opcodeExtension: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
 
     def apply[X <: O1](p1: X, prefix: Seq[Prefix]) = {
       val prefixBytes = format.getPrefix(prefix, p1).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
@@ -26,10 +28,12 @@ trait InstructionDefinition {
     }
   }
 
-  trait _2[-O1, -O2] extends x86Instruction {
+  trait _2[-O1, -O2] extends x86Instruction with TwoOperandFormats[O1, O2]  {
     val mnemonic = InstructionDefinition.this.mnemonic
     def hasImplicitOperand: Boolean = false
     val format: TwoOperandFormat[O1, O2]
+    def opcodeSelectsRegister = opcode.isInstanceOf[OpcodeWithReg]
+    def opcodeExtension: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
 
     def apply[X <: O1, Y <: O2](p1: X, p2: Y) = {
       val prefixBytes = format.getPrefix(prefix, p1, p2).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }

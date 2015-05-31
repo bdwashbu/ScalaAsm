@@ -56,8 +56,6 @@ case class OneMachineCode[O1] (
   }
 
   def apply: Array[Byte] = {
-    val opEx: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
-    
     val prefixAndOpcode = if (opcode.isInstanceOf[OpcodeWithReg] && operand.isInstanceOf[reg]) { // this is hacky as hell!
       val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
       opcodePlus.reg = operand.asInstanceOf[reg]
@@ -66,7 +64,7 @@ case class OneMachineCode[O1] (
       prefixBytes ++: opcode.get
     }
     
-    val addressForm = format.getAddressingForm(operand, opEx, opcode.isInstanceOf[OpcodeWithReg])
+    val addressForm = format.getAddressingForm(operand)
     
     prefixAndOpcode ++: addressForm.getBytes
   }
@@ -86,8 +84,7 @@ case class TwoMachineCode[O1, O2] (
     }
   
   def apply: Array[Byte] = {
-    val opEx: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
-    
+
     val prefixAndOpcode = if (opcode.isInstanceOf[OpcodeWithReg] && operand.isInstanceOf[reg]) { // this is hacky as hell!
       val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
       opcodePlus.reg = operand.asInstanceOf[reg]
@@ -96,7 +93,7 @@ case class TwoMachineCode[O1, O2] (
       prefixBytes ++: opcode.get
     }
     
-    val addressForm = format.getAddressingForm(operand, operand2, opEx, opcode.isInstanceOf[OpcodeWithReg])
+    val addressForm = format.getAddressingForm(operand, operand2)
     
     prefixAndOpcode ++: addressForm.getBytes
   }

@@ -14,6 +14,9 @@ trait x86Instruction {
   val mnemonic: String
   def opcode: OpcodeFormat
   def prefix = Seq[Prefix]()
+  def opcodeSelectsRegister = opcode.isInstanceOf[OpcodeWithReg]
+  def opcodeExtension: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
+  def hasRMByte: Boolean = opcode.hasModRMByte || opcode.opcodeExtension.isDefined
   
   implicit def toPrefixSeq(x: Prefix) = Seq(x)
   implicit def toByte(x: Int) = x.toByte
@@ -23,15 +26,15 @@ trait x86Instruction {
 }
 
 trait OneOperand[X <: InstructionDefinition] {
-  def apply[O1](p1: O1)(implicit ev: X#_1[O1]): OneMachineCode[O1] = ev(p1, ev.prefix)
+  def apply[O1](p1: O1)(implicit ev: X#OneOp[O1]): OneMachineCode[O1] = ev(p1, ev.prefix)
 }
 
 trait TwoOperands[X <: InstructionDefinition] {
-  def apply[O1, O2](p1: O1, p2: O2)(implicit ev: X#_2[O1, O2]): TwoMachineCode[O1, O2] = ev(p1, p2)
+  def apply[O1, O2](p1: O1, p2: O2)(implicit ev: X#TwoOp[O1, O2]): TwoMachineCode[O1, O2] = ev(p1, p2)
 }
 
 trait ZeroOperands[X <: InstructionDefinition] {
-  def apply(ignored: Unit)(implicit ev: X#_0): ZeroMachineCode = ev.get
+  def apply(ignored: Unit)(implicit ev: X#NoOp): ZeroMachineCode = ev.get
 }
 
 object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = Array())

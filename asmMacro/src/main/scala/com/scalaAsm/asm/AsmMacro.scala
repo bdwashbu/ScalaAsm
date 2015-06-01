@@ -148,13 +148,13 @@ object AsmCompiler {
           case "PUSH" =>
             s"""Reference(\"$varName\")"""
           case "JNZ" =>
-            s"""LabelRef(\"$varName\", implicitly[JNZ#_1[Constant[_8]]])"""
+            s"""LabelRef(\"$varName\", implicitly[JNZ#OneOp[Constant[_8]]])"""
           case "JZ" =>
-            s"""LabelRef(\"$varName\", implicitly[JZ#_1[Constant[_8]]])"""
+            s"""LabelRef(\"$varName\", implicitly[JZ#OneOp[Constant[_8]]])"""
           case "JE" =>
-            s"""LabelRef(\"$varName\", implicitly[JE#_1[Constant[_8]]])"""
+            s"""LabelRef(\"$varName\", implicitly[JE#OneOp[Constant[_8]]])"""
           case "JMP" =>
-            s"""LabelRef(\"$varName\", implicitly[JMP#_1[Constant[_8]]])"""
+            s"""LabelRef(\"$varName\", implicitly[JMP#OneOp[Constant[_8]]])"""
           case "INVOKE" => s"""Invoke(\"$varName\")"""
           case _        => x86Macro.x86(c, inst)(args: _*)
         }

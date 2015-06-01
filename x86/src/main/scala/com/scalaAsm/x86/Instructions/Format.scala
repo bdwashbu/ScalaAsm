@@ -37,7 +37,7 @@ abstract class ResolvedZeroOperand(opcode: OpcodeFormat, prefix: Seq[Prefix]) {
 \------------------------------------------------------------------------------------------------------------------------------------------*/
 
 trait OneOperandFormats[-X] {
-  self: InstructionDefinition#_1[X] =>
+  self: InstructionDefinition#OneOp[X] =>
 
   object ImmFormat extends OneOperandFormat[imm] {
   
@@ -100,7 +100,7 @@ trait OneOperandFormats[-X] {
 }
 
 trait TwoOperandFormats[-X,-Y] {
-  self: InstructionDefinition#_2[X,Y] =>
+  self: InstructionDefinition#TwoOp[X,Y] =>
 
   object RmImmFormat extends TwoOperandFormat[rm, imm] {
   

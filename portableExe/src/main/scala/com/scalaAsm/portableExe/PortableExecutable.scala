@@ -21,12 +21,18 @@ case class PortableExecutable(dosHeader: DosHeader,
   def dissemble: Seq[String] = {
     val code = sections(0).contents
     println(sections(0).contents(0))
-    for (i <- 0 to 3) {
-      println("GO")
+    var i = 0
+    //while (i < code.size) {
+      println("START DISSEMBLING")
+      println("Opcode found: " + (code(i) & 0x000000FF))
       val possible = instructionMap.instMap(code(i) & 0x000000FF).toSeq
-      val result = possible.filter(inst => inst.opcode.isInstanceOf[OneOpcode] && inst.prefix.isEmpty).map(inst => inst.mnemonic).toSeq
-      result.foreach(println)
-    }
+      val results = possible.filter(inst => inst.opcode.isInstanceOf[OneOpcode] && inst.prefix.isEmpty).toSeq
+      //val shouldCheckRM = results.forall{inst => inst.}
+      //result.foreach{what => println(what.toString + " " + what.opcode)}
+      println(results.head.mnemonic)
+      println("END DISSEMBLING")
+     // if (result.h)
+    //}
     null
   }
   
@@ -44,6 +50,8 @@ case class PortableExecutable(dosHeader: DosHeader,
     result = result.patch(0, headers, headers.length)
     sections.foreach{section => result = result.patch(section.header.pointerToRawData, section.contents, section.contents.length)}
 
+    //dissemble
+    
     result.toArray
   }
 

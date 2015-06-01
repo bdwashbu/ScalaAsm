@@ -45,4 +45,6 @@ abstract class ConstantWriter[Size: x86Size] {
   def write(buffer: ByteBuffer, value: Size): Unit
 }
 
-class RegisterOrMemory[Size: x86Size]
+class RegisterOrMemory[Size: x86Size] {
+  def size = implicitly[x86Size[Size]].size
+}

@@ -15,7 +15,7 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
     new AsmProgram {
 
       import com.scalaAsm.x86.Instructions.General._
-      import com.scalaAsm.x86.Operands._
+      import com.scalaAsm.x86.Instructions._
 
       sections += new DataSection(
         Variable("test", "%d\n\u0000")) {}

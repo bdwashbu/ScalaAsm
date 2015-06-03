@@ -4,7 +4,7 @@ import sections._
 import scala.collection.mutable.ArrayBuffer
 import com.scalaAsm.coff.Section
 import com.scalaAsm
-import com.scalaAsm.x86.Instructions.instructionMap
+import com.scalaAsm.x86.Instructions.InstructionMap
 import com.scalaAsm.x86._
 
 case class PortableExecutable(dosHeader: DosHeader,
@@ -25,7 +25,7 @@ case class PortableExecutable(dosHeader: DosHeader,
     //while (i < code.size) {
       println("START DISSEMBLING")
       println("Opcode found: " + (code(i) & 0x000000FF))
-      val possible = instructionMap.instMap(code(i) & 0x000000FF).toSeq
+      val possible = InstructionMap.instMap(code(i) & 0x000000FF).toSeq
       val results = possible.filter(inst => inst.opcode.isInstanceOf[OneOpcode] && inst.prefix.isEmpty).toSeq
       //val shouldCheckRM = results.forall{inst => inst.}
       //result.foreach{what => println(what.toString + " " + what.opcode)}

@@ -26,7 +26,7 @@ class ConditionalTest extends FlatSpec with ShouldMatchers {
 
       import com.scalaAsm.x86.Instructions.General._
       import com.scalaAsm.asm._
-      import com.scalaAsm.x86.Operands._
+      import com.scalaAsm.x86.Instructions._
       
       sections += new DataSection(
         Variable("jumpTaken", "Jump taken!\n\u0000"),

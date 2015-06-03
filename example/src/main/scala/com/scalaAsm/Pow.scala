@@ -5,7 +5,7 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86._
-import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Instructions._
 
 class PowTest {//}extends FlatSpec with ShouldMatchers {
 
@@ -16,7 +16,7 @@ class PowTest {//}extends FlatSpec with ShouldMatchers {
 
       import com.scalaAsm.x86.Instructions.General._
       import com.scalaAsm.x86.Instructions.x87._
-      import com.scalaAsm.x86.Operands._
+      import com.scalaAsm.x86.Instructions._
 
       sections += new DataSection(
         Variable("test", "%d\n\u0000")) {}

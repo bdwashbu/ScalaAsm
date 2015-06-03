@@ -13,7 +13,7 @@ import com.scalaAsm.asm._
 object HelloWorld64 extends AsmProgram {
   
   import com.scalaAsm.x86.Instructions.General._
-  import com.scalaAsm.x86.Operands._
+  import com.scalaAsm.x86.Instructions._
   
   sections += new DataSection (
     Variable("helloWorld", "Hello World!\r\n\u0000")

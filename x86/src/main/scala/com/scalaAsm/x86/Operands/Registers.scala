@@ -1,13 +1,15 @@
 package com.scalaAsm.x86
 package Operands
 
-import com.scalaAsm.x86.Operands.Memory._
+import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Instructions._
+import com.scalaAsm.x86.Operands.Memory.BaseIndex
+
+abstract class SegmentRegister(name: String) extends GeneralPurpose[_16](name)
 
 abstract class Register[S: x86Size](name: String) extends RegisterOrMemory[S] {
   override def toString = name.toLowerCase()
 }
-
-abstract class SegmentRegister(name: String) extends GeneralPurpose[_16](name)
 
 abstract case class GeneralPurpose[S: x86Size](name: String) extends Register[S](name) {
   self =>

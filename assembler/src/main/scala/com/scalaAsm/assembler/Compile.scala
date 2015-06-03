@@ -4,16 +4,14 @@ package assembler
 import com.scalaAsm.asm._
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.x86.Instructions.General._
-import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.x86.InstructionResult
 
 import com.scalaAsm.x86.Instructions.OneMachineCode
 import com.scalaAsm.x86.Instructions.TwoMachineCode
-import com.scalaAsm.asm.AsmProgram
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.asm.x86Mode
 import com.scalaAsm.coff.Relocation
 import scala.collection.mutable.ArrayBuffer
 import com.scalaAsm.coff.CoffSymbol
@@ -23,10 +21,7 @@ import com.scalaAsm.coff.SectionHeader
 import com.scalaAsm.coff.Characteristic
 import com.scalaAsm.coff.{ IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION }
 
-import com.scalaAsm.asm.AsmCompiler
-
 import com.scalaAsm.x86.InstructionResult
-import com.scalaAsm.x86.Operands._
 
 class Assembler {
   self =>

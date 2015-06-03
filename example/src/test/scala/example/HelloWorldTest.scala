@@ -17,7 +17,7 @@ import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
 
 import com.scalaAsm.x86.InstructionResult
-import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Instructions._
 
 object HelloWorld extends AsmProgram {
 

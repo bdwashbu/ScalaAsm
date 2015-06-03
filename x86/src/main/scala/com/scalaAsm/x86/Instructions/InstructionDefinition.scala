@@ -2,9 +2,24 @@ package com.scalaAsm.x86
 package Instructions
 
 import Operands._
-import Operands.Constant
 import Memory._
 import com.scalaAsm.x86.OpcodeFormat
+
+sealed trait x86Instruction {
+  import scala.language.implicitConversions
+  val mnemonic: String
+  def opcode: OpcodeFormat
+  def prefix = Seq[Prefix]()
+  def opcodeSelectsRegister = opcode.isInstanceOf[OpcodeWithReg]
+  def opcodeExtension: Byte = if (!opcode.opcodeExtension.isEmpty) opcode.opcodeExtension.get else -1
+  def hasRMByte: Boolean = opcode.hasModRMByte || opcode.opcodeExtension.isDefined
+  
+  implicit def toPrefixSeq(x: Prefix) = Seq(x)
+  implicit def toByte(x: Int) = x.toByte
+  implicit def toOneOpcode(x: Int): OneOpcode = OneOpcode(x.toByte, prefix, false)
+  implicit def toTwoOpcodes(x: (Int, Int)): TwoOpcodes = TwoOpcodes(x._1.toByte, x._2.toByte, prefix, false)
+  implicit def toThreeOpcodes(x: (Int, Int, Int)): ThreeOpcodes = ThreeOpcodes(x._1.toByte, x._2.toByte, x._3.toByte, prefix, false)
+}
 
 trait InstructionDefinition {
   val mnemonic: String

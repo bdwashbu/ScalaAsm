@@ -8,7 +8,7 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
-import com.scalaAsm.x86.Operands._
+import com.scalaAsm.x86.Instructions._
 import com.scalaAsm.x86._
 import scala.language.experimental.macros
 import com.scalaAsm.x86.Operands.Memory.Indirect

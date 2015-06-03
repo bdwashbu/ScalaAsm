@@ -6,7 +6,7 @@ package object asm {
 
   import scala.reflect.macros.blackbox.Context
   import com.scalaAsm.x86.InstructionResult
-  import com.scalaAsm.x86.Operands.Constant
+  import com.scalaAsm.x86.Instructions.Constant
   import com.scalaAsm.x86
 
   implicit class AsmContext (val sc : StringContext) {

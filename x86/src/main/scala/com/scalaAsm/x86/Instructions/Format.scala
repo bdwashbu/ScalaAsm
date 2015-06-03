@@ -15,6 +15,7 @@ class NoOperandFormat extends ResolvedZeroOperand(null, Seq()) {
   val size = 1
 }
 
+object NoAddressingForm extends InstructionFormat(addressingForm = NoModRM(), immediate = Array())
 
 abstract class TwoOperandFormat[-X, -Y] {
   def getAddressingForm(op1: X, op2: Y): InstructionFormat
@@ -30,11 +31,6 @@ abstract class ResolvedZeroOperand(opcode: OpcodeFormat, prefix: Seq[Prefix]) {
   def getPrefix: Array[Byte] = Array()
   def size: Int
 }
-
-// Instruction Format:
-/*------------------------------------------------------------------------------------------------------------------------------------------\
-|*Prefixes | *Mandatory Prefix | *REX Prefix | Opcode Bytes | *ModR/M | *SIB | *Displacement (1,2 or 4 bytes) | *Immediate (1,2 or 4 bytes) |
-\------------------------------------------------------------------------------------------------------------------------------------------*/
 
 trait OneOperandFormats[-X] {
   self: InstructionDefinition#OneOp[X] =>

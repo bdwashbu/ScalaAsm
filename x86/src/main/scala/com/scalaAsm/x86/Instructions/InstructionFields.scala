@@ -9,20 +9,32 @@ import java.nio.{ByteBuffer, ByteOrder}
 |*Prefixes | *Mandatory Prefix | *REX Prefix | Opcode Bytes | *ModR/M | *SIB | *Displacement (1,2 or 4 bytes) | *Immediate (1,2 or 4 bytes) |
 \------------------------------------------------------------------------------------------------------------------------------------------*/
 
-sealed trait InstructionField {
+sealed trait SizedInstructionField {
   def size: Int
 }
 
-sealed trait ByteInstructionField extends InstructionField {
+sealed trait ByteInstructionField {
   val size = 1
   def getByte: Byte
 }
 
-abstract class RegisterOrMemory[Size: x86Size] extends InstructionField {
-  def size = implicitly[x86Size[Size]].size
+sealed trait DependantInstructionField {
+  def size(modRM: ModRM): Int
 }
 
-case class Constant[Size: x86Size](val value: Size)(implicit writer: ConstantWriter[Size]) extends InstructionField {
+abstract class RegisterOrMemory[Size: x86Size]
+
+trait Memory[Size] extends RegisterOrMemory[Size] with DependantInstructionField {
+  def size(modRm: ModRM) = {
+    modRm.mod match {
+      case DisplacementByte => 1
+      case DisplacementDword => 4
+      case _ => 0
+    }
+  }
+}
+
+case class Constant[Size: x86Size](val value: Size)(implicit writer: ConstantWriter[Size]) extends SizedInstructionField {
   
   val buffer = ByteBuffer.allocate(size)
   if (size != 0) {
@@ -81,9 +93,7 @@ case object DisplacementByte  extends RegisterMode(1) // [disp + reg8 + eax*n]
 case object DisplacementDword extends RegisterMode(2) // [disp + reg32 + eax*n]
 case object TwoRegisters      extends RegisterMode(3) // r/m is treated as a second "reg" field
 
-trait ModRM extends ByteInstructionField
-
-trait ModRegisterMemory extends ModRM {
+trait ModRM extends ByteInstructionField {
   val mod: RegisterMode
   val rm: GPR
 }
@@ -97,7 +107,7 @@ abstract class NoDisp(value: Int) extends Constant[_32](value) {
 // |  mod  |    reg    |     rm    |
 // +---+---+---+---+---+---+---+---+
 
-final case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) extends ModRegisterMemory {
+final case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) extends ModRM {
   def getByte = ((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte
 }
 
@@ -106,7 +116,7 @@ final case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) 
 // |  mod  |Op Extended|     rm    |
 // +---+---+---+---+---+---+---+---+
 
-final case class ModRMOpcode[X <: GPR](mod: RegisterMode, opcodeExtended: Byte, rm: X) extends ModRegisterMemory {
+final case class ModRMOpcode[X <: GPR](mod: RegisterMode, opcodeExtended: Byte, rm: X) extends ModRM {
   def getByte = ((mod.value << 6) + (opcodeExtended << 3) + rm.ID).toByte
 }
 

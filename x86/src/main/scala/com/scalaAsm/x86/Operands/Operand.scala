@@ -1,7 +1,6 @@
 package com.scalaAsm.x86
 package Operands
 
-import com.scalaAsm.x86.Instructions.InstructionField
 import com.scalaAsm.x86.Operands.Memory.AbsoluteAddress
 import java.nio.{ByteBuffer, ByteOrder}
 

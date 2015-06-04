@@ -14,8 +14,8 @@ sealed trait InstructionField {
 }
 
 sealed trait ByteInstructionField extends InstructionField {
-  def size: Int
-  def getByte: Option[Byte]
+  val size = 1
+  def getByte: Byte
 }
 
 abstract class RegisterOrMemory[Size: x86Size] extends InstructionField {
@@ -40,11 +40,12 @@ case class Constant[Size: x86Size](val value: Size)(implicit writer: ConstantWri
   override def toString = value.toString
 }
 
-protected[x86] abstract class AddressingFormSpecifier(modRM: ModRM, sib: SIB, displacement: Array[Byte]) {
+protected[x86] abstract class AddressingFormSpecifier(modRM: Option[ModRM], sib: Option[SIB], displacement: Array[Byte]) {
   import scala.language.postfixOps
 
   lazy val getBytes: Array[Byte] = {
-    Array(modRM.getByte, sib.getByte).flatten ++: displacement
+    val what = Array(modRM, sib).flatten.map(_.getByte)
+    Array(modRM, sib).flatten.map(_.getByte) ++: displacement
   }
 
   lazy val size: Int = {
@@ -62,17 +63,17 @@ protected[x86] case class InstructionFormat (
   }
 }
 
-final case class NoModRM() extends AddressingFormSpecifier(NoModField, NoSibField, Array())
+final case class NoModRM() extends AddressingFormSpecifier(None, None, Array())
 
-final case class OnlyDisplacement(offset: Array[Byte]) extends AddressingFormSpecifier(NoModField, NoSibField, offset)
+final case class OnlyDisplacement(offset: Array[Byte]) extends AddressingFormSpecifier(None, None, offset)
 
-final case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier(mod, NoSibField, Array())
+final case class OnlyModRM(mod: ModRM) extends AddressingFormSpecifier(Some(mod), None, Array())
 
-final case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier(mod, theSIB, Array())
+final case class WithSIBNoDisplacement(mod: ModRM, theSIB: SIB) extends AddressingFormSpecifier(Some(mod), Some(theSIB), Array())
 
-final case class NoSIBWithDisplacement(mod: ModRM, offset: Array[Byte]) extends AddressingFormSpecifier(mod, NoSibField, offset)
+final case class NoSIBWithDisplacement(mod: ModRM, offset: Array[Byte]) extends AddressingFormSpecifier(Some(mod), None, offset)
 
-final case class WithSIBWithDisplacement[Mod <: ModRM, Sib <: SIB](mod: Mod, theSIB: Sib, offset: Array[Byte]) extends AddressingFormSpecifier(mod, theSIB, offset)
+final case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Array[Byte]) extends AddressingFormSpecifier(Some(mod), Some(theSIB), offset)
 
 sealed class RegisterMode(val value: Byte)
 case object NoDisplacement    extends RegisterMode(0) // [reg32 + eax*n]
@@ -85,23 +86,6 @@ trait ModRM extends ByteInstructionField
 trait ModRegisterMemory extends ModRM {
   val mod: RegisterMode
   val rm: GPR
-  val size = 1;
-}
-
-trait NoMod extends ModRM {
-  def getByte = None
-}
-
-object NoModField extends NoMod {
-  val size = 0
-}
-
-trait NoSib extends SIB {
-  def getByte = None
-}
-
-object NoSibField extends NoSib {
-  val size = 0
 }
 
 abstract class NoDisp(value: Int) extends Constant[_32](value) {
@@ -114,7 +98,7 @@ abstract class NoDisp(value: Int) extends Constant[_32](value) {
 // +---+---+---+---+---+---+---+---+
 
 final case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) extends ModRegisterMemory {
-  def getByte = Some(((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte)
+  def getByte = ((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte
 }
 
 // Alternative Mod/RM format
@@ -123,7 +107,7 @@ final case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) 
 // +---+---+---+---+---+---+---+---+
 
 final case class ModRMOpcode[X <: GPR](mod: RegisterMode, opcodeExtended: Byte, rm: X) extends ModRegisterMemory {
-  def getByte = Some(((mod.value << 6) + (opcodeExtended << 3) + rm.ID).toByte)
+  def getByte = ((mod.value << 6) + (opcodeExtended << 3) + rm.ID).toByte
 }
 
 sealed class SIBScale(val value: Byte)
@@ -144,6 +128,5 @@ object SIB {
 trait SIB extends ByteInstructionField
 
 case class ScaleIndexByte[X <: GPR, Y <: GPR](scale: SIBScale, index: X, base: Y) extends SIB {
-  def getByte = Some(((scale.value << 6) + (index.ID << 3) + base.ID).toByte)
-  val size = 1
+  def getByte = ((scale.value << 6) + (index.ID << 3) + base.ID).toByte
 }

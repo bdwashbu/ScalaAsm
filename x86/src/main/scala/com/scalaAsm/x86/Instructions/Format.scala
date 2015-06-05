@@ -49,28 +49,20 @@ trait OneOperandFormats[-X] {
     def getAddressingForm(operand: rm) = {
   
       getRegFormat(operand).getOrElse{
-        operand match {
+        val result = operand match {
           case BaseIndex(base, offset) if (base.name == "rsp" || base.name == "esp") =>
-            InstructionFormat(
-              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
-              immediate = Array())
+              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base))
           case BaseIndex(base, offset) =>
-            InstructionFormat(
-              NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, base), offset.getBytes),
-              immediate = Array())
+              NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, base), offset.getBytes)
           case Indirect(base) if (base.name == "rsp" || base.name == "esp") =>
-            InstructionFormat(
-              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base)),
-              immediate = Array())
+              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base))
           case Indirect(base) =>
-            InstructionFormat(
-              addressingForm = OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, base)),
-              immediate = Array())
+              OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, base))
           case x @ AbsoluteAddress(offset) =>
-            InstructionFormat(
-              addressingForm = NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), x.getBytes), //mem.encode(opcode.opcodeExtension),
-              immediate = Array())
+              NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), x.getBytes)
         }
+        
+        InstructionFormat(result, Array())
       }
     }
   }
@@ -127,36 +119,26 @@ trait TwoOperandFormats[-X,-Y] {
   object RegRmFormat extends TwoOperandFormat[reg, rm] {
   
     def getAddressingForm(op1: reg, op2: rm) = {
-      op2 match {
+      val result = op2 match {
         case reg @ GeneralPurpose(_) =>
-          InstructionFormat(
-            OnlyModRM(ModRMReg(TwoRegisters, op1, reg)),
-            immediate = Array())
+            OnlyModRM(ModRMReg(TwoRegisters, op1, reg))
         case Indirect(base) =>
-          InstructionFormat(
-            addressingForm = OnlyModRM(ModRMReg(NoDisplacement, op1, rm = base)),
-            immediate = Array())
+            OnlyModRM(ModRMReg(NoDisplacement, op1, rm = base))
         case BaseIndex(base, offset) =>
           if (offset.size == 1) {
             if (base.name == "rsp" || base.name == "esp") {
-              InstructionFormat(
-                WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, base), ScaleIndexByte(SIB.One, new ESP, base), offset.getBytes),
-                immediate = Array())
+                WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, base), ScaleIndexByte(SIB.One, new ESP, base), offset.getBytes)
             } else {
-              InstructionFormat(
-                NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = base), offset.getBytes),
-                immediate = Array())
+                NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = base), offset.getBytes)
             }
           } else {
-            InstructionFormat(
-              NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = base), offset.getBytes),
-              immediate = Array())
+              NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = base), offset.getBytes)
           }
         case op2 @ AbsoluteAddress(address) =>
-          InstructionFormat(
-            addressingForm = NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.getBytes),
-            immediate = Array())
+            NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.getBytes)
       }
+      
+      InstructionFormat(result, Array())
     }
   
     override def getPrefix(prefix: Seq[Prefix], op1: reg, op2: rm) = {

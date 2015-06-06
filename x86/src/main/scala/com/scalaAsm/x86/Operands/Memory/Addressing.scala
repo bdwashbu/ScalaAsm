@@ -4,9 +4,8 @@ package Memory
 import com.scalaAsm.x86._
 import com.scalaAsm.x86.Instructions._
 
-case class AbsoluteAddress[Size: x86Size: ConstantWriter](offset: Size) extends Memory[Size] {
-  val name: String = ""
-  val getBytes: Array[Byte] = Constant(offset).getBytes
+case class AbsoluteAddress[Size: x86Size: ConstantWriter](address: Constant[Size], name: String) extends Memory[Size] {
+  val getBytes: Array[Byte] = address.getBytes
   override def size(next: ModRM) = implicitly[x86Size[Size]].size
 }
 

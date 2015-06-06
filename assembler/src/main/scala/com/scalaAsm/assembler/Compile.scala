@@ -187,14 +187,11 @@ class Assembler {
         var result: Option[Relocation] = None
         token match {
           case InstructionToken(inst) => inst match {
-            case OneMachineCode(_, op1, _, _, _) if op1.isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op1.asInstanceOf[AbsoluteAddress[_]].name
+            case OneMachineCode(_, AbsoluteAddress(address, name), _, _, _) =>
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(_, op1, _, _, _, _) if op1.isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op1.asInstanceOf[AbsoluteAddress[_]].name
+            case TwoMachineCode(_, AbsoluteAddress(address, name), _, _, _, _) =>
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
-            case TwoMachineCode(_, _, op2, _, _, _) if op2.isInstanceOf[AbsoluteAddress[_]] =>
-              val name = op2.asInstanceOf[AbsoluteAddress[_]].name
+            case TwoMachineCode(_, _, AbsoluteAddress(address, name), _, _, _) =>
               result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
             case _ =>
           }

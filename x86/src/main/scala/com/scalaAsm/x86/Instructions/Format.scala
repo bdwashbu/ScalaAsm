@@ -58,7 +58,7 @@ trait OneOperandFormats[-X] {
               WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base))
           case Indirect(base) =>
               OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, base))
-          case x @ AbsoluteAddress(offset) =>
+          case x @ AbsoluteAddress(offset, _) =>
               NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), x.getBytes)
         }
         
@@ -134,7 +134,7 @@ trait TwoOperandFormats[-X,-Y] {
           } else {
               NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = base), offset.getBytes)
           }
-        case op2 @ AbsoluteAddress(address) =>
+        case op2 @ AbsoluteAddress(address, _) =>
             NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.getBytes)
       }
       

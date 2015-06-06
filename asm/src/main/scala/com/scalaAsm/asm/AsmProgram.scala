@@ -68,17 +68,8 @@ trait AsmProgram {
 
     private def procRef(procName: String) = ProcRef(procName)
     
-    def addr(varName: String): AbsoluteAddress[_32] = {
-      new AbsoluteAddress[_32](0) {
-        override val name = varName
-      }
-    }
-    
-    def addr64(varName: String): AbsoluteAddress[_64] = {
-      new AbsoluteAddress[_64](0) {
-        override val name = varName
-      }
-    }
+    def addr(varName: String) = AbsoluteAddress(dword(0), varName)  
+    def addr64(varName: String) = AbsoluteAddress(qword(0), varName)
 
     def align(to: Int, filler: Byte = 0xCC.toByte) = Align(to, filler, (parserPos) => (to - (parserPos % to)) % to)
 

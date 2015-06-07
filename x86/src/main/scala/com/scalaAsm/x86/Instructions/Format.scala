@@ -51,15 +51,15 @@ trait OneOperandFormats[-X] {
       getRegFormat(operand).getOrElse{
         val result = operand match {
           case BaseIndex(base, offset) if (base.name == "rsp" || base.name == "esp") =>
-              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base))
+              WithSIBNoDisplacement(ModRMOpcode(Indirect0, opcodeExtension, base.ID), ScaleIndexByte(SIB.One, new ESP, base))
           case BaseIndex(base, offset) =>
-              NoSIBWithDisplacement(ModRMOpcode(DisplacementByte, opcodeExtension, base), offset.getBytes)
+              NoSIBWithDisplacement(ModRMOpcode(Indirect8, opcodeExtension, base.ID), offset.getBytes)
           case Indirect(base) if (base.name == "rsp" || base.name == "esp") =>
-              WithSIBNoDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, base), ScaleIndexByte(SIB.One, new ESP, base))
+              WithSIBNoDisplacement(ModRMOpcode(Indirect0, opcodeExtension, base.ID), ScaleIndexByte(SIB.One, new ESP, base))
           case Indirect(base) =>
-              OnlyModRM(ModRMOpcode(NoDisplacement, opcodeExtension, base))
+              OnlyModRM(ModRMOpcode(Indirect0, opcodeExtension, base.ID))
           case x @ AbsoluteAddress(offset, _) =>
-              NoSIBWithDisplacement(ModRMOpcode(NoDisplacement, opcodeExtension, new EBP), x.getBytes)
+              NoSIBWithDisplacement(ModRMOpcode(Indirect0, opcodeExtension, (new EBP).ID), x.getBytes)
         }
         
         InstructionFormat(result, Array())
@@ -74,7 +74,7 @@ trait OneOperandFormats[-X] {
       Some(NoAddressingForm)
     case reg @ GeneralPurpose(_) =>
       Some(InstructionFormat(
-        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, reg)),
+        addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, reg.ID)),
         immediate = Array()))
     case _ => None
   }
@@ -95,7 +95,7 @@ trait TwoOperandFormats[-X,-Y] {
     def getAddressingForm(op1: rm, op2: imm) = {
       if (opcodeExtension != -1) {
         InstructionFormat(
-          addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1.asInstanceOf[reg])), // hack!
+          addressingForm = OnlyModRM(ModRMOpcode(TwoRegisters, opcodeExtension, op1.asInstanceOf[reg].ID)), // hack!
           immediate = op2.getBytes)
       } else
         InstructionFormat(
@@ -121,21 +121,21 @@ trait TwoOperandFormats[-X,-Y] {
     def getAddressingForm(op1: reg, op2: rm) = {
       val result = op2 match {
         case reg @ GeneralPurpose(_) =>
-            OnlyModRM(ModRMReg(TwoRegisters, op1, reg))
+            OnlyModRM(ModRMReg(TwoRegisters, op1.ID, reg.ID))
         case Indirect(base) =>
-            OnlyModRM(ModRMReg(NoDisplacement, op1, rm = base))
+            OnlyModRM(ModRMReg(Indirect0, op1.ID, rm = base.ID))
         case BaseIndex(base, offset) =>
           if (offset.size == 1) {
             if (base.name == "rsp" || base.name == "esp") {
-                WithSIBWithDisplacement(ModRMReg(DisplacementByte, op1, base), ScaleIndexByte(SIB.One, new ESP, base), offset.getBytes)
+                WithSIBWithDisplacement(ModRMReg(Indirect8, op1.ID, base.ID), ScaleIndexByte(SIB.One, new ESP, base), offset.getBytes)
             } else {
-                NoSIBWithDisplacement(ModRMReg(DisplacementByte, reg = op1, rm = base), offset.getBytes)
+                NoSIBWithDisplacement(ModRMReg(Indirect8, op1.ID, base.ID), offset.getBytes)
             }
           } else {
-              NoSIBWithDisplacement(ModRMReg(DisplacementDword, reg = op1, rm = base), offset.getBytes)
+              NoSIBWithDisplacement(ModRMReg(Indirect32, op1.ID, base.ID), offset.getBytes)
           }
         case op2 @ AbsoluteAddress(address, _) =>
-            NoSIBWithDisplacement(ModRMReg(NoDisplacement, op1, new EBP), op2.getBytes)
+            NoSIBWithDisplacement(ModRMReg(Indirect0, op1.ID, (new EBP).ID), op2.getBytes)
       }
       
       InstructionFormat(result, Array())

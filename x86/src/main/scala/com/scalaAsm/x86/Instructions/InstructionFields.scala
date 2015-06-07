@@ -19,16 +19,16 @@ sealed trait ByteInstructionField {
 }
 
 sealed trait DependantInstructionField {
-  def size(modRM: ModRM): Int
+  def size(modRM: Byte): Int
 }
 
 abstract class RegisterOrMemory[Size: x86Size]
 
 trait Memory[Size] extends RegisterOrMemory[Size] with DependantInstructionField {
-  def size(modRm: ModRM) = {
-    modRm.mod match {
-      case DisplacementByte => 1
-      case DisplacementDword => 4
+  def size(modRm: Byte) = {
+    ModRMReg(modRm).mod match {
+      case Indirect8 => 1
+      case Indirect32 => 4
       case _ => 0
     }
   }
@@ -88,14 +88,22 @@ final case class NoSIBWithDisplacement(mod: ModRM, offset: Array[Byte]) extends 
 final case class WithSIBWithDisplacement(mod: ModRM, theSIB: SIB, offset: Array[Byte]) extends AddressingFormSpecifier(Some(mod), Some(theSIB), offset)
 
 sealed class RegisterMode(val value: Byte)
-case object NoDisplacement    extends RegisterMode(0) // [reg32 + eax*n]
-case object DisplacementByte  extends RegisterMode(1) // [disp + reg8 + eax*n]
-case object DisplacementDword extends RegisterMode(2) // [disp + reg32 + eax*n]
+case object Indirect0   extends RegisterMode(0) // e.g [reg]
+case object Indirect8  extends RegisterMode(1) // e.g [reg + disp8]
+case object Indirect32 extends RegisterMode(2) // e.g [reg + disp32]
 case object TwoRegisters      extends RegisterMode(3) // r/m is treated as a second "reg" field
+object RegisterMode {
+  def apply(value: Byte) = value match {
+    case 0 => Indirect0
+    case 1 => Indirect8
+    case 2 => Indirect32
+    case 3 => TwoRegisters
+  }
+}
 
 trait ModRM extends ByteInstructionField {
   val mod: RegisterMode
-  val rm: GPR
+  val rm: Byte
 }
 
 abstract class NoDisp(value: Int) extends Constant[_32](value) {
@@ -103,12 +111,20 @@ abstract class NoDisp(value: Int) extends Constant[_32](value) {
 }
 
 // Mod/RM format
+// * The ModR/M byte encodes a register or an opcode extension, and a register or a memory address
+
 // +---+---+---+---+---+---+---+---+
 // |  mod  |    reg    |     rm    |
 // +---+---+---+---+---+---+---+---+
 
-final case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) extends ModRM {
-  def getByte = ((mod.value << 6) + (reg.ID << 3) + rm.ID).toByte
+final case class ModRMReg(mod: RegisterMode, reg: Byte, rm: Byte) extends ModRM {
+  def getByte = ((mod.value << 6) + (reg << 3) + rm).toByte
+}
+
+object ModRMReg {
+  def apply(mod: Byte): ModRMReg = {
+    ModRMReg(RegisterMode((mod >> 6).toByte), ((mod >> 3) & 0x07).toByte, (mod & 0x07).toByte)
+  }
 }
 
 // Alternative Mod/RM format
@@ -116,8 +132,8 @@ final case class ModRMReg[X <: GPR, Y <: GPR](mod: RegisterMode, reg: X, rm: Y) 
 // |  mod  |Op Extended|     rm    |
 // +---+---+---+---+---+---+---+---+
 
-final case class ModRMOpcode[X <: GPR](mod: RegisterMode, opcodeExtended: Byte, rm: X) extends ModRM {
-  def getByte = ((mod.value << 6) + (opcodeExtended << 3) + rm.ID).toByte
+final case class ModRMOpcode(mod: RegisterMode, opcodeExtended: Byte, rm: Byte) extends ModRM {
+  def getByte = ((mod.value << 6) + (opcodeExtended << 3) + rm).toByte
 }
 
 sealed class SIBScale(val value: Byte)

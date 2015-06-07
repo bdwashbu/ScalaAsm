@@ -36,7 +36,7 @@ trait InstructionDefinition {
     val format: OneOperandFormat[O1]
     
     def apply[X <: O1](p1: X, prefix: Seq[Prefix]) = {
-      val prefixBytes = format.getPrefix(prefix, p1).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
+      val prefixBytes = format.getPrefix(prefix, p1)
       OneMachineCode(opcode, p1, prefixBytes, mnemonic, format)
     }
   }
@@ -47,7 +47,7 @@ trait InstructionDefinition {
     val format: TwoOperandFormat[O1, O2]
 
     def apply[X <: O1, Y <: O2](p1: X, p2: Y) = {
-      val prefixBytes = format.getPrefix(prefix, p1, p2).map(_.get).foldLeft(Array[Byte]()) { _ ++ _ }
+      val prefixBytes = format.getPrefix(prefix, p1, p2)
       TwoMachineCode(opcode, p1, p2, prefixBytes, mnemonic, format)
     }
   }

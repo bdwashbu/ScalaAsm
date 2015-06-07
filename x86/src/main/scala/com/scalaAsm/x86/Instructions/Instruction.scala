@@ -20,7 +20,7 @@ trait ZeroOperands[X <: InstructionDefinition] {
 case class ZeroMachineCode(format: ResolvedZeroOperand, opcode: OpcodeFormat, mnemonic: String) extends InstructionResult {
 
   def apply: Array[Byte] = {
-    format.getPrefix ++: opcode.get
+    format.getPrefix ++: opcode.get(0)
   }
 }
 
@@ -39,10 +39,9 @@ case class OneMachineCode[O1] (
   def apply: Array[Byte] = {
     val prefixAndOpcode = if (opcode.isInstanceOf[OpcodeWithReg] && operand.isInstanceOf[reg]) { // this is hacky as hell!
       val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
-      opcodePlus.reg = operand.asInstanceOf[reg]
-      prefixBytes ++: opcodePlus.get
+      prefixBytes ++: opcodePlus.get(operand.asInstanceOf[reg].ID)
     } else {
-      prefixBytes ++: opcode.get
+      prefixBytes ++: opcode.get(0)
     }
     
     val addressForm = format.getAddressingForm(operand)
@@ -68,10 +67,9 @@ case class TwoMachineCode[O1, O2] (
 
     val prefixAndOpcode = if (opcode.isInstanceOf[OpcodeWithReg] && operand.isInstanceOf[reg]) { // this is hacky as hell!
       val opcodePlus = opcode.asInstanceOf[OpcodeWithReg]
-      opcodePlus.reg = operand.asInstanceOf[reg]
-      prefixBytes ++: opcodePlus.get
+      prefixBytes ++: opcodePlus.get(operand.asInstanceOf[reg].ID)
     } else {
-      prefixBytes ++: opcode.get
+      prefixBytes ++: opcode.get(0)
     }
     
     val addressForm = format.getAddressingForm(operand, operand2)

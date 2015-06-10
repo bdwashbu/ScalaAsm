@@ -15,9 +15,11 @@ import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._
 import com.scalaAsm.asm.DataSection
 import com.scalaAsm.asm.x86_32
+import org.scalatest.concurrent.TimeLimitedTests
 
 import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions._
+import org.scalatest.time.SpanSugar._
 
 object HelloWorld extends AsmProgram {
 

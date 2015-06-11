@@ -8,20 +8,19 @@ import java.io.DataOutputStream
 import java.io.FileOutputStream
 import java.io.File
 import com.scalaAsm.asm.x86_32
+import com.scalaAsm.portableExe.PortableExecutable
+import org.scalatest._
+
+import org.scalatest.concurrent.TimeLimitedTests
+import org.scalatest.time.SpanSugar._
 
 package object example {
-
-  var iteration = 0
   
   def getProgramOutput(program: AsmProgram, is64Bit: Boolean): String = {
     
-    var executableName = ""
-    synchronized {
-      do {
-        iteration += 1
-        executableName = s"test$iteration.exe"
-      } while (new File(executableName).exists)
-    }
+    var output = ""
+
+    val executableName = s"test${sync.getTestID}.exe"
 
     val name = System.nanoTime
     val outputStream = new DataOutputStream(new FileOutputStream(executableName));
@@ -38,15 +37,22 @@ package object example {
     outputStream.close
 
     val child = Runtime.getRuntime().exec(executableName);
+    
+    Thread.sleep(10)
+    try {
+      child.exitValue()
+    } catch {
+      case exception: IllegalThreadStateException => throw new Exception("Test took too long!")
+    }
+    
     val in = new BufferedReader(
       new InputStreamReader(child.getInputStream()));
 
-    val output = in.readLine()
+    output = in.readLine()
 
     child.waitFor()
 
     new File(executableName).delete()
-
     output
   }
   

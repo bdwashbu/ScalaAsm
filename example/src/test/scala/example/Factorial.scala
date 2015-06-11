@@ -52,7 +52,6 @@ class FactorialTest extends FlatSpec with ShouldMatchers {
     (1 to 12).foreach {
       input =>
         val expectedOutput = factorial(input)
-        println(expectedOutput)
         getProgramOutput(getExecutable(input), false) should equal(expectedOutput.toString)
     }
 

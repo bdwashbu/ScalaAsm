@@ -38,7 +38,7 @@ package object example {
 
     val child = Runtime.getRuntime().exec(executableName);
     
-    Thread.sleep(10)
+    Thread.sleep(20)
     try {
       child.exitValue()
     } catch {

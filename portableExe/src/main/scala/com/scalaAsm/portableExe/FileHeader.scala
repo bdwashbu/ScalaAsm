@@ -5,11 +5,26 @@ import java.nio.ByteOrder
 
 // aka COFF Header
 
+sealed abstract class MachineType(val value: Short)
+case object Intel386 extends MachineType(0x14c)
+case object Intel860 extends MachineType(0x14d)
+case object MIPS3000 extends MachineType(0x162)
+case object MIPS4000 extends MachineType(0x166)
+case object DecAlpha extends MachineType(0x183)
+case object AMD64 extends MachineType(0x8664.toShort)
+
+sealed abstract class Characteristic(val value: Short)
+
 object FileHeader {
+  
+  val LargeAddresses: Short = 0x0020
+  val DLL: Short = 0x2000
+  val Executable: Short = 0x0002
+  
   def getFileHeader(input: ByteBuffer): FileHeader = {
     input.order(ByteOrder.LITTLE_ENDIAN)
     val header = FileHeader(
-        machine = input.getShort(),
+        machine = new MachineType(input.getShort()) {},
         numberOfSections = input.getShort(),
     	timeDateStamp = input.getInt(),
     	pointerToSymbolTable = input.getInt(),
@@ -23,7 +38,7 @@ object FileHeader {
 }
 
 case class FileHeader(
-    machine: Short,
+    machine: MachineType,
     numberOfSections: Short,
     timeDateStamp: Int,
     pointerToSymbolTable: Int, // only .obj file
@@ -34,7 +49,7 @@ case class FileHeader(
     def apply() = {
       val bbuf = ByteBuffer.allocate(20);
       bbuf.order(ByteOrder.LITTLE_ENDIAN)
-      bbuf.putShort(machine)
+      bbuf.putShort(machine.value)
       bbuf.putShort(numberOfSections)
       bbuf.putInt(timeDateStamp)
       bbuf.putInt(pointerToSymbolTable)

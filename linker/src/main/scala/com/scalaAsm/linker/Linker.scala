@@ -1,29 +1,15 @@
 package com.scalaAsm.linker
 
-import com.scalaAsm.portableExe.CompiledImports
-import com.scalaAsm.portableExe.DosHeader
-import com.scalaAsm.portableExe.PeHeader
-import com.scalaAsm.portableExe.DataDirectories
-import com.scalaAsm.portableExe.sections._
-import com.scalaAsm.portableExe.{PortableExecutable}
 import com.scalaAsm.portableExe.OptionalHeader
-import com.scalaAsm.portableExe.AdditionalFields
-import com.scalaAsm.portableExe.ImageDataDirectory
-import com.scalaAsm.portableExe.FileHeader
-import com.scalaAsm.portableExe.NtHeader
-import com.scalaAsm.portableExe.sections.ResourceGen
+import com.scalaAsm.portableExe._
+import com.scalaAsm.portableExe.sections._
 import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import com.scalaAsm.coff.Sections
-import com.scalaAsm.coff.Section
-import com.scalaAsm.coff.SectionHeader
-import com.scalaAsm.coff.Characteristic
-import com.scalaAsm.coff.CoffSymbol
-import com.scalaAsm.coff.Coff
-import com.scalaAsm.coff.{IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION}
+import com.scalaAsm.coff.{OptionalHeader => _, _}
 import scala.collection.mutable.ListBuffer
+import FileHeader._
 
 class Linker {
   
@@ -204,13 +190,13 @@ class Linker {
       watermark = "Scala x86\0")
       
     val fileHeader = FileHeader(
-      machine = if (is64Bit) 0x8664.toShort else 0x14C,
+      machine = if (is64Bit) AMD64 else Intel386,
       numberOfSections = peSections.size.toShort,
       timeDateStamp = 0x535BF29F,
       pointerToSymbolTable = 0, // no importance
       numberOfSymbols = 0, // no importance
       sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
-      characteristics = if (is64Bit) 47 else 271)
+      characteristics = if (is64Bit) (LargeAddresses | Executable).toShort else Executable)
       
     val optionalHeader = OptionalHeader(
       magic = if (is64Bit) 0x20b else 0x10b,

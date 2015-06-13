@@ -61,7 +61,7 @@ class ConditionalTest extends FlatSpec with ShouldMatchers {
     val linker = new Linker {}
     
     val factorial = assembler.assemble(Factorial).addIcon("scala.ico")
-    val exe = linker.link(factorial, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+    val exe = linker.link(factorial, 0x3000, false, false, "kernel32.dll", "msvcrt.dll")
     outputStream.write(exe.get)
     outputStream.close
     fileOut.close()

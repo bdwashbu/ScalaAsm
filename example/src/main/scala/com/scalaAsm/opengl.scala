@@ -20,7 +20,7 @@ object main {
       var beginTime = System.nanoTime()
       
       val ogl = assembler.assemble(opengl).addIcon("scala.ico")
-      val exe = linker.link(ogl, 0x3000, true, "kernel32.dll", "glut32.dll", "opengl32.dll")
+      val exe = linker.link(ogl, 0x3000, true, false, "kernel32.dll", "glut32.dll", "opengl32.dll")
 
       outputStream.write(exe.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

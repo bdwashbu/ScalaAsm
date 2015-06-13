@@ -30,7 +30,7 @@ package object example {
     var beginTime = System.nanoTime()
     val obj = assembler.assemble(program).addIcon("scala.ico")
 
-    val exe = linker.link(obj, 0x3000, is64Bit, "kernel32.dll", "msvcrt.dll")
+    val exe = linker.link(obj, 0x3000, is64Bit, false, "kernel32.dll", "msvcrt.dll")
 
     outputStream.write(exe.get)
     println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

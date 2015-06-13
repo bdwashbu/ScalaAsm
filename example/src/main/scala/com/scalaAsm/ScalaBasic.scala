@@ -25,7 +25,7 @@ object ScalaBasic {
       val outputStream64 = new DataOutputStream(new FileOutputStream("test64.exe"));
 
       val helloWorld64 = assembler.assemble(HelloWorld2).addIcon("scala.ico")
-      val exe64 = linker.link(helloWorld64, 0x3000, true, "kernel32.dll", "msvcrt.dll")
+      val exe64 = linker.link(helloWorld64, 0x3000, true, false, "kernel32.dll", "msvcrt.dll")
 
       outputStream64.write(exe64.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
@@ -34,7 +34,7 @@ object ScalaBasic {
       val outputStream2 = new DataOutputStream(new FileOutputStream("test2.exe"));
 
       val coff = Coff.readCoff("helloWorld32.obj")
-      val exe2 = linker.link(coff, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+      val exe2 = linker.link(coff, 0x3000, false, false, "kernel32.dll", "msvcrt.dll")
 
       outputStream2.write(exe2.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
@@ -43,7 +43,7 @@ object ScalaBasic {
       val rdtscStream = new DataOutputStream(new FileOutputStream("factorial.exe"));
 
       val rdtsc = assembler.assemble(rdtscExample).addIcon("scala.ico")
-      val rdtscExe = linker.link(rdtsc, 0x3000, false, "kernel32.dll", "msvcrt.dll")
+      val rdtscExe = linker.link(rdtsc, 0x3000, false, false, "kernel32.dll", "msvcrt.dll")
 
       rdtscStream.write(rdtscExe.get)
       println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

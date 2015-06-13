@@ -47,7 +47,7 @@ class Linker {
     test.generateImports(is64Bit) 
   }
   
-  def link(objFile: Coff, addressOfData: Int, is64Bit: Boolean, dlls: String*): PortableExecutable = {
+  def link(objFile: Coff, addressOfData: Int, is64Bit: Boolean, isDll: Boolean, dlls: String*): PortableExecutable = {
 
     val executableImports = compileImports(objFile, dlls, is64Bit, 0x3000)
 
@@ -189,6 +189,8 @@ class Linker {
       e_res2 = (26479, 24946, 8557, 2573, 46116.toShort, 47625.toShort, 256, 8653, 19636, 8653),
       watermark = "Scala x86\0")
       
+    val addressSize: Short = if (is64Bit) LargeAddresses else 0
+      
     val fileHeader = FileHeader(
       machine = if (is64Bit) AMD64 else Intel386,
       numberOfSections = peSections.size.toShort,
@@ -196,7 +198,7 @@ class Linker {
       pointerToSymbolTable = 0, // no importance
       numberOfSymbols = 0, // no importance
       sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
-      characteristics = if (is64Bit) (LargeAddresses | Executable).toShort else Executable)
+      characteristics = if (isDll) (addressSize | DLL).toShort else (addressSize | Executable).toShort)
       
     val optionalHeader = OptionalHeader(
       magic = if (is64Bit) 0x20b else 0x10b,
@@ -234,15 +236,10 @@ class Linker {
         
     val numImportedFunctions = executableImports.importSymbols.filter(sym => !sym.name.contains(".dll")).size
 
-    val directories = resources map {res => DataDirectories(
+    val directories = DataDirectories(
       importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
       importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize),
-      resource = ImageDataDirectory(0x4000, 11300)) 
-    } getOrElse {
-        DataDirectories(
-          importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
-          importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize))
-    }
+      resource = if (resources.isDefined) ImageDataDirectory(0x4000, 11300) else ImageDataDirectory(0,0)) 
 
     PortableExecutable(dosHeader, NtHeader(fileHeader, optionalHeader), directories, peSections)
   }

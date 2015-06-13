@@ -150,10 +150,9 @@ Press any key to continue ...
 How to build:
 ========
 
-1. Launch sbt
-2. Run the 'eclipse' command to rebuild all .classpath and .project files
-3. In Eclipse, under window->preferences->general->workspace->build order, uncheck 'use default order' and set the order from top to bottom: x86, coff, asm, assembler, portableExe, linker, example
-4. Refresh/Clean projects in eclipse
+1. Launch sbt from base directory
+2. Run the 'eclipse with-source=true' using sbtEclipse to generate eclipse files
+3. Refresh/Clean projects in eclipse
 
 Tricks:
 ========

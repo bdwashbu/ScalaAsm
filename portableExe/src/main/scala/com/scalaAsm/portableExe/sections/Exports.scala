@@ -50,7 +50,7 @@ object ImageExportDirectory {
     val rvaArray = exports.map(_.address)
     val rvaArrayAddress = offset + ImageExportDirectory.sizeOfHeader
     val nameArray = exports.map(_.name.toCharArray().map(_.toByte) :+ 0.toByte).reduce(_ ++ _)
-    val nameArrayAddress = rvaArrayAddress + nameArray.size
+    val nameArrayAddress = rvaArrayAddress + exports.size * 4
     
     val dir = ImageExportDirectory(
       characteristics = 0,

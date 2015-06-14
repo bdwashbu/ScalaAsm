@@ -221,7 +221,7 @@ case class Imports(val imports: Seq[Extern], val offset: Int) {
     CompiledImports(
       byteOutput.toByteArray(),
       importDescriptorOffset,
-      importAddressTable.map(table => (table.thunks.size + 1) * (if (is64Bit) 8 else 4)).reduce(_ + _),
+      nameTableSize = importAddressTable.map(table => (table.thunks.size + 1) * (if (is64Bit) 8 else 4)).sum,
       getFunctionMap(imports),
       importByNames
     )

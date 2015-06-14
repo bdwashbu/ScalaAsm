@@ -3,7 +3,6 @@ package com.scalaAsm.portableExe
 import sections._
 import scala.collection.mutable.ArrayBuffer
 import com.scalaAsm.coff.Section
-import com.scalaAsm
 import com.scalaAsm.x86.Instructions.InstructionMap
 import com.scalaAsm.x86._
 

@@ -8,7 +8,6 @@ import java.io.DataOutputStream
 import java.io.FileOutputStream
 import java.io.File
 import com.scalaAsm.asm.x86_32
-import com.scalaAsm.portableExe.PortableExecutable
 import org.scalatest._
 
 import org.scalatest.concurrent.TimeLimitedTests
@@ -53,6 +52,60 @@ package object example {
     child.waitFor()
 
     new File(executableName).delete()
+    output
+  }
+  
+  def getDLLOutput(dllProgram: AsmProgram, program: AsmProgram, is64Bit: Boolean): String = {
+    
+    var output = ""
+
+    val dllName = s"test${sync.getTestID}.dll"
+    val executableName = s"test${sync.getTestID}.exe"
+
+    val outputStream = new DataOutputStream(new FileOutputStream(dllName));
+    val assembler = new Assembler {}
+    val linker = new Linker {}  
+
+    var beginTime = System.nanoTime()
+    val dllobj = assembler.assemble(dllProgram)
+
+    val dll = linker.link(dllobj, 0x3000, is64Bit, true, "kernel32.dll", "msvcrt.dll")
+
+    outputStream.write(dll.get)
+    println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
+    outputStream.close
+    
+    val outputStream2 = new DataOutputStream(new FileOutputStream(executableName));
+    val assembler2 = new Assembler {}
+    val linker2 = new Linker {}  
+
+    beginTime = System.nanoTime()
+    val exeobj = assembler.assemble(dllProgram)
+
+    val exe = linker.link(dllobj, 0x3000, is64Bit, false, dllName)
+
+    outputStream2.write(exe.get)
+    println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
+    outputStream2.close
+
+    val child = Runtime.getRuntime().exec(executableName);
+    
+    Thread.sleep(500)
+    try {
+      child.exitValue()
+    } catch {
+      case exception: IllegalThreadStateException => throw new Exception("Test took too long!")
+    }
+    
+    val in = new BufferedReader(
+      new InputStreamReader(child.getInputStream()));
+
+    output = in.readLine()
+
+    child.waitFor()
+
+    new File(executableName).delete()
+    //new File(dllName).delete()
     output
   }
   

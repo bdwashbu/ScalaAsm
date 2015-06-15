@@ -80,9 +80,9 @@ package object example {
     val linker2 = new Linker {}  
 
     beginTime = System.nanoTime()
-    val exeobj = assembler.assemble(dllProgram)
+    val exeobj = assembler.assemble(program)
 
-    val exe = linker.link(dllobj, 0x3000, is64Bit, false, dllName)
+    val exe = linker.link(exeobj, 0x3000, is64Bit, false, dllName)
 
     outputStream2.write(exe.get)
     println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
@@ -105,7 +105,7 @@ package object example {
     child.waitFor()
 
     new File(executableName).delete()
-    //new File(dllName).delete()
+    new File(dllName).delete()
     output
   }
   

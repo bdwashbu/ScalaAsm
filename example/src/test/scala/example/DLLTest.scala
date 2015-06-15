@@ -61,8 +61,8 @@ object DLLRunner extends AsmProgram {
 
 
 class DLLTest extends FlatSpec with ShouldMatchers {
-  getDLLOutput(DLLBuilder, DLLRunner, false)
-//  "A c-library 32-bit Hello world" should "print 'Hello World'" in {
-//    getDLLOutput(DLLBuilder, DLLRunner, false) should equal("Hello World!")
-//  }
+  //getDLLOutput(DLLBuilder, DLLRunner, false)
+  "A c-library 32-bit Hello world" should "print 'Hello World'" in {
+    getDLLOutput(DLLBuilder, DLLRunner, false) should equal("Hello World!")
+  }
 }

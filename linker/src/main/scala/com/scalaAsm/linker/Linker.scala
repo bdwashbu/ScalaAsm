@@ -1,6 +1,5 @@
 package com.scalaAsm.linker
 
-import com.scalaAsm.portableExe.OptionalHeader
 import com.scalaAsm.portableExe._
 import com.scalaAsm.portableExe.sections._
 import java.io.File
@@ -9,14 +8,14 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import com.scalaAsm.coff.{OptionalHeader => _, _}
 import scala.collection.mutable.ListBuffer
-import FileHeader._
+import com.scalaAsm.portableExe.FileHeader._
 
 class Linker {
   
   def compileImports(objFile: Coff, dlls: Seq[String], is64Bit: Boolean, importsLoc: Int): CompiledImports = { 
     
     val dllImports = dlls flatMap { dll =>
-	    val file = new File("C:/Windows/System32/" + dll);
+	    val file = if (new File(dll).exists) new File(dll) else new File("C:/Windows/System32/" + dll);
 	 
 	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
 	      
@@ -33,7 +32,7 @@ class Linker {
 	    val dirs = DataDirectories.getDirectories(bbuf)
 	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
 	
-	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols)
+	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols.virtualAddress)
 	    val importedSymbols = export.functionNames intersect objFile.relocations.filter(reloc => reloc.symbol.sectionNumber == 0).map(_.symbol.name).toSeq
 	    
 	    if (importedSymbols.isEmpty)
@@ -59,6 +58,8 @@ class Linker {
         Some(result)
       } else None
     }
+    
+    
 
     val getSymbolAddress: Map[String, Int] = {
       val newRefSymbols = objFile.symbols ++ importSymbols
@@ -84,7 +85,8 @@ class Linker {
     
     var code = codeSection.contents
     
-    println(getSymbolAddress)
+    val exportSymbols = objFile.symbols.filter(sym => sym.storageClass == IMAGE_SYM_CLASS_EXTERNAL && sym.sectionNumber == 2)
+    val exports = exportSymbols.map{sym => Export(sym.name, sym.value)}
     
     objFile.relocations.toList.foreach { relocation =>
       
@@ -109,10 +111,15 @@ class Linker {
         }
     }
     
+    val exportData: Array[Byte] = if (isDll)
+      ImageExportDirectory.writeExports("test.dll", exports.toSeq, 0x3000 + executableImports.rawData.size)
+    else
+      Array()
+    
     val idataSection = Section(
       SectionHeader(
         name = ".idata",
-        virtualSize = executableImports.rawData.length,
+        virtualSize = executableImports.rawData.length + exportData.length,
         virtualAddress = 0x3000,
         sizeOfRawData = 0x200,
         pointerToRawData = 0x800,
@@ -123,7 +130,7 @@ class Linker {
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
           Characteristic.READ.id)
-     , executableImports.rawData)
+     , executableImports.rawData ++ exportData)
       
     val standardSections = List(codeSection.copy(contents = code), dataSection, idataSection)
     val sections = ListBuffer[Section]() ++ standardSections
@@ -238,8 +245,11 @@ class Linker {
 
     val directories = DataDirectories(
       importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
-      importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.nameTableSize),
-      resource = if (resources.isDefined) ImageDataDirectory(0x4000, 11300) else ImageDataDirectory(0,0)) 
+      importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.boundImportSize),
+      resource = if (resources.isDefined) ImageDataDirectory(0x4000, 11300) else ImageDataDirectory(0,0),
+      exportSymbols = if (isDll) ImageDataDirectory(idataSection.header.virtualAddress + executableImports.rawData.size, exportData.size) else ImageDataDirectory(0,0)  
+        
+    ) 
 
     PortableExecutable(dosHeader, NtHeader(fileHeader, optionalHeader), directories, peSections)
   }

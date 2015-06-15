@@ -48,30 +48,43 @@ object ImageExportDirectory {
   def writeExports(dllName: String, exports: Seq[Export], offset: Int): Array[Byte] = { 
     
     val rvaArray = exports.map(_.address)
-    val rvaArrayAddress = offset + ImageExportDirectory.sizeOfHeader
+    val rvaAddressArrayAddress = offset + ImageExportDirectory.sizeOfHeader
+    val rvaAddressArray: Array[Int] = Array((rvaAddressArrayAddress + 4))
+    
     val nameArray = exports.map(_.name.toCharArray().map(_.toByte) :+ 0.toByte).reduce(_ ++ _)
-    val nameArrayAddress = rvaArrayAddress + exports.size * 4
+    val nameAddressArrayAddress = rvaAddressArray.last + rvaArray.size * 4 
+    val nameAddressArray: Array[Int] = Array((nameAddressArrayAddress + 4)) 
+    
+    val ordinalArray: Array[Short] = Array(1)
+    val ordinalArrayAddress = nameAddressArray.last + nameArray.size
+    
+    val dllName = "test1.dll".toCharArray().map(_.toByte) :+ 0.toByte
+    val dllNameRVA = ordinalArrayAddress + 2
     
     val dir = ImageExportDirectory(
       characteristics = 0,
       timeDateStamp = 0,
       majorVersion = 0,
       minorVersion = 0,
-      name = 0,
+      name = dllNameRVA,
       base = 1,
       numberOfFunctions = exports.size,
       numberOfNames = exports.size,
-      addressOfFunctions = rvaArrayAddress,
-      addressOfNames = nameArrayAddress,
-      addressOfNameOrdinals = 0)
+      addressOfFunctions = rvaAddressArrayAddress,
+      addressOfNames = nameAddressArrayAddress,
+      addressOfNameOrdinals = ordinalArrayAddress)
       
-    val bbuf = ByteBuffer.allocate(ImageExportDirectory.sizeOfHeader + rvaArray.size * 4 + nameArray.size)
+    val bbuf = ByteBuffer.allocate(ImageExportDirectory.sizeOfHeader + rvaAddressArray.size * 4 + rvaArray.size * 4 + nameAddressArray.size * 4 + nameArray.size + ordinalArray.size * 2 + dllName.size)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     
     bbuf.put(dir())
+    rvaAddressArray.foreach(bbuf.putInt(_))
     rvaArray.foreach(bbuf.putInt(_))
+    nameAddressArray.foreach(bbuf.putInt(_))
     bbuf.put(nameArray)
-    bbuf.array() 
+    ordinalArray.foreach(bbuf.putShort(_))
+    bbuf.put(dllName)
+    bbuf.array().take(bbuf.position())
   }
 }
 

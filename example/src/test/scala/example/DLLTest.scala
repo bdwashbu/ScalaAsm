@@ -27,18 +27,11 @@ object DLLBuilder extends AsmProgram {
 
   import com.scalaAsm.asm._
   import universe._
-  
-  sections += new DataSection(
-    Variable("helloWorld", "Hello World!\r\n\u0000"),
-    Variable("helloWorld2", "Hello Worldddd!\r\n\u0000")
-  ) {}
 
   sections += new CodeSection {
     
     procedure(name = "printHelloWorld",
-      asm"push helloWorld",
-      asm"call printf",
-      asm"add esp, 4",
+      asm"mov eax, 4",
       asm"retn")
   }
 }
@@ -49,11 +42,20 @@ object DLLRunner extends AsmProgram {
 
   import com.scalaAsm.asm._
   import universe._
+  
+  sections += new DataSection(
+        Variable("test", "%d\n\u0000")) {}
 
   sections += new CodeSection {
     builder += Code(
       asm"""
-      call printHelloWorld
+        mov eax, 4
+      //call printHelloWorld
+      push eax
+      push test
+      call printf
+      pop eax
+      pop eax
       retn"""
     )
   }
@@ -63,6 +65,6 @@ object DLLRunner extends AsmProgram {
 class DLLTest extends FlatSpec with ShouldMatchers {
   //getDLLOutput(DLLBuilder, DLLRunner, false)
   "A c-library 32-bit Hello world" should "print 'Hello World'" in {
-    getDLLOutput(DLLBuilder, DLLRunner, false) should equal("Hello World!")
+    getDLLOutput(DLLBuilder, DLLRunner, false) should equal("4")
   }
 }

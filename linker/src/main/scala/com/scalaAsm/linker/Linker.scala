@@ -86,7 +86,7 @@ class Linker {
     var code = codeSection.contents
     
     val exportSymbols = objFile.symbols.filter(sym => sym.storageClass == IMAGE_SYM_CLASS_EXTERNAL && sym.sectionNumber == 2)
-    val exports = exportSymbols.map{sym => Export(sym.name, sym.value)}
+    val exports = exportSymbols.map{sym => Export(sym.name, 0x1000 + sym.value)}
     
     objFile.relocations.toList.foreach { relocation =>
       
@@ -112,14 +112,14 @@ class Linker {
     }
     
     val exportData: Array[Byte] = if (isDll)
-      ImageExportDirectory.writeExports("test.dll", exports.toSeq, 0x3000 + executableImports.rawData.size)
+      ImageExportDirectory.writeExports("test.dll", exports.toSeq, 0x1000 + code.size)
     else
       Array()
     
     val idataSection = Section(
       SectionHeader(
         name = ".idata",
-        virtualSize = executableImports.rawData.length + exportData.length,
+        virtualSize = executableImports.rawData.length,
         virtualAddress = 0x3000,
         sizeOfRawData = 0x200,
         pointerToRawData = 0x800,
@@ -130,9 +130,9 @@ class Linker {
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
           Characteristic.READ.id)
-     , executableImports.rawData ++ exportData)
+     , executableImports.rawData)
       
-    val standardSections = List(codeSection.copy(contents = code), dataSection, idataSection)
+    val standardSections = List(codeSection.copy(contents = code ++ exportData), dataSection, idataSection)
     val sections = ListBuffer[Section]() ++ standardSections
     
     if (objFile.iconPath.isDefined) {
@@ -247,7 +247,7 @@ class Linker {
       importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
       importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.boundImportSize),
       resource = if (resources.isDefined) ImageDataDirectory(0x4000, 11300) else ImageDataDirectory(0,0),
-      exportSymbols = if (isDll) ImageDataDirectory(idataSection.header.virtualAddress + executableImports.rawData.size, exportData.size) else ImageDataDirectory(0,0)  
+      exportSymbols = if (isDll) ImageDataDirectory(codeSection.header.virtualAddress + code.size, exportData.size) else ImageDataDirectory(0,0)  
         
     ) 
 

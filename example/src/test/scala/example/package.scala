@@ -69,7 +69,7 @@ package object example {
     var beginTime = System.nanoTime()
     val dllobj = assembler.assemble(dllProgram)
 
-    val dll = linker.link(dllobj, 0x3000, is64Bit, true, "kernel32.dll", "msvcrt.dll")
+    val dll = linker.link(dllobj, 0x3000, is64Bit, true)
 
     outputStream.write(dll.get)
     println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
@@ -82,7 +82,7 @@ package object example {
     beginTime = System.nanoTime()
     val exeobj = assembler.assemble(program)
 
-    val exe = linker.link(exeobj, 0x3000, is64Bit, false, dllName)
+    val exe = linker.link(exeobj, 0x3000, is64Bit, false, dllName, "kernel32.dll", "msvcrt.dll")
 
     outputStream2.write(exe.get)
     println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")

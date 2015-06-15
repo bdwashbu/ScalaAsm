@@ -46,17 +46,18 @@ object ImageExportDirectory {
   }
   
   def writeExports(dllName: String, exports: Seq[Export], offset: Int): Array[Byte] = { 
+    println("offset: " + offset)
     
-    val rvaArray = exports.map(_.address)
     val rvaAddressArrayAddress = offset + ImageExportDirectory.sizeOfHeader
-    val rvaAddressArray: Array[Int] = Array((rvaAddressArrayAddress + 4))
+    //val rvaAddressArray: Array[Int] = Array((rvaAddressArrayAddress + 2))
+    val rvaArray = exports.map(_.address)   
     
-    val nameArray = exports.map(_.name.toCharArray().map(_.toByte) :+ 0.toByte).reduce(_ ++ _)
-    val nameAddressArrayAddress = rvaAddressArray.last + rvaArray.size * 4 
+    val nameAddressArrayAddress = rvaAddressArrayAddress + rvaArray.size * 4 
     val nameAddressArray: Array[Int] = Array((nameAddressArrayAddress + 4)) 
+    val nameArray = exports.map(_.name.toCharArray().map(_.toByte) :+ 0.toByte).reduce(_ ++ _)
     
-    val ordinalArray: Array[Short] = Array(1)
-    val ordinalArrayAddress = nameAddressArray.last + nameArray.size
+    val ordinalArrayAddress = nameAddressArrayAddress + nameAddressArray.size * 4 + nameArray.size
+    val ordinalArray: Array[Short] = Array(0)    
     
     val dllName = "test1.dll".toCharArray().map(_.toByte) :+ 0.toByte
     val dllNameRVA = ordinalArrayAddress + 2
@@ -74,11 +75,19 @@ object ImageExportDirectory {
       addressOfNames = nameAddressArrayAddress,
       addressOfNameOrdinals = ordinalArrayAddress)
       
-    val bbuf = ByteBuffer.allocate(ImageExportDirectory.sizeOfHeader + rvaAddressArray.size * 4 + rvaArray.size * 4 + nameAddressArray.size * 4 + nameArray.size + ordinalArray.size * 2 + dllName.size)
+    /*
+     * Order:
+     * rva array
+     * name address array
+     * name array
+     * ordinal array
+     * dll name
+     */
+      
+    val bbuf = ByteBuffer.allocate(ImageExportDirectory.sizeOfHeader + rvaArray.size * 4 + nameAddressArray.size * 4 + nameArray.size + ordinalArray.size * 2 + dllName.size)
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     
     bbuf.put(dir())
-    rvaAddressArray.foreach(bbuf.putInt(_))
     rvaArray.foreach(bbuf.putInt(_))
     nameAddressArray.foreach(bbuf.putInt(_))
     bbuf.put(nameArray)

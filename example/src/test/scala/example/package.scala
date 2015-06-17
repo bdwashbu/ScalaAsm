@@ -9,6 +9,7 @@ import java.io.FileOutputStream
 import java.io.File
 import com.scalaAsm.asm.x86_32
 import org.scalatest._
+import scala.util.Try
 
 import org.scalatest.concurrent.TimeLimitedTests
 import org.scalatest.time.SpanSugar._
@@ -37,11 +38,15 @@ package object example {
 
     val child = Runtime.getRuntime().exec(executableName);
     
-    Thread.sleep(150)
-    try {
-      child.exitValue()
-    } catch {
-      case exception: IllegalThreadStateException => throw new Exception("Test took too long!")
+    var timer = 0
+    while (timer < 150) {
+      Thread.sleep(10)
+      val test  = Try(child.exitValue())
+      timer += 10
+      if (test.isSuccess)
+        timer = 150
+      else if (timer == 150)
+        throw new Exception("Test took too long!")
     }
     
     val in = new BufferedReader(

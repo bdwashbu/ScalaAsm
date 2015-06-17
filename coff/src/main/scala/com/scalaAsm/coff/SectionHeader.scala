@@ -69,6 +69,7 @@ object Characteristic extends Enumeration {
   val EXECUTE     = Value(0x20000000)
   val READ        = Value(0x40000000)
   val WRITE       = Value(0x80000000)
+  val DISCARDABLE = Value(0x02000000)
 }
 
 object Sections {

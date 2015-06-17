@@ -14,32 +14,44 @@ class Linker {
   
   def compileImports(objFile: Coff, dlls: Seq[String], is64Bit: Boolean, importsLoc: Int): CompiledImports = { 
     
-    val dllImports = dlls flatMap { dll =>
-	    val file = if (new File(dll).exists) new File(dll) else new File("C:/Windows/System32/" + dll);
-	 
-	    val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
-	      
-	    //convert file into array of bytes
-	    val fileInputStream = new FileInputStream(file);
-	    fileInputStream.read(bFile);
-	    fileInputStream.close();
-	    
-	    val bbuf = ByteBuffer.wrap(bFile)
-	    bbuf.order(ByteOrder.LITTLE_ENDIAN)
-	    
-	    val dosHeader = DosHeader.getDosHeader(bbuf)
-	    val peHeader = PeHeader.getPeHeader(bbuf)
-	    val dirs = DataDirectories.getDirectories(bbuf)
-	    val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
-	
-	    val export = ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols.virtualAddress)
-	    val importedSymbols = export.functionNames intersect objFile.relocations.filter(reloc => reloc.symbol.sectionNumber == 0).map(_.symbol.name).toSeq
-	    
-	    if (importedSymbols.isEmpty)
-	      None
-	    else
-	      Some(Extern(dll, importedSymbols))
+    val symbolsToBindTo = objFile.relocations.filter(reloc => reloc.symbol.sectionNumber == 0).map(_.symbol.name).toSeq
+    
+    val exportMap = dlls.map{dllName => (dllName -> {
+      val file = if (new File(dllName).exists) new File(dllName) else new File("C:/Windows/System32/" + dllName);
+   
+      val bFile: Array[Byte] = Array.fill(file.length().toInt)(0);
+        
+      //convert file into array of bytes
+      val fileInputStream = new FileInputStream(file);
+      fileInputStream.read(bFile);
+      fileInputStream.close();
+      
+      val bbuf = ByteBuffer.wrap(bFile)
+      bbuf.order(ByteOrder.LITTLE_ENDIAN)
+      
+      val dosHeader = DosHeader.getDosHeader(bbuf)
+      val peHeader = PeHeader.getPeHeader(bbuf)
+      val dirs = DataDirectories.getDirectories(bbuf)
+      val sections = Sections.getSections(bbuf, peHeader.fileHeader.numberOfSections)
+  
+      ImageExportDirectory.getExports(bbuf, sections, dirs.exportSymbols.virtualAddress).functionNames
+    })}.toMap
+    
+    val resolvedMap = symbolsToBindTo.map{sym => sym -> exportMap.filter{case (dll,exports) => exports.contains(sym)}.map{case (dll,exports) => dll}}.toMap
+    
+    resolvedMap.foreach{sym =>
+      if (sym._2.size == 0) {
+        throw new Exception(s"symbol not found: ${sym._1}")
+      } else if (sym._2.size > 1) {
+        throw new Exception(s"ambiguous symbol found: ${sym._1}")
+      }
     }
+    
+    val dllMap = dlls.map{dllName => (dllName, resolvedMap.filter{case (key, values) => values.toSeq.contains(dllName)}.map{_._1})}.toMap
+    
+    val dllImports = dllMap.map{case (dllName, symbols) =>
+	      Extern(dllName, symbols.toSeq)
+    }.toSeq
     
     val test = Imports(imports = dllImports, offset = importsLoc)
 
@@ -112,7 +124,7 @@ class Linker {
     }
     
     val exportData: Array[Byte] = if (isDll)
-      ImageExportDirectory.writeExports("test.dll", exports.toSeq, 0x1000 + code.size)
+      ImageExportDirectory.writeExports("helloWorld.dll", exports.toSeq, 0x2000) // fix hardcoded!!!
     else
       Array()
     
@@ -132,7 +144,11 @@ class Linker {
           Characteristic.READ.id)
      , executableImports.rawData)
       
-    val standardSections = List(codeSection.copy(contents = code ++ exportData), dataSection, idataSection)
+    val standardSections = if (isDll)
+      List(codeSection.copy(contents = code, header = codeSection.header.copy(sizeOfRawData = code.size)))
+     else 
+      List(codeSection.copy(contents = code), dataSection, idataSection)
+      
     val sections = ListBuffer[Section]() ++ standardSections
     
     if (objFile.iconPath.isDefined) {
@@ -150,6 +166,22 @@ class Linker {
         lineNumbers = 0,
         characteristics = Characteristic.INITIALIZED.id |
           Characteristic.READ.id), res)
+    }
+    
+    if (isDll) {
+      sections += Section(
+       SectionHeader(
+        name = ".edata", // export data
+        virtualSize = exportData.length,
+        virtualAddress = 0x4000,
+        sizeOfRawData = exportData.length,
+        pointerToRawData = 0x800,
+        relocPtr = 0,
+        linenumPtr = 0,
+        relocations = 0,
+        lineNumbers = 0,
+        characteristics = Characteristic.INITIALIZED.id |
+          Characteristic.READ.id), exportData)
     }
     
     var virtAddress = 0x1000
@@ -196,7 +228,7 @@ class Linker {
       e_res2 = (26479, 24946, 8557, 2573, 46116.toShort, 47625.toShort, 256, 8653, 19636, 8653),
       watermark = "Scala x86\0")
       
-    val addressSize: Short = if (is64Bit) LargeAddresses else 0
+    val addressSize: Short = if (is64Bit) LargeAddresses else is32Bit
       
     val fileHeader = FileHeader(
       machine = if (is64Bit) AMD64 else Intel386,
@@ -205,7 +237,7 @@ class Linker {
       pointerToSymbolTable = 0, // no importance
       numberOfSymbols = 0, // no importance
       sizeOfOptionalHeader = if (is64Bit) 0xF0 else 0xE0,
-      characteristics = if (isDll) (addressSize | DLL).toShort else (addressSize | Executable).toShort)
+      characteristics = if (isDll) (addressSize | DLL | Executable | symbolsStripped | linesStripped).toShort else (addressSize | Executable).toShort)
       
     val optionalHeader = OptionalHeader(
       magic = if (is64Bit) 0x20b else 0x10b,
@@ -214,12 +246,12 @@ class Linker {
       sizeOfCode = 512,
       sizeOfInitializedData = 1024,
       sizeOfUninitData = 0,
-      addressOfEntryPoint = 0x1000,
+      addressOfEntryPoint = if (!isDll) 0x1000 else 0,
       baseOfCode = 0x1000,
       baseOfData = 0x2000,
 
       AdditionalFields(
-        imageBase = 0x400000,
+        imageBase = if (isDll) 0x10000000 else 0x400000,
         sectionAlignment = 0x1000,
         fileAlignment = 0x200,
         majorOperatingSystemVersion = if (is64Bit) 5 else 4,
@@ -244,11 +276,10 @@ class Linker {
     val numImportedFunctions = executableImports.importSymbols.filter(sym => !sym.name.contains(".dll")).size
 
     val directories = DataDirectories(
-      importSymbols = executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6),
-      importAddressTable = executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.boundImportSize),
+      importSymbols = if (!isDll) executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6) else ImageDataDirectory(0,0),
+      importAddressTable = if (!isDll) executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.boundImportSize) else ImageDataDirectory(0,0),
       resource = if (resources.isDefined) ImageDataDirectory(0x4000, 11300) else ImageDataDirectory(0,0),
-      exportSymbols = if (isDll) ImageDataDirectory(codeSection.header.virtualAddress + code.size, exportData.size) else ImageDataDirectory(0,0)  
-        
+      exportSymbols = if (isDll) ImageDataDirectory(0x2000, exportData.size) else ImageDataDirectory(0,0)
     ) 
 
     PortableExecutable(dosHeader, NtHeader(fileHeader, optionalHeader), directories, peSections)

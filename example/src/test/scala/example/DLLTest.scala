@@ -30,9 +30,15 @@ object DLLBuilder extends AsmProgram {
 
   sections += new CodeSection {
     
-    procedure(name = "printHelloWorld",
-      asm"mov eax, 4",
-      asm"retn")
+    procedure(name = "addMe",asm"""
+      push ebp
+      mov ebp, esp
+      mov eax, [ebp + 8]
+      mov edx, [ebp + 12]
+      add eax, edx
+      pop ebp
+      retn
+      """)
   }
 }
 
@@ -47,10 +53,13 @@ object DLLRunner extends AsmProgram {
         Variable("test", "%d\n\u0000")) {}
 
   sections += new CodeSection {
+    
     builder += Code(
       asm"""
-        mov eax, 4
-      //call printHelloWorld
+      push 1
+      push 3
+      call addMe
+      add esp, 8
       push eax
       push test
       call printf

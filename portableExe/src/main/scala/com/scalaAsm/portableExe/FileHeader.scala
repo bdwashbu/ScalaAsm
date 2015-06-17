@@ -20,6 +20,9 @@ object FileHeader {
   val LargeAddresses: Short = 0x0020
   val DLL: Short = 0x2000
   val Executable: Short = 0x0002
+  val is32Bit: Short = 0x0100
+  val symbolsStripped: Short = 0x0008
+  val linesStripped: Short = 0x0004
   
   def getFileHeader(input: ByteBuffer): FileHeader = {
     input.order(ByteOrder.LITTLE_ENDIAN)

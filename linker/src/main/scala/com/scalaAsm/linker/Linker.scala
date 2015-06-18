@@ -162,7 +162,7 @@ class Linker {
 
     lazy val exportData: Array[Byte] = if (isDll) {
       val exportSymbols = objFile.symbols.filter(sym => sym.storageClass == IMAGE_SYM_CLASS_EXTERNAL && sym.sectionNumber == 2)
-      val exports = exportSymbols.map { sym => Export(sym.name, 0x1000 + sym.value) }
+      val exports = exportSymbols.map { sym => Export(sym.name, codeSection.header.virtualAddress + sym.value) }
       
       ImageExportDirectory.writeExports("helloWorld.dll", exports.toSeq, 0x2000) // fix hardcoded!!!
     } else {
@@ -184,16 +184,20 @@ class Linker {
           Characteristic.EXECUTE.id |
           Characteristic.READ.id), executableImports.rawData)
 
-    lazy val standardSections = if (isDll)
-      List(codeSection.copy(contents = code, header = codeSection.header.copy(sizeOfRawData = code.size)))
-    else
-      List(codeSection.copy(contents = code), dataSection, idataSection)
+    
 
     lazy val peSections: Seq[Section] = {
       var virtAddress = 0x1000
       var rawPointer = 0x200
+
+      val sections = ListBuffer[Section]()
+      sections += codeSection.copy(contents = code, header = codeSection.header.copy(sizeOfRawData = code.size))
       
-      val sections = ListBuffer[Section]() ++ standardSections
+      if (!dataSection.contents.isEmpty && !isDll)
+        sections += dataSection
+        
+      if (!importSymbols.isEmpty && !isDll)
+        sections += idataSection
 
       if (objFile.iconPath.isDefined) {
         val res = ResourceGen.compileResources(0x4000, objFile.iconPath.get)

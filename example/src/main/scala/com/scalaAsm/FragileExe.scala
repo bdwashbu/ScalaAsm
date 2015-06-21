@@ -9,6 +9,8 @@ import scala.xml._
 import java.io.PrintWriter
 import scala.util.Try
 import scala.collection.mutable.ListBuffer
+import com.scalaAsm.asm.AsmProgram
+import com.scalaAsm.asm.Tokens._
 
 object HelloWorld extends AsmProgram {
 

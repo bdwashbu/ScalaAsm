@@ -70,10 +70,52 @@ object DLLRunner extends AsmProgram {
   }
 }
 
+object DLLBuilder2 extends AsmProgram {
+
+  import com.scalaAsm.x86.Instructions.General._
+
+  import com.scalaAsm.asm._
+  import universe._
+
+  sections += new DataSection(
+        Variable("helloWorld", "Hello World!\r\n\u0000")) {}
+  
+  sections += new CodeSection {
+    
+    procedure(name = "printHello",asm"""
+      push test
+      call printf
+      pop eax
+      retn
+      """)
+  }
+}
+
+object DLLRunner2 extends AsmProgram {
+
+  import com.scalaAsm.x86.Instructions.General._
+
+  import com.scalaAsm.asm._
+  import universe._
+
+  sections += new CodeSection {
+    
+    builder += Code(
+      asm"""
+      call printHello
+      retn"""
+    )
+  }
+}
+
 
 class DLLTest extends FlatSpec with ShouldMatchers {
   //getDLLOutput(DLLBuilder, DLLRunner, false)
-  "A c-library 32-bit Hello world" should "print 'Hello World'" in {
+  "A simple function found in a dll" should "be found and print '4'" in {   
     getDLLOutput(DLLBuilder, DLLRunner, false) should equal("4")
+  }
+  
+  "A dll with imports" should "work fine" in {
+    //getDLLOutput(DLLBuilder2, DLLRunner2, Seq("kernel32.dll", "msvcrt.dll"), Nil, false) should equal("Hello World!")
   }
 }

@@ -42,7 +42,7 @@ case class SectionHeader(
   characteristics: Int) {
 
   def write: Array[Byte] = {
-    val bbuf = ByteBuffer.allocate(256);
+    val bbuf = ByteBuffer.allocate(40);
     bbuf.order(ByteOrder.LITTLE_ENDIAN)
     bbuf.put(name.padTo(8, 0.toChar).map(_.toByte).toArray)
     bbuf.putInt(virtualSize)
@@ -54,7 +54,7 @@ case class SectionHeader(
     bbuf.putShort(relocations)
     bbuf.putShort(lineNumbers)
     bbuf.putInt(characteristics)
-    bbuf.array().take(bbuf.position())
+    bbuf.array()
   }
 }
 

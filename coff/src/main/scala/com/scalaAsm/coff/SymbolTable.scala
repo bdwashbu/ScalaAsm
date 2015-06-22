@@ -104,7 +104,7 @@ object CoffSymbol {
     
     val allSymbolsAndAux = symbols flatMap {sym => List(sym) ++ sym.auxiliarySymbols}
     
-    val allReloc = relocations.map(_.apply(allSymbolsAndAux.zipWithIndex.toMap)).reduce(_ ++ _)
+    val allReloc = relocations.map(_.apply).reduce(_ ++ _)
     val allSymbols = symbols.map(_.write).reduce(_++_)
     
     allReloc ++ allSymbols ++ tableLength.array() ++ stringTable

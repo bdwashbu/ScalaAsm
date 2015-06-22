@@ -182,29 +182,31 @@ class Assembler {
 
     def getRelocations: Seq[Relocation] = {
       var parserPosition = 0
+      
+      val symIndex = symbols.zipWithIndex
 
       compiledAsm.onePass.flatMap { token =>
         var result: Option[Relocation] = None
         token match {
           case InstructionToken(inst) => inst match {
             case OneMachineCode(_, AbsoluteAddress(address, name), _, _, _) =>
-              result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
+              result = Some(Relocation(parserPosition + 2, symIndex.find { sym => sym._1.name == name }.get._2, 1))
             case TwoMachineCode(_, AbsoluteAddress(address, name), _, _, _, _) =>
-              result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
+              result = Some(Relocation(parserPosition + 2, symIndex.find { sym => sym._1.name == name }.get._2, 1))
             case TwoMachineCode(_, _, AbsoluteAddress(address, name), _, _, _) =>
-              result = Some(Relocation(parserPosition + 2, symbols.find { sym => sym.name == name }.get, 1))
+              result = Some(Relocation(parserPosition + 2, symIndex.find { sym => sym._1.name == name }.get._2, 1))
             case _ =>
           }
           case ProcRef(name) =>
-            result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 2))
+            result = Some(Relocation(parserPosition, symIndex.find { sym => sym._1.name == name }.get._2, 2))
           case InvokeRef(_, name) =>
-            result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
+            result = Some(Relocation(parserPosition + 1, symIndex.find { sym => sym._1.name == name }.get._2, 20))
           case VarRef(name) =>
-            result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 6))
+            result = Some(Relocation(parserPosition + 1, symIndex.find { sym => sym._1.name == name }.get._2, 6))
           case ImportRef(_, name) =>
-            result = Some(Relocation(parserPosition + 1, symbols.find { sym => sym.name == name }.get, 20))
+            result = Some(Relocation(parserPosition + 1, symIndex.find { sym => sym._1.name == name }.get._2, 20))
           case LabelRef(name, inst) =>
-            result = Some(Relocation(parserPosition, symbols.find { sym => sym.name == name }.get, 7))
+            result = Some(Relocation(parserPosition, symIndex.find { sym => sym._1.name == name }.get._2, 7))
           case _ => None
         }
         token match {

@@ -37,7 +37,7 @@ object Coff {
 
     val relocations = sectionHeaders flatMap { header =>
       for (i <- 0 until header.relocations)
-        yield RelocationEntry.getRelocationEntry(bbuf)
+        yield Relocation.getRelocation(bbuf)
     }
 
     val symbolTable = new ListBuffer[(Int, CoffSymbol)]()
@@ -78,8 +78,8 @@ object Coff {
     val resolvedRelocations = relocations.toSeq map { reloc =>
       Relocation(
         reloc.referenceAddress,
-        symbolMap(reloc.symbolIndex),
-        reloc.reloationType)
+        reloc.symbolIndex,
+        reloc.relocationType)
     }
 
     Coff(sections, resolvedRelocations, symbolMap.values.toSeq, None)

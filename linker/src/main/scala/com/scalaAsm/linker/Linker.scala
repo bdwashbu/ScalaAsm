@@ -14,7 +14,7 @@ class Linker {
 
   def compileImports(objFile: Coff, dlls: Seq[String], is64Bit: Boolean, importsLoc: Int): CompiledImports = {
 
-    val symbolsToBindTo = objFile.relocations.filter(reloc => reloc.symbol.sectionNumber == 0).map(_.symbol.name).toSeq
+    val symbolsToBindTo = objFile.relocations.filter(reloc => objFile.symbols(reloc.symbolIndex).sectionNumber == 0).map{reloc => objFile.symbols(reloc.symbolIndex).name}.toSeq
 
     val exportMap = dlls.map { dllName =>
       (dllName -> {
@@ -260,22 +260,24 @@ class Linker {
 
         val bb = java.nio.ByteBuffer.allocate(4)
         bb.order(ByteOrder.LITTLE_ENDIAN)
+        
+        val symbolName = objFile.symbols(relocation.symbolIndex).name
 
         relocation.relocationType match {
           case 1 => // addr
-            bb.putInt(getSymbolAddress(relocation.symbol.name) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
+            bb.putInt(getSymbolAddress(symbolName) + addressOfData - 0x2000 - relocation.referenceAddress - 5)
             patchedCode = patchedCode.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 2 => // ProcRef
-            bb.putInt(getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 5)
+            bb.putInt(getSymbolAddress(symbolName) - relocation.referenceAddress - 5)
             patchedCode = patchedCode.patch(relocation.referenceAddress + 1, bb.array(), 4)
           case 20 => // InvokeRef/ImportRef
-            bb.putInt(getSymbolAddress(relocation.symbol.name) - (relocation.referenceAddress + 0x1000) - 4)
+            bb.putInt(getSymbolAddress(symbolName) - (relocation.referenceAddress + 0x1000) - 4)
             patchedCode = patchedCode.patch(relocation.referenceAddress, bb.array(), 4)
           case 6 => // GoAsm VarRef
-            bb.putInt(getSymbolAddress(relocation.symbol.name) - 0x1000 + addressOfData + 0x400000)
+            bb.putInt(getSymbolAddress(symbolName) - 0x1000 + addressOfData + 0x400000)
             patchedCode = patchedCode.patch(relocation.referenceAddress, bb.array(), 4)
           case 7 => // LabelRef
-            patchedCode(relocation.referenceAddress + 1) = (getSymbolAddress(relocation.symbol.name) - relocation.referenceAddress - 2).toByte
+            patchedCode(relocation.referenceAddress + 1) = (getSymbolAddress(symbolName) - relocation.referenceAddress - 2).toByte
         }
       }
       patchedCode

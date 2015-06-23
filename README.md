@@ -60,30 +60,21 @@ Scala x86 can be used to implement low-level assembly code. ScalaAsm currently s
 Heres a short 32-bit windows console version of "Hello world!":
 
 ```scala
-object HelloWorld extends AsmProgram[x86_32] {
+object HelloWorld extends AsmProgram {
+
+  import com.scalaAsm.x86.Instructions.General._
+  import com.scalaAsm.asm._
   
-  dataSections += new DataSection {
-    builder += Variable("helloWorld", "Hello World!\r\n\0")
-    builder += Variable("pressAnyKey", "Press any key to continue ...\r\n\0")
-  }
+  sections += new DataSection(
+    Variable("helloWorld", "Hello World!\r\n")
+  ) {}
 
-  codeSections += new CodeSection {
-    
-    val STD_INPUT_HANDLE = byte(-10)
-
-    procedure(name = "start",
-      push("helloWorld"),
-      call("printf"),
-      pop(ebx),
-      push("pressAnyKey"),
-      call("printf"),
-      pop(ebx),
-      push(STD_INPUT_HANDLE),
-      call("GetStdHandle"),
-      push(eax),
-      call("FlushConsoleInputBuffer"),
-      call("_getch"),
-      retn
+  sections += new CodeSection {
+    builder += Code(
+      asm"""push helloWorld
+      call printf
+      pop ebx
+      retn"""
     )
   }
 }

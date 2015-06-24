@@ -23,6 +23,7 @@ object FileHeader {
   val is32Bit: Short = 0x0100
   val symbolsStripped: Short = 0x0008
   val linesStripped: Short = 0x0004
+  val relocationStripped: Short = 0x0001
   
   def getFileHeader(input: ByteBuffer): FileHeader = {
     input.order(ByteOrder.LITTLE_ENDIAN)

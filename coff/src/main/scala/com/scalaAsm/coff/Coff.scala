@@ -101,20 +101,20 @@ case class Coff(sections: Seq[Section], relocations: Seq[Relocation], symbols: S
 
     val sectionHeaders = sections.map(_.header.write).reduce(_ ++ _)
 
-    val allSections = sections.map(_.contents).reduce(_ ++ _)
+    val sectionData = sections.map(_.contents).reduce(_ ++ _)
     
-    val sectionData = sectionHeaders ++ allSections
-    
+    val relocData = relocations.map(_.apply).reduce(_ ++ _)
+
     val header = CoffHeader(
       machine = if (is64Bit) 0x8664.toShort else 0x14C,
       numberOfSections = sections.size.toShort,
       timeDateStamp = 0x535BF29F,
-      pointerToSymbolTable = 20 + sectionData.length + relocations.size*10,
+      pointerToSymbolTable = 20 + (sectionHeaders ++ sectionData).length + relocations.size*10,
       numberOfSymbols = numSymbolsAndAux,
       sizeOfOptionalHeader = 0,
       characteristics = IMAGE_FILE_32BIT_MACHINE.value)
 
-    outputStream.write(header() ++ sectionData ++ CoffSymbol.writeRelocationsAndSymbols(relocations, symbols))
+    outputStream.write(header() ++ sectionHeaders ++ sectionData ++ CoffSymbol.writeRelocationsAndSymbols(relocations, symbols))
     outputStream.close()
   }
 

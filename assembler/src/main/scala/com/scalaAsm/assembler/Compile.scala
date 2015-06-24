@@ -12,14 +12,8 @@ import com.scalaAsm.x86.InstructionResult
 import com.scalaAsm.x86.Instructions.OneMachineCode
 import com.scalaAsm.x86.Instructions.TwoMachineCode
 import scala.collection.mutable.ListBuffer
-import com.scalaAsm.coff.Relocation
 import scala.collection.mutable.ArrayBuffer
-import com.scalaAsm.coff.CoffSymbol
-import com.scalaAsm.coff.Section
-import com.scalaAsm.coff.Coff
-import com.scalaAsm.coff.SectionHeader
-import com.scalaAsm.coff.Characteristic
-import com.scalaAsm.coff.{ IMAGE_SYM_CLASS_EXTERNAL, IMAGE_SYM_DTYPE_FUNCTION }
+import com.scalaAsm.coff._
 
 import com.scalaAsm.x86.InstructionResult
 
@@ -146,25 +140,25 @@ class Assembler {
     val codeSection = Section(
       SectionHeader(
         name = "code",
-        virtualSize = code.length,
-        virtualAddress = 0x1000,
-        sizeOfRawData = 0x200,
-        pointerToRawData = 0x400,
-        relocPtr = 0,
+        virtualSize = 0,
+        virtualAddress = 0,
+        sizeOfRawData = code.length,
+        pointerToRawData = 100,
+        relocPtr = 100 + code.size + compiledAsm.rawData.size,
         linenumPtr = 0,
-        relocations = 0,
+        relocations = 2,
         lineNumbers = 0,
         characteristics = Characteristic.CODE.id |
           Characteristic.EXECUTE.id |
-          Characteristic.READ.id), code.toArray)
+          Characteristic.READ.id), code)
 
     val dataSection = Section(
       SectionHeader(
         name = "data",
-        virtualSize = compiledAsm.rawData.length,
-        virtualAddress = 0x2000,
-        sizeOfRawData = 0x200,
-        pointerToRawData = 0x600,
+        virtualSize = 0,
+        virtualAddress = 0,
+        sizeOfRawData = compiledAsm.rawData.length,
+        pointerToRawData = 100 + code.size,
         relocPtr = 0,
         linenumPtr = 0,
         relocations = 0,
@@ -172,13 +166,30 @@ class Assembler {
         characteristics = Characteristic.INITIALIZED.id |
           Characteristic.READ.id |
           Characteristic.WRITE.id), compiledAsm.rawData)
+          
+    val sectionSymbols = Seq(codeSection, dataSection).zipWithIndex.map{ case (section, index) =>
+      CoffSymbol(section.header.name, 0, (index + 1).toShort, IMAGE_SYM_DTYPE_NULL(0), IMAGE_SYM_CLASS_STATIC,
+          Seq(new SymbolEntry {
+            def write: Array[Byte] = {
+              bbuf.putInt(section.header.sizeOfRawData)
+              bbuf.putShort(section.header.relocations.toShort)
+              bbuf.putShort(0)
+              bbuf.putInt(0)
+              bbuf.putShort(0)
+              bbuf.putInt(0)
+              bbuf.array()
+            }
+          }))
+    }
+    
+    val start = CoffSymbol("START", 0, 1, IMAGE_SYM_DTYPE_NULL(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
 
     val symbols = (compiledAsm.positionPass collect {
-      case Proc(offset, name)          => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
-      case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
-      case InvokeRef(offset, name)     => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
-      case ImportRef(offset, name)     => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil)
-    }) ++ compiledAsm.variablesSymbols
+      case Proc(offset, name)          => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0x2000), IMAGE_SYM_CLASS_EXTERNAL, Nil)
+      case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0x2000), IMAGE_SYM_CLASS_EXTERNAL, Nil)
+      case InvokeRef(offset, name)     => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0x2000), IMAGE_SYM_CLASS_EXTERNAL, Nil)
+      case ImportRef(offset, name)     => CoffSymbol(name, 0, 0, IMAGE_SYM_DTYPE_FUNCTION(0x2000), IMAGE_SYM_CLASS_EXTERNAL, Nil)
+    }) ++ compiledAsm.variablesSymbols ++ sectionSymbols :+ start
 
     def getRelocations: Seq[Relocation] = {
       var parserPosition = 0
@@ -227,11 +238,9 @@ class Assembler {
 
   private def compileData(dataTokens: Seq[Token]): (Array[Byte], Seq[CoffSymbol]) = {
 
-    // Here, we implicitly add a "KEEP" variable to hold results
-
     val dataSection: Seq[PostToken] = {
       var parserPosition: Int = 0
-      for (token <- Variable("KEEP", "\u0000\u0000\u0000\u0000") +: dataTokens) yield {
+      for (token <- dataTokens) yield {
         val result = token match {
           case Variable(name, value) => PostVar(name, value, parserPosition)
           case Align(to, filler, _)  => ByteOutputPost(Array.fill((to - (parserPosition % to)) % to)(filler))
@@ -249,12 +258,12 @@ class Assembler {
       case ByteOutputPost(padding) => padding
       case PostVar(_, value, _)    => value.toCharArray().map(_.toByte)
       case _                       => Array[Byte]()
-    }.reduce(_ ++ _)
+    }.foldLeft(Array[Byte]())(_ ++ _)
 
     // a map of variable to its RVA
     def createDefMap(dataSection: Seq[PostToken]): Seq[CoffSymbol] = {
       dataSection flatMap {
-        case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 1, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil))
+        case PostVar(name, value, pos) => Some(CoffSymbol(name, pos, 2, IMAGE_SYM_DTYPE_FUNCTION(0), IMAGE_SYM_CLASS_EXTERNAL, Nil))
         case _                         => None
       }
     }

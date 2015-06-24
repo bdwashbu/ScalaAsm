@@ -157,7 +157,10 @@ class Linker {
 
     lazy val resources = objFile.iconPath map (path => Option(ResourceGen.compileResources(0x4000, path))) getOrElse None
 
-    lazy val codeSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.CODE.id) != 0 }.get
+    lazy val coffCodeSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.CODE.id) != 0 }.get
+    
+    // fix me: change v address to 1000
+    lazy val codeSection = coffCodeSection.copy(header = coffCodeSection.header.copy(sizeOfRawData = coffCodeSection.contents.size, virtualAddress = 0x1000))
     lazy val dataSection = objFile.sections.find { section => (section.header.characteristics & Characteristic.WRITE.id) != 0 }.get
 
     lazy val exportData: Array[Byte] = if (isDll) {
@@ -191,7 +194,7 @@ class Linker {
       var rawPointer = 0x200
 
       val sections = ListBuffer[Section]()
-      sections += codeSection.copy(contents = code, header = codeSection.header.copy(sizeOfRawData = code.size))
+      sections += codeSection.copy(contents = code, header = codeSection.header.copy(sizeOfRawData = code.size, virtualAddress = 0x1000))
       
       if (!dataSection.contents.isEmpty && !isDll)
         sections += dataSection
@@ -232,7 +235,7 @@ class Linker {
               Characteristic.READ.id), exportData)
       }
 
-      sections map { section =>
+      val results = sections map { section =>
         val size: Int = (section.header.sizeOfRawData / 0x200) + 1
         val result = Section(
           SectionHeader(
@@ -250,8 +253,11 @@ class Linker {
         rawPointer += size * 0x200
         val newVirtAddress: Int = ((size * 0x200) / 0x1000) + 1
         virtAddress += newVirtAddress * 0x1000
+        
         result
       }
+
+      results
     }
 
     lazy val code = {
@@ -285,6 +291,8 @@ class Linker {
 
     val numImportedFunctions = executableImports.importSymbols.filter(sym => !sym.name.contains(".dll")).size
 
+    println(peSections)
+    
     val directories = DataDirectories(
       importSymbols = if (!isDll) executableImports.getImportsDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6) else ImageDataDirectory(0, 0),
       importAddressTable = if (!isDll) executableImports.getIATDirectory(idataSection.header.virtualAddress + numImportedFunctions * 6 + executableImports.boundImportSize) else ImageDataDirectory(0, 0),

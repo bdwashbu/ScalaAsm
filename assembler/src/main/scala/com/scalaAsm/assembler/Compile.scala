@@ -139,7 +139,7 @@ class Assembler {
 
     val codeSection = Section(
       SectionHeader(
-        name = "code",
+        name = ".text",
         virtualSize = 0,
         virtualAddress = 0,
         sizeOfRawData = code.length,
@@ -189,7 +189,7 @@ class Assembler {
       case LabelResolved(offset, name) => CoffSymbol(name, offset, 2, IMAGE_SYM_DTYPE_FUNCTION(0x2000), IMAGE_SYM_CLASS_EXTERNAL, Nil)
       case InvokeRef(offset, name)     => CoffSymbol(name, offset, 0, IMAGE_SYM_DTYPE_FUNCTION(0x2000), IMAGE_SYM_CLASS_EXTERNAL, Nil)
       case ImportRef(offset, name)     => CoffSymbol(name, 0, 0, IMAGE_SYM_DTYPE_FUNCTION(0x2000), IMAGE_SYM_CLASS_EXTERNAL, Nil)
-    }) ++ compiledAsm.variablesSymbols ++ sectionSymbols :+ start
+    }) ++ compiledAsm.variablesSymbols :+ start
 
     def getRelocations: Seq[Relocation] = {
       var parserPosition = 0

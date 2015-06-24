@@ -24,26 +24,21 @@ import org.scalatest.time.SpanSugar._
 object HelloWorld extends AsmProgram {
 
   import com.scalaAsm.x86.Instructions.General._
-
   import com.scalaAsm.asm._
-  import universe._
   
   sections += new DataSection(
-    Variable("helloWorld", "Hello World!\r\n\u0000"),
-    Variable("helloWorld2", "Hello Worldddd!\r\n\u0000")
+    Variable("helloWorld", "Hello World!\r\n")
   ) {}
 
   sections += new CodeSection {
-    builder += Code(
+    procedure(name = "_main",
       asm"""push helloWorld
-      call printf
+      call _printf
       pop ebx
       retn"""
     )
   }
 }
-
-
 
 object HelloWorldWin extends AsmProgram {
   import com.scalaAsm.x86.Instructions.General._

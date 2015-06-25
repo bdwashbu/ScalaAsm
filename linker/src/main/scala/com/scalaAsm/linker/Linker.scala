@@ -60,9 +60,16 @@ class Linker {
 
     test.generateImports(is64Bit)
   }
+  
+  // C convention dictates a '_' prefix, we gotta get rid of it to get the real symbol name
+  def stripUnderscorePrefix(name: String): String = {
+    if (name.trim.head == '_') name.trim.drop(1) else name.trim
+  }
 
-  def link(objFile: Coff, addressOfData: Int, is64Bit: Boolean, isDll: Boolean, dlls: String*): PortableExecutable = {
+  def link(coff: Coff, addressOfData: Int, is64Bit: Boolean, isDll: Boolean, dlls: String*): PortableExecutable = {
 
+    val objFile = coff.copy(symbols = coff.symbols.map{sym => sym.copy(name = stripUnderscorePrefix(sym.name))})
+    
     val dosHeader = DosHeader(
       e_cblp = 108,
       e_cp = 1,

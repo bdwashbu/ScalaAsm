@@ -24,85 +24,81 @@ object HelloWorld2 extends AsmProgram {
 
   sections += new CodeSection {
 
-    procedure(name = "start",
-      asm"call printHelloWorld",
-      asm"push ebx",
-      asm"call flushBuffer",
-      asm"retn")
+    procedure(name = "start",asm"""
+      call printHelloWorld
+      push ebx
+      call flushBuffer
+      retn""")
 
-    procedure(name = "printHelloWorld",
-      asm"push helloWorld",
-      asm"call printf",
-      asm"add esp, 4",
-      asm"retn")
+    procedure(name = "printHelloWorld",asm"""
+      push helloWorld
+      call printf
+      add esp, 4
+      retn""")
       
     val numberOfBytesToWrite = ebp + byte(-12)
     val numberOfBytesWritten = ebp + byte(-8)
-    //val hFile = ebp - byte(4)
     val hFile = "[ebp - 4]"
-    //val hFileTest = asm"[ebp - 4]"
     val lpBuffer = ebp + byte(8)
     val STD_OUTPUT_HANDLE = "byte -14"
     val STD_INPUT_HANDLE = byte(-10)
-    
-    
-    
-    procedure(name = "flushBuffer",
-      asm"push ebp",
-      asm"mov ebp, esp",
-      asm"add esp, -12",
-      asm"call GetStdHandle",
-      asm"mov $hFile, eax",
-      asm"push $lpBuffer",
-      asm"call strlen",
-      asm"mov $numberOfBytesToWrite, eax",
-      asm"push byte 0",
-      asm"lea eax, $numberOfBytesWritten",
-      asm"push eax",
-      asm"push $numberOfBytesToWrite",
-      asm"push $lpBuffer",
-      asm"push $hFile",
-      asm"call WriteFile",
-      asm"mov eax, $numberOfBytesWritten",
-      asm"leave",
+   
+    procedure(name = "flushBuffer",asm"""
+      push ebp
+      mov ebp, esp
+      add esp, -12
+      call GetStdHandle
+      mov $hFile, eax
+      push $lpBuffer
+      call strlen
+      mov $numberOfBytesToWrite, eax
+      push byte 0
+      lea eax, $numberOfBytesWritten
+      push eax
+      push $numberOfBytesToWrite
+      push $lpBuffer
+      push $hFile
+      call WriteFile
+      mov eax, $numberOfBytesWritten
+      leave""",
       List(RETN(word(4))))
 
-    procedure(name = "strlen",
-      asm"mov eax, [esp + 4]", // pointer to string
-      asm"lea eax, [esp + 3]",
-      asm"push ebp",
-      asm"push edi",
-      asm"mov ebp, 0x80808080",
+    procedure(name = "strlen",asm"""
+      mov eax, [esp + 4] // pointer to string
+      lea eax, [esp + 3]
+      push ebp
+      push edi
+      mov ebp, 0x80808080""",
 
       asm"start:",
 
-      repeat(3,
-          asm"mov edi, [eax]", // read first 4 bytes
-          asm"ADD eax, 4", // increment pointer
-          asm"lea ecx, [edi - 0x1010101]", // subtract 1 from each byte
-          asm"not edi", // invert all bytes
-          asm"and ecx, edi",
-          asm"and ecx, ebp",
-          asm"jnz test"),
+      repeat(3,asm"""
+          mov edi, [eax] // read first 4 bytes
+          ADD eax, 4 // increment pointer
+          lea ecx, [edi - 0x1010101] // subtract 1 from each byte
+          not edi // invert all bytes
+          and ecx, edi
+          and ecx, ebp
+          jnz test"""),
 
-      asm"mov edi, [eax]",
-      asm"add eax, 4",
-      asm"lea ecx, [edi - 0x1010101]",
-      asm"not edi",
-      asm"and ecx, edi",
-      asm"and ecx, ebp",
-      asm"jz start",
-
-      asm"test:",
-      asm"test ecx, 0x8080", // test first 2 bytes
-      asm"jnz end",
-      asm"shr ecx, 16",
-      asm"add eax, 2",
-      asm"end:",
-      asm"shl cl",
-      asm"sbb eax, edx", // compute length
-      asm"pop edi",
-      asm"pop ebp",
+      asm"""
+      mov edi, [eax]
+      add eax, 4
+      lea ecx, [edi - 0x1010101]
+      not edi
+      and ecx, edi
+      and ecx, ebp
+      jz start
+      test:
+      test ecx, 0x8080 // test first 2 bytes
+      jnz end
+      shr ecx, 16
+      add eax, 2
+      end:
+      shl cl
+      sbb eax, edx // compute length
+      pop edi
+      pop ebp""",
       List(RETN(word(4))))
 
     builder += align(2)

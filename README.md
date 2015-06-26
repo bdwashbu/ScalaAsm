@@ -1,7 +1,7 @@
 Scala x86 ![Alt text](/example/smooth-spiral.png) ![Alt text](/example/exe-icon1.gif)
 ========
 
-Welcome to the best Scala source for all things [x86-64](http://en.wikipedia.org/wiki/X86), [Portable Executable](http://en.wikipedia.org/wiki/Portable_Executable) (.exe), and [COFF](http://en.wikipedia.org/wiki/COFF) (.o)!
+![Alt text](/example/exeicon.png) Welcome to the best Scala source for all things [x86-64](http://en.wikipedia.org/wiki/X86), [Portable Executable](http://en.wikipedia.org/wiki/Portable_Executable) (.exe), and [COFF](http://en.wikipedia.org/wiki/COFF) (.o)!
 
 Scala x86 is a back-end for a compiler.  Its a collection of libraries that handles the low-level machine code generation.
 
@@ -9,15 +9,15 @@ ScalaAsm is a simple low-level assembly prototype which uses Scala x86.  It can 
 
 #### Implementing x86
 
-Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set.  There are over 700 instructions and each one could have dozens of versions with different types of inputs.  The instruction MOV has over 30 different versions, for instance.  When you account for each version there are more than 1300 unique instruction signatures.  The Intel x86 spec is 3300 pages, after all.
+![Alt text](/example/dllicon.png) Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set - the documentation is over 3300 pages.  There are over 700 instructions and each one could have dozens of versions with different types of inputs.  The instruction MOV has over 30 different versions, for instance.  When you account for each version there are more than 1300 unique instruction signatures. 
 
-There are far too many x86 instructions to maintain the code behind them manually.  It would be difficult and time consuming to make the most trivial changes.  To get around this, Scala x86 uses auto-generated instruction code definitions which comes from a very helpful XML file.  The XML can be found in references below.
+At the end of the day, there are far too many x86 instructions to maintain the code behind them manually.  It would be difficult and time consuming to make the most trivial changes.  To get around this, Scala x86 uses auto-generated instruction code definitions which comes from a very helpful XML file.  The XML can be found in references below.
 
 All the auto-generated instruction definitions are members of a type class.  The end result is great compile time safety and readable code if you want to look at the definitions.
 
 ##### Instructions
 
-Heres an example of some PUSH instructions for 64-bit register, 16-bit register, 8-bit immediate value, and 16-bit immediate value operands.
+![Alt text](/example/exeicon.png) Heres an example of some PUSH instructions for 64-bit register, 16-bit register, 8-bit immediate value, and 16-bit immediate value operands.
 
 ```scala
 implicit object push1 extends PUSH._1[r64] {
@@ -53,11 +53,9 @@ It would be a compile time error because there is no PUSH implementation defined
 
 ### ScalaAsm
 
-The hope is that Scala x86 can be used to implement a turing-complete programming language, but this is still an area of research.
+![Alt text](/example/dllicon.png) Scala x86 can be used to implement low-level assembly code. ScalaAsm currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
 
-Scala x86 can be used to implement low-level assembly code. ScalaAsm currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
-
-Heres a short 32-bit windows console version of "Hello world!":
+Heres a very short 32-bit windows console version of "Hello world!", using printf:
 
 ```scala
 object HelloWorld extends AsmProgram {

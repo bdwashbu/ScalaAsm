@@ -1,38 +1,38 @@
 Scala x86 ![Alt text](/example/smooth-spiral.png) ![Alt text](/example/exe-icon1.gif)
 ========
 
-![Alt text](/example/exeicon.png) Welcome to the best Scala source for all things [x86-64](http://en.wikipedia.org/wiki/X86), [Portable Executable](http://en.wikipedia.org/wiki/Portable_Executable) (.exe), and [COFF](http://en.wikipedia.org/wiki/COFF) (.o)!
+Welcome to the best Scala source for all things [x86-64](http://en.wikipedia.org/wiki/X86), [Portable Executable](http://en.wikipedia.org/wiki/Portable_Executable) (.exe/dll), and [COFF](http://en.wikipedia.org/wiki/COFF) (.o/obj)!
 
-Scala x86 is a back-end for a compiler.  Its a collection of libraries that handles the low-level machine code generation.
+Scala x86 is very low level code written in a very high level language.  It is a back-end for a compiler.  A number of projects comprise of scala x86, and these assist in handling the assembling and linking.
 
-ScalaAsm is a simple low-level assembly prototype which uses Scala x86.  It can assemble code into a object file and then link it into an executable for windows 32 or 64-bit platforms.  What makes ScalaAsm special is the amount of compile time safety within the API.
+ScalaAsm is a assembly prototype which uses Scala x86 and macros.  It can assemble code into a object file and then link it into an executable or dll for windows 32 or 64-bit platforms.  What makes ScalaAsm special is the amount of compile time safety within the API. ![Alt text](/example/exeicon.png)
 
 #### Implementing x86
 
-![Alt text](/example/dllicon.png) Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set - the documentation is over 3300 pages.  There are over 700 instructions and each one could have dozens of versions with different types of inputs.  The instruction MOV has over 30 different versions, for instance.  When you account for each version there are more than 1300 unique instruction signatures. 
+Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set - the documentation is over 3300 pages.  There are over 700 instructions and each one could have dozens of versions with different types of inputs.  The instruction MOV has over 30 different versions, for instance.  When you account for each version there are more than 1300 unique instruction signatures. 
 
 At the end of the day, there are far too many x86 instructions to maintain the code behind them manually.  It would be difficult and time consuming to make the most trivial changes.  To get around this, Scala x86 uses auto-generated instruction code definitions which comes from a very helpful XML file.  The XML can be found in references below.
 
-All the auto-generated instruction definitions are members of a type class.  The end result is great compile time safety and readable code if you want to look at the definitions.
+All the auto-generated instruction definitions are members of a type class.  The end result is great compile time safety and readable code if you want to look at the definitions. ![Alt text](/example/dllicon.png)
 
 ##### Instructions
 
-![Alt text](/example/exeicon.png) Heres an example of some PUSH instructions for 64-bit register, 16-bit register, 8-bit immediate value, and 16-bit immediate value operands.
+Heres an example of some PUSH instructions for 64-bit register, 16-bit register, 8-bit immediate value, and 16-bit immediate value operands.
 
 ```scala
-implicit object push1 extends PUSH._1[r64] {
+implicit object push1 extends _1[r64] {
   def opcode = 0x50 + rd
 }
 
-implicit object push2 extends PUSH._1[r16] {
+implicit object push2 extends _1[r16] {
   def opcode = 0x50 + rw
 }
   
-implicit object push3 extends PUSH._1[imm8] {
+implicit object push3 extends _1[imm8] {
   def opcode = 0x6A
 }
   
-implicit object push4 extends PUSH._1[imm16] {
+implicit object push4 extends _1[imm16] {
   def opcode = 0x68
 }
 ```
@@ -49,7 +49,7 @@ Assuming those are the only versions of PUSH available, if you tried calling:
 push(ecx)
 ```
 
-It would be a compile time error because there is no PUSH implementation defined that takes a single 32-bit register.
+It would be a compile time error because there is no PUSH implementation defined that takes a single 32-bit register. ![Alt text](/example/exeicon.png)
 
 ### ScalaAsm
 
@@ -98,10 +98,16 @@ http://www.godevtool.com/
 The best x86 reference site!  The master x86 XML comes from here.  
 http://ref.x86asm.net/
 
+Specs:
+========
+
 Intel® 64 and IA-32 Architectures Software Developer Manuals:   http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
 
 Microsoft PE format spec:  
 http://msdn.microsoft.com/en-us/library/windows/desktop/ms680547(v=vs.85).aspx
+
+Informational:
+========
 
 The Portable Executable format from top to bottom:  
 http://www.csn.ul.ie/~caolan/publink/winresdump/winresdump/doc/pefile2.html

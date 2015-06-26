@@ -99,11 +99,11 @@ case class Coff(sections: Seq[Section], relocations: Seq[Relocation], symbols: S
     
     val numSymbolsAndAux = symbols.map{sym => 1 + sym.auxiliarySymbols.size}.sum
 
-    val sectionHeaders = sections.map(_.header.write).reduce(_ ++ _)
+    val sectionHeaders = Array.concat(sections.map(_.header.write): _*)
 
-    val sectionData = sections.map(_.contents).reduce(_ ++ _)
+    val sectionData = Array.concat(sections.map(_.contents): _*)
     
-    val relocData = relocations.map(_.apply).reduce(_ ++ _)
+    val relocData = Array.concat(relocations.map(_.apply): _*)
 
     val header = CoffHeader(
       machine = if (is64Bit) 0x8664.toShort else 0x14C,

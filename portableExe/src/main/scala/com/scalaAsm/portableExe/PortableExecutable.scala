@@ -72,7 +72,7 @@ case class PortableExecutable(dosHeader: DosHeader,
     val headers = align(dosHeader(), 32, 0) ++:
       peHeader() ++:
       directories() ++:
-      sections.map(_.header.write).reduce(_ ++ _)
+      Array.concat(sections.map(_.header.write): _*)
     
     result = result.patch(0, headers, headers.length)
     sections.foreach{section => result = result.patch(section.header.pointerToRawData, section.contents, section.contents.length)}

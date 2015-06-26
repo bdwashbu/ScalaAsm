@@ -102,8 +102,8 @@ object CoffSymbol {
       }
     }
     
-    val allReloc = relocations.map(_.apply).reduce(_ ++ _)
-    val allSymbols = symbols.map(_.write).reduce(_++_)
+    val allReloc = Array.concat(relocations.map(_.apply): _*)
+    val allSymbols = Array.concat(symbols.map(_.write): _*)
     
     allReloc ++ allSymbols ++ tableLength.array() ++ stringTable
   }

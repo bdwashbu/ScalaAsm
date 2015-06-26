@@ -21,7 +21,7 @@ class Linker {
       (dllName -> PortableExecutable.getExports(dllName))
     }.toMap
 
-    val resolvedMap = symbolsToBindTo.map { sym => sym -> exportMap.filter { case (dll, exports) => exports.contains(sym) }.map { case (dll, exports) => dll } }.toMap
+    val resolvedMap = symbolsToBindTo.map { sym => sym -> exportMap.filter { case (dll, exports) => exports.contains(sym) }.keys }.toMap
 
     resolvedMap.foreach { sym =>
       if (sym._2.size == 0) {
@@ -31,7 +31,7 @@ class Linker {
       }
     }
 
-    val dllMap = dlls.map { dllName => (dllName, resolvedMap.filter { case (key, values) => values.toSeq.contains(dllName) }.map { _._1 }) }.toMap
+    val dllMap = dlls.map { dllName => (dllName, resolvedMap.filter { case (key, values) => values.toSeq.contains(dllName) }.keys) }.toMap
 
     val dllImports = dllMap.map {
       case (dllName, symbols) =>

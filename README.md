@@ -145,15 +145,13 @@ Hello World!
 Press any key to continue ...
 ```
 
-#### How to build:
-========
+### How to build:
 
 1. Launch sbt from base directory
 2. Run the 'eclipse with-source=true' using sbtEclipse to generate eclipse files
 3. Refresh/Clean projects in eclipse
 
-#### Misc:
-========
+### Misc:
 
 Adding an icon to an executable:
 

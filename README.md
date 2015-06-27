@@ -53,7 +53,7 @@ It would be a compile time error because there is no PUSH implementation defined
 
 ### ScalaAsm
 
-![Alt text](/example/dllicon.png) Scala x86 can be used to implement low-level assembly code. ScalaAsm currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
+Scala x86 can be used to implement low-level assembly code. ScalaAsm currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
 
 Heres a very short 32-bit windows console version of "Hello world!", using printf:
 
@@ -89,8 +89,7 @@ outputStream.write(exe.get)
 outputStream.close
 ```
 
-References:
-========
+#### References:
 
 A huge shoutout to Jeremy Gordon and Wayne Radburn for GoAsm, the best 64-bit windows assembler!  
 http://www.godevtool.com/
@@ -98,16 +97,14 @@ http://www.godevtool.com/
 The best x86 reference site!  The master x86 XML comes from here.  
 http://ref.x86asm.net/
 
-Specs:
-========
+#### Specs:
 
 Intel® 64 and IA-32 Architectures Software Developer Manuals:   http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html
 
 Microsoft PE format spec:  
 http://msdn.microsoft.com/en-us/library/windows/desktop/ms680547(v=vs.85).aspx
 
-Informational:
-========
+#### Informational:
 
 The Portable Executable format from top to bottom:  
 http://www.csn.ul.ie/~caolan/publink/winresdump/winresdump/doc/pefile2.html
@@ -121,8 +118,7 @@ http://ref.x86asm.net/index.html
 Encoding x86 instructions:  
 http://www.c-jump.com/CIS77/CPU/x86/lecture.html#X77_0240_prefix
 
-Interesting Articles:
-========
+#### Interesting Articles:
 
 Redundancy within x86:  
 http://www.strchr.com/machine_code_redundancy

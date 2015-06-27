@@ -3,11 +3,11 @@ Scala x86 ![Alt text](/example/smooth-spiral.png) ![Alt text](/example/exe-icon1
 
 Welcome to the best Scala source for all things [x86-64](http://en.wikipedia.org/wiki/X86), [Portable Executable](http://en.wikipedia.org/wiki/Portable_Executable) (.exe/dll), and [COFF](http://en.wikipedia.org/wiki/COFF) (.o/obj)!
 
-Scala x86 is very low level code written in a very high level language.  It is a back-end for a compiler.  A number of projects comprise of scala x86, and these assist in handling the assembling and linking.
+Scala x86 is very low level code written in a very high level language.  Its a back-end for a compiler.  A number of projects comprise of scala x86 and these assist in assembling and linking.
 
-ScalaAsm is a assembly prototype which uses Scala x86 and macros.  It can assemble code into a object file and then link it into an executable or dll for windows 32 or 64-bit platforms.  What makes ScalaAsm special is the amount of compile time safety within the API. ![Alt text](/example/exeicon.png)
+ScalaAsm is assembly which uses Scala x86 and macros.  It can assemble code into a object file and then link it into an executable or dll for windows 32 or 64-bit platforms.  What makes ScalaAsm special is the amount of compile time safety within the API. ![Alt text](/example/exeicon.png)
 
-#### Implementing x86
+#### Implementing x86-64
 
 Intel and others have worked on x86 since 1978 and it has grown into a very large instruction set - the documentation is over 3300 pages.  There are over 700 instructions and each one could have dozens of versions with different types of inputs.  The instruction MOV has over 30 different versions, for instance.  When you account for each version there are more than 1300 unique instruction signatures. 
 
@@ -55,7 +55,7 @@ It would be a compile time error because there is no PUSH implementation defined
 
 Scala x86 can be used to implement low-level assembly code. ScalaAsm currently supports many useful features such as procedures, loops, labels, and variables.  Some of these, like variables, are implemented using scala code.
 
-Heres a very short 32-bit windows console version of "Hello world!", using printf:
+Heres a short 32-bit windows console version of "Hello world!", without using the C standard library:
 
 ```scala
 object HelloWorld extends AsmProgram {
@@ -69,11 +69,22 @@ object HelloWorld extends AsmProgram {
 
   sections += new CodeSection {
     builder += Code(asm"""
-      push helloWorld
-      call printf
-      pop ebx
-      ret
-    """)
+      mov     ebp, esp
+      sub     esp, 4
+      push    -11
+      call    GetStdHandle
+      mov     ebx, eax    
+      push    0
+      lea     eax, [ebp-4]
+      push    eax
+      push    12
+      push    helloWorld
+      push    ebx
+      call    WriteFile
+      push    0
+      call    ExitProcess
+      """
+    )
   }
 }
 ```
@@ -156,6 +167,6 @@ Adding an icon to an executable:
 
 Before: ![Alt text](/example/beforeicon.png)
 ```
-assembler.assemble(Factorial).addIcon("scala.ico")
+assembler.assemble(HelloWorld).addIcon("scala.ico")
 ```
 After: ![Alt text](/example/aftericon.png)

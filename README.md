@@ -68,12 +68,12 @@ object HelloWorld extends AsmProgram {
   ) {}
 
   sections += new CodeSection {
-    builder += Code(
-      asm"""push helloWorld
+    builder += Code(asm"""
+      push helloWorld
       call printf
       pop ebx
-      retn"""
-    )
+      ret
+    """)
   }
 }
 ```
@@ -104,6 +104,13 @@ Intel® 64 and IA-32 Architectures Software Developer Manuals:   http://www.inte
 Microsoft PE format spec:  
 http://msdn.microsoft.com/en-us/library/windows/desktop/ms680547(v=vs.85).aspx
 
+#### Tools
+
+[PE View](http://wjradburn.com/software/)  
+PE Viewer  
+[Hopper dissembler](http://www.hopperapp.com/)  
+IDA  
+
 #### Informational:
 
 The Portable Executable format from top to bottom:  
@@ -123,7 +130,7 @@ http://www.c-jump.com/CIS77/CPU/x86/lecture.html#X77_0240_prefix
 Redundancy within x86:  
 http://www.strchr.com/machine_code_redundancy
 
-How to run:
+### How to run:
 ========
 
 1. Launch sbt
@@ -138,14 +145,14 @@ Hello World!
 Press any key to continue ...
 ```
 
-How to build:
+#### How to build:
 ========
 
 1. Launch sbt from base directory
 2. Run the 'eclipse with-source=true' using sbtEclipse to generate eclipse files
 3. Refresh/Clean projects in eclipse
 
-Tricks:
+#### Misc:
 ========
 
 Adding an icon to an executable:

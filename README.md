@@ -131,7 +131,6 @@ Redundancy within x86:
 http://www.strchr.com/machine_code_redundancy
 
 ### How to run:
-========
 
 1. Launch sbt
 2. type 'project example'

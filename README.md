@@ -156,6 +156,6 @@ Adding an icon to an executable:
 
 Before: ![Alt text](/example/beforeicon.png)
 ```
-assembler.assemble(HelloWorld).addIcon("scala.ico")
+assembler.assemble(Factorial).addIcon("scala.ico")
 ```
 After: ![Alt text](/example/aftericon.png)

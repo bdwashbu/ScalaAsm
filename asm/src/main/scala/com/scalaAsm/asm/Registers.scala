@@ -20,6 +20,8 @@ trait Registers {
     object edx extends EDX
     object ebx extends EBX
     object esp extends ESP
+    
+    object esi extends ESI
   
     object ax extends AX
     object cx extends CX
@@ -28,6 +30,7 @@ trait Registers {
     object ah extends AH
   
     object cl extends CL
+    object bl extends BL
   
     object spl extends SPL
   

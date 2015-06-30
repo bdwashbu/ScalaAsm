@@ -268,7 +268,7 @@ object x86Macro {
     }
 
     object Register {
-      val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "rsp", "rax", "spl", "rdx")
+      val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "bl", "esi", "rsp", "rax", "spl", "rdx")
       
       def unapply(operand: String): Option[String] = {
         if (regList contains operand) {

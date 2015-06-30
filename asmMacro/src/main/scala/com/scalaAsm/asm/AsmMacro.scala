@@ -13,7 +13,7 @@ import java.math.BigInteger
 
 object AsmCompiler {
 
-  val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "cl", "rsp", "rax", "spl", "rdx")
+  val regList = Seq("ebx", "ebp", "eax", "ecx", "edx", "esp", "edi", "esi", "cl", "bl", "rsp", "rax", "spl", "rdx")
 
   def isByte(s: String): Boolean = {
     if (s.contains("0x")) {

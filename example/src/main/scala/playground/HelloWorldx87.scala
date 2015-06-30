@@ -1,4 +1,4 @@
-package com.scalaAsm
+package playground
 
 import com.scalaAsm.asm.AsmProgram
 import com.scalaAsm.asm.Tokens._

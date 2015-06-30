@@ -1,4 +1,4 @@
-package com.scalaAsm
+package playground
 
 import java.io._
 import com.scalaAsm.assembler.Assembler
@@ -6,7 +6,6 @@ import com.scalaAsm.linker.Linker
 import com.scalaAsm.coff.Coff
 import scala.xml._
 import java.io.PrintWriter
-import example._
 
 object ScalaBasic {
 
@@ -20,15 +19,15 @@ object ScalaBasic {
 
       var beginTime = System.nanoTime()
       
-      val helloWorld = assembler.assemble(HelloWorld).addIcon("scala.ico")
+      //val helloWorld = assembler.assemble(HelloWorld).addIcon("scala.ico")
       //val helloWorlddll = assembler.assemble(DLLBuilder)
       //val dll = linker.link(helloWorlddll, 0x3000, false, true, "msvcrt.dll")
       //dllOutputStream.write(dll.get)
-      val exe = linker.link(helloWorld, 0x3000, false, false, "msvcrt.dll", "test64.dll")
+     // val exe = linker.link(helloWorld, 0x3000, false, false, "msvcrt.dll", "test64.dll")
       
-      outputStream.write(exe.get)
-      println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
-      outputStream.close
+//      outputStream.write(exe.get)
+//      println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
+//      outputStream.close
       
 
 //      beginTime = System.nanoTime()

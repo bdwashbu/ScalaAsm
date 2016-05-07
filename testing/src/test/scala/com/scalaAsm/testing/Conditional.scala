@@ -21,7 +21,7 @@ class ConditionalTest extends FlatSpec with ShouldMatchers {
 
   val executableName = "test_ConditionalTest.exe"
 
-  def getExecutable(input: Int) = {
+  def getExecutable(input: Int): AsmProgram = {
     object Factorial extends AsmProgram {
 
       import com.scalaAsm.x86.Instructions.General._
@@ -54,52 +54,14 @@ class ConditionalTest extends FlatSpec with ShouldMatchers {
 
       }
     }
-
-    val fileOut = new FileOutputStream(executableName + input)
-    val outputStream = new DataOutputStream(fileOut);
-    val assembler = new Assembler {}
-    val linker = new Linker {}
-    
-    val factorial = assembler.assemble(Factorial).addIcon("scala.ico")
-    val exe = linker.link(factorial, 0x3000, false, false, "kernel32.dll", "msvcrt.dll")
-    outputStream.write(exe.get)
-    outputStream.close
-    fileOut.close()
+    Factorial
   }
 
   "jz" should "jump" in {
-    val name = System.nanoTime
-    
-    getExecutable(0)
-    val child = Runtime.getRuntime().exec(executableName + "0");
-    val in = new BufferedReader(
-      new InputStreamReader(child.getInputStream()));
-
-    val outputLine = in.readLine()
-
-    child.waitFor()
-
-    new File(executableName + "0").delete()
-
-    outputLine should equal("Jump taken!")
-
+    getProgramOutput(getExecutable(0), false) should equal("Jump taken!")
   }
   
   "jz" should "not jump" in {
-    val name = System.nanoTime
-    
-    getExecutable(4)
-    val child = Runtime.getRuntime().exec(executableName + "4");
-    val in = new BufferedReader(
-      new InputStreamReader(child.getInputStream()));
-
-    val outputLine = in.readLine()
-
-    child.waitFor()
-
-    new File(executableName + "4").delete()
-
-    outputLine should equal("Jump not taken!")
-
+    getProgramOutput(getExecutable(4), false) should equal("Jump not taken!")
   }
 }

@@ -11,9 +11,10 @@ import java.io.File
 import com.scalaAsm.asm.x86_32
 import org.scalatest._
 import scala.util.Try
-
 import org.scalatest.concurrent.TimeLimitedTests
 import org.scalatest.time.SpanSugar._
+import Registry.WinRegistry
+import java.io.PrintWriter
 
 package object testing {
   
@@ -27,7 +28,9 @@ package object testing {
     val outputStream = new DataOutputStream(new FileOutputStream(executableName));
     val assembler = new Assembler {}
     val linker = new Linker {}  
-
+    
+    val exeFile = new File(executableName)                                       
+    
     var beginTime = System.nanoTime()
     val obj = assembler.assemble(program).addIcon("scala.ico")
 
@@ -36,8 +39,15 @@ package object testing {
     outputStream.write(exe.get)
     println("done generating in " + (System.nanoTime() - beginTime) / 1000000 + " ms")
     outputStream.close
+    
+    val batchFile = new File("test.bat" )
+    batchFile.delete
+    val pw = new PrintWriter(batchFile)
+    pw.write("set __COMPAT_LAYER=WIN7RTM\r\n")
+    pw.write(executableName)
+    pw.close
 
-    val child = Runtime.getRuntime().exec(executableName);
+    val child = Runtime.getRuntime().exec("test.bat");
     
     var timer = 0
     while (timer < 150) {
@@ -54,19 +64,27 @@ package object testing {
       new InputStreamReader(child.getInputStream()));
 
     output = in.readLine()
+    output = in.readLine()
+    output = in.readLine()
+    output = in.readLine()
+    output = in.readLine()
 
     child.waitFor()
 
     new File(executableName).delete()
     output
   }
-  
+
   def getDLLOutput(dllProgram: AsmProgram, program: AsmProgram, is64Bit: Boolean): String = {
     
     var output = ""
 
     val dllName = s"test${sync.getTestID}.dll"
     val executableName = s"test${sync.getTestID}.exe"
+    
+    
+    
+      
 
     val outputStream = new DataOutputStream(new FileOutputStream(dllName));
     val assembler = new Assembler {}

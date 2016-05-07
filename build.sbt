@@ -36,3 +36,6 @@ lazy val linker = project.in(file("linker"))
 
 lazy val assembler = project.in(file("assembler"))
     .dependsOn(asm, coff)
+
+libraryDependencies += "org.scalactic" %% "scalactic" % "2.2.6"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
